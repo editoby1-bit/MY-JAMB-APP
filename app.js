@@ -5,6 +5,9 @@
   const SK_SW_CREDITS  = 'jamb-sw-credits-v1';
   const SW_QUARTERLY   = 20; // snaps per quarter
   const SNAP_API_URL   = 'https://editoby-api.vercel.app/api/mark';
+  // Same Vercel project as My Exams App — /api/verify-payment and /api/teach
+  // are shared across both apps.
+  const API_BASE = 'https://editoby-api.vercel.app';
 
   function getSWCredits() {
     const qtr = getCurrentQuarter();
@@ -967,9 +970,19 @@
         { display_name: 'App',  variable_name: 'app',  value: 'My JAMB App' },
       ]},
       onClose() {},
-      callback() {
+      async callback(response) {
+        const res = await fetch(API_BASE + '/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: response.reference })
+        }).catch(() => null);
+        const data = res ? await res.json().catch(() => ({})) : {};
+        if (!res || !res.ok || !data.verified) {
+          alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
+          return;
+        }
         if (isEA) savePref(SK_EASOLD, sold + 1);
-        grantAccess(90, 'jamb');
+        grantAccess(data.days || 90, data.tier || 'jamb');
       }
     });
     handler.openIframe();
@@ -1070,17 +1083,13 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         panel?.classList.add('hidden');
         return;
       }
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch(API_BASE + '/api/teach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 400,
-          messages: [{ role: 'user', content: prompt }]
-        })
+        body: JSON.stringify({ prompt })
       });
       const data = await res.json();
-      const text = data.content?.map(c=>c.text||'').join('') || 'Could not get explanation. Please try again.';
+      const text = data.text || data.content?.map(c=>c.text||'').join('') || 'Could not get explanation. Please try again.';
       loading?.classList.add('hidden');
       if (response) {
         response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div><div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>`;
@@ -1454,12 +1463,23 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         { display_name: 'Product', variable_name: 'product', value: 'Show Working Top-up 10 snaps' },
       ]},
       onClose() {},
-      callback() {
+      async callback(response) {
+        const res = await fetch(API_BASE + '/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: response.reference })
+        }).catch(() => null);
+        const data = res ? await res.json().catch(() => ({})) : {};
+        if (!res || !res.ok || !data.verified) {
+          alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
+          return;
+        }
+        const addCredits = data.credits || 10;
         const current = getSWCredits();
-        savePref(SK_SW_CREDITS, { n: current + 10, quarter: getCurrentQuarter() });
+        savePref(SK_SW_CREDITS, { n: current + addCredits, quarter: getCurrentQuarter() });
         const badge = document.getElementById('swCredits');
         if (badge) badge.textContent = getSWCredits() + ' snaps left';
-        alert('✅ 10 snaps added! You now have ' + getSWCredits() + ' snaps remaining.');
+        alert(`✅ ${addCredits} snaps added! You now have ` + getSWCredits() + ' snaps remaining.');
       }
     });
     handler.openIframe();
