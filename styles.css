@@ -998,6 +998,22 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 .ai-explain-btn:hover { background: rgba(245,166,35,.1); }
 .ai-explain-btn.hidden { display: none; }
 
+/* Small, low-key teaser shown only in Exam Mode — same size as the original
+   floating button, but inline and intentionally unobtrusive since it can't
+   actually do anything until Practice Mode or review. */
+.ai-explain-teaser-btn {
+  display: block; margin: .85rem auto 0;
+  background: rgba(13,31,56,0.6);
+  color: rgba(245,166,35,.75);
+  border: 1px solid rgba(245,166,35,.25);
+  border-radius: 99px;
+  padding: .5rem 1rem;
+  font-size: .8rem; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.ai-explain-teaser-btn:hover { background: rgba(245,166,35,.08); }
+.ai-explain-teaser-btn.hidden { display: none; }
+
 .ai-panel {
   position: fixed; bottom: 0; left: 0; right: 0;
   z-index: 150;

@@ -152,8 +152,6 @@
     subjectRanges: {} // { subjectName: { start, end } }
   };
 
-  init();
-
   // ─────────────────────────────────────────────────
   function init() {
     populateSubjects();
@@ -509,8 +507,11 @@
     // Show AI explain button only in Practice mode or when reviewing past
     // results — never during a live, timed Exam Mode session, so it can't
     // be used to see the answer to a question you're being tested on.
-    if (checkAccess() && (state.mode === 'practice' || state.reviewMode)) showAIButton();
-    else hideAIButton();
+    // Full Explain This in Practice Mode or when reviewing results; a small,
+    // inert teaser during a live Exam Mode session; nothing if not logged in.
+    if (!checkAccess()) hideAIButton();
+    else if (state.mode === 'practice' || state.reviewMode) showAIButton();
+    else showAITeaserButton();
 
     // Show Working mode panel
     const swPanel = document.getElementById('showWorkingPanel');
@@ -606,8 +607,10 @@
     el.explanationBox.classList.toggle('hidden', !shouldShowExpl);
     if (shouldShowExpl) el.explanationBox.textContent = q.explanation || '';
 
-    // Nav buttons
-    el.prevBtn.disabled = state.currentIndex === 0;
+    // Nav buttons — on the very first question, "Previous" has nowhere to
+    // go, so it becomes the exit action instead of just being greyed out.
+    el.prevBtn.disabled = false;
+    el.prevBtn.textContent = state.currentIndex === 0 ? '✕ Exit' : '← Previous';
     el.nextBtn.textContent = state.currentIndex === state.currentQuestions.length - 1
       ? 'Finish ✓'
       : 'Next →';
@@ -631,6 +634,10 @@
   function moveQuestion(step) {
     if (step > 0 && state.currentIndex === state.currentQuestions.length - 1) {
       finishQuiz(false);
+      return;
+    }
+    if (step < 0 && state.currentIndex === 0) {
+      confirmExit();
       return;
     }
     state.currentIndex = Math.max(0, Math.min(state.currentQuestions.length - 1, state.currentIndex + step));
@@ -1174,15 +1181,29 @@
       document.getElementById('aiPanel')?.classList.add('hidden');
     });
     document.getElementById('aiExplainBtn')?.addEventListener('click', triggerAIExplain);
+    document.getElementById('aiExplainTeaserBtn')?.addEventListener('click', () => {
+      alert('Explanations are only available in Practice Mode or when reviewing your results — not during a live Exam Mode session.');
+    });
   }
 
   function showAIButton() {
     if (!checkAccess()) return;
     document.getElementById('aiExplainBtn')?.classList.remove('hidden');
+    document.getElementById('aiExplainTeaserBtn')?.classList.add('hidden');
+  }
+
+  // Shown only during a live Exam Mode session — small and deliberately
+  // inert, just tells the student when the real explain feature becomes
+  // available rather than pretending the feature doesn't exist at all.
+  function showAITeaserButton() {
+    if (!checkAccess()) return;
+    document.getElementById('aiExplainBtn')?.classList.add('hidden');
+    document.getElementById('aiExplainTeaserBtn')?.classList.remove('hidden');
   }
 
   function hideAIButton() {
     document.getElementById('aiExplainBtn')?.classList.add('hidden');
+    document.getElementById('aiExplainTeaserBtn')?.classList.add('hidden');
   }
 
   async function triggerAIExplain() {
@@ -1798,5 +1819,11 @@ Return ONLY valid JSON:
   // them. Exposing defensively here since My Exams App had this exact bug.
   window.showPaywall       = showPaywall;
   window.handleJambPayment = handleJambPayment;
+
+  // Called here, at the very end, so every const declared anywhere in this
+  // file (like CROSSSELL_MSGS) has already been initialized by the time
+  // init() and anything it calls actually runs. Calling init() earlier in
+  // the file caused "Cannot access 'CROSSSELL_MSGS' before initialization".
+  init();
 
 })();
