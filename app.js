@@ -1176,13 +1176,35 @@
     badge.style.color = c < 10 ? '#e74c3c' : '#27ae60';
   }
 
+  /* ════════ INFO TOAST (replaces native alert() for simple notices) ════════ */
+  function showInfoToast(message) {
+    let toast = document.getElementById('jambInfoToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'jambInfoToast';
+      toast.style.cssText = `
+        position:fixed; bottom:5rem; left:50%; transform:translateX(-50%);
+        background:#0a1628; color:white; border:1.5px solid var(--gold,#d4af37);
+        border-radius:10px; padding:.75rem 1.25rem;
+        font-family:var(--sans,sans-serif); font-size:.82rem; font-weight:500;
+        text-align:center; z-index:9999; max-width:320px; width:calc(100% - 2rem);
+        box-shadow:0 4px 20px rgba(0,0,0,.4); line-height:1.5;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.display = 'block';
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => { toast.style.display = 'none'; }, 3500);
+  }
+
   function initAIExplain() {
     document.getElementById('aiPanelClose')?.addEventListener('click', () => {
       document.getElementById('aiPanel')?.classList.add('hidden');
     });
     document.getElementById('aiExplainBtn')?.addEventListener('click', triggerAIExplain);
     document.getElementById('aiExplainTeaserBtn')?.addEventListener('click', () => {
-      alert('Explanations are only available in Practice Mode or when reviewing your results — not during a live Exam Mode session.');
+      showInfoToast('Explanations are only available in Practice Mode or when reviewing your results.');
     });
   }
 
@@ -1209,7 +1231,7 @@
   async function triggerAIExplain() {
     if (!checkAccess()) { showPaywall('feature'); return; }
     if (!(state.mode === 'practice' || state.reviewMode)) {
-      alert('Explanations are only available in Practice Mode or when reviewing your results — not during a live Exam Mode session.');
+      showInfoToast('Explanations are only available in Practice Mode or when reviewing your results.');
       return;
     }
     const credits = getAICredits();
