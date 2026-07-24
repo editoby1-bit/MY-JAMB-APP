@@ -790,7 +790,67 @@
     el.resultScreen.classList.toggle('active', name === 'result');
     if (name !== 'quiz') hideAIButton();
     if (name === 'home') refreshChallengeBtn();
+
+    // Hash-based back-button support — mirrors My Exams App's approach so
+    // the phone/browser back button doesn't just yank the student out of
+    // an in-progress session with no warning.
+    if (name === 'quiz' || name === 'result') {
+      history.pushState(null, '', window.location.pathname + '#' + name);
+    } else {
+      history.pushState(null, '', window.location.pathname);
+    }
   }
+
+  // Double-back-to-exit — first back press shows a toast, second confirms exit.
+  let _backLastPress = 0;
+  let _backToastTimer = null;
+
+  function showBackWarningToast() {
+    let toast = document.getElementById('jambBackWarningToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'jambBackWarningToast';
+      toast.style.cssText = `
+        position:fixed; bottom:5rem; left:50%; transform:translateX(-50%);
+        background:#0a1628; color:white; border:1.5px solid var(--gold,#d4af37);
+        border-radius:10px; padding:.75rem 1.25rem;
+        font-family:var(--sans,sans-serif); font-size:.82rem; font-weight:500;
+        text-align:center; z-index:9999; max-width:320px; width:calc(100% - 2rem);
+        box-shadow:0 4px 20px rgba(0,0,0,.4); line-height:1.5;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = '⚠️ <strong>Press back again to exit session.</strong><br>Use the on-screen buttons to navigate questions.';
+    toast.style.display = 'block';
+    clearTimeout(_backToastTimer);
+    _backToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+
+  window.addEventListener('hashchange', () => {
+    const quizActive   = el.quizScreen?.classList.contains('active');
+    const resultActive = el.resultScreen?.classList.contains('active');
+    if (!quizActive && !resultActive) return;
+
+    // Immediately restore the hash so the back button stays "armed"
+    if (quizActive)   window.location.hash = 'quiz';
+    if (resultActive) window.location.hash = 'result';
+
+    if (resultActive) {
+      showScreen('home');
+      return;
+    }
+
+    const now = Date.now();
+    if (now - _backLastPress < 3000) {
+      _backLastPress = 0;
+      const toast = document.getElementById('jambBackWarningToast');
+      if (toast) toast.style.display = 'none';
+      confirmExit();
+    } else {
+      _backLastPress = now;
+      showBackWarningToast();
+    }
+  });
 
   function syncDurationUi() {
     const mode = el.modeSelect.value;
