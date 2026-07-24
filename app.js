@@ -725,17 +725,52 @@
     renderQuestion();
   }
 
-  function confirmExit() {
-    const leave = confirm('Exit this session? Your progress will be lost.');
+  /* ════════ CUSTOM CONFIRM MODAL (replaces native browser confirm()) ════════ */
+  function showConfirmModal(message, confirmLabel = 'Yes', cancelLabel = 'Cancel') {
+    return new Promise((resolve) => {
+      let overlay = document.getElementById('confirmModalOverlay');
+      if (overlay) overlay.remove();
+
+      overlay = document.createElement('div');
+      overlay.id = 'confirmModalOverlay';
+      overlay.style.cssText = `
+        position:fixed; inset:0; background:rgba(5,10,20,.72);
+        display:flex; align-items:center; justify-content:center;
+        z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);
+      `;
+      overlay.innerHTML = `
+        <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px;
+                    padding:1.75rem 1.5rem; max-width:340px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+          <p style="margin:0 0 1.1rem; color:#fff; font-size:.95rem; line-height:1.5;">${escHtml(message)}</p>
+          <div style="display:flex; gap:.6rem;">
+            <button id="confirmModalCancel" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a;
+                    background:transparent; color:#fff; font-weight:600; font-size:.85rem;">${escHtml(cancelLabel)}</button>
+            <button id="confirmModalOk" style="flex:1; padding:.65rem; border-radius:9px; border:none;
+                    background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">${escHtml(confirmLabel)}</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const cleanup = (val) => { overlay.remove(); resolve(val); };
+      document.getElementById('confirmModalCancel').addEventListener('click', () => cleanup(false));
+      document.getElementById('confirmModalOk').addEventListener('click', () => cleanup(true));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+    });
+  }
+
+  async function confirmExit() {
+    const leave = await showConfirmModal('Exit this session? Your progress will be lost.', 'Exit', 'Stay');
     if (leave) {
       if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
       showScreen('home');
     }
   }
 
-  function switchUser() {
+  async function switchUser() {
     if (state.timerId) {
-      if (!confirm('Switch student? Current session will close.')) return;
+      const ok = await showConfirmModal('Switch student? Current session will close.', 'Switch', 'Cancel');
+      if (!ok) return;
       clearInterval(state.timerId); state.timerId = null;
       showScreen('home');
     }
@@ -860,9 +895,10 @@
     return state.users[state.currentUser].history || [];
   }
 
-  function resetProgress() {
+  async function resetProgress() {
     if (!state.currentUser) { alert('Login with a student name first.'); return; }
-    if (!confirm(`Erase all saved results for "${state.currentUser}" on this device?`)) return;
+    const ok = await showConfirmModal(`Erase all saved results for "${state.currentUser}" on this device?`, 'Erase', 'Cancel');
+    if (!ok) return;
     if (!state.users[state.currentUser]) state.users[state.currentUser] = { history: [] };
     state.users[state.currentUser].history = [];
     saveUsers(state.users);
@@ -1023,19 +1059,21 @@
         { display_name: 'App',  variable_name: 'app',  value: 'My JAMB App' },
       ]},
       onClose() {},
-      async callback(response) {
-        const res = await fetch(API_BASE + '/api/verify-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reference: response.reference })
-        }).catch(() => null);
-        const data = res ? await res.json().catch(() => ({})) : {};
-        if (!res || !res.ok || !data.verified) {
-          alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
-          return;
-        }
-        if (isEA) savePref(SK_EASOLD, sold + 1);
-        grantAccess(data.days || 90, data.tier || 'jamb');
+      callback(response) {
+        (async () => {
+          const res = await fetch(API_BASE + '/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: response.reference })
+          }).catch(() => null);
+          const data = res ? await res.json().catch(() => ({})) : {};
+          if (!res || !res.ok || !data.verified) {
+            alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
+            return;
+          }
+          if (isEA) savePref(SK_EASOLD, sold + 1);
+          grantAccess(data.days || 90, data.tier || 'jamb');
+        })();
       }
     });
     handler.openIframe();
@@ -1516,23 +1554,25 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         { display_name: 'Product', variable_name: 'product', value: 'Show Working Top-up 10 snaps' },
       ]},
       onClose() {},
-      async callback(response) {
-        const res = await fetch(API_BASE + '/api/verify-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reference: response.reference })
-        }).catch(() => null);
-        const data = res ? await res.json().catch(() => ({})) : {};
-        if (!res || !res.ok || !data.verified) {
-          alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
-          return;
-        }
-        const addCredits = data.credits || 10;
-        const current = getSWCredits();
-        savePref(SK_SW_CREDITS, { n: current + addCredits, quarter: getCurrentQuarter() });
-        const badge = document.getElementById('swCredits');
-        if (badge) badge.textContent = getSWCredits() + ' snaps left';
-        alert(`✅ ${addCredits} snaps added! You now have ` + getSWCredits() + ' snaps remaining.');
+      callback(response) {
+        (async () => {
+          const res = await fetch(API_BASE + '/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: response.reference })
+          }).catch(() => null);
+          const data = res ? await res.json().catch(() => ({})) : {};
+          if (!res || !res.ok || !data.verified) {
+            alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
+            return;
+          }
+          const addCredits = data.credits || 10;
+          const current = getSWCredits();
+          savePref(SK_SW_CREDITS, { n: current + addCredits, quarter: getCurrentQuarter() });
+          const badge = document.getElementById('swCredits');
+          if (badge) badge.textContent = getSWCredits() + ' snaps left';
+          alert(`✅ ${addCredits} snaps added! You now have ` + getSWCredits() + ' snaps remaining.');
+        })();
       }
     });
     handler.openIframe();
