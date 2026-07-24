@@ -506,8 +506,10 @@
     const q = state.currentQuestions[state.currentIndex];
     if (!q) return;
 
-    // Show AI explain button for paid users
-    if (checkAccess()) showAIButton();
+    // Show AI explain button only in Practice mode or when reviewing past
+    // results — never during a live, timed Exam Mode session, so it can't
+    // be used to see the answer to a question you're being tested on.
+    if (checkAccess() && (state.mode === 'practice' || state.reviewMode)) showAIButton();
     else hideAIButton();
 
     // Show Working mode panel
@@ -1176,14 +1178,7 @@
 
   function showAIButton() {
     if (!checkAccess()) return;
-    const btn = document.getElementById('aiExplainBtn');
-    if (!btn) return;
-    // Position near question
-    const questionArea = document.querySelector('.quiz-main');
-    if (questionArea && !questionArea.contains(btn)) {
-      questionArea.appendChild(btn);
-    }
-    btn.classList.remove('hidden');
+    document.getElementById('aiExplainBtn')?.classList.remove('hidden');
   }
 
   function hideAIButton() {
@@ -1192,6 +1187,10 @@
 
   async function triggerAIExplain() {
     if (!checkAccess()) { showPaywall('feature'); return; }
+    if (!(state.mode === 'practice' || state.reviewMode)) {
+      alert('Explanations are only available in Practice Mode or when reviewing your results — not during a live Exam Mode session.');
+      return;
+    }
     const credits = getAICredits();
     if (credits <= 0) {
       alert(`You've used all ${AI_QUARTERLY} AI explanation credits for this quarter.\n\nTop up: ₦500 = 50 more explanations.`);

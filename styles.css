@@ -982,16 +982,18 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
    AI PANEL
 ══════════════════════════════════════════ */
 .ai-explain-btn {
-  position: fixed; bottom: 5rem; right: 1.25rem;
-  z-index: 70;
+  display: flex; align-items: baseline; gap: .5rem; justify-content: center;
+  width: 100%; margin: 1rem 0 0;
   background: rgba(13,31,56,0.95);
   color: var(--amber,#f5a623);
   border: 1px solid rgba(245,166,35,.4);
-  border-radius: 99px;
-  padding: .5rem 1rem;
-  font-size: .8rem; font-weight: 700;
-  cursor: pointer; backdrop-filter: blur(8px);
-  transition: all .2s;
+  border-radius: 12px;
+  padding: .75rem 1rem;
+  font-size: .95rem; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.ai-explain-btn .ai-explain-sub {
+  font-size: .78rem; font-weight: 400; color: rgba(245,166,35,.7);
 }
 .ai-explain-btn:hover { background: rgba(245,166,35,.1); }
 .ai-explain-btn.hidden { display: none; }
