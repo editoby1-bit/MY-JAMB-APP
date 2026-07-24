@@ -953,9 +953,62 @@
     refreshChallengeBtn();
   }
 
-  function handleJambPayment() {
-    const email = prompt('Enter your email to continue:');
-    if (!email?.includes('@')) { if (email !== null) alert('Please enter a valid email.'); return; }
+  /* ════════ EMAIL MODAL (replaces native prompt() for payment email) ════════ */
+  function getEmailViaModal() {
+    return new Promise((resolve) => {
+      let overlay = document.getElementById('emailModalOverlay');
+      if (overlay) overlay.remove();
+
+      overlay = document.createElement('div');
+      overlay.id = 'emailModalOverlay';
+      overlay.style.cssText = `
+        position:fixed; inset:0; background:rgba(5,10,20,.72);
+        display:flex; align-items:center; justify-content:center;
+        z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);
+      `;
+      overlay.innerHTML = `
+        <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px;
+                    padding:1.75rem 1.5rem; max-width:340px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+          <h3 style="margin:0 0 .5rem; color:#fff; font-size:1.05rem; font-weight:700;">Enter your email</h3>
+          <p style="margin:0 0 1rem; color:var(--text-dim,#9aa5b1); font-size:.85rem; line-height:1.4;">
+            We'll send your payment receipt here.
+          </p>
+          <input id="emailModalInput" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"
+                 style="width:100%; box-sizing:border-box; padding:.7rem .85rem; border-radius:9px;
+                        border:1.5px solid #26344a; background:#0d1b2a; color:#fff; font-size:.95rem; outline:none;" />
+          <p id="emailModalError" style="display:none; color:var(--red,#e55); font-size:.78rem; margin:.4rem 0 0;">
+            Please enter a valid email address.
+          </p>
+          <div style="display:flex; gap:.6rem; margin-top:1.1rem;">
+            <button id="emailModalCancel" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a;
+                    background:transparent; color:#fff; font-weight:600; font-size:.85rem;">Cancel</button>
+            <button id="emailModalContinue" style="flex:1; padding:.65rem; border-radius:9px; border:none;
+                    background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">Continue</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const input = document.getElementById('emailModalInput');
+      const errEl = document.getElementById('emailModalError');
+      const cleanup = (val) => { overlay.remove(); resolve(val); };
+
+      input.focus();
+      document.getElementById('emailModalCancel').addEventListener('click', () => cleanup(null));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(null); });
+      const submit = () => {
+        const val = (input.value || '').trim();
+        if (!val.includes('@') || !val.includes('.')) { errEl.style.display = 'block'; return; }
+        cleanup(val);
+      };
+      document.getElementById('emailModalContinue').addEventListener('click', submit);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    });
+  }
+
+  async function handleJambPayment() {
+    const email = await getEmailViaModal();
+    if (!email) return; // cancelled
     const sold = loadPref(SK_EASOLD) || 0;
     const isEA = sold < JAMB_EA_CAP;
     const amount = 150000; // ₦1,500 in kobo
@@ -1450,9 +1503,9 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     modal.classList.remove('hidden');
   }
 
-  function handleSWTopUpPayment() {
-    const email = prompt('Enter your email to continue:');
-    if (!email?.includes('@')) { if (email !== null) alert('Please enter a valid email.'); return; }
+  async function handleSWTopUpPayment() {
+    const email = await getEmailViaModal();
+    if (!email) return; // cancelled
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_KEY,
       email,
@@ -1640,5 +1693,11 @@ Return ONLY valid JSON:
     if (swPanel) swPanel.classList.add('hidden');
     lockOptionsUntilWorking(true);
   }
+
+  // Inline onclick="..." attributes (in index.html) can only see truly
+  // global functions — anything defined inside this closure is invisible to
+  // them. Exposing defensively here since My Exams App had this exact bug.
+  window.showPaywall       = showPaywall;
+  window.handleJambPayment = handleJambPayment;
 
 })();
