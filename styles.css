@@ -1003,15 +1003,15 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
    actually do anything until Practice Mode or review. */
 .ai-explain-teaser-btn {
   display: block; margin: .85rem auto 0;
-  background: rgba(13,31,56,0.6);
-  color: rgba(245,166,35,.75);
-  border: 1px solid rgba(245,166,35,.25);
+  background: rgba(245,166,35,.12);
+  color: rgba(245,166,35,.95);
+  border: 1px solid rgba(245,166,35,.5);
   border-radius: 99px;
-  padding: .5rem 1rem;
-  font-size: .8rem; font-weight: 700;
+  padding: .55rem 1.1rem;
+  font-size: .82rem; font-weight: 700;
   cursor: pointer; transition: all .2s;
 }
-.ai-explain-teaser-btn:hover { background: rgba(245,166,35,.08); }
+.ai-explain-teaser-btn:hover { background: rgba(245,166,35,.2); }
 .ai-explain-teaser-btn.hidden { display: none; }
 
 .ai-panel {
@@ -1100,6 +1100,11 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 .jqc-select { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:8px; color:white; padding:.5rem .65rem; font-size:.85rem; }
 .jqc-code-display { font-size:2rem; font-weight:800; letter-spacing:.15em; color:var(--amber,#f5a623); background:rgba(245,166,35,.08); border:2px dashed rgba(245,166,35,.4); border-radius:12px; padding:.65rem 1rem; margin:.5rem 0 1rem; }
 .jqc-leaderboard { display:flex; flex-direction:column; gap:.4rem; text-align:left; }
+.jqc-score-row { display:flex; align-items:center; gap:.6rem; background:rgba(255,255,255,.05); border-radius:8px; padding:.5rem .75rem; }
+.jqc-score-me { background:rgba(245,166,35,.12); border:1px solid rgba(245,166,35,.35); }
+.jqc-rank { font-size:.9rem; width:1.75rem; text-align:center; }
+.jqc-score-name { flex:1; font-size:.85rem; font-weight:600; color:white; }
+.jqc-score-val { font-size:.8rem; color:rgba(255,255,255,.7); font-weight:700; }
 
 /* ══════════════════════════════════════════
    SHARED SESSION VIEW

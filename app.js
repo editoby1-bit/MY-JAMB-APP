@@ -724,6 +724,44 @@
     renderStats();
     renderHistory();
     showScreen('result');
+
+    // If this was a Challenge Mode attempt, report the score to the shared
+    // leaderboard so the creator and anyone else with the code can see it —
+    // not just whoever is on this exact device.
+    if (state._challengeCode) {
+      submitJambChallengeScore(state._challengeCode, state.currentUser, correct, total, percent);
+    }
+  }
+
+  async function submitJambChallengeScore(code, student, score, total, pct) {
+    try {
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submit', code, student, score, total, pct }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) renderJambLeaderboard(code, data.scores);
+    } catch (err) {
+      // Non-fatal — the student's own result screen already showed their
+      // score; the shared leaderboard just won't update this time.
+    }
+  }
+
+  function renderJambLeaderboard(code, scores) {
+    const list = document.getElementById('jambLeaderboardList');
+    if (!list) return;
+    const entries = Object.entries(scores || {}).sort((a, b) => b[1].pct - a[1].pct);
+    list.innerHTML = entries.map(([name, s], i) => `
+      <div class="jqc-score-row ${name === state.currentUser ? 'jqc-score-me' : ''}">
+        <span class="jqc-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i+1)}</span>
+        <span class="jqc-score-name">${escHtml(name)}${name === state.currentUser ? ' (you)' : ''}</span>
+        <span class="jqc-score-val">${s.score}/${s.total} · ${s.pct}%</span>
+      </div>
+    `).join('') || '<p class="jqc-sub">No scores yet — share the code with a friend!</p>';
+    document.getElementById('jambCodeDisplay') && (document.getElementById('jambCodeDisplay').textContent = code);
+    showJQCPanel('jambQcLeaderboard');
+    document.getElementById('jambQuizModal')?.classList.remove('hidden');
   }
 
   function enterReviewMode() {
@@ -1359,25 +1397,43 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     return code;
   }
 
-  function generateJambChallenge() {
+  async function generateJambChallenge() {
     const subject = document.getElementById('jambQcSubject')?.value;
     const count   = parseInt(document.getElementById('jambQcCount')?.value || '10');
     const pool    = QUESTION_BANK[subject] || [];
-    if (!pool.length) { alert('No questions for this subject.'); return; }
+    if (!pool.length) { showInfoToast('No questions for this subject.'); return; }
     const selected = [...pool].sort(()=>Math.random()-.5).slice(0, count);
     const code     = generateJambChallengeCode();
-    const challenges = loadPref(QC_STORE, {});
-    challenges[code] = {
-      code, subject, count,
-      questions: selected,
-      expires: Date.now() + 24*60*60*1000,
-      creator: state.currentUser,
-      scores: {},
-    };
-    savePref(QC_STORE, challenges);
-    _currentChallengeCode = code;
-    document.getElementById('jambCodeDisplay').textContent = code;
-    showJQCPanel('jambQcShare2');
+
+    const btn = document.getElementById('jambQcGenerate');
+    if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+
+    try {
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create', code, subject, count,
+          questions: selected, creator: state.currentUser,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Could not create challenge');
+
+      // Also keep a local copy so the creator's own attempt works instantly
+      // without waiting on a second network round trip.
+      const challenges = loadPref(QC_STORE, {});
+      challenges[code] = { code, subject, count, questions: selected, creator: state.currentUser, scores: {} };
+      savePref(QC_STORE, challenges);
+
+      _currentChallengeCode = code;
+      document.getElementById('jambCodeDisplay').textContent = code;
+      showJQCPanel('jambQcShare2');
+    } catch (err) {
+      showInfoToast('Could not create challenge — check your connection and try again.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Generate Code →'; }
+    }
   }
 
   function shareJambChallengeLink() {
@@ -1389,15 +1445,40 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     else navigator.clipboard?.writeText(text).then(()=>alert('Link copied!')).catch(()=>prompt('Copy:',url));
   }
 
-  function joinJambChallenge() {
+  async function joinJambChallenge() {
     const code = (document.getElementById('jambJoinCode')?.value||'').trim().toUpperCase();
     if (!code) return;
-    const challenges = loadPref(QC_STORE, {});
-    const challenge  = challenges[code];
-    if (!challenge) { alert('Challenge not found.'); return; }
-    if (Date.now() > challenge.expires) { alert('This challenge has expired.'); return; }
-    _currentChallengeCode = code;
-    startJambChallengeAttempt(challenge);
+
+    const btn = document.getElementById('jambJoinConfirm');
+    if (btn) { btn.disabled = true; btn.textContent = 'Joining…'; }
+
+    try {
+      // Check locally first (covers the creator's own device, no network
+      // needed), then fall back to the shared backend for anyone else.
+      const local = loadPref(QC_STORE, {})[code];
+      if (local) {
+        _currentChallengeCode = code;
+        startJambChallengeAttempt(local);
+        return;
+      }
+
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'join', code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        showInfoToast(data.error === 'Challenge not found or expired'
+          ? 'Challenge not found — check the code and try again.'
+          : 'Could not join challenge — check your connection and try again.');
+        return;
+      }
+      _currentChallengeCode = code;
+      startJambChallengeAttempt(data.challenge);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Join →'; }
+    }
   }
 
   function startJambChallengeAttempt(challengeArg) {
