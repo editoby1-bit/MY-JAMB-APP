@@ -453,17 +453,33 @@
         <div id="jambQcCreate2" class="hidden">
           <h3 class="jqc-section">Set Up Challenge</h3>
           <div class="jqc-form">
-            <div class="jqc-field"><label class="jqc-label">Subject</label><select id="jambQcSubject" class="jqc-select"></select></div>
-            <div class="jqc-field"><label class="jqc-label">Questions</label>
+            <div class="jqc-field">
+              <label class="jqc-label">Subjects (pick one or more)</label>
+              <div id="jambQcSubjects" class="jqc-subject-checks"></div>
+            </div>
+            <div class="jqc-field"><label class="jqc-label">Questions (total, split across subjects)</label>
               <select id="jambQcCount" class="jqc-select">
                 <option value="5">5 Questions</option>
                 <option value="10" selected>10 Questions</option>
                 <option value="20">20 Questions</option>
               </select>
             </div>
+            <label class="jqc-sync-toggle">
+              <input type="checkbox" id="jambQcSyncStart"/>
+              <span>⏱️ Wait for everyone to be ready before starting <em>(optional — leave off if people should take it whenever suits them)</em></span>
+            </label>
           </div>
           <button class="jqc-btn jqc-primary" id="jambQcGenerate" style="width:100%">Generate Code →</button>
           <button class="jqc-btn jqc-ghost" id="jambQcBack">← Back</button>
+        </div>
+        <div id="jambQcWaitingRoom" class="hidden">
+          <div class="jqc-icon">⏱️</div>
+          <h3 class="jqc-section">Waiting Room</h3>
+          <div class="jqc-code-display" id="jambWaitingCodeDisplay">JAMB-000</div>
+          <p class="jqc-sub" id="jambWaitingStatus">Waiting for everyone to be ready…</p>
+          <div id="jambWaitingList" class="jqc-leaderboard" style="margin-bottom:1rem"></div>
+          <button class="jqc-btn jqc-primary" id="jambReadyBtn" style="width:100%;margin-bottom:.5rem">✅ I'm Ready</button>
+          <button class="jqc-btn jqc-secondary hidden" id="jambForceStartBtn" style="width:100%">▶ Start Now (everyone else joins mid-way)</button>
         </div>
         <div id="jambQcShare2" class="hidden">
           <div class="jqc-icon">🎯</div>

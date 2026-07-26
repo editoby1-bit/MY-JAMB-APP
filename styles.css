@@ -1100,6 +1100,13 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 .jqc-select { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:8px; color:white; padding:.5rem .65rem; font-size:.85rem; }
 .jqc-code-display { font-size:2rem; font-weight:800; letter-spacing:.15em; color:var(--amber,#f5a623); background:rgba(245,166,35,.08); border:2px dashed rgba(245,166,35,.4); border-radius:12px; padding:.65rem 1rem; margin:.5rem 0 1rem; }
 .jqc-leaderboard { display:flex; flex-direction:column; gap:.4rem; text-align:left; }
+.jqc-subject-checks { display:flex; flex-wrap:wrap; gap:.5rem; }
+.jqc-subject-check { display:flex; align-items:center; gap:.4rem; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:8px; padding:.4rem .7rem; font-size:.82rem; color:white; cursor:pointer; }
+.jqc-subject-check input { accent-color: var(--amber,#f5a623); }
+.jqc-subject-check.checked { background:rgba(245,166,35,.15); border-color:rgba(245,166,35,.5); }
+.jqc-sync-toggle { display:flex; align-items:flex-start; gap:.5rem; font-size:.8rem; color:rgba(255,255,255,.75); margin-top:.75rem; cursor:pointer; }
+.jqc-sync-toggle input { margin-top:.2rem; accent-color: var(--amber,#f5a623); }
+.jqc-sync-toggle em { color:rgba(255,255,255,.45); font-style:normal; }
 .jqc-score-row { display:flex; align-items:center; gap:.6rem; background:rgba(255,255,255,.05); border-radius:8px; padding:.5rem .75rem; }
 .jqc-score-me { background:rgba(245,166,35,.12); border:1px solid rgba(245,166,35,.35); }
 .jqc-rank { font-size:.9rem; width:1.75rem; text-align:center; }

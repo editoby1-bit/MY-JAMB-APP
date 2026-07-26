@@ -1341,6 +1341,10 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
   ════════════════════════════════════════════════════ */
   const QC_STORE = 'jamb-challenges-v1';
   let _currentChallengeCode = null;
+  let _pendingChallenge = null;   // challenge object waiting to start (sync-start mode)
+  let _waitingRoomTimer = null;   // poll interval handle
+  let _isWaitingRoomCreator = false;
+  const WAITING_ROOM_TIMEOUT_MS = 2 * 60 * 1000; // auto-start 2 min after first "ready"
 
   function initCommunityQuiz() {
     const modal = document.getElementById('jambQuizModal');
@@ -1354,16 +1358,24 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     document.getElementById('jambJoinConfirm')?.addEventListener('click', joinJambChallenge);
     document.getElementById('jambQcGenerate')?.addEventListener('click', generateJambChallenge);
     document.getElementById('jambQcShareLink')?.addEventListener('click', shareJambChallengeLink);
-    document.getElementById('jambQcStartOwn')?.addEventListener('click', startJambChallengeAttempt);
+    document.getElementById('jambQcStartOwn')?.addEventListener('click', () => startJambChallengeAttempt());
     document.getElementById('jambQcNew')?.addEventListener('click', () => showJQCPanel('jambQcCreate2'));
-    document.getElementById('jambQcDone')?.addEventListener('click', () => modal?.classList.add('hidden'));
+    document.getElementById('jambQcDone')?.addEventListener('click', () => {
+      clearInterval(_waitingRoomTimer);
+      modal?.classList.add('hidden');
+    });
+    document.getElementById('jambReadyBtn')?.addEventListener('click', markJambReady);
+    document.getElementById('jambForceStartBtn')?.addEventListener('click', forceStartJambChallenge);
 
-    // Populate subject dropdown
-    const sel = document.getElementById('jambQcSubject');
-    if (sel) Object.keys(QUESTION_BANK).forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s; opt.textContent = fmt(s);
-      sel.appendChild(opt);
+    // Populate subject checkboxes (multi-select)
+    const subjectsWrap = document.getElementById('jambQcSubjects');
+    if (subjectsWrap) Object.keys(QUESTION_BANK).forEach(s => {
+      const label = document.createElement('label');
+      label.className = 'jqc-subject-check';
+      label.innerHTML = `<input type="checkbox" value="${s}"/> <span>${fmt(s)}</span>`;
+      const input = label.querySelector('input');
+      input.addEventListener('change', () => label.classList.toggle('checked', input.checked));
+      subjectsWrap.appendChild(label);
     });
 
     // Check URL for challenge code
@@ -1378,7 +1390,7 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
   }
 
   function showJQCPanel(id) {
-    ['jambQcHome','jambQcCreate2','jambQcShare2','jambQcLeaderboard'].forEach(p => {
+    ['jambQcHome','jambQcCreate2','jambQcShare2','jambQcLeaderboard','jambQcWaitingRoom'].forEach(p => {
       document.getElementById(p)?.classList.toggle('hidden', p !== id);
     });
   }
@@ -1398,12 +1410,23 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
   }
 
   async function generateJambChallenge() {
-    const subject = document.getElementById('jambQcSubject')?.value;
-    const count   = parseInt(document.getElementById('jambQcCount')?.value || '10');
-    const pool    = QUESTION_BANK[subject] || [];
-    if (!pool.length) { showInfoToast('No questions for this subject.'); return; }
-    const selected = [...pool].sort(()=>Math.random()-.5).slice(0, count);
-    const code     = generateJambChallengeCode();
+    const subjectBoxes = [...document.querySelectorAll('#jambQcSubjects input:checked')].map(i => i.value);
+    if (!subjectBoxes.length) { showInfoToast('Pick at least one subject.'); return; }
+    const count     = parseInt(document.getElementById('jambQcCount')?.value || '10');
+    const syncStart = !!document.getElementById('jambQcSyncStart')?.checked;
+
+    // Split the requested count evenly across however many subjects were picked.
+    const perSubject = Math.max(1, Math.floor(count / subjectBoxes.length));
+    let selected = [];
+    subjectBoxes.forEach(subject => {
+      const pool = QUESTION_BANK[subject] || [];
+      selected = selected.concat([...pool].sort(() => Math.random() - .5).slice(0, perSubject));
+    });
+    if (!selected.length) { showInfoToast('No questions available for the selected subjects.'); return; }
+    selected = [...selected].sort(() => Math.random() - .5); // interleave subjects
+
+    const subjectLabel = subjectBoxes.map(fmt).join(' + ');
+    const code = generateJambChallengeCode();
 
     const btn = document.getElementById('jambQcGenerate');
     if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
@@ -1413,8 +1436,8 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'create', code, subject, count,
-          questions: selected, creator: state.currentUser,
+          action: 'create', code, subject: subjectLabel, subjects: subjectBoxes, count: selected.length,
+          questions: selected, creator: state.currentUser, syncStart,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -1423,12 +1446,19 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       // Also keep a local copy so the creator's own attempt works instantly
       // without waiting on a second network round trip.
       const challenges = loadPref(QC_STORE, {});
-      challenges[code] = { code, subject, count, questions: selected, creator: state.currentUser, scores: {} };
+      const challengeObj = { code, subject: subjectLabel, subjects: subjectBoxes, count: selected.length, questions: selected, creator: state.currentUser, syncStart, scores: {} };
+      challenges[code] = challengeObj;
       savePref(QC_STORE, challenges);
 
       _currentChallengeCode = code;
       document.getElementById('jambCodeDisplay').textContent = code;
-      showJQCPanel('jambQcShare2');
+
+      if (syncStart) {
+        _pendingChallenge = challengeObj;
+        openJambWaitingRoom(code, true);
+      } else {
+        showJQCPanel('jambQcShare2');
+      }
     } catch (err) {
       showInfoToast('Could not create challenge — check your connection and try again.');
     } finally {
@@ -1439,7 +1469,8 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
   function shareJambChallengeLink() {
     if (!_currentChallengeCode) return;
     const url  = window.location.origin + window.location.pathname + '?challenge=' + _currentChallengeCode;
-    const subj = document.getElementById('jambQcSubject')?.value || '';
+    const challenges = loadPref(QC_STORE, {});
+    const subj = challenges[_currentChallengeCode]?.subject || '';
     const text = `🏆 JAMB Challenge! Beat my score in ${fmt(subj)}.\n\nCode: ${_currentChallengeCode}\nLink: ${url}`;
     if (navigator.share) navigator.share({ title:'JAMB Challenge', text, url }).catch(()=>{});
     else navigator.clipboard?.writeText(text).then(()=>alert('Link copied!')).catch(()=>prompt('Copy:',url));
@@ -1458,14 +1489,19 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       const local = loadPref(QC_STORE, {})[code];
       if (local) {
         _currentChallengeCode = code;
-        startJambChallengeAttempt(local);
+        if (local.syncStart) {
+          _pendingChallenge = local;
+          openJambWaitingRoom(code, local.creator === state.currentUser);
+        } else {
+          startJambChallengeAttempt(local);
+        }
         return;
       }
 
       const res = await fetch(API_BASE + '/api/challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'join', code }),
+        body: JSON.stringify({ action: 'join', code, student: state.currentUser }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
@@ -1475,13 +1511,110 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         return;
       }
       _currentChallengeCode = code;
-      startJambChallengeAttempt(data.challenge);
+      if (data.challenge.syncStart) {
+        _pendingChallenge = data.challenge;
+        openJambWaitingRoom(code, data.challenge.creator === state.currentUser);
+      } else {
+        startJambChallengeAttempt(data.challenge);
+      }
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Join →'; }
     }
   }
 
+  function openJambWaitingRoom(code, isCreator) {
+    _isWaitingRoomCreator = isCreator;
+    document.getElementById('jambWaitingCodeDisplay').textContent = code;
+    document.getElementById('jambForceStartBtn')?.classList.toggle('hidden', !isCreator);
+    const readyBtn = document.getElementById('jambReadyBtn');
+    if (readyBtn) { readyBtn.disabled = false; readyBtn.textContent = "✅ I'm Ready"; }
+    showJQCPanel('jambQcWaitingRoom');
+    document.getElementById('jambQuizModal')?.classList.remove('hidden');
+    pollJambWaitingRoom(code);
+  }
+
+  function renderJambWaitingList(participants) {
+    const list = document.getElementById('jambWaitingList');
+    if (!list) return;
+    const entries = Object.entries(participants || {});
+    list.innerHTML = entries.map(([name, p]) => `
+      <div class="jqc-score-row">
+        <span class="jqc-rank">${p.ready ? '✅' : '⏳'}</span>
+        <span class="jqc-score-name">${escHtml(name)}${name === state.currentUser ? ' (you)' : ''}</span>
+        <span class="jqc-score-val">${p.ready ? 'Ready' : 'Waiting'}</span>
+      </div>
+    `).join('') || '<p class="jqc-sub">Waiting for people to join…</p>';
+  }
+
+  async function pollJambWaitingRoom(code) {
+    clearInterval(_waitingRoomTimer);
+
+    const tick = async () => {
+      try {
+        const res = await fetch(API_BASE + '/api/challenge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'status', code }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) return; // transient network hiccup — just try again next tick
+
+        renderJambWaitingList(data.participants);
+
+        if (data.startedAt) {
+          clearInterval(_waitingRoomTimer);
+          document.getElementById('jambQuizModal')?.classList.add('hidden');
+          startJambChallengeAttempt(_pendingChallenge);
+          return;
+        }
+
+        // Auto-start safety net: if someone's been ready a while and not
+        // everyone else has joined in, start anyway rather than wait forever.
+        if (data.firstReadyAt && (Date.now() - data.firstReadyAt) > WAITING_ROOM_TIMEOUT_MS) {
+          await fetch(API_BASE + '/api/challenge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'force_start', code }),
+          });
+        }
+      } catch (err) { /* try again next tick */ }
+    };
+
+    tick();
+    _waitingRoomTimer = setInterval(tick, 3000);
+  }
+
+  async function markJambReady() {
+    if (!_currentChallengeCode) return;
+    const btn = document.getElementById('jambReadyBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '✅ Waiting for others…'; }
+    try {
+      await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_ready', code: _currentChallengeCode, student: state.currentUser }),
+      });
+    } catch (err) {
+      showInfoToast('Could not mark ready — check your connection.');
+      if (btn) { btn.disabled = false; btn.textContent = "✅ I'm Ready"; }
+    }
+  }
+
+  async function forceStartJambChallenge() {
+    if (!_currentChallengeCode) return;
+    try {
+      await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'force_start', code: _currentChallengeCode }),
+      });
+    } catch (err) {
+      showInfoToast('Could not start — check your connection.');
+    }
+  }
+
   function startJambChallengeAttempt(challengeArg) {
+    clearInterval(_waitingRoomTimer);
     const challenges = loadPref(QC_STORE, {});
     const challenge  = challengeArg || challenges[_currentChallengeCode];
     if (!challenge) return;
