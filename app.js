@@ -734,6 +734,15 @@
   }
 
   async function submitJambChallengeScore(code, student, score, total, pct) {
+    // Update the local copy too — this is what lets the creator's own
+    // device recognize "you've already completed this" without a network
+    // round trip, and keeps it correct even if the submit call below fails.
+    const challenges = loadPref(QC_STORE, {});
+    if (challenges[code]) {
+      challenges[code].scores = challenges[code].scores || {};
+      challenges[code].scores[student] = { score, total, pct, completedAt: Date.now() };
+      savePref(QC_STORE, challenges);
+    }
     try {
       const res = await fetch(API_BASE + '/api/challenge', {
         method: 'POST',
@@ -1376,6 +1385,18 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         document.getElementById('jambScheduledTimeWrap')?.classList.toggle('hidden', radio.value !== 'scheduled' || !radio.checked);
       });
     });
+    document.getElementById('jambConfirmScheduledTime')?.addEventListener('click', () => {
+      const input = document.getElementById('jambScheduledTime');
+      const confirmEl = document.getElementById('jambScheduledTimeConfirmed');
+      input?.blur(); // closes the native date/time picker on desktop browsers
+      if (input?.value && confirmEl) {
+        const d = new Date(input.value);
+        confirmEl.textContent = Number.isNaN(d.getTime())
+          ? ''
+          : `✅ Set for ${d.toLocaleDateString(undefined, { month:'short', day:'numeric' })} at ${d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })}`;
+        confirmEl.classList.toggle('hidden', !confirmEl.textContent);
+      }
+    });
 
     // Populate subject checkboxes (multi-select)
     const subjectsWrap = document.getElementById('jambQcSubjects');
@@ -1618,6 +1639,19 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
+        if (res.status === 409 && data.alreadyCompleted) {
+          showInfoToast("You've already completed this challenge — check the leaderboard for your result.");
+          // We don't have the full scores list from this response alone —
+          // fetch it fresh so the leaderboard shown is complete and current.
+          const lbRes = await fetch(API_BASE + '/api/challenge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'leaderboard', code }),
+          });
+          const lbData = await lbRes.json().catch(() => ({}));
+          if (lbRes.ok && lbData.ok) renderJambLeaderboard(code, lbData.scores);
+          return;
+        }
         showInfoToast(res.status === 410 ? 'This challenge has ended.'
           : data.error === 'Challenge not found or expired'
           ? 'Challenge not found — check the code and try again.'
@@ -1799,6 +1833,15 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     const challenges = loadPref(QC_STORE, {});
     const challenge  = challengeArg || challenges[_currentChallengeCode];
     if (!challenge) return;
+
+    // A challenge is a one-shot comparison, not a retakeable practice set —
+    // if this student already has a recorded score, show results instead.
+    if (challenge.scores && challenge.scores[state.currentUser]) {
+      showInfoToast("You've already completed this challenge — check the leaderboard for your result.");
+      renderJambLeaderboard(challenge.code, challenge.scores);
+      return;
+    }
+
     document.getElementById('jambQuizModal')?.classList.add('hidden');
 
     state.sessionType = 'single';
