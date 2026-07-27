@@ -449,6 +449,10 @@
             <input id="jambJoinCode" class="jqc-code-input" placeholder="Enter code" maxlength="10"/>
             <button class="jqc-btn jqc-primary" id="jambJoinConfirm">Join →</button>
           </div>
+          <div id="jambPendingWrap" class="hidden">
+            <h4 class="jqc-pending-title">Your Challenges (<span id="jambPendingCount">0</span>/3)</h4>
+            <div id="jambPendingList" class="jqc-pending-list"></div>
+          </div>
         </div>
         <div id="jambQcCreate2" class="hidden">
           <h3 class="jqc-section">Set Up Challenge</h3>
@@ -464,10 +468,26 @@
                 <option value="20">20 Questions</option>
               </select>
             </div>
-            <label class="jqc-sync-toggle">
-              <input type="checkbox" id="jambQcSyncStart"/>
-              <span>⏱️ Wait for everyone to be ready before starting <em>(optional — leave off if people should take it whenever suits them)</em></span>
-            </label>
+            <div class="jqc-field"><label class="jqc-label">Time Limit</label>
+              <select id="jambQcDuration" class="jqc-select">
+                <option value="0">No time limit</option>
+                <option value="10">10 minutes</option>
+                <option value="20" selected>20 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </div>
+            <div class="jqc-field">
+              <label class="jqc-label">Start mode</label>
+              <div class="jqc-radio-group">
+                <label class="jqc-radio"><input type="radio" name="jambSyncMode" value="anytime" checked/> <span>Anytime — everyone takes it at their own pace</span></label>
+                <label class="jqc-radio"><input type="radio" name="jambSyncMode" value="ready"/> <span>Wait until everyone's ready, then start together</span></label>
+                <label class="jqc-radio"><input type="radio" name="jambSyncMode" value="scheduled"/> <span>Start at a specific time — late joiners jump into the already-running timer</span></label>
+              </div>
+              <div id="jambScheduledTimeWrap" class="hidden" style="margin-top:.5rem">
+                <input type="datetime-local" id="jambScheduledTime" class="jqc-select" style="width:100%"/>
+              </div>
+            </div>
           </div>
           <button class="jqc-btn jqc-primary" id="jambQcGenerate" style="width:100%">Generate Code →</button>
           <button class="jqc-btn jqc-ghost" id="jambQcBack">← Back</button>
@@ -477,9 +497,11 @@
           <h3 class="jqc-section">Waiting Room</h3>
           <div class="jqc-code-display" id="jambWaitingCodeDisplay">JAMB-000</div>
           <p class="jqc-sub" id="jambWaitingStatus">Waiting for everyone to be ready…</p>
+          <p class="jqc-countdown hidden" id="jambWaitingCountdown"></p>
           <div id="jambWaitingList" class="jqc-leaderboard" style="margin-bottom:1rem"></div>
           <button class="jqc-btn jqc-primary" id="jambReadyBtn" style="width:100%;margin-bottom:.5rem">✅ I'm Ready</button>
-          <button class="jqc-btn jqc-secondary hidden" id="jambForceStartBtn" style="width:100%">▶ Start Now (everyone else joins mid-way)</button>
+          <button class="jqc-btn jqc-secondary hidden" id="jambForceStartBtn" style="width:100%;margin-bottom:.5rem">▶ Start Now (everyone else joins mid-way)</button>
+          <button class="jqc-btn jqc-ghost hidden" id="jambEndChallengeBtn" style="width:100%">🗑 End This Challenge</button>
         </div>
         <div id="jambQcShare2" class="hidden">
           <div class="jqc-icon">🎯</div>
