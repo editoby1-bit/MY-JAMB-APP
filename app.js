@@ -169,6 +169,7 @@
     refreshChallengeBtn();
     initUpgradeBar();
     checkForStartedJambChallenges();
+    checkScheduledChallengeReminders();
   }
 
   function populateSubjects() {
@@ -258,6 +259,7 @@
     renderStats();
     renderHistory();
     checkForStartedJambChallenges();
+    checkScheduledChallengeReminders();
   }
 
   function startSession() {
@@ -1445,6 +1447,7 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
   function showChallengeStartedNotice(code, challenge, startedAt) {
     let card = document.getElementById('jambStartedNotice');
     if (card) card.remove();
+    playChallengeBeep();
 
     card = document.createElement('div');
     card.id = 'jambStartedNotice';
@@ -1481,6 +1484,19 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     });
   }
 
+  function playChallengeBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.start(); osc.stop(ctx.currentTime + 0.35);
+    } catch (err) { /* audio not available — badge/card still show visually */ }
+  }
+
   function setJambChallengeBadge(show) {
     document.getElementById('jambChallengeBadge')?.classList.toggle('hidden', !show);
   }
@@ -1488,6 +1504,31 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
   // Checked on app load and whenever the Challenge modal opens — quietly
   // (no interrupting popup) flags the button if something the student
   // owns or joined has started without them actively watching for it.
+  // Shows a one-time-per-day reminder toast for a scheduled challenge
+  // that's coming up within the next 2 days — a gentle heads-up, not a
+  // repeat every single time the app opens.
+  const JAMB_REMINDED_STORE = 'jamb-challenge-reminded-v1';
+  function checkScheduledChallengeReminders() {
+    if (!state.currentUser) return;
+    const all = loadPref(QC_STORE, {});
+    const reminded = loadPref(JAMB_REMINDED_STORE, {});
+    const todayKey = new Date().toDateString();
+    const mine = Object.values(all).filter(c =>
+      c.creator === state.currentUser && c.syncMode === 'scheduled'
+      && c.scheduledStartAt && !c.startedAt && !c.ended
+    );
+    for (const c of mine) {
+      if (reminded[c.code] === todayKey) continue; // already reminded today
+      const daysUntil = Math.ceil((c.scheduledStartAt - Date.now()) / 86400000);
+      if (daysUntil < 0 || daysUntil > 2) continue;
+      const when = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'in 1 day' : 'in 2 days';
+      showInfoToast(`📅 You have a scheduled challenge (${c.code}) starting ${when}.`);
+      reminded[c.code] = todayKey;
+      savePref(JAMB_REMINDED_STORE, reminded);
+      break; // one toast at a time — don't stack multiple on top of each other
+    }
+  }
+
   async function checkForStartedJambChallenges() {
     if (!state.currentUser) return;
     const all = loadPref(QC_STORE, {});
@@ -1512,7 +1553,7 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         }
       } catch (err) { /* skip — try again next time */ }
     }
-    if (anyStarted) { savePref(QC_STORE, all); setJambChallengeBadge(true); }
+    if (anyStarted) { savePref(QC_STORE, all); setJambChallengeBadge(true); playChallengeBeep(); }
   }
 
   function generateJambChallengeCode() {
@@ -1599,6 +1640,33 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     renderJambPendingChallenges();
   }
 
+  const RECENT_QS_STORE = 'jamb-challenge-recent-qs-v1';
+  const RECENT_QS_CAP = 80;
+
+  // Picks `count` questions from `pool` (a QUESTION_BANK[subject] array),
+  // preferring ones this student hasn't used in their recent challenges —
+  // so repeated challenges with the same friends don't keep surfacing the
+  // same questions. Uses "subject:index" as a stable ID since these
+  // questions don't carry a real id field.
+  function pickJambQuestions(subject, pool, count) {
+    if (!pool.length) return [];
+    const tagged = pool.map((q, i) => ({ ...q, _qid: `${subject}:${i}` }));
+    const recentIds = loadPref(RECENT_QS_STORE, []);
+    const recentSet = new Set(recentIds);
+    const fresh = [...tagged.filter(q => !recentSet.has(q._qid))].sort(() => Math.random() - .5);
+    const stale = tagged.filter(q => recentSet.has(q._qid))
+      .sort((a, b) => recentIds.indexOf(a._qid) - recentIds.indexOf(b._qid));
+
+    const selected = fresh.slice(0, count);
+    if (selected.length < count) selected.push(...stale.slice(0, count - selected.length));
+
+    const usedIds = selected.map(q => q._qid);
+    const updated = [...recentIds.filter(id => !usedIds.includes(id)), ...usedIds].slice(-RECENT_QS_CAP);
+    savePref(RECENT_QS_STORE, updated);
+
+    return selected;
+  }
+
   async function generateJambChallenge() {
     // Keep at most MAX_PENDING_CHALLENGES total — auto-retire the oldest
     // one rather than blocking creation.
@@ -1633,7 +1701,7 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     let offset = 0;
     subjectBoxes.forEach(subject => {
       const pool = QUESTION_BANK[subject] || [];
-      const qs = [...pool].sort(() => Math.random() - .5).slice(0, perSubject).map(q => ({ ...q, sourceSubject: subject }));
+      const qs = pickJambQuestions(subject, pool, perSubject).map(q => ({ ...q, sourceSubject: subject }));
       subjectRanges[subject] = { start: offset, end: offset + qs.length - 1 };
       offset += qs.length;
       selected = selected.concat(qs);
