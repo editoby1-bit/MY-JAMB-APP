@@ -747,6 +747,7 @@
       challenges[code].scores[student] = { score, total, pct, completedAt: Date.now() };
       savePref(QC_STORE, challenges);
     }
+    refreshJambChallengeBadgeState();
     try {
       const res = await fetch(API_BASE + '/api/challenge', {
         method: 'POST',
@@ -1430,14 +1431,23 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     });
   }
 
+  function refreshJambChallengeBadgeState() {
+    const all = loadPref(QC_STORE, {});
+    const needsAttention = Object.values(all).some(c => {
+      if (c.ended) return false;
+      const completed = c.scores && c.scores[c.creator || state.currentUser];
+      return c.startedAt && !completed;
+    });
+    setJambChallengeBadge(needsAttention);
+  }
+
   function openJambChallenge() {
     if (!checkAccess()) { showPaywall('feature'); return; }
     if (!state.currentUser) { alert('Please log in first.'); return; }
     showJQCPanel('jambQcHome');
     document.getElementById('jambQuizModal')?.classList.remove('hidden');
-    setJambChallengeBadge(false);
     renderJambPendingChallenges();
-    checkForStartedJambChallenges().then(renderJambPendingChallenges);
+    checkForStartedJambChallenges().then(() => { renderJambPendingChallenges(); refreshJambChallengeBadgeState(); });
   }
 
   // Instead of yanking the student straight into the quiz the moment a
@@ -1459,12 +1469,14 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       text-align:center;
     `;
     card.innerHTML = `
-      <p style="margin:0 0 .9rem; color:#fff; font-size:.9rem; font-weight:600;">🎉 Your challenge has started!</p>
-      <div style="display:flex; gap:.6rem;">
-        <button id="jambStartedLater" style="flex:1; padding:.6rem; border-radius:9px; border:1.5px solid #26344a;
-                background:transparent; color:#fff; font-weight:600; font-size:.82rem;">Join Later</button>
-        <button id="jambStartedNow" style="flex:1; padding:.6rem; border-radius:9px; border:none;
-                background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.82rem;">Join Now</button>
+      <p style="margin:0 0 .7rem; color:#fff; font-size:.9rem; font-weight:600;">🎉 Your challenge has started!</p>
+      <button id="jambStartedNow" style="width:100%; padding:.65rem; border-radius:9px; border:none; margin-bottom:.6rem;
+              background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">Join Now</button>
+      <p style="margin:0 0 .4rem; color:rgba(255,255,255,.5); font-size:.72rem;">Or remind me again in:</p>
+      <div style="display:flex; gap:.4rem;">
+        <button class="jamb-snooze-opt" data-min="5" style="flex:1; padding:.5rem; border-radius:8px; border:1px solid #26344a; background:transparent; color:#fff; font-size:.75rem;">5 min</button>
+        <button class="jamb-snooze-opt" data-min="15" style="flex:1; padding:.5rem; border-radius:8px; border:1px solid #26344a; background:transparent; color:#fff; font-size:.75rem;">15 min</button>
+        <button class="jamb-snooze-opt" data-min="30" style="flex:1; padding:.5rem; border-radius:8px; border:1px solid #26344a; background:transparent; color:#fff; font-size:.75rem;">30 min</button>
       </div>
     `;
     document.body.appendChild(card);
@@ -1474,13 +1486,20 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       document.getElementById('jambQuizModal')?.classList.add('hidden');
       startJambChallengeAttempt(challenge, startedAt);
     });
-    document.getElementById('jambStartedLater').addEventListener('click', () => {
-      card.remove();
-      // Remember locally that this one's ready to join, so the pending list
-      // and badge reflect it even if the app is closed and reopened.
-      const challenges = loadPref(QC_STORE, {});
-      if (challenges[code]) { challenges[code].startedAt = startedAt; savePref(QC_STORE, challenges); }
-      setJambChallengeBadge(true);
+    card.querySelectorAll('.jamb-snooze-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const minutes = parseInt(btn.dataset.min, 10);
+        card.remove();
+        const challenges = loadPref(QC_STORE, {});
+        if (challenges[code]) { challenges[code].startedAt = startedAt; savePref(QC_STORE, challenges); }
+        setJambChallengeBadge(true);
+        setTimeout(() => {
+          const latest = loadPref(QC_STORE, {})[code];
+          if (latest && !latest.ended && !(latest.scores && latest.scores[state.currentUser])) {
+            showChallengeStartedNotice(code, challenge, startedAt);
+          }
+        }, minutes * 60000);
+      });
     });
   }
 
@@ -1583,19 +1602,31 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     wrap.classList.toggle('hidden', mine.length === 0);
 
     list.innerHTML = mine.map(c => {
-      const completed = c.scores && c.scores[c.creator];
-      const statusLabel = c.ended ? '⏹ Ended'
-        : completed ? '✅ Completed'
-        : c.syncMode === 'scheduled' ? '📅 Scheduled'
-        : c.syncMode === 'ready' && !c.startedAt ? '⏱ Waiting room'
-        : '▶ In progress';
+      const completed = !!(c.scores && c.scores[c.creator]);
+      const isDone = c.ended || completed;
+      let statusLabel;
+      if (c.ended)      statusLabel = '⏹ Ended';
+      else if (completed) statusLabel = '✅ Completed';
+      else if (c.syncMode === 'scheduled' && !c.startedAt) statusLabel = '📅 Scheduled';
+      else if (c.syncMode === 'ready' && !c.startedAt)     statusLabel = '⏱ Waiting room';
+      else if (c.startedAt && c.syncMode && c.syncMode !== 'anytime') {
+        const endTxt = c.time > 0
+          ? ' · ends ' + new Date(c.startedAt + c.time * 60000).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })
+          : '';
+        statusLabel = '▶ Ongoing' + endTxt;
+      } else statusLabel = '▶ Not yet taken';
+
+      const actionBtn = isDone
+        ? `<button class="jqc-pending-btn" data-code="${escHtml(c.code)}" data-action="results">View Results</button>`
+        : `<button class="jqc-pending-btn" data-code="${escHtml(c.code)}" data-action="continue">Continue</button>`;
+
       return `
         <div class="jqc-pending-row">
           <div class="jqc-pending-info">
             <div class="jqc-pending-code">${escHtml(c.code)}</div>
             <div class="jqc-pending-sub">${escHtml(c.subject||'')} · ${statusLabel}</div>
           </div>
-          <button class="jqc-pending-btn" data-code="${escHtml(c.code)}" data-action="continue">${c.ended ? 'View' : 'Continue'}</button>
+          ${actionBtn}
           <button class="jqc-pending-delete" data-code="${escHtml(c.code)}" data-action="delete">Delete</button>
         </div>
       `;
@@ -1604,9 +1635,26 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     list.querySelectorAll('[data-action="continue"]').forEach(btn => {
       btn.addEventListener('click', () => continueJambChallenge(btn.dataset.code));
     });
+    list.querySelectorAll('[data-action="results"]').forEach(btn => {
+      btn.addEventListener('click', () => viewJambChallengeResults(btn.dataset.code));
+    });
     list.querySelectorAll('[data-action="delete"]').forEach(btn => {
       btn.addEventListener('click', () => deleteJambChallenge(btn.dataset.code));
     });
+  }
+
+  async function viewJambChallengeResults(code) {
+    const local = loadPref(QC_STORE, {})[code];
+    if (local && local.scores) renderJambLeaderboard(code, local.scores);
+    try {
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'leaderboard', code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) renderJambLeaderboard(code, data.scores);
+    } catch (err) { /* local scores already shown as a fallback */ }
   }
 
   function continueJambChallenge(code) {
@@ -1638,6 +1686,7 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     const challenges = loadPref(QC_STORE, {});
     if (challenges[code]) { challenges[code].ended = true; savePref(QC_STORE, challenges); }
     renderJambPendingChallenges();
+    refreshJambChallengeBadgeState();
   }
 
   const RECENT_QS_STORE = 'jamb-challenge-recent-qs-v1';
