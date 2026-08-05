@@ -450,7 +450,7 @@
             <button class="jqc-btn jqc-primary" id="jambJoinConfirm">Join →</button>
           </div>
           <div id="jambPendingWrap" class="hidden">
-            <h4 class="jqc-pending-title">Your Challenges (<span id="jambPendingCount">0</span>/3)</h4>
+            <h4 class="jqc-pending-title">Your Challenges (<span id="jambPendingCount">0</span>/<span id="jambPendingMax">5</span>)</h4>
             <div id="jambPendingList" class="jqc-pending-list"></div>
           </div>
         </div>
@@ -491,6 +491,7 @@
               </div>
             </div>
           </div>
+          <p class="jqc-sub" style="text-align:left;margin:0 0 .75rem">💡 By default each challenge avoids questions you've used in your last few challenges, so repeated matches with the same friends stay fresh.</p>
           <button class="jqc-btn jqc-primary" id="jambQcGenerate" style="width:100%">Generate Code →</button>
           <button class="jqc-btn jqc-ghost" id="jambQcBack">← Back</button>
         </div>
@@ -504,13 +505,15 @@
           <button class="jqc-btn jqc-primary" id="jambReadyBtn" style="width:100%;margin-bottom:.5rem">✅ I'm Ready</button>
           <button class="jqc-btn jqc-secondary hidden" id="jambForceStartBtn" style="width:100%;margin-bottom:.5rem">▶ Start Now (everyone else joins mid-way)</button>
           <button class="jqc-btn jqc-ghost hidden" id="jambEndChallengeBtn" style="width:100%">🗑 End This Challenge</button>
+          <button class="jqc-btn jqc-ghost" id="jambWaitingBack" style="margin-top:.4rem">← Back</button>
         </div>
         <div id="jambQcShare2" class="hidden">
           <div class="jqc-icon">🎯</div>
           <h3 class="jqc-section">Challenge Created!</h3>
           <div class="jqc-code-display" id="jambCodeDisplay">MEA-000</div>
           <button class="jqc-btn jqc-primary" id="jambQcShareLink" style="width:100%;margin-bottom:.5rem">📤 Share Link</button>
-          <button class="jqc-btn jqc-primary" id="jambQcStartOwn" style="width:100%">Start My Attempt →</button>
+          <button class="jqc-btn jqc-primary" id="jambQcStartOwn" style="width:100%;margin-bottom:.5rem">Start My Attempt →</button>
+          <button class="jqc-btn jqc-ghost" id="jambShare2Back">← Back</button>
         </div>
         <div id="jambQcLeaderboard" class="hidden">
           <div class="jqc-icon">📊</div>

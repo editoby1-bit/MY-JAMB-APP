@@ -1367,6 +1367,14 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     modal?.addEventListener('click', e => { if(e.target===modal) modal?.classList.add('hidden'); });
     document.getElementById('jambQcCreate')?.addEventListener('click', () => showJQCPanel('jambQcCreate2'));
     document.getElementById('jambQcBack')?.addEventListener('click', () => showJQCPanel('jambQcHome'));
+    document.getElementById('jambShare2Back')?.addEventListener('click', () => { showJQCPanel('jambQcHome'); renderJambPendingChallenges(); });
+    document.getElementById('jambWaitingBack')?.addEventListener('click', () => {
+      clearInterval(_waitingRoomTimer);
+      clearInterval(_waitingRoomCountdownTicker);
+      showJQCPanel('jambQcHome');
+      renderJambPendingChallenges();
+      refreshJambChallengeBadgeState();
+    });
     document.getElementById('jambQcJoin')?.addEventListener('click', () => {
       document.getElementById('jambJoinRow')?.classList.toggle('hidden');
     });
@@ -1466,9 +1474,11 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px;
       padding:1.1rem 1.25rem; max-width:340px; width:calc(100% - 2rem);
       box-shadow:0 10px 40px rgba(0,0,0,.5); z-index:10001; font-family:var(--sans,sans-serif);
-      text-align:center;
+      text-align:center; position:fixed;
     `;
     card.innerHTML = `
+      <button id="jambStartedClose" style="position:absolute; top:.6rem; right:.7rem; background:none; border:none;
+              color:rgba(255,255,255,.5); font-size:1.1rem; cursor:pointer; line-height:1;">✕</button>
       <p style="margin:0 0 .7rem; color:#fff; font-size:.9rem; font-weight:600;">🎉 Your challenge has started!</p>
       <button id="jambStartedNow" style="width:100%; padding:.65rem; border-radius:9px; border:none; margin-bottom:.6rem;
               background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">Join Now</button>
@@ -1481,6 +1491,12 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     `;
     document.body.appendChild(card);
 
+    document.getElementById('jambStartedClose').addEventListener('click', () => {
+      card.remove();
+      const challenges = loadPref(QC_STORE, {});
+      if (challenges[code]) { challenges[code].startedAt = startedAt; savePref(QC_STORE, challenges); }
+      setJambChallengeBadge(true); // still findable via the badge + pending list, just not re-popped automatically
+    });
     document.getElementById('jambStartedNow').addEventListener('click', () => {
       card.remove();
       document.getElementById('jambQuizModal')?.classList.add('hidden');
@@ -1599,6 +1615,8 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
 
     const mine = getMyChallenges().slice(0, MAX_PENDING_CHALLENGES);
     countEl && (countEl.textContent = mine.length);
+    const maxEl = document.getElementById('jambPendingMax');
+    if (maxEl) maxEl.textContent = MAX_PENDING_CHALLENGES;
     wrap.classList.toggle('hidden', mine.length === 0);
 
     list.innerHTML = mine.map(c => {
@@ -1607,7 +1625,12 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       let statusLabel;
       if (c.ended)      statusLabel = '⏹ Ended';
       else if (completed) statusLabel = '✅ Completed';
-      else if (c.syncMode === 'scheduled' && !c.startedAt) statusLabel = '📅 Scheduled';
+      else if (c.syncMode === 'scheduled' && !c.startedAt) {
+        const when = c.scheduledStartAt
+          ? new Date(c.scheduledStartAt).toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })
+          : '';
+        statusLabel = '📅 Scheduled' + (when ? ' for ' + when : '');
+      }
       else if (c.syncMode === 'ready' && !c.startedAt)     statusLabel = '⏱ Waiting room';
       else if (c.startedAt && c.syncMode && c.syncMode !== 'anytime') {
         const endTxt = c.time > 0
@@ -1829,9 +1852,14 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       if (local) {
         if (local.ended) { showInfoToast('This challenge has ended.'); return; }
         _currentChallengeCode = code;
-        if (local.syncMode !== 'anytime' && !local.startedAt) {
+        if (local.syncMode && local.syncMode !== 'anytime' && !local.startedAt) {
           _pendingChallenge = local;
           openJambWaitingRoom(code, local.creator === state.currentUser);
+        } else if (local.syncMode && local.syncMode !== 'anytime' && local.startedAt) {
+          // Already running with a shared clock — show the same Join Now /
+          // snooze notice a watching participant would have gotten, rather
+          // than dropping straight into the quiz.
+          showChallengeStartedNotice(code, local, local.startedAt);
         } else {
           startJambChallengeAttempt(local);
         }
@@ -1865,12 +1893,15 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
         return;
       }
       _currentChallengeCode = code;
-      if (data.challenge.syncMode !== 'anytime' && !data.challenge.startedAt) {
+      if (data.challenge.syncMode && data.challenge.syncMode !== 'anytime' && !data.challenge.startedAt) {
         _pendingChallenge = data.challenge;
         openJambWaitingRoom(code, data.challenge.creator === state.currentUser);
-      } else {
+      } else if (data.challenge.syncMode && data.challenge.syncMode !== 'anytime' && data.challenge.startedAt) {
         // Already started (including a scheduled challenge whose time has
-        // passed) — join in progress, resuming the already-ticking timer.
+        // passed) — show the Join Now / snooze notice instead of dropping
+        // straight in, same as a watching participant would see.
+        showChallengeStartedNotice(code, data.challenge, data.challenge.startedAt);
+      } else {
         startJambChallengeAttempt(data.challenge);
       }
     } finally {
