@@ -373,6 +373,7 @@
 
     <!-- CHALLENGE BUTTON -->
     <button id="jambChallengeBtn" class="jamb-challenge-btn hidden">🏆 Challenge a Friend<span id="jambChallengeBadge" class="jamb-challenge-badge hidden"></span></button>
+    <button id="jambDashBtn" class="jamb-challenge-btn jamb-dash-btn hidden">🏫 School & Class</button>
 
     <!-- PAYWALL -->
     <div id="jambPaywall" class="jpw-overlay hidden">
@@ -522,6 +523,41 @@
           <button class="jqc-btn jqc-primary" id="jambQcNew" style="width:100%;margin-top:.75rem">New Challenge →</button>
           <button class="jqc-btn jqc-ghost" id="jambQcDone">Done</button>
         </div>
+      </div>
+    </div>
+
+    <!-- SCHOOL / PARENT DASHBOARDS MODAL -->
+    <div id="jambDashModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambDashClose">✕</button>
+        <div class="jqc-icon">🏫</div>
+        <h2 class="jqc-title">School & Class</h2>
+        <div class="dash-tabs" id="dashTabBar">
+          <button class="dash-tab" data-tab="student">Student</button>
+          <button class="dash-tab" data-tab="teacher">Teacher</button>
+          <button class="dash-tab" data-tab="parent">Parent</button>
+        </div>
+        <div id="dashTabBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <!-- TEACHER DASHBOARD MODAL (class-wide) -->
+    <div id="teacherDashModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:480px;">
+        <button class="jqc-close" id="teacherDashClose">✕</button>
+        <div class="jqc-icon">📊</div>
+        <h2 class="jqc-title">Class Dashboard</h2>
+        <div id="teacherDashBody" style="text-align:left; max-height:60vh; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- PARENT DASHBOARD MODAL (single child) -->
+    <div id="parentDashModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:480px;">
+        <button class="jqc-close" id="parentDashClose">✕</button>
+        <div class="jqc-icon">👨‍👩‍👧</div>
+        <h2 class="jqc-title">Your Child's Progress</h2>
+        <div id="parentDashBody" style="text-align:left; max-height:60vh; overflow-y:auto;"></div>
       </div>
     </div>
 

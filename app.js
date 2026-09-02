@@ -33,6 +33,8 @@
   const SK_TIER       = 'jamb-tier-v1';
   const SK_EASOLD     = 'jamb-ea-sold-v1';
   const SK_AI_CREDITS = 'jamb-ai-credits-v1';
+  const SK_CLASS       = 'jamb-class-v1';       // { classCode, name, pin } — this device's class membership
+  const SK_CLASS_ADMIN = 'jamb-class-admin-v1'; // { classCode, adminSecret, schoolName } — teacher device only
   const JAMB_FREE_LIMIT = 10;
   const JAMB_EA_CAP     = 100;
   const AI_QUARTERLY    = 100;
@@ -47,7 +49,7 @@
   function getCurrentQuarter(){const d=new Date();return `${d.getFullYear()}-Q${Math.ceil((d.getMonth()+1)/3)}`;}
   function getAICredits(){const d=loadPref(SK_AI_CREDITS);if(!d||d.quarter!==getCurrentQuarter()){savePref(SK_AI_CREDITS,{n:AI_QUARTERLY,quarter:getCurrentQuarter()});return AI_QUARTERLY;}return d.n;}
   function useAICredit(){const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
-  function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');}
+  function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');const dbtn=document.getElementById('jambDashBtn');if(dbtn){if(state&&state.currentUser)dbtn.classList.remove('hidden');else dbtn.classList.add('hidden');}}
   function refreshUpgradeBar(){
     const bar=document.getElementById('jambUpgradeBar');
     const txt=document.getElementById('jambUpgradeText');
@@ -742,10 +744,334 @@
     // If this was a Challenge Mode attempt, report the score to the shared
     // leaderboard so the creator and anyone else with the code can see it —
     // not just whoever is on this exact device.
+    const wasChallenge = !!state._challengeCode;
     if (state._challengeCode) {
       submitJambChallengeScore(state._challengeCode, state.currentUser, correct, total, percent);
     }
+
+    // Best-effort report to the class dashboard (no-op if this device
+    // hasn't joined a class). This question bank has no stable per-question
+    // id, so a short hash of subject+question text stands in for one —
+    // stable across sessions, which is what "missed more than once" needs.
+    if (total > 0) {
+      const missed = state.currentQuestions
+        .map((q, i) => (state.answers[i] !== null && state.answers[i] !== q.answer)
+          ? qHash(q.sourceSubject || state.subject, q.question) : null)
+        .filter(Boolean);
+      recordClassSession({
+        subject: state.subject,
+        mode: wasChallenge ? 'challenge' : 'practice',
+        score: correct, total, missed,
+      });
+    }
   }
+
+  // Short, stable hash — same subject+question text always produces the
+  // same id, which is all the dashboard's "weak spot" detection needs.
+  function qHash(subject, text) {
+    const str = String(subject) + '|' + String(text);
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return 'q' + (h >>> 0).toString(36);
+  }
+
+  /* ════════ SCHOOL / PARENT DASHBOARDS ════════
+     A student joins a class with a class code + a 4-6 digit PIN they pick
+     (stops another student claiming their name). Every completed session
+     (practice, exam, or challenge) reports to /api/dashboard — best-effort,
+     never blocks the student's own result screen. A parent link is a
+     read-only code the student's own device generates for one child.
+     Shares the same backend and API_BASE as My Exams App's version. */
+  function getClassMembership() { return loadPref(SK_CLASS); }
+  function saveClassMembership(m) { savePref(SK_CLASS, m); }
+  function clearClassMembership() { try { localStorage.removeItem(SK_CLASS); } catch (e) {} }
+
+  async function dashApi(action, body) {
+    const res = await fetch(API_BASE + '/api/dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...body }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  async function recordClassSession({ subject, mode, score, total, missed }) {
+    const m = getClassMembership();
+    if (!m) return;
+    try {
+      await dashApi('record_session', {
+        classCode: m.classCode, name: m.name, pin: m.pin,
+        subject, mode, score, total, missed, timestamp: Date.now(),
+      });
+    } catch (e) { /* offline or class removed — not worth surfacing */ }
+  }
+
+  let _dashTab = null; // 'student' | 'teacher' | 'parent'
+
+  function openDashModal(tab) {
+    if (tab) _dashTab = tab;
+    if (!_dashTab) {
+      _dashTab = getClassMembership() ? 'student' : (loadPref(SK_CLASS_ADMIN) ? 'teacher' : 'student');
+    }
+    document.getElementById('jambDashModal')?.classList.remove('hidden');
+    renderDashModal();
+  }
+  function closeDashModal() {
+    document.getElementById('jambDashModal')?.classList.add('hidden');
+  }
+
+  function renderDashModal() {
+    document.querySelectorAll('#dashTabBar .dash-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === _dashTab);
+    });
+    const body = document.getElementById('dashTabBody');
+    if (_dashTab === 'teacher') renderDashTeacherTab(body);
+    else if (_dashTab === 'parent') renderDashParentTab(body);
+    else renderDashStudentTab(body);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#dashTabBar .dash-tab').forEach(btn => {
+      btn.addEventListener('click', () => { _dashTab = btn.dataset.tab; renderDashModal(); });
+    });
+    document.getElementById('jambDashBtn')?.addEventListener('click', () => openDashModal());
+    document.getElementById('jambDashClose')?.addEventListener('click', closeDashModal);
+    document.getElementById('teacherDashClose')?.addEventListener('click', () => document.getElementById('teacherDashModal')?.classList.add('hidden'));
+    document.getElementById('parentDashClose')?.addEventListener('click', () => document.getElementById('parentDashModal')?.classList.add('hidden'));
+  });
+
+  /* ── Student tab: join a class, or manage membership + parent link ── */
+  function renderDashStudentTab(body) {
+    const m = getClassMembership();
+    if (m) {
+      body.innerHTML = `
+        <p class="jqc-sub" style="margin-bottom:.5rem;">You're in a class</p>
+        <p style="font-size:.85rem; margin-bottom:1rem;">Class code <b>${escHtml(m.classCode)}</b> · joined as <b>${escHtml(m.name)}</b><br>
+        <span class="jqc-sub" style="margin:0;">Your practice sessions and challenges are now shared with your teacher's class dashboard.</span></p>
+        <button class="jqc-btn jqc-primary" id="genParentLinkBtn" style="width:100%;">Generate Parent Link</button>
+        <div id="parentLinkOut" style="margin-top:.75rem;"></div>
+        <button class="jqc-btn jqc-ghost" id="leaveClassBtn" style="margin-top:1rem;">Leave Class</button>
+      `;
+      document.getElementById('genParentLinkBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('genParentLinkBtn');
+        btn.disabled = true; btn.textContent = 'Generating…';
+        try {
+          const { parentCode } = await dashApi('link_parent', { classCode: m.classCode, name: m.name, pin: m.pin });
+          document.getElementById('parentLinkOut').innerHTML = `
+            <input class="jqc-code-input" readonly value="${escHtml(parentCode)}" style="width:100%;margin-bottom:.5rem;">
+            <p class="jqc-sub" style="margin:0;">Share this code with your parent — they enter it under the Parent tab.</p>`;
+        } catch (e) {
+          showInfoToast(e.message || 'Could not generate link');
+        }
+        btn.disabled = false; btn.textContent = 'Generate Parent Link';
+      });
+      document.getElementById('leaveClassBtn').addEventListener('click', () => {
+        showConfirmModal('Leave this class? You can rejoin any time with the class code.', 'Leave', 'Cancel')
+          .then(ok => { if (ok) { clearClassMembership(); renderDashModal(); } });
+      });
+      return;
+    }
+
+    body.innerHTML = `
+      <p class="jqc-sub">Ask your teacher for the class code. Pick a 4-6 digit PIN — this keeps your results only yours.</p>
+      <div class="jqc-form">
+        <div class="jqc-field"><input class="jqc-code-input" id="joinClassCode" placeholder="Class code (e.g. C-XXXXXX)" style="text-transform:uppercase;"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="joinClassName" placeholder="Your name" style="text-transform:none;" value="${state.currentUser ? escHtml(state.currentUser) : ''}"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="joinClassPin" type="tel" placeholder="PIN (4-6 digits)" maxlength="6" style="text-transform:none;"></div>
+      </div>
+      <button class="jqc-btn jqc-primary" id="joinClassBtn" style="width:100%;margin-top:1rem;">Join Class</button>
+    `;
+    document.getElementById('joinClassBtn').addEventListener('click', async () => {
+      const classCode = document.getElementById('joinClassCode').value.trim().toUpperCase();
+      const name = document.getElementById('joinClassName').value.trim();
+      const pin = document.getElementById('joinClassPin').value.trim();
+      if (!classCode || !name || !/^\d{4,6}$/.test(pin)) { showInfoToast('Fill in class code, name, and a 4-6 digit PIN.'); return; }
+      const btn = document.getElementById('joinClassBtn');
+      btn.disabled = true; btn.textContent = 'Joining…';
+      try {
+        await dashApi('join_class', { classCode, name, pin });
+        saveClassMembership({ classCode, name, pin });
+        showInfoToast('Joined class!');
+        renderDashModal();
+      } catch (e) {
+        showInfoToast(e.message || 'Could not join class');
+        btn.disabled = false; btn.textContent = 'Join Class';
+      }
+    });
+  }
+
+  /* ── Teacher tab: create a class, or log in to an existing one ── */
+  function renderDashTeacherTab(body) {
+    const admin = loadPref(SK_CLASS_ADMIN);
+    if (admin) {
+      body.innerHTML = `
+        <p class="jqc-sub" style="margin-bottom:.5rem;">Logged in as admin</p>
+        <p style="font-size:.85rem; margin-bottom:1rem;">${escHtml(admin.schoolName || 'Class')} · code <b>${escHtml(admin.classCode)}</b></p>
+        <button class="jqc-btn jqc-primary" id="openTeacherDashBtn2" style="width:100%;margin-bottom:.5rem;">Open Teacher Dashboard</button>
+        <button class="jqc-btn jqc-ghost" id="teacherLogoutBtn">Log Out / Switch Class</button>
+      `;
+      document.getElementById('openTeacherDashBtn2').addEventListener('click', () => openTeacherDashboard(admin.classCode, admin.adminSecret));
+      document.getElementById('teacherLogoutBtn').addEventListener('click', () => {
+        try { localStorage.removeItem(SK_CLASS_ADMIN); } catch (e) {}
+        renderDashModal();
+      });
+      return;
+    }
+
+    body.innerHTML = `
+      <p class="jqc-sub">Already created a class? Log back in with your class code and admin PIN.</p>
+      <div class="jqc-form">
+        <div class="jqc-field"><input class="jqc-code-input" id="loginClassCode" placeholder="Class code" style="text-transform:uppercase;"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="loginAdminPin" type="tel" placeholder="Admin PIN" maxlength="6" style="text-transform:none;"></div>
+      </div>
+      <button class="jqc-btn jqc-primary" id="teacherLoginBtn" style="width:100%;margin-top:1rem;margin-bottom:1.25rem;">Log In</button>
+      <p class="jqc-sub" style="margin-bottom:.5rem;">New here? Create a class and get a code to share with your students.</p>
+      <button class="jqc-btn jqc-secondary" id="showCreateClassBtn" style="width:100%;">Create a Class</button>
+      <div id="createClassForm" class="hidden" style="margin-top:1rem;">
+        <div class="jqc-form">
+          <div class="jqc-field"><input class="jqc-code-input" id="newSchoolName" placeholder="School / class name" style="text-transform:none;"></div>
+          <div class="jqc-field"><input class="jqc-code-input" id="newAdminPin" type="tel" placeholder="Admin PIN (4-6 digits, for future logins)" maxlength="6" style="text-transform:none;"></div>
+        </div>
+        <button class="jqc-btn jqc-primary" id="createClassBtn" style="width:100%;margin-top:1rem;">Create Class</button>
+      </div>
+    `;
+
+    document.getElementById('teacherLoginBtn').addEventListener('click', async () => {
+      const classCode = document.getElementById('loginClassCode').value.trim().toUpperCase();
+      const adminPin = document.getElementById('loginAdminPin').value.trim();
+      if (!classCode || !/^\d{4,6}$/.test(adminPin)) { showInfoToast('Enter your class code and admin PIN.'); return; }
+      const btn = document.getElementById('teacherLoginBtn');
+      btn.disabled = true; btn.textContent = 'Logging in…';
+      try {
+        const { adminSecret, schoolName } = await dashApi('admin_login', { classCode, adminPin });
+        savePref(SK_CLASS_ADMIN, { classCode, adminSecret, schoolName });
+        showInfoToast('Logged in!');
+        openTeacherDashboard(classCode, adminSecret);
+      } catch (e) {
+        showInfoToast(e.message || 'Could not log in — check your class code and PIN.');
+        btn.disabled = false; btn.textContent = 'Log In';
+      }
+    });
+
+    document.getElementById('showCreateClassBtn').addEventListener('click', () => {
+      document.getElementById('createClassForm').classList.toggle('hidden');
+    });
+
+    document.getElementById('createClassBtn').addEventListener('click', async () => {
+      const schoolName = document.getElementById('newSchoolName').value.trim();
+      const adminPin = document.getElementById('newAdminPin').value.trim();
+      if (!schoolName || !/^\d{4,6}$/.test(adminPin)) { showInfoToast('Enter a class name and a 4-6 digit PIN.'); return; }
+      const btn = document.getElementById('createClassBtn');
+      btn.disabled = true; btn.textContent = 'Creating…';
+      try {
+        const { classCode, adminSecret } = await dashApi('create_class', { schoolName, adminPin });
+        savePref(SK_CLASS_ADMIN, { classCode, adminSecret, schoolName });
+        document.getElementById('createClassForm').innerHTML = `
+          <p style="font-weight:700; margin-bottom:.5rem;">Class created! Share this code with your students:</p>
+          <p style="font-size:1.4rem; font-weight:700; letter-spacing:.05em; color:var(--amber,#f5a623);">${escHtml(classCode)}</p>
+          <button class="jqc-btn jqc-primary" style="width:100%; margin-top:1rem;" id="openTeacherDashBtn">Open Teacher Dashboard</button>`;
+        document.getElementById('openTeacherDashBtn').addEventListener('click', () => openTeacherDashboard(classCode, adminSecret));
+      } catch (e) {
+        showInfoToast(e.message || 'Could not create class');
+        btn.disabled = false; btn.textContent = 'Create Class';
+      }
+    });
+  }
+
+  /* ── Parent tab: log in with a parent code ───────────────────── */
+  function renderDashParentTab(body) {
+    body.innerHTML = `
+      <p class="jqc-sub">Enter the parent code your child shared with you.</p>
+      <div class="jqc-field"><input class="jqc-code-input" id="parentTabCode" placeholder="Parent code (e.g. P-XXXXXXXX)" style="width:100%;"></div>
+      <button class="jqc-btn jqc-primary" id="parentTabGoBtn" style="width:100%;margin-top:1rem;">View Progress</button>
+      <p id="parentTabErr" style="color:#e57373; font-size:.8rem; margin-top:.5rem;"></p>
+    `;
+    document.getElementById('parentTabGoBtn').addEventListener('click', async () => {
+      const code = document.getElementById('parentTabCode').value.trim().toUpperCase();
+      if (!code) return;
+      const btn = document.getElementById('parentTabGoBtn');
+      btn.disabled = true; btn.textContent = 'Loading…';
+      try {
+        const data = await dashApi('get_parent_dashboard', { parentCode: code });
+        closeDashModal();
+        renderParentDash(data);
+        document.getElementById('parentDashModal')?.classList.remove('hidden');
+      } catch (e) {
+        document.getElementById('parentTabErr').textContent = e.message || 'Could not load — check the code.';
+        btn.disabled = false; btn.textContent = 'View Progress';
+      }
+    });
+  }
+
+  /* ── Teacher dashboard (class-wide view) ─────────────────────── */
+  function openTeacherDashboard(classCode, adminSecret) {
+    closeDashModal();
+    document.getElementById('teacherDashBody').innerHTML = `<p class="jqc-sub">Loading class…</p>`;
+    document.getElementById('teacherDashModal')?.classList.remove('hidden');
+    dashApi('get_class_dashboard', { classCode, adminSecret }).then(renderTeacherDash).catch(e => {
+      document.getElementById('teacherDashBody').innerHTML = `<p style="color:#e57373;">${escHtml(e.message || 'Could not load dashboard')}</p>`;
+    });
+  }
+  function renderTeacherDash(data) {
+    const body = document.getElementById('teacherDashBody');
+    if (!data.students.length) {
+      body.innerHTML = `<p class="jqc-sub">No students have joined <b>${escHtml(data.classCode)}</b> yet. Share the class code to get started.</p>`;
+      return;
+    }
+    const sorted = [...data.students].sort((a, b) => (b.avgPct || 0) - (a.avgPct || 0));
+    body.innerHTML = `
+      <p class="jqc-sub">${escHtml(data.schoolName || 'Class')} · ${data.students.length} student${data.students.length === 1 ? '' : 's'}</p>
+      <div class="jqc-pending-list">
+        ${sorted.map(s => `
+          <div class="jqc-pending-row" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="jqc-score-name">${escHtml(s.name)}</span>
+              <span class="jqc-score-val">${s.avgPct == null ? '—' : s.avgPct + '%'}</span>
+            </div>
+            <p class="jqc-pending-sub">${s.sessionCount} session${s.sessionCount === 1 ? '' : 's'} · ${s.practiceCount || 0} practice · ${s.challengeCount || 0} challenge${(s.challengeCount || 0) === 1 ? '' : 's'}</p>
+            ${renderSubjectBreakdown(s.bySubject)}
+          </div>`).join('')}
+      </div>
+    `;
+  }
+  function renderSubjectBreakdown(bySubject) {
+    const entries = Object.entries(bySubject || {});
+    if (!entries.length) return '';
+    return entries.sort((a, b) => a[1].avgPct - b[1].avgPct).map(([subj, d]) => `
+      <div style="display:flex; justify-content:space-between; font-size:.78rem; padding:.15rem 0; color:rgba(255,255,255,.6);">
+        <span>${escHtml(subj)} ${d.weakQuestions.length ? '⚠️' : ''}</span>
+        <span>${d.avgPct}% avg · ${d.sessions}x</span>
+      </div>`).join('');
+  }
+
+  /* ── Parent dashboard (single-child, read-only) ──────────────── */
+  function renderParentDash(data) {
+    const body = document.getElementById('parentDashBody');
+    body.innerHTML = `
+      <p style="font-weight:700; margin-bottom:.2rem;">${escHtml(data.name)}</p>
+      <p class="jqc-sub" style="margin-bottom:.5rem;">${escHtml(data.schoolName || '')}</p>
+      <div style="display:flex; gap:1.5rem; margin-bottom:1rem;">
+        <div><span style="font-weight:700; font-size:1.3rem;">${data.avgPct == null ? '—' : data.avgPct + '%'}</span><br><span class="jqc-pending-sub">Average</span></div>
+        <div><span style="font-weight:700; font-size:1.3rem;">${data.sessions.length}</span><br><span class="jqc-pending-sub">Sessions</span></div>
+      </div>
+      <p class="jqc-pending-title" style="margin-top:0;">By Subject</p>
+      ${renderSubjectBreakdown(data.bySubject) || '<p class="jqc-sub">No sessions yet.</p>'}
+      <p class="jqc-pending-title">Recent Sessions</p>
+      <div class="jqc-pending-list">
+        ${data.sessions.slice(0, 15).map(s => `
+          <div class="jqc-pending-row">
+            <div class="jqc-pending-info">
+              <span class="jqc-score-name" style="font-weight:600;">${escHtml(s.subject)} ${s.mode === 'challenge' ? '🏆' : ''}</span>
+              <p class="jqc-pending-sub">${new Date(s.at).toLocaleDateString()}</p>
+            </div>
+            <span class="jqc-score-val">${s.score}/${s.total}</span>
+          </div>`).join('') || '<p class="jqc-sub">No sessions yet.</p>'}
+      </div>
+    `;
+  }
+
 
   async function submitJambChallengeScore(code, student, score, total, pct) {
     // Update the local copy too — this is what lets the creator's own
