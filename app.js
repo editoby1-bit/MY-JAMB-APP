@@ -49,7 +49,7 @@
   function getCurrentQuarter(){const d=new Date();return `${d.getFullYear()}-Q${Math.ceil((d.getMonth()+1)/3)}`;}
   function getAICredits(){const d=loadPref(SK_AI_CREDITS);if(!d||d.quarter!==getCurrentQuarter()){savePref(SK_AI_CREDITS,{n:AI_QUARTERLY,quarter:getCurrentQuarter()});return AI_QUARTERLY;}return d.n;}
   function useAICredit(){const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
-  function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');const dbtn=document.getElementById('jambDashBtn');if(dbtn){if(state&&state.currentUser)dbtn.classList.remove('hidden');else dbtn.classList.add('hidden');}}
+  function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');}
   function refreshUpgradeBar(){
     const bar=document.getElementById('jambUpgradeBar');
     const txt=document.getElementById('jambUpgradeText');
@@ -836,7 +836,7 @@
     document.querySelectorAll('#dashTabBar .dash-tab').forEach(btn => {
       btn.addEventListener('click', () => { _dashTab = btn.dataset.tab; renderDashModal(); });
     });
-    document.getElementById('jambDashBtn')?.addEventListener('click', () => openDashModal());
+    document.getElementById('jambDashBanner')?.addEventListener('click', () => openDashModal());
     document.getElementById('jambDashClose')?.addEventListener('click', closeDashModal);
     document.getElementById('teacherDashClose')?.addEventListener('click', () => document.getElementById('teacherDashModal')?.classList.add('hidden'));
     document.getElementById('parentDashClose')?.addEventListener('click', () => document.getElementById('parentDashModal')?.classList.add('hidden'));

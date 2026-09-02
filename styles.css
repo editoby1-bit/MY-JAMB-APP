@@ -914,9 +914,23 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 }
 .jamb-challenge-btn:hover { transform: translateY(-2px); }
 .jamb-challenge-btn.hidden { display: none; }
-.jamb-dash-btn { bottom: 4.75rem; background: var(--navy,#0b1f3a); color: var(--amber,#f5a623); border: 1px solid rgba(245,166,35,.4); box-shadow: 0 4px 16px rgba(11,31,58,.35); }
-.jamb-dash-btn:hover { transform: translateY(-2px); background: #132a4d; }
-.jamb-dash-btn.hidden { display: none; }
+
+/* School & Class banner — sits as the first element inside the login/setup
+   card, directly under the hero, spanning only the left column so it never
+   touches the hero stats or the session-history card on the right. */
+.jamb-dash-banner {
+  display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+  background: linear-gradient(135deg, var(--amber,#f5a623), #ffb84d);
+  padding:.65rem 1.75rem;
+  cursor:pointer;
+  border-bottom: 1.5px solid rgba(11,31,58,.15);
+  transition: filter .15s;
+}
+.jamb-dash-banner:hover { filter: brightness(1.04); }
+.jdb-left { display:flex; align-items:center; gap:.5rem; flex:1; min-width:0; }
+.jdb-icon { font-size:1rem; flex-shrink:0; }
+.jdb-text { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); line-height:1.4; }
+.jdb-arrow { font-size:.78rem; font-weight:700; color:var(--navy,#0b1f3a); flex-shrink:0; white-space:nowrap; }
 .dash-tabs { display:flex; gap:.4rem; margin-bottom:1.25rem; }
 .dash-tab { flex:1; font-size:.78rem; font-weight:700; padding:.5rem .3rem; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); cursor:pointer; }
 .dash-tab.active { background:rgba(245,166,35,.15); border-color:rgba(245,166,35,.5); color:var(--amber,#f5a623); }
