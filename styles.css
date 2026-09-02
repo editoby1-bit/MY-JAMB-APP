@@ -914,8 +914,8 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 }
 .jamb-challenge-btn:hover { transform: translateY(-2px); }
 .jamb-challenge-btn.hidden { display: none; }
-.jamb-dash-btn { bottom: 4.75rem; background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.2); box-shadow: none; }
-.jamb-dash-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.16); }
+.jamb-dash-btn { bottom: 4.75rem; background: var(--navy,#0b1f3a); color: var(--amber,#f5a623); border: 1px solid rgba(245,166,35,.4); box-shadow: 0 4px 16px rgba(11,31,58,.35); }
+.jamb-dash-btn:hover { transform: translateY(-2px); background: #132a4d; }
 .jamb-dash-btn.hidden { display: none; }
 .dash-tabs { display:flex; gap:.4rem; margin-bottom:1.25rem; }
 .dash-tab { flex:1; font-size:.78rem; font-weight:700; padding:.5rem .3rem; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); cursor:pointer; }
