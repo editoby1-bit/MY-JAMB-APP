@@ -924,7 +924,7 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
   flex-shrink: 0;
 }
 .jamb-dash-banner {
-  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  display:flex; align-items:center; justify-content:center; gap:.55rem;
   background: linear-gradient(135deg, var(--amber,#f5a623), #ffb84d);
   border-radius: var(--radius);
   padding: .55rem .75rem;
@@ -932,9 +932,11 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
   transition: filter .15s, transform .15s;
 }
 .jamb-dash-banner:hover { filter: brightness(1.04); transform: translateY(-1px); }
-.jdb-icon { font-size:.95rem; }
+.jdb-icon { font-size:1.1rem; flex-shrink:0; }
+.jdb-text-wrap { display:flex; flex-direction:column; align-items:flex-start; gap:.05rem; line-height:1.25; }
 .jdb-text { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); }
-.jdb-arrow { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); }
+.jdb-sub { font-size:.68rem; font-weight:600; color:rgba(11,31,58,.65); }
+.jdb-arrow { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); flex-shrink:0; }
 .dash-tabs { display:flex; gap:.4rem; margin-bottom:1.25rem; }
 .dash-tab { flex:1; font-size:.78rem; font-weight:700; padding:.5rem .3rem; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); cursor:pointer; }
 .dash-tab.active { background:rgba(245,166,35,.15); border-color:rgba(245,166,35,.5); color:var(--amber,#f5a623); }
