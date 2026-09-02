@@ -915,24 +915,26 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 .jamb-challenge-btn:hover { transform: translateY(-2px); }
 .jamb-challenge-btn.hidden { display: none; }
 
-/* School & Class banner — its own standalone block directly under the
-   hero, full width, visually separate from the login/setup card below it
-   (not flush/embedded — it has its own rounding, shadow and margin). */
+/* School & Class — sits directly under the stat row, same width, still
+   inside the hero banner itself (not a separate block below it). */
+.hero-stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  flex-shrink: 0;
+}
 .jamb-dash-banner {
-  display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
   background: linear-gradient(135deg, var(--amber,#f5a623), #ffb84d);
-  padding: .85rem 1.75rem;
-  margin-bottom: 1.75rem;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 4px 16px rgba(245,166,35,.25);
+  border-radius: var(--radius);
+  padding: .55rem .75rem;
   cursor:pointer;
   transition: filter .15s, transform .15s;
 }
 .jamb-dash-banner:hover { filter: brightness(1.04); transform: translateY(-1px); }
-.jdb-left { display:flex; align-items:center; gap:.6rem; flex:1; min-width:0; }
-.jdb-icon { font-size:1.15rem; flex-shrink:0; }
-.jdb-text { font-size:.88rem; font-weight:700; color:var(--navy,#0b1f3a); line-height:1.4; }
-.jdb-arrow { font-size:.82rem; font-weight:700; color:var(--navy,#0b1f3a); flex-shrink:0; white-space:nowrap; }
+.jdb-icon { font-size:.95rem; }
+.jdb-text { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); }
+.jdb-arrow { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); }
 .dash-tabs { display:flex; gap:.4rem; margin-bottom:1.25rem; }
 .dash-tab { flex:1; font-size:.78rem; font-weight:700; padding:.5rem .3rem; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); cursor:pointer; }
 .dash-tab.active { background:rgba(245,166,35,.15); border-color:rgba(245,166,35,.5); color:var(--amber,#f5a623); }
