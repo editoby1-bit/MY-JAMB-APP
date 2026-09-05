@@ -891,9 +891,16 @@
       const btn = document.getElementById('joinClassBtn');
       btn.disabled = true; btn.textContent = 'Joining…';
       try {
-        await dashApi('join_class', { classCode, name, pin });
+        const result = await dashApi('join_class', { classCode, name, pin });
         saveClassMembership({ classCode, name, pin });
-        showInfoToast('Joined class!');
+        if (result.entitlement) {
+          // Backend speaks My Exams App's tier vocabulary ('student'/'plus')
+          // since that's shared across both apps' bundle logic — JAMB's own
+          // tier is just 'jamb' (access here is binary, not tiered).
+          grantAccess(result.entitlement.days, 'jamb');
+        } else {
+          showInfoToast('Joined class!');
+        }
         renderDashModal();
       } catch (e) {
         showInfoToast(e.message || 'Could not join class');
@@ -1016,12 +1023,15 @@
   }
   function renderTeacherDash(data) {
     const body = document.getElementById('teacherDashBody');
+    const admin = loadPref(SK_CLASS_ADMIN);
+    const bundleHtml = renderBundleSection(data.bundle);
     if (!data.students.length) {
-      body.innerHTML = `<p class="jqc-sub">No students have joined <b>${escHtml(data.classCode)}</b> yet. Share the class code to get started.</p>`;
+      body.innerHTML = bundleHtml + `<p class="jqc-sub">No students have joined <b>${escHtml(data.classCode)}</b> yet. Share the class code to get started.</p>`;
+      wireBundleSection(data.classCode, admin?.adminSecret);
       return;
     }
     const sorted = [...data.students].sort((a, b) => (b.avgPct || 0) - (a.avgPct || 0));
-    body.innerHTML = `
+    body.innerHTML = bundleHtml + `
       <p class="jqc-sub">${escHtml(data.schoolName || 'Class')} · ${data.students.length} student${data.students.length === 1 ? '' : 's'}</p>
       <div class="jqc-pending-list">
         ${sorted.map(s => `
@@ -1035,6 +1045,122 @@
           </div>`).join('')}
       </div>
     `;
+    wireBundleSection(data.classCode, admin?.adminSecret);
+  }
+
+  /* ── School Bundle purchase/status — top of the teacher dashboard ── */
+  function renderBundleSection(bundle) {
+    if (bundle && bundle.active) {
+      const expDate = new Date(bundle.expiresAt).toLocaleDateString('en-NG');
+      const tierLabel = { standard: 'Standard', branded: 'Branded', premium: 'Premium' }[bundle.tier] || bundle.tier;
+      const nearExpiry = (bundle.expiresAt - Date.now()) < 30 * 24 * 60 * 60 * 1000;
+      return `
+        <div class="jqc-pending-row" style="flex-direction:column; align-items:stretch; border:1px solid rgba(245,166,35,.4); margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="jqc-score-name">${tierLabel} Bundle — Active</span>
+            <span class="jqc-pending-sub" style="margin:0;">Expires ${expDate}</span>
+          </div>
+          <p class="jqc-pending-sub">${bundle.seatsUsed} of ${bundle.tier === 'standard' ? bundle.seatLimit : 'unlimited'} seats used · students who join get ${bundle.tier === 'standard' ? 'access' : 'full Plus access'} automatically</p>
+          ${nearExpiry ? `<button class="jqc-btn jqc-secondary" id="bundleRenewBtn" style="margin-top:.5rem;">Renew Bundle</button>` : ''}
+        </div>
+        <div id="bundlePickerOut"></div>
+      `;
+    }
+    return `
+      <div class="jqc-pending-row" style="flex-direction:column; align-items:stretch; margin-bottom:1rem;">
+        <span class="jqc-score-name">No active school bundle</span>
+        <p class="jqc-pending-sub">Activate a bundle so students who join this class get access automatically — no individual payment needed.</p>
+        <button class="jqc-btn jqc-primary" id="bundleActivateBtn" style="margin-top:.5rem;">Activate School Bundle</button>
+        <div id="bundlePickerOut"></div>
+      </div>
+    `;
+  }
+
+  function wireBundleSection(classCode, adminSecret) {
+    const openPicker = () => renderBundlePicker(classCode, adminSecret);
+    document.getElementById('bundleActivateBtn')?.addEventListener('click', openPicker);
+    document.getElementById('bundleRenewBtn')?.addEventListener('click', openPicker);
+  }
+
+  function renderBundlePicker(classCode, adminSecret) {
+    const out = document.getElementById('bundlePickerOut');
+    if (!out) return;
+    out.innerHTML = `
+      <div style="margin-top:.75rem;">
+        <div class="dash-tabs" id="bundleTierTabs">
+          <button class="dash-tab active" data-tier="standard">Standard</button>
+          <button class="dash-tab" data-tier="branded">Branded</button>
+          <button class="dash-tab" data-tier="premium">Premium</button>
+        </div>
+        <div id="bundleTierBody"></div>
+      </div>
+    `;
+    let tier = 'standard';
+    const renderTierBody = () => {
+      const tb = document.getElementById('bundleTierBody');
+      if (tier === 'standard') {
+        tb.innerHTML = `
+          <p class="jqc-sub">₦2,000 per student/year · minimum 50 seats</p>
+          <div class="jqc-field"><input class="jqc-code-input" id="bundleSeats" type="number" min="50" value="50" style="text-transform:none; width:100%;"></div>
+          <p style="font-weight:700; margin:.5rem 0 .75rem;" id="bundlePriceOut">Total: ₦100,000</p>
+        `;
+        document.getElementById('bundleSeats').addEventListener('input', (e) => {
+          const seats = Math.max(50, parseInt(e.target.value) || 50);
+          document.getElementById('bundlePriceOut').textContent = `Total: ₦${(seats * 2000).toLocaleString('en-NG')}`;
+        });
+      } else if (tier === 'branded') {
+        tb.innerHTML = `<p class="jqc-sub" style="margin-bottom:.75rem;">Unlimited seats, branded experience — ₦500,000/year flat.</p>`;
+      } else {
+        tb.innerHTML = `<p class="jqc-sub" style="margin-bottom:.75rem;">Unlimited seats, full premium tier — ₦1,000,000/year flat.</p>`;
+      }
+      tb.innerHTML += `<button class="jqc-btn jqc-primary" id="bundlePayBtn" style="width:100%;">Pay & Activate →</button>`;
+      document.getElementById('bundlePayBtn').addEventListener('click', () => payForBundle(tier, classCode, adminSecret));
+    };
+    renderTierBody();
+    document.querySelectorAll('#bundleTierTabs .dash-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tier = btn.dataset.tier;
+        document.querySelectorAll('#bundleTierTabs .dash-tab').forEach(b => b.classList.toggle('active', b === btn));
+        renderTierBody();
+      });
+    });
+  }
+
+  async function payForBundle(tier, classCode, adminSecret) {
+    const seats = tier === 'standard' ? Math.max(50, parseInt(document.getElementById('bundleSeats')?.value) || 50) : null;
+    const amount = tier === 'standard' ? seats * 200000 : (tier === 'branded' ? 50000000 : 100000000);
+    const email = await getEmailViaModal();
+    if (!email) return;
+    const PAYSTACK_KEY = 'pk_live_5d12ee2a90900116dc222107e059a06214c085ff';
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_KEY, email, amount, currency: 'NGN',
+      ref: 'JAMB-BUNDLE-' + Date.now(),
+      metadata: { custom_fields: [
+        { display_name: 'Bundle', variable_name: 'bundle_tier', value: tier },
+        { display_name: 'Class Code', variable_name: 'class_code', value: classCode },
+      ]},
+      onClose() {},
+      callback(response) {
+        (async () => {
+          const btn = document.getElementById('bundlePayBtn');
+          if (btn) { btn.disabled = true; btn.textContent = 'Activating…'; }
+          try {
+            const result = await dashApi('activate_bundle', {
+              classCode, adminSecret, tier, seats, reference: response.reference,
+            });
+            if (result.error) {
+              alert('Payment received but activation failed: ' + result.error + '\nContact support with reference: ' + response.reference);
+              return;
+            }
+            alert('✅ Bundle activated! Students who join this class now get automatic access.');
+            openTeacherDashboard(classCode, adminSecret);
+          } catch (e) {
+            alert('Could not confirm activation. If you were charged, contact support with reference: ' + response.reference);
+          }
+        })();
+      },
+    });
+    handler.openIframe();
   }
   function renderSubjectBreakdown(bySubject) {
     const entries = Object.entries(bySubject || {});
