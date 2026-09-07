@@ -937,6 +937,9 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 .jdb-text { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); }
 .jdb-sub { font-size:.68rem; font-weight:600; color:rgba(11,31,58,.65); }
 .jdb-arrow { font-size:.8rem; font-weight:700; color:var(--navy,#0b1f3a); flex-shrink:0; }
+.jamb-games-banner { background: linear-gradient(135deg, #7c5cff, #a78bfa); }
+.jamb-games-banner .jdb-text, .jamb-games-banner .jdb-arrow { color: #1a1042; }
+.jamb-games-banner .jdb-sub { color: rgba(26,16,66,.65); }
 .dash-tabs { display:flex; gap:.4rem; margin-bottom:1.25rem; }
 .dash-tab { flex:1; font-size:.78rem; font-weight:700; padding:.5rem .3rem; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); cursor:pointer; }
 .dash-tab.active { background:rgba(245,166,35,.15); border-color:rgba(245,166,35,.5); color:var(--amber,#f5a623); }
@@ -1640,4 +1643,87 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 @keyframes gentlePopIn {
   from { opacity:0; transform:translateY(-6px); }
   to   { opacity:1; transform:translateY(0); }
+}
+
+/* ════════ GAMES ════════ */
+.game-type-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: rgba(255,255,255,.05);
+  border: 1.5px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  margin-bottom: .75rem;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.game-type-card:hover { border-color: var(--amber,#f5a623); background: rgba(245,166,35,.08); }
+.gtc-icon { font-size: 1.8rem; flex-shrink: 0; }
+.gtc-body { flex: 1; min-width: 0; }
+.gtc-title { font-weight: 700; font-size: .92rem; color: white; }
+.gtc-sub { font-size: .76rem; color: rgba(255,255,255,.5); margin-top: .15rem; }
+
+.game-subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; max-height: 240px; overflow-y: auto; margin-top: .75rem; }
+.game-subject-btn {
+  font-size: .8rem; font-weight: 600; color: rgba(255,255,255,.8);
+  background: rgba(255,255,255,.05); border: 1.5px solid rgba(255,255,255,.12);
+  border-radius: 8px; padding: .55rem .6rem; cursor: pointer; text-align: left;
+}
+.game-subject-btn:hover { border-color: var(--amber,#f5a623); background: rgba(245,166,35,.08); }
+.game-subject-count { display: block; font-size: .68rem; color: rgba(255,255,255,.4); margin-top: .15rem; }
+
+.game-timer-bar { height: 6px; background: rgba(255,255,255,.1); border-radius: 99px; overflow: hidden; margin-bottom: 1rem; }
+.game-timer-fill { height: 100%; background: var(--amber,#f5a623); border-radius: 99px; transition: width .1s linear, background .2s; }
+.game-timer-fill.urgent { background: #e05252; }
+.game-progress { font-size: .78rem; color: rgba(255,255,255,.5); margin-bottom: .5rem; display: flex; justify-content: space-between; }
+.game-score-live { font-weight: 700; color: white; }
+.game-question { font-size: 1rem; font-weight: 600; color: white; margin-bottom: 1.1rem; line-height: 1.4; }
+
+.game-option-btn {
+  display: block; width: 100%; text-align: left; font-size: .88rem;
+  color: rgba(255,255,255,.85); background: rgba(255,255,255,.05);
+  border: 1.5px solid rgba(255,255,255,.12); border-radius: 10px;
+  padding: .75rem .9rem; margin-bottom: .55rem; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.game-option-btn:hover:not(:disabled) { border-color: var(--amber,#f5a623); background: rgba(245,166,35,.08); }
+.game-option-btn.correct { background: rgba(34,197,94,.15); border-color: #22c55e; color: #4ade80; font-weight: 700; }
+.game-option-btn.wrong { background: rgba(220,60,60,.15); border-color: #e05252; color: #ff8a8a; font-weight: 700; }
+.game-option-btn:disabled { cursor: default; opacity: .8; }
+
+.tf-statement {
+  font-size: .95rem; font-weight: 600; color: white;
+  background: rgba(255,255,255,.05); border: 1.5px solid rgba(255,255,255,.12);
+  border-radius: 10px; padding: 1.3rem 1.1rem; margin-bottom: 1.3rem;
+  text-align: center; line-height: 1.5; min-height: 80px;
+  display: flex; align-items: center; justify-content: center;
+}
+.tf-statement.correct { background: rgba(34,197,94,.15); border-color: #22c55e; }
+.tf-statement.wrong { background: rgba(220,60,60,.15); border-color: #e05252; }
+.tf-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+.tf-btn { font-weight: 700; font-size: 1rem; padding: 1rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05); cursor: pointer; transition: transform .15s; }
+.tf-btn.true-btn { color: #4ade80; }
+.tf-btn.false-btn { color: #ff8a8a; }
+.tf-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.tf-btn:disabled { opacity: .5; cursor: default; }
+
+.memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .45rem; }
+.memory-card {
+  aspect-ratio: 1; border-radius: 8px;
+  background: rgba(245,166,35,.12); border: 1.5px solid rgba(245,166,35,.3); color: var(--amber,#f5a623);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: .66rem; font-weight: 600; padding: .35rem; cursor: pointer;
+  transition: transform .15s, background .15s; overflow: hidden; line-height: 1.2;
+}
+.memory-card.flipped { background: rgba(255,255,255,.08); color: white; border-color: rgba(255,255,255,.3); }
+.memory-card.matched { background: rgba(34,197,94,.15); color: #4ade80; border-color: #22c55e; cursor: default; }
+.memory-card.hidden-face::before { content: "?"; font-size: 1.2rem; }
+.memory-card.flipped .memory-card-back, .memory-card.matched .memory-card-back { display: none; }
+.memory-stats { display: flex; justify-content: space-between; font-size: .8rem; color: rgba(255,255,255,.5); margin-bottom: .7rem; }
+
+.game-result-score { font-size: 2.6rem; font-weight: 700; color: var(--amber,#f5a623); margin: .5rem 0; text-align: center; }
+.game-result-label { font-size: .82rem; color: rgba(255,255,255,.5); margin-bottom: 1.3rem; text-align: center; }
+.game-result-actions { display: flex; flex-direction: column; gap: .55rem; }
+
+@media (max-width: 480px) {
+  .memory-grid { grid-template-columns: repeat(3, 1fr); }
 }

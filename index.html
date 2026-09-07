@@ -72,6 +72,16 @@
               </div>
               <span class="jdb-arrow">→</span>
             </div>
+
+            <!-- Games — same treatment, stacked below -->
+            <div class="jamb-dash-banner jamb-games-banner" id="jambGamesBanner">
+              <span class="jdb-icon">🎮</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Games</span>
+                <span class="jdb-sub">Speed Round · True/False · Memory Match</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
           </div>
         </div>
 
@@ -569,6 +579,37 @@
         <div class="jqc-icon">👨‍👩‍👧</div>
         <h2 class="jqc-title">Your Child's Progress</h2>
         <div id="parentDashBody" style="text-align:left; max-height:60vh; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- GAMES HUB -->
+    <div id="jambGamesModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambGamesClose">✕</button>
+        <div class="jqc-icon">🎮</div>
+        <h2 class="jqc-title">Games</h2>
+        <div id="jambGamesBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <!-- SPEED ROUND -->
+    <div id="speedRoundModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:440px; text-align:left;">
+        <div id="speedRoundBody"></div>
+      </div>
+    </div>
+
+    <!-- TRUE OR FALSE -->
+    <div id="trueFalseModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:440px; text-align:left;">
+        <div id="trueFalseBody"></div>
+      </div>
+    </div>
+
+    <!-- MEMORY MATCH -->
+    <div id="memoryMatchModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:520px; text-align:left;">
+        <div id="memoryMatchBody"></div>
       </div>
     </div>
 

@@ -813,7 +813,7 @@
   function openDashModal(tab) {
     if (tab) _dashTab = tab;
     if (!_dashTab) {
-      _dashTab = getClassMembership() ? 'student' : (loadPref(SK_CLASS_ADMIN) ? 'teacher' : 'student');
+      _dashTab = getClassMembership() ? 'student' : (loadPref(SK_CLASS_ADMIN) ? 'teacher' : 'teacher');
     }
     document.getElementById('jambDashModal')?.classList.remove('hidden');
     renderDashModal();
@@ -838,6 +838,8 @@
     });
     document.getElementById('jambDashBanner')?.addEventListener('click', () => openDashModal());
     document.getElementById('jambDashClose')?.addEventListener('click', closeDashModal);
+    document.getElementById('jambGamesBanner')?.addEventListener('click', openGamesHub);
+    document.getElementById('jambGamesClose')?.addEventListener('click', closeGamesHub);
     document.getElementById('teacherDashClose')?.addEventListener('click', () => document.getElementById('teacherDashModal')?.classList.add('hidden'));
     document.getElementById('parentDashClose')?.addEventListener('click', () => document.getElementById('parentDashModal')?.classList.add('hidden'));
   });
@@ -928,21 +930,19 @@
     }
 
     body.innerHTML = `
-      <p class="jqc-sub">Already created a class? Log back in with your class code and admin PIN.</p>
+      <p class="jqc-sub" style="margin-bottom:.5rem;">Sign up your school — free to get started, no card required.</p>
+      <div class="jqc-form">
+        <div class="jqc-field"><input class="jqc-code-input" id="newSchoolName" placeholder="School / class name" style="text-transform:none;"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="newAdminPin" type="tel" placeholder="Set an admin PIN (4-6 digits)" maxlength="6" style="text-transform:none;"></div>
+      </div>
+      <button class="jqc-btn jqc-primary" id="createClassBtn" style="width:100%;margin-top:1rem;margin-bottom:1.25rem;">Create Class</button>
+      <div id="createClassForm"></div>
+      <p class="jqc-sub" style="margin-bottom:.5rem;">Already have an account?</p>
       <div class="jqc-form">
         <div class="jqc-field"><input class="jqc-code-input" id="loginClassCode" placeholder="Class code" style="text-transform:uppercase;"></div>
         <div class="jqc-field"><input class="jqc-code-input" id="loginAdminPin" type="tel" placeholder="Admin PIN" maxlength="6" style="text-transform:none;"></div>
       </div>
-      <button class="jqc-btn jqc-primary" id="teacherLoginBtn" style="width:100%;margin-top:1rem;margin-bottom:1.25rem;">Log In</button>
-      <p class="jqc-sub" style="margin-bottom:.5rem;">New here? Create a class and get a code to share with your students.</p>
-      <button class="jqc-btn jqc-secondary" id="showCreateClassBtn" style="width:100%;">Create a Class</button>
-      <div id="createClassForm" class="hidden" style="margin-top:1rem;">
-        <div class="jqc-form">
-          <div class="jqc-field"><input class="jqc-code-input" id="newSchoolName" placeholder="School / class name" style="text-transform:none;"></div>
-          <div class="jqc-field"><input class="jqc-code-input" id="newAdminPin" type="tel" placeholder="Admin PIN (4-6 digits, for future logins)" maxlength="6" style="text-transform:none;"></div>
-        </div>
-        <button class="jqc-btn jqc-primary" id="createClassBtn" style="width:100%;margin-top:1rem;">Create Class</button>
-      </div>
+      <button class="jqc-btn jqc-secondary" id="teacherLoginBtn" style="width:100%;margin-top:1rem;">Log In</button>
     `;
 
     document.getElementById('teacherLoginBtn').addEventListener('click', async () => {
@@ -960,10 +960,6 @@
         showInfoToast(e.message || 'Could not log in — check your class code and PIN.');
         btn.disabled = false; btn.textContent = 'Log In';
       }
-    });
-
-    document.getElementById('showCreateClassBtn').addEventListener('click', () => {
-      document.getElementById('createClassForm').classList.toggle('hidden');
     });
 
     document.getElementById('createClassBtn').addEventListener('click', async () => {
@@ -1196,6 +1192,344 @@
           </div>`).join('') || '<p class="jqc-sub">No sessions yet.</p>'}
       </div>
     `;
+  }
+
+
+  /* ════════ GAMES ════════
+     Three lightweight game modes replaying the SAME existing question
+     bank through a faster-paced UI loop — no new content needed. Ported
+     from My Exams App's version, adapted to JAMB's modal-based UI (this
+     app has no full-screen navigation for auxiliary features, only
+     home/quiz/result) and its flat QUESTION_BANK[subject] array (no
+     .objective/.theory split, no per-question id — neither is needed
+     here). Deliberately NOT reported to class dashboards — same as the
+     My Exams App version, these are for-fun practice, kept separate from
+     tracked practice/exam/challenge sessions. */
+  let G = null;
+
+  function gameQuestionPool(subjectKey) {
+    const arr = QUESTION_BANK[subjectKey];
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2);
+  }
+
+  // Memory Match needs short text to fit on a card — a subject can pass
+  // the general question count but still come up short here, so both the
+  // picker's eligibility check and the actual game must use this exact
+  // same filter, not just gameQuestionPool.
+  function memoryEligiblePool(subjectKey) {
+    return gameQuestionPool(subjectKey).filter(q => q.question.length <= 70 && q.options[q.answer].length <= 22);
+  }
+
+  function openGamesHub() {
+    document.getElementById('jambGamesModal')?.classList.remove('hidden');
+    renderGamesHub();
+  }
+  function closeGamesHub() {
+    document.getElementById('jambGamesModal')?.classList.add('hidden');
+  }
+
+  function renderGamesHub() {
+    const body = document.getElementById('jambGamesBody');
+    body.innerHTML = `
+      <div class="game-type-card" data-game="speed">
+        <span class="gtc-icon">⚡</span>
+        <div class="gtc-body"><div class="gtc-title">Speed Round</div><div class="gtc-sub">12 questions, 8 seconds each</div></div>
+      </div>
+      <div class="game-type-card" data-game="tf">
+        <span class="gtc-icon">✅</span>
+        <div class="gtc-body"><div class="gtc-title">True or False</div><div class="gtc-sub">Quick-fire judgment calls, 6 seconds each</div></div>
+      </div>
+      <div class="game-type-card" data-game="memory">
+        <span class="gtc-icon">🧠</span>
+        <div class="gtc-body"><div class="gtc-title">Memory Match</div><div class="gtc-sub">Match each question to its correct answer</div></div>
+      </div>
+      <div id="gamesSubjectPicker"></div>
+    `;
+    document.querySelectorAll('#jambGamesBody .game-type-card').forEach(card => {
+      card.addEventListener('click', () => renderGamesSubjectPicker(card.dataset.game));
+    });
+  }
+
+  function renderGamesSubjectPicker(gameType) {
+    const minNeeded = gameType === 'memory' ? 8 : 12;
+    const out = document.getElementById('gamesSubjectPicker');
+    const options = Object.keys(QUESTION_BANK)
+      .map(key => ({ key, count: (gameType === 'memory' ? memoryEligiblePool(key) : gameQuestionPool(key)).length }))
+      .filter(s => s.count >= minNeeded);
+    if (!options.length) {
+      out.innerHTML = `<p class="jqc-sub" style="margin-top:1rem;">Not enough questions yet for this game.</p>`;
+      return;
+    }
+    out.innerHTML = `
+      <p style="font-weight:700; margin:1rem 0 .25rem; color:white;">Pick a subject</p>
+      <div class="game-subject-grid">
+        ${options.map(s => `
+          <button class="game-subject-btn" data-subject="${s.key}">
+            ${fmt(s.key)}
+            <span class="game-subject-count">${s.count} questions</span>
+          </button>`).join('')}
+      </div>
+    `;
+    document.querySelectorAll('#gamesSubjectPicker .game-subject-btn').forEach(btn => {
+      btn.addEventListener('click', () => startGame(gameType, btn.dataset.subject));
+    });
+  }
+
+  function startGame(gameType, subjectKey) {
+    closeGamesHub();
+    if (gameType === 'speed') startSpeedRound(subjectKey);
+    else if (gameType === 'tf') startTrueFalse(subjectKey);
+    else if (gameType === 'memory') startMemoryMatch(subjectKey);
+  }
+
+  function shuffleArr(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function exitGameConfirm(reopenHub) {
+    if (G && G.active && !confirm('Leave this game? Your progress will be lost.')) return;
+    if (G) G.active = false;
+    clearGameTimer();
+    ['speedRoundModal', 'trueFalseModal', 'memoryMatchModal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    if (reopenHub) openGamesHub();
+  }
+
+  function clearGameTimer() {
+    if (G && G.timerHandle) { clearInterval(G.timerHandle); G.timerHandle = null; }
+  }
+
+  function runGameTimer(seconds, fillEl, onExpire) {
+    clearGameTimer();
+    const start = Date.now();
+    const durationMs = seconds * 1000;
+    G.timerHandle = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.max(0, 100 - (elapsed / durationMs) * 100);
+      if (fillEl) {
+        fillEl.style.width = pct + '%';
+        fillEl.classList.toggle('urgent', pct < 30);
+      }
+      if (elapsed >= durationMs) {
+        clearGameTimer();
+        onExpire();
+      }
+    }, 100);
+  }
+
+  /* ── Speed Round ── */
+  function startSpeedRound(subjectKey) {
+    const pool = shuffleArr(gameQuestionPool(subjectKey)).slice(0, 12);
+    G = { type: 'speed', subject: subjectKey, questions: pool, idx: 0, score: 0, active: true, timerHandle: null };
+    document.getElementById('speedRoundModal')?.classList.remove('hidden');
+    renderSpeedRoundQ();
+  }
+
+  function renderSpeedRoundQ() {
+    const body = document.getElementById('speedRoundBody');
+    const q = G.questions[G.idx];
+    const total = G.questions.length;
+    body.innerHTML = `
+      <button class="jqc-ghost" id="speedExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="game-progress"><span>⚡ Speed Round · Q${G.idx + 1}/${total}</span><span class="game-score-live">Score: ${G.score}</span></div>
+      <div class="game-timer-bar"><div class="game-timer-fill" id="speedTimerFill" style="width:100%;"></div></div>
+      <p class="game-question">${escHtml(q.question)}</p>
+      <div id="speedOptions">
+        ${q.options.map((opt, i) => `<button class="game-option-btn" data-i="${i}">${escHtml(opt)}</button>`).join('')}
+      </div>
+    `;
+    document.getElementById('speedExitBtn').addEventListener('click', () => exitGameConfirm(true));
+    document.querySelectorAll('#speedOptions .game-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => answerSpeedRound(parseInt(btn.dataset.i)));
+    });
+    runGameTimer(8, document.getElementById('speedTimerFill'), () => answerSpeedRound(null));
+  }
+
+  function answerSpeedRound(choiceIdx) {
+    if (!G || !G.active) return;
+    clearGameTimer();
+    const q = G.questions[G.idx];
+    if (choiceIdx === q.answer) G.score++;
+    document.querySelectorAll('#speedOptions .game-option-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.answer) btn.classList.add('correct');
+      else if (i === choiceIdx) btn.classList.add('wrong');
+    });
+    setTimeout(() => {
+      G.idx++;
+      if (G.idx >= G.questions.length) finishGame('speedRoundModal');
+      else renderSpeedRoundQ();
+    }, 600);
+  }
+
+  /* ── True or False ── */
+  function startTrueFalse(subjectKey) {
+    const pool = shuffleArr(gameQuestionPool(subjectKey)).slice(0, 12);
+    const rounds = pool.map(q => {
+      const showCorrect = Math.random() < 0.5;
+      let statementIdx;
+      if (showCorrect) statementIdx = q.answer;
+      else {
+        const wrongIndices = q.options.map((_, i) => i).filter(i => i !== q.answer);
+        statementIdx = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+      }
+      return { q, statementIdx, isTrue: statementIdx === q.answer };
+    });
+    G = { type: 'tf', subject: subjectKey, rounds, idx: 0, score: 0, active: true, timerHandle: null };
+    document.getElementById('trueFalseModal')?.classList.remove('hidden');
+    renderTrueFalseQ();
+  }
+
+  function renderTrueFalseQ() {
+    const body = document.getElementById('trueFalseBody');
+    const r = G.rounds[G.idx];
+    const total = G.rounds.length;
+    body.innerHTML = `
+      <button class="jqc-ghost" id="tfExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="game-progress"><span>✅ True or False · Q${G.idx + 1}/${total}</span><span class="game-score-live">Score: ${G.score}</span></div>
+      <div class="game-timer-bar"><div class="game-timer-fill" id="tfTimerFill" style="width:100%;"></div></div>
+      <div class="tf-statement" id="tfStatement">${escHtml(r.q.question)} — <b>${escHtml(r.q.options[r.statementIdx])}</b></div>
+      <div class="tf-btn-row">
+        <button class="tf-btn true-btn" id="tfTrueBtn">TRUE</button>
+        <button class="tf-btn false-btn" id="tfFalseBtn">FALSE</button>
+      </div>
+    `;
+    document.getElementById('tfExitBtn').addEventListener('click', () => exitGameConfirm(true));
+    document.getElementById('tfTrueBtn').addEventListener('click', () => answerTrueFalse(true));
+    document.getElementById('tfFalseBtn').addEventListener('click', () => answerTrueFalse(false));
+    runGameTimer(6, document.getElementById('tfTimerFill'), () => answerTrueFalse(null));
+  }
+
+  function answerTrueFalse(choice) {
+    if (!G || !G.active) return;
+    clearGameTimer();
+    const r = G.rounds[G.idx];
+    if (choice === r.isTrue) G.score++;
+    document.getElementById('tfTrueBtn').disabled = true;
+    document.getElementById('tfFalseBtn').disabled = true;
+    document.getElementById('tfStatement').classList.add(r.isTrue ? 'correct' : 'wrong');
+    setTimeout(() => {
+      G.idx++;
+      if (G.idx >= G.rounds.length) finishGame('trueFalseModal');
+      else renderTrueFalseQ();
+    }, 600);
+  }
+
+  /* ── Memory Match ── */
+  function startMemoryMatch(subjectKey) {
+    const pool = memoryEligiblePool(subjectKey);
+    const shuffled = shuffleArr(pool).slice(0, 8);
+    const cards = [];
+    shuffled.forEach((q, pairIdx) => {
+      cards.push({ pairIdx, side: 'q', text: q.question, matched: false });
+      cards.push({ pairIdx, side: 'a', text: q.options[q.answer], matched: false });
+    });
+    G = {
+      type: 'memory', subject: subjectKey, cards: shuffleArr(cards),
+      flipped: [], moves: 0, matchedCount: 0, totalPairs: shuffled.length,
+      active: true, startTime: Date.now(),
+    };
+    document.getElementById('memoryMatchModal')?.classList.remove('hidden');
+    renderMemoryMatch();
+  }
+
+  function renderMemoryMatch() {
+    const body = document.getElementById('memoryMatchBody');
+    body.innerHTML = `
+      <button class="jqc-ghost" id="memoryExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="memory-stats"><span>🧠 Memory Match</span><span>Moves: ${G.moves} · Pairs: ${G.matchedCount}/${G.totalPairs}</span></div>
+      <div class="memory-grid" id="memoryGrid">
+        ${G.cards.map((c, i) => `<div class="memory-card hidden-face" data-i="${i}"><span class="memory-card-back"></span></div>`).join('')}
+      </div>
+    `;
+    document.getElementById('memoryExitBtn').addEventListener('click', () => exitGameConfirm(true));
+    document.querySelectorAll('#memoryGrid .memory-card').forEach(el => {
+      el.addEventListener('click', () => flipMemoryCard(parseInt(el.dataset.i)));
+    });
+  }
+
+  function flipMemoryCard(i) {
+    if (!G || !G.active) return;
+    const card = G.cards[i];
+    if (card.matched || G.flipped.includes(i) || G.flipped.length >= 2) return;
+    const el = document.querySelector(`#memoryGrid .memory-card[data-i="${i}"]`);
+    el.classList.remove('hidden-face');
+    el.classList.add('flipped');
+    el.textContent = card.text;
+    G.flipped.push(i);
+    if (G.flipped.length === 2) {
+      G.moves++;
+      const [i1, i2] = G.flipped;
+      const c1 = G.cards[i1], c2 = G.cards[i2];
+      if (c1.pairIdx === c2.pairIdx && c1.side !== c2.side) {
+        c1.matched = true; c2.matched = true;
+        G.matchedCount++;
+        [i1, i2].forEach(idx => {
+          const cel = document.querySelector(`#memoryGrid .memory-card[data-i="${idx}"]`);
+          cel.classList.remove('flipped');
+          cel.classList.add('matched');
+        });
+        G.flipped = [];
+        const statsEl = document.querySelector('.memory-stats span:last-child');
+        if (statsEl) statsEl.textContent = `Moves: ${G.moves} · Pairs: ${G.matchedCount}/${G.totalPairs}`;
+        if (G.matchedCount >= G.totalPairs) setTimeout(() => finishGame('memoryMatchModal'), 500);
+      } else {
+        setTimeout(() => {
+          [i1, i2].forEach(idx => {
+            const cel = document.querySelector(`#memoryGrid .memory-card[data-i="${idx}"]`);
+            if (cel) { cel.classList.remove('flipped'); cel.classList.add('hidden-face'); cel.textContent = ''; }
+          });
+          G.flipped = [];
+          const statsEl = document.querySelector('.memory-stats span:last-child');
+          if (statsEl) statsEl.textContent = `Moves: ${G.moves} · Pairs: ${G.matchedCount}/${G.totalPairs}`;
+        }, 800);
+      }
+    }
+  }
+
+  /* ── Shared results — rendered inline into whichever modal was playing ── */
+  function finishGame(modalId) {
+    if (!G) return;
+    G.active = false;
+    clearGameTimer();
+    const bodyId = modalId === 'speedRoundModal' ? 'speedRoundBody' : modalId === 'trueFalseModal' ? 'trueFalseBody' : 'memoryMatchBody';
+    const body = document.getElementById(bodyId);
+    const subjName = fmt(G.subject);
+    let scoreLine, labelLine;
+    if (G.type === 'speed') {
+      scoreLine = `${G.score}/${G.questions.length}`;
+      labelLine = `Speed Round · ${escHtml(subjName)}`;
+    } else if (G.type === 'tf') {
+      scoreLine = `${G.score}/${G.rounds.length}`;
+      labelLine = `True or False · ${escHtml(subjName)}`;
+    } else {
+      const seconds = Math.round((Date.now() - G.startTime) / 1000);
+      scoreLine = `${G.moves} moves`;
+      labelLine = `Memory Match · ${escHtml(subjName)} · ${seconds}s`;
+    }
+    body.innerHTML = `
+      <div style="font-size:2.2rem; text-align:center;">🎮</div>
+      <div class="game-result-score">${scoreLine}</div>
+      <div class="game-result-label">${labelLine}</div>
+      <div class="game-result-actions">
+        <button class="jqc-btn jqc-primary" id="gamePlayAgainBtn">Play Again</button>
+        <button class="jqc-btn jqc-secondary" id="gameChangeBtn">Change Game</button>
+        <button class="jqc-ghost" id="gameCloseBtn" style="text-align:center;">Close</button>
+      </div>
+    `;
+    document.getElementById('gamePlayAgainBtn').addEventListener('click', () => startGame(G.type, G.subject));
+    document.getElementById('gameChangeBtn').addEventListener('click', () => {
+      document.getElementById(modalId)?.classList.add('hidden');
+      openGamesHub();
+    });
+    document.getElementById('gameCloseBtn').addEventListener('click', () => {
+      document.getElementById(modalId)?.classList.add('hidden');
+    });
   }
 
 
