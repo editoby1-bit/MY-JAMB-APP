@@ -1708,16 +1708,25 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 
 .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .45rem; }
 .memory-card {
-  aspect-ratio: 1; border-radius: 8px;
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* box size comes purely from width — content can never affect it */
+  border-radius: 8px;
+  cursor: pointer;
+}
+.memory-card-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
   background: rgba(245,166,35,.12); border: 1.5px solid rgba(245,166,35,.3); color: var(--amber,#f5a623);
   display: flex; align-items: center; justify-content: center; text-align: center;
-  font-size: .66rem; font-weight: 600; padding: .35rem; cursor: pointer;
-  transition: transform .15s, background .15s; overflow: hidden; line-height: 1.2;
+  font-size: .66rem; font-weight: 600; padding: .35rem;
+  overflow: hidden; line-height: 1.2;
+  transition: background .15s;
 }
-.memory-card.flipped { background: rgba(255,255,255,.08); color: white; border-color: rgba(255,255,255,.3); }
-.memory-card.matched { background: rgba(34,197,94,.15); color: #4ade80; border-color: #22c55e; cursor: default; }
-.memory-card.hidden-face::before { content: "?"; font-size: 1.2rem; }
-.memory-card.flipped .memory-card-back, .memory-card.matched .memory-card-back { display: none; }
+.memory-card.flipped .memory-card-inner { background: rgba(255,255,255,.08); color: white; border-color: rgba(255,255,255,.3); }
+.memory-card.matched .memory-card-inner { background: rgba(34,197,94,.15); color: #4ade80; border-color: #22c55e; cursor: default; }
 .memory-stats { display: flex; justify-content: space-between; font-size: .8rem; color: rgba(255,255,255,.5); margin-bottom: .7rem; }
 
 .game-result-score { font-size: 2.6rem; font-weight: 700; color: var(--amber,#f5a623); margin: .5rem 0; text-align: center; }
