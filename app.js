@@ -840,6 +840,7 @@
     document.getElementById('jambDashClose')?.addEventListener('click', closeDashModal);
     document.getElementById('jambGamesBanner')?.addEventListener('click', openGamesHub);
     document.getElementById('jambGamesClose')?.addEventListener('click', closeGamesHub);
+    document.getElementById('gameHistoryClose')?.addEventListener('click', closeGameHistory);
     document.getElementById('teacherDashClose')?.addEventListener('click', () => document.getElementById('teacherDashModal')?.classList.add('hidden'));
     document.getElementById('parentDashClose')?.addEventListener('click', () => document.getElementById('parentDashModal')?.classList.add('hidden'));
   });
@@ -1244,10 +1245,27 @@
         <span class="gtc-icon">🧠</span>
         <div class="gtc-body"><div class="gtc-title">Memory Match</div><div class="gtc-sub">Match each question to its correct answer</div></div>
       </div>
+      <div class="game-type-card" data-game="sequence">
+        <span class="gtc-icon">🔢</span>
+        <div class="gtc-body"><div class="gtc-title">Sequence</div><div class="gtc-sub">60 seconds — spot the pattern, pick what comes next</div></div>
+      </div>
+      <div class="game-type-card" data-game="equation">
+        <span class="gtc-icon">🧩</span>
+        <div class="gtc-body"><div class="gtc-title">Equation Builder</div><div class="gtc-sub">60 seconds — solve for x, watch for common-mistake decoys</div></div>
+      </div>
+      <div class="game-type-card" data-game="recent">
+        <span class="gtc-icon">🕹</span>
+        <div class="gtc-body"><div class="gtc-title">Recent Games</div><div class="gtc-sub">Your last 5 games on this device</div></div>
+      </div>
       <div id="gamesSubjectPicker"></div>
     `;
     document.querySelectorAll('#jambGamesBody .game-type-card').forEach(card => {
-      card.addEventListener('click', () => renderGamesSubjectPicker(card.dataset.game));
+      card.addEventListener('click', () => {
+        const g = card.dataset.game;
+        if (g === 'sequence' || g === 'equation') startMathGame(g);
+        else if (g === 'recent') openGameHistory();
+        else renderGamesSubjectPicker(g);
+      });
     });
   }
 
@@ -1296,7 +1314,7 @@
     if (G && G.active && !confirm('Leave this game? Your progress will be lost.')) return;
     if (G) G.active = false;
     clearGameTimer();
-    ['speedRoundModal', 'trueFalseModal', 'memoryMatchModal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    ['speedRoundModal', 'trueFalseModal', 'memoryMatchModal', 'mathGameModal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
     if (reopenHub) openGamesHub();
   }
 
@@ -1492,26 +1510,224 @@
     }
   }
 
+  /* ── Sequence & Equation Builder (procedural — no subject bank needed) ── */
+  function generateSequenceItem(usedQuestions) {
+    const types = ['arithmetic', 'geometric', 'squares', 'fibonacci'];
+    let seq, answer, questionText;
+    let attempts = 0;
+    do {
+      attempts++;
+      const type = types[Math.floor(Math.random() * types.length)];
+      if (type === 'arithmetic') {
+        const start = 1 + Math.floor(Math.random() * 20);
+        const step = 2 + Math.floor(Math.random() * 8);
+        seq = [0, 1, 2, 3, 4].map(i => start + i * step);
+      } else if (type === 'geometric') {
+        const start = 1 + Math.floor(Math.random() * 5);
+        const ratio = Math.random() < 0.5 ? 2 : 3;
+        seq = [0, 1, 2, 3, 4].map(i => start * Math.pow(ratio, i));
+      } else if (type === 'squares') {
+        const startN = 1 + Math.floor(Math.random() * 6);
+        seq = [0, 1, 2, 3, 4].map(i => Math.pow(startN + i, 2));
+      } else {
+        let a = 1 + Math.floor(Math.random() * 5), b = 1 + Math.floor(Math.random() * 5);
+        seq = [a, b];
+        for (let i = 2; i < 5; i++) seq.push(seq[i - 1] + seq[i - 2]);
+      }
+      answer = seq[4];
+      questionText = seq.slice(0, 4).join(', ') + ', ?';
+    } while (usedQuestions.has(questionText) && attempts < 10);
+    usedQuestions.add(questionText);
+
+    const distractors = new Set();
+    let guardCount = 0;
+    while (distractors.size < 3 && guardCount < 30) {
+      guardCount++;
+      const magnitude = Math.max(2, Math.round(Math.abs(answer) * 0.2)) || 3;
+      const delta = (Math.floor(Math.random() * magnitude * 2) - magnitude) || (Math.random() < 0.5 ? 1 : -1);
+      const wrong = answer + delta;
+      if (wrong !== answer && wrong > 0 && !distractors.has(wrong)) distractors.add(wrong);
+    }
+    let fallback = answer + 1;
+    while (distractors.size < 3) { if (fallback !== answer && !distractors.has(fallback)) distractors.add(fallback); fallback++; }
+
+    const options = shuffleArr([answer, ...Array.from(distractors)]);
+    return { id: 'seq-' + questionText, question: questionText, options: options.map(String), answer: options.indexOf(answer) };
+  }
+
+  function generateEquationItem(usedQuestions) {
+    let a, b, x, questionText, answer;
+    let attempts = 0;
+    do {
+      attempts++;
+      const form = Math.floor(Math.random() * 3);
+      x = 1 + Math.floor(Math.random() * 12);
+      if (form === 0) { // ax + b = c
+        a = 2 + Math.floor(Math.random() * 9);
+        b = Math.floor(Math.random() * 20) - 10;
+        const c = a * x + b;
+        questionText = `${a}x ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)} = ${c}`;
+      } else if (form === 1) { // ax - b = c
+        a = 2 + Math.floor(Math.random() * 9);
+        b = 1 + Math.floor(Math.random() * 15);
+        const c = a * x - b;
+        questionText = `${a}x - ${b} = ${c}`;
+      } else { // x/a + b = c
+        a = 2 + Math.floor(Math.random() * 6);
+        x = a * (1 + Math.floor(Math.random() * 10));
+        b = Math.floor(Math.random() * 10) - 5;
+        const c = x / a + b;
+        questionText = `x/${a} ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)} = ${c}`;
+      }
+      answer = x;
+    } while (usedQuestions.has(questionText) && attempts < 10);
+    usedQuestions.add(questionText);
+
+    const decoySet = new Set([answer + 1, answer - 1, -answer, answer + (a || 2)].filter(v => v !== answer && v > -50));
+    let fallback = answer + 2;
+    while (decoySet.size < 3) { if (fallback !== answer && !decoySet.has(fallback)) decoySet.add(fallback); fallback++; }
+    const options = shuffleArr([answer, ...Array.from(decoySet).slice(0, 3)]);
+    return { id: 'eq-' + questionText, question: `Solve: ${questionText}`, options: options.map(String), answer: options.indexOf(answer) };
+  }
+
+  function startMathGame(kind) {
+    closeGamesHub();
+    G = { type: kind, subject: null, usedQuestions: new Set(), queue: [], idx: 0, score: 0, streak: 0, bestStreak: 0, correct: 0, attempted: 0, active: true, timerHandle: null };
+    document.getElementById('mathGameModal')?.classList.remove('hidden');
+    renderMathGameShell();
+    renderMathGameQ();
+    runGameTimer(60, document.getElementById('mathGameTimerFill'), () => { if (G && G.active) finishGame('mathGameModal'); });
+  }
+
+  function renderMathGameShell() {
+    const body = document.getElementById('mathGameBody');
+    body.innerHTML = `
+      <button class="jqc-ghost" id="mathGameExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="game-progress"><span id="mathGameTitle"></span><span class="game-score-live" id="mathGameScoreLive">Score: 0</span></div>
+      <div class="game-timer-bar"><div class="game-timer-fill" id="mathGameTimerFill" style="width:100%;"></div></div>
+      <div id="mathGameQArea"></div>
+    `;
+    document.getElementById('mathGameExitBtn').addEventListener('click', () => exitGameConfirm(true));
+  }
+
+  function renderMathGameQ() {
+    if (G.idx >= G.queue.length) {
+      const gen = G.type === 'sequence' ? generateSequenceItem : generateEquationItem;
+      G.queue.push(gen(G.usedQuestions));
+    }
+    const q = G.queue[G.idx];
+    const titleBase = G.type === 'sequence' ? '🔢 Sequence' : '🧩 Equation Builder';
+    document.getElementById('mathGameTitle').textContent = titleBase + (G.streak >= 3 ? ` · 🔥 ${G.streak} streak` : '');
+    document.getElementById('mathGameScoreLive').textContent = `Score: ${G.score}`;
+    const area = document.getElementById('mathGameQArea');
+    area.innerHTML = `
+      <p class="game-question">${escHtml(q.question)}</p>
+      <div id="mathGameOptions">
+        ${q.options.map((opt, i) => `<button class="game-option-btn" data-i="${i}">${escHtml(opt)}</button>`).join('')}
+      </div>
+    `;
+    document.querySelectorAll('#mathGameOptions .game-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => answerMathGame(parseInt(btn.dataset.i)));
+    });
+  }
+
+  function answerMathGame(choiceIdx) {
+    if (!G || !G.active) return;
+    const q = G.queue[G.idx];
+    const correct = choiceIdx === q.answer;
+    G.attempted++;
+    if (correct) {
+      G.streak++;
+      G.bestStreak = Math.max(G.bestStreak, G.streak);
+      G.correct++;
+      const mult = G.streak >= 5 ? 3 : G.streak >= 3 ? 2 : 1;
+      G.score += 10 * mult;
+    } else {
+      G.streak = 0;
+    }
+    document.querySelectorAll('#mathGameOptions .game-option-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.answer) btn.classList.add('correct');
+      else if (i === choiceIdx) btn.classList.add('wrong');
+    });
+    setTimeout(() => {
+      if (!G || !G.active) return;
+      G.idx++;
+      renderMathGameQ();
+    }, 600);
+  }
+
+  /* ── Recent Games (local history — solo games only for now; multiplayer
+     rows will slot in here once Last Man Standing ships) ── */
+  const GAME_HISTORY_KEY = 'jambGameHistory';
+  const GAME_HISTORY_MAX = 5;
+  const GAME_NAMES = { speed: 'Speed Round', tf: 'True or False', memory: 'Memory Match', sequence: 'Sequence', equation: 'Equation Builder' };
+
+  function pushGameHistory(entry) {
+    let history = loadPref(GAME_HISTORY_KEY, []);
+    history.unshift(entry);
+    history = history.slice(0, GAME_HISTORY_MAX);
+    savePref(GAME_HISTORY_KEY, history);
+  }
+
+  function openGameHistory() {
+    closeGamesHub();
+    document.getElementById('gameHistoryModal')?.classList.remove('hidden');
+    renderGameHistory();
+  }
+
+  function closeGameHistory() {
+    document.getElementById('gameHistoryModal')?.classList.add('hidden');
+  }
+
+  function renderGameHistory() {
+    const body = document.getElementById('gameHistoryBody');
+    const history = loadPref(GAME_HISTORY_KEY, []);
+    body.innerHTML = history.length === 0
+      ? `<p style="color:var(--text-muted); font-size:.85rem; margin-top:1rem;">No games yet — jump into one from Games!</p>`
+      : history.map(h => {
+          const when = new Date(h.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          const subjLabel = h.subject ? fmt(h.subject) : 'Mixed';
+          return `
+            <div style="padding:.7rem .9rem; background:var(--cream-dark); border-radius:var(--radius); margin-bottom:.5rem;">
+              <div style="display:flex; justify-content:space-between; font-weight:700; font-size:.85rem;">
+                <span>${escHtml(GAME_NAMES[h.kind] || h.kind)}</span><span style="font-weight:400; color:var(--text-muted); font-size:.75rem;">${when}</span>
+              </div>
+              <div style="font-size:.78rem; color:var(--text-muted); margin-top:.15rem;">${escHtml(subjLabel)}</div>
+              <div style="font-size:.82rem; margin-top:.25rem;">${escHtml(h.summary)} · ${escHtml(h.detail)}</div>
+            </div>`;
+        }).join('');
+  }
+
   /* ── Shared results — rendered inline into whichever modal was playing ── */
   function finishGame(modalId) {
     if (!G) return;
     G.active = false;
     clearGameTimer();
-    const bodyId = modalId === 'speedRoundModal' ? 'speedRoundBody' : modalId === 'trueFalseModal' ? 'trueFalseBody' : 'memoryMatchBody';
+    const bodyId = modalId === 'speedRoundModal' ? 'speedRoundBody' : modalId === 'trueFalseModal' ? 'trueFalseBody' : modalId === 'mathGameModal' ? 'mathGameBody' : 'memoryMatchBody';
     const body = document.getElementById(bodyId);
-    const subjName = fmt(G.subject);
-    let scoreLine, labelLine;
+    const subjName = G.subject ? fmt(G.subject) : 'Mixed';
+    let scoreLine, labelLine, histEntry;
     if (G.type === 'speed') {
       scoreLine = `${G.score}/${G.questions.length}`;
       labelLine = `Speed Round · ${escHtml(subjName)}`;
+      histEntry = { kind: 'speed', at: Date.now(), subject: G.subject, summary: scoreLine, detail: `${Math.round(G.score / G.questions.length * 100)}% accuracy` };
     } else if (G.type === 'tf') {
       scoreLine = `${G.score}/${G.rounds.length}`;
       labelLine = `True or False · ${escHtml(subjName)}`;
-    } else {
+      histEntry = { kind: 'tf', at: Date.now(), subject: G.subject, summary: scoreLine, detail: `${Math.round(G.score / G.rounds.length * 100)}% accuracy` };
+    } else if (G.type === 'memory') {
       const seconds = Math.round((Date.now() - G.startTime) / 1000);
       scoreLine = `${G.moves} moves`;
       labelLine = `Memory Match · ${escHtml(subjName)} · ${seconds}s`;
+      histEntry = { kind: 'memory', at: Date.now(), subject: G.subject, summary: scoreLine, detail: `${seconds}s` };
+    } else {
+      const gameLabel = G.type === 'sequence' ? 'Sequence' : 'Equation Builder';
+      scoreLine = `${G.score} pts`;
+      labelLine = `${gameLabel} · ${G.correct}/${G.attempted} correct${G.bestStreak >= 3 ? ' · best streak ' + G.bestStreak : ''}`;
+      histEntry = { kind: G.type, at: Date.now(), subject: null, summary: scoreLine, detail: `${G.correct}/${G.attempted} correct${G.bestStreak >= 3 ? ' · best streak ' + G.bestStreak : ''}` };
     }
+    pushGameHistory(histEntry);
     body.innerHTML = `
       <div style="font-size:2.2rem; text-align:center;">🎮</div>
       <div class="game-result-score">${scoreLine}</div>
@@ -1522,7 +1738,7 @@
         <button class="jqc-ghost" id="gameCloseBtn" style="text-align:center;">Close</button>
       </div>
     `;
-    document.getElementById('gamePlayAgainBtn').addEventListener('click', () => startGame(G.type, G.subject));
+    document.getElementById('gamePlayAgainBtn').addEventListener('click', () => G.subject ? startGame(G.type, G.subject) : startMathGame(G.type));
     document.getElementById('gameChangeBtn').addEventListener('click', () => {
       document.getElementById(modalId)?.classList.add('hidden');
       openGamesHub();
