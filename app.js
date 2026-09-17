@@ -1262,21 +1262,11 @@
     document.querySelectorAll('#jambGamesBody .game-type-card').forEach(card => {
       card.addEventListener('click', () => {
         const g = card.dataset.game;
-        let dbg = document.getElementById('gamesDebugBanner');
-        if (!dbg) {
-          dbg = document.createElement('div');
-          dbg.id = 'gamesDebugBanner';
-          dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;padding:.6rem 1rem;font-size:.8rem;font-family:monospace;white-space:pre-wrap;';
-          document.body.appendChild(dbg);
-        }
-        dbg.textContent = 'CLICK RECEIVED: game=' + g;
         try {
           if (g === 'sequence' || g === 'equation') startMathGame(g);
           else if (g === 'recent') openGameHistory();
           else renderGamesSubjectPicker(g);
-          dbg.textContent += ' | handler ran without throwing';
         } catch (e) {
-          dbg.textContent += ' | ERROR: ' + e.message;
           console.error(e);
         }
       });
@@ -1291,6 +1281,7 @@
       .filter(s => s.count >= minNeeded);
     if (!options.length) {
       out.innerHTML = `<p class="jqc-sub" style="margin-top:1rem;">Not enough questions yet for this game.</p>`;
+      out.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
     out.innerHTML = `
@@ -1306,6 +1297,7 @@
     document.querySelectorAll('#gamesSubjectPicker .game-subject-btn').forEach(btn => {
       btn.addEventListener('click', () => startGame(gameType, btn.dataset.subject));
     });
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function startGame(gameType, subjectKey) {
