@@ -940,6 +940,9 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 .jamb-games-banner { background: linear-gradient(135deg, #7c5cff, #a78bfa); }
 .jamb-games-banner .jdb-text, .jamb-games-banner .jdb-arrow { color: #1a1042; }
 .jamb-games-banner .jdb-sub { color: rgba(26,16,66,.65); }
+.jamb-community-banner { background: linear-gradient(135deg, #16a34a, #4ade80); }
+.jamb-community-banner .jdb-text, .jamb-community-banner .jdb-arrow { color: #062e14; }
+.jamb-community-banner .jdb-sub { color: rgba(6,46,20,.65); }
 .dash-tabs { display:flex; gap:.4rem; margin-bottom:1.25rem; }
 .dash-tab { flex:1; font-size:.78rem; font-weight:700; padding:.5rem .3rem; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); cursor:pointer; }
 .dash-tab.active { background:rgba(245,166,35,.15); border-color:rgba(245,166,35,.5); color:var(--amber,#f5a623); }
