@@ -9,6 +9,72 @@
   // are shared across both apps.
   const API_BASE = 'https://editoby-api.vercel.app';
 
+  /* ════════ PASSAGE-GROUPED QUESTIONS ════════
+     Comprehension / cloze content is stored in questions.js as ONE entry:
+       { passageId:'eng-2001-p2', passageTitle:'Passage II', year:2001,
+         instruction:'Read the passage and answer questions 6-10',
+         passage:'…', questions:[ {question, options, answer, explanation}, … ] }
+     It is flattened ONCE here into ordinary questions that each carry their
+     passage (+ passageId/passagePart/passageSize), so Challenge Mode,
+     dashboards and history keep working on flat arrays unchanged. Only
+     selection (keep a passage's questions together and in order), rendering
+     (show the passage), Teach Me (send the passage) and qHash need to know.
+     Existing flat questions are untouched. */
+  (function normalizePassageBank(bank) {
+    Object.keys(bank).forEach(subject => {
+      const arr = bank[subject];
+      if (!Array.isArray(arr) || !arr.some(e => e && Array.isArray(e.questions))) return;
+      const flat = [];
+      arr.forEach((entry, gi) => {
+        if (!entry || !Array.isArray(entry.questions)) { flat.push(entry); return; }
+        const pid = entry.passageId || `${subject}-passage-${gi}`;
+        entry.questions.forEach((q, k) => flat.push({
+          ...q,
+          year: q.year ?? entry.year,
+          passage: entry.passage,
+          passageId: pid,
+          passageTitle: entry.passageTitle || 'Passage',
+          passageInstruction: entry.instruction || '',
+          passagePart: k + 1,
+          passageSize: entry.questions.length,
+        }));
+      });
+      bank[subject] = flat;
+    });
+  })(QUESTION_BANK);
+
+  // Splits a flat pool into selection units: a standalone question is a unit
+  // of 1; all questions sharing a passageId form one unit, in passage order.
+  function toUnits(pool) {
+    const units = [], byId = new Map();
+    pool.forEach(q => {
+      if (!q.passageId) { units.push([q]); return; }
+      let u = byId.get(q.passageId);
+      if (!u) { u = []; byId.set(q.passageId, u); units.push(u); }
+      u.push(q);
+    });
+    units.forEach(u => { if (u.length > 1) u.sort((a, b) => (a.passagePart || 0) - (b.passagePart || 0)); });
+    return units;
+  }
+
+  // Picks up to `count` questions from already-ordered units without ever
+  // splitting a passage: a passage is only taken if all its questions fit in
+  // the slots left, so the requested count is never exceeded. If nothing fits
+  // at all (count smaller than every passage), the first unit is trimmed.
+  function fillFromUnits(units, count) {
+    const out = [];
+    for (const u of units) {
+      if (out.length >= count) break;
+      if (out.length + u.length <= count) out.push(...u);
+    }
+    if (!out.length && units.length) out.push(...units[0].slice(0, count));
+    return out;
+  }
+
+  function groupAwarePick(pool, count) {
+    return fillFromUnits(shuffle(toUnits(pool)), count);
+  }
+
   function getSWCredits() {
     const qtr = getCurrentQuarter();
     const d   = loadPref(SK_SW_CREDITS);
@@ -49,6 +115,7 @@
   function getCurrentQuarter(){const d=new Date();return `${d.getFullYear()}-Q${Math.ceil((d.getMonth()+1)/3)}`;}
   function getAICredits(){const d=loadPref(SK_AI_CREDITS);if(!d||d.quarter!==getCurrentQuarter()){savePref(SK_AI_CREDITS,{n:AI_QUARTERLY,quarter:getCurrentQuarter()});return AI_QUARTERLY;}return d.n;}
   function useAICredit(){const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
+  function refundAICredit(){const c=getAICredits();savePref(SK_AI_CREDITS,{n:c+1,quarter:getCurrentQuarter()});}
   function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');}
   function refreshUpgradeBar(){
     const bar=document.getElementById('jambUpgradeBar');
@@ -354,10 +421,10 @@
 
   function buildSingleSession() {
     const subject = el.subjectSelect.value;
-    const pool = shuffle([...QUESTION_BANK[subject]]);
+    const pool = QUESTION_BANK[subject];
     const countValue = el.questionCountSelect.value;
     const count = countValue === 'all' ? pool.length : Math.min(Number(countValue), pool.length);
-    const questions = pool.slice(0, count).map(q => ({ ...q, sourceSubject: subject }));
+    const questions = groupAwarePick(pool, count).map(q => ({ ...q, sourceSubject: subject }));
     return {
       questions,
       subjects: [subject],
@@ -384,15 +451,15 @@
     let offset = 0;
     let allQuestions = [];
 
-    const enPool = shuffle([...QUESTION_BANK.english]);
-    const enQs = enPool.slice(0, Math.min(engCount, enPool.length)).map(q => ({ ...q, sourceSubject: 'english' }));
+    const enPool = QUESTION_BANK.english;
+    const enQs = groupAwarePick(enPool, Math.min(engCount, enPool.length)).map(q => ({ ...q, sourceSubject: 'english' }));
     subjectRanges['english'] = { start: offset, end: offset + enQs.length - 1 };
     offset += enQs.length;
     allQuestions.push(...enQs);
 
     unique.forEach(subject => {
-      const pool = shuffle([...QUESTION_BANK[subject]]);
-      const qs = pool.slice(0, Math.min(otherCount, pool.length)).map(q => ({ ...q, sourceSubject: subject }));
+      const pool = QUESTION_BANK[subject];
+      const qs = groupAwarePick(pool, Math.min(otherCount, pool.length)).map(q => ({ ...q, sourceSubject: subject }));
       subjectRanges[subject] = { start: offset, end: offset + qs.length - 1 };
       offset += qs.length;
       allQuestions.push(...qs);
@@ -567,6 +634,7 @@
     } else if (el.subjectPositionTag) {
       el.subjectPositionTag.classList.add('hidden');
     }
+    renderPassage(q);
     el.questionText.innerHTML = escHtml(q.question).replace(/\n/g, '<br>');
 
     const hasDiagram = Boolean(q.diagram);
@@ -756,7 +824,7 @@
     if (total > 0) {
       const missed = state.currentQuestions
         .map((q, i) => (state.answers[i] !== null && state.answers[i] !== q.answer)
-          ? qHash(q.sourceSubject || state.subject, q.question) : null)
+          ? qHash(q.sourceSubject || state.subject, q.passageId ? q.passageId + '|' + q.question : q.question) : null)
         .filter(Boolean);
       recordClassSession({
         subject: state.subject,
@@ -764,6 +832,30 @@
         score: correct, total, missed,
       });
     }
+  }
+
+  // Shows the shared passage above a comprehension/cloze question. Opens
+  // expanded when the student arrives at a new passage; stays as the student
+  // left it (collapsed or open) while moving within the same passage.
+  function renderPassage(q) {
+    let box = document.getElementById('passageBox');
+    if (!box) {
+      box = document.createElement('details');
+      box.id = 'passageBox';
+      box.className = 'passage-box hidden';
+      el.questionText.parentNode.insertBefore(box, el.questionText);
+    }
+    if (!q.passage) { box.classList.add('hidden'); box.dataset.pid = ''; return; }
+    if (box.dataset.pid !== q.passageId) {
+      box.dataset.pid = q.passageId;
+      box.open = true;
+      box.innerHTML = `<summary><span class="passage-title">${escHtml(q.passageTitle)}</span><span class="passage-part" id="passagePartTag"></span></summary>`
+        + (q.passageInstruction ? `<p class="passage-instr">${escHtml(q.passageInstruction)}</p>` : '')
+        + `<div class="passage-text">${escHtml(q.passage).replace(/\n/g, '<br>')}</div>`;
+    }
+    const tag = document.getElementById('passagePartTag');
+    if (tag) tag.textContent = `Question ${q.passagePart} of ${q.passageSize} on this passage`;
+    box.classList.remove('hidden');
   }
 
   // Short, stable hash — same subject+question text always produces the
@@ -1215,7 +1307,9 @@
   function gameQuestionPool(subjectKey) {
     const arr = QUESTION_BANK[subjectKey];
     if (!Array.isArray(arr)) return [];
-    return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2);
+    // Passage-bound questions ("According to the passage…") are meaningless
+    // in a fast game loop without the passage, so games skip them.
+    return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage);
   }
 
   // Memory Match needs short text to fit on a card — a subject can pass
@@ -2616,13 +2710,15 @@
       showInfoToast('Explanations are only available in Practice Mode or when reviewing your results.');
       return;
     }
+    const q = state.currentQuestions[state.currentIndex];
+    if (!q) return;
+    // Already-fetched explanations stay viewable even at 0 credits.
+    const alreadyCached = !!getCachedTeach(teachCacheKey(q.sourceSubject || state.subject, q));
     const credits = getAICredits();
-    if (credits <= 0) {
+    if (credits <= 0 && !alreadyCached) {
       alert(`You've used all ${AI_QUARTERLY} AI explanation credits for this quarter.\n\nTop up: ₦500 = 50 more explanations.`);
       return;
     }
-    const q = state.currentQuestions[state.currentIndex];
-    if (!q) return;
 
     const panel = document.getElementById('aiPanel');
     const loading = document.getElementById('aiLoading');
@@ -2634,22 +2730,48 @@
 
     const correctOpt = q.options[q.answer];
     const studentAns = state.answers[state.currentIndex];
-    const studentOpt = studentAns !== null ? q.options[studentAns] : 'Did not answer';
+    const studentOpt = studentAns !== null && studentAns !== undefined ? q.options[studentAns] : null;
     const wasCorrect = studentAns === q.answer;
+    const subject = q.sourceSubject || state.subject;
+    const L = i => String.fromCharCode(65 + i);
 
-    const prompt = `You are a JAMB/UTME exam tutor helping a Nigerian student prepare.
+    // The student-specific line lives OUTSIDE the explanation, so one
+    // explanation per question can be reused for every student.
+    const youLine = studentOpt === null
+      ? `<div class="ai-you">You didn't answer this one. The answer is <strong>${L(q.answer)}</strong>.</div>`
+      : wasCorrect
+        ? `<div class="ai-you ai-you-right">You chose <strong>${L(studentAns)}</strong> — correct ✓</div>`
+        : `<div class="ai-you ai-you-wrong">You chose <strong>${L(studentAns)}</strong>. The answer is <strong>${L(q.answer)}</strong>.</div>`;
+    const show = text => {
+      loading?.classList.add('hidden');
+      if (response) {
+        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>`;
+        response.classList.remove('hidden');
+      }
+      updateAICreditsBadge();
+    };
 
+    // Layer 1: this device already fetched it — show instantly, no credit,
+    // no network. (Layer 2, shared across ALL students, is the server-side
+    // Redis cache in /api/teach keyed on the `teach` fields sent below.)
+    const cacheKey = teachCacheKey(subject, q);
+    const local = getCachedTeach(cacheKey);
+    if (local) { show(local); return; }
+
+    // Student-agnostic on purpose (see youLine above): explains the right
+    // answer AND every wrong option, so it serves whoever picked anything.
+    const prompt = `You are a JAMB/UTME exam tutor helping Nigerian students prepare.
+${q.passage ? `\nThis question is based on the following ${q.passageTitle || 'passage'}:\n---\n${q.passage}\n---\n` : ''}
 Question: ${q.question}
-Options: ${q.options.map((o,i)=>String.fromCharCode(65+i)+'. '+o).join(' | ')}
-Correct answer: ${correctOpt}
-Student answered: ${studentOpt} (${wasCorrect ? 'CORRECT ✓' : 'WRONG ✗'})
+Options: ${q.options.map((o,i)=>L(i)+'. '+o).join(' | ')}
+Correct answer: ${L(q.answer)}. ${correctOpt}
 
-Give a clear, concise explanation in 3-4 sentences:
-1. Why the correct answer is right
-2. Why common wrong choices are incorrect (if student was wrong, specifically address their choice)
+Give a clear, concise explanation in 3-5 sentences:
+1. Why the correct answer is right${q.passage ? ' — point to what in the passage supports it' : ''}
+2. Briefly, why each other option is wrong (the trap in each)
 3. A memory tip or key principle to remember for JAMB
 
-Use plain English. Be encouraging. Keep it brief — this student is studying under pressure.`;
+Use plain English. Be encouraging. Keep it brief — students are studying under pressure.`;
 
     try {
       if (!useAICredit()) {
@@ -2661,23 +2783,47 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
       const res = await fetch(API_BASE + '/api/teach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        // `prompt` keeps today's /api/teach working unchanged. `teach` lets
+        // the updated backend build the prompt itself and cache by content.
+        body: JSON.stringify({
+          prompt,
+          teach: { app: 'jamb', v: 1, subject, question: q.question, options: q.options,
+                   answer: q.answer, passage: q.passage || null, passageTitle: q.passageTitle || null }
+        })
       });
-      const data = await res.json();
-      const text = data.text || data.content?.map(c=>c.text||'').join('') || 'Could not get explanation. Please try again.';
-      loading?.classList.add('hidden');
-      if (response) {
-        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div><div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>`;
-        response.classList.remove('hidden');
-      }
-      updateAICreditsBadge();
+      const data = await res.json().catch(() => ({}));
+      const text = data.text || data.content?.map(c=>c.text||'').join('') || '';
+      if (!res.ok || !text) throw new Error('empty');
+      putCachedTeach(cacheKey, text);
+      show(text);
     } catch(err) {
+      refundAICredit(); // the student got nothing — don't charge them
       loading?.classList.add('hidden');
       if (response) {
         response.innerHTML = '<p style="color:#e74c3c">Could not reach AI. Check your connection and try again.</p>';
         response.classList.remove('hidden');
       }
+      updateAICreditsBadge();
     }
+  }
+
+  const SK_TEACH_CACHE = 'jamb-teach-cache-v1';
+  const TEACH_CACHE_CAP = 200; // ~600 chars each → well under localStorage limits
+  function teachCacheKey(subject, q) {
+    return qHash(subject, JSON.stringify([q.passageId || '', q.question, q.options, q.answer]));
+  }
+  function getCachedTeach(key) {
+    const c = loadPref(SK_TEACH_CACHE, {});
+    return c && c[key] ? c[key].t : null;
+  }
+  function putCachedTeach(key, text) {
+    const c = loadPref(SK_TEACH_CACHE, {}) || {};
+    c[key] = { t: text, at: Date.now() };
+    const keys = Object.keys(c);
+    if (keys.length > TEACH_CACHE_CAP) {
+      keys.sort((a, b) => c[a].at - c[b].at).slice(0, keys.length - TEACH_CACHE_CAP).forEach(k => delete c[k]);
+    }
+    savePref(SK_TEACH_CACHE, c);
   }
 
   /* ════════════════════════════════════════════════════
@@ -3187,12 +3333,15 @@ Use plain English. Be encouraging. Keep it brief — this student is studying un
     const tagged = pool.map((q, i) => ({ ...q, _qid: `${subject}:${i}` }));
     const recentIds = loadPref(RECENT_QS_STORE, []);
     const recentSet = new Set(recentIds);
-    const fresh = [...tagged.filter(q => !recentSet.has(q._qid))].sort(() => Math.random() - .5);
-    const stale = tagged.filter(q => recentSet.has(q._qid))
-      .sort((a, b) => recentIds.indexOf(a._qid) - recentIds.indexOf(b._qid));
+    // Passage questions travel as one unit — a unit counts as "recent" if
+    // any of its questions was used recently.
+    const units = toUnits(tagged);
+    const isStale = u => u.some(q => recentSet.has(q._qid));
+    const fresh = shuffle(units.filter(u => !isStale(u)));
+    const stale = units.filter(isStale)
+      .sort((a, b) => recentIds.indexOf(a[0]._qid) - recentIds.indexOf(b[0]._qid));
 
-    const selected = fresh.slice(0, count);
-    if (selected.length < count) selected.push(...stale.slice(0, count - selected.length));
+    const selected = fillFromUnits([...fresh, ...stale], count);
 
     const usedIds = selected.map(q => q._qid);
     const updated = [...recentIds.filter(id => !usedIds.includes(id)), ...usedIds].slice(-RECENT_QS_CAP);
