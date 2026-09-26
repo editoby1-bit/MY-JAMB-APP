@@ -1739,3 +1739,33 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 @media (max-width: 480px) {
   .memory-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ── Comprehension / cloze passage (passage + questions[] schema) ── */
+.passage-box {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+}
+.passage-box summary {
+  cursor: pointer;
+  padding: .75rem 1rem;
+  display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline;
+  font-weight: 600; color: var(--text-main);
+  list-style: none;
+}
+.passage-box summary::-webkit-details-marker { display: none; }
+.passage-box summary::before { content: '▸'; color: var(--amber-dark); transition: transform .15s; }
+.passage-box[open] summary::before { transform: rotate(90deg); }
+.passage-part { font-size: .8rem; font-weight: 500; opacity: .7; }
+.passage-instr { margin: 0; padding: 0 1rem .5rem; font-size: .85rem; font-style: italic; opacity: .8; }
+.passage-text {
+  padding: 0 1rem 1rem;
+  font-size: .95rem; line-height: 1.75; color: var(--text-main);
+  max-height: 45vh; overflow-y: auto;
+}
+.ai-you { font-size: .85rem; margin: .4rem 0 .6rem; }
+.ai-you-right strong { color: #2e9d5b; }
+.ai-you-wrong strong { color: #e57373; }
