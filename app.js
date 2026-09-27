@@ -688,7 +688,9 @@
     const shouldShowToggle = state.reviewMode && state.mode === 'exam';
     el.toggleExplanationBtn.classList.toggle('hidden', !shouldShowToggle);
     el.toggleExplanationBtn.textContent = state.showReviewExplanation ? '🙈 Hide Explanation' : '💡 Show Explanation';
-    el.explanationBox.classList.toggle('hidden', !shouldShowExpl);
+    // Newly imported papers have no written explanation yet (Teach Me covers
+    // them), so hide the box rather than show an empty one.
+    el.explanationBox.classList.toggle('hidden', !(shouldShowExpl && q.explanation));
     if (shouldShowExpl) el.explanationBox.textContent = q.explanation || '';
 
     // Nav buttons — on the very first question, "Previous" has nowhere to

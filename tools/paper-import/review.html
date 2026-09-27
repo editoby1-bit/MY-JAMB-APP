@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper Review</title>
+<style>
+  :root { --bg:#f6f4ef; --card:#fff; --ink:#1c2230; --dim:#667085; --line:#e3ded3; --flag:#b42318; --flagbg:#fef3f2; --ok:#067647; --okbg:#ecfdf3; --accent:#0a1628; --gold:#b8860b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--ink); }
+  header { position:sticky; top:0; z-index:5; background:var(--accent); color:#fff; padding:10px 16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  header h1 { font-size:16px; margin:0 12px 0 0; }
+  header .stats { font-size:13px; opacity:.85; margin-right:auto; }
+  header label { font-size:13px; display:flex; gap:6px; align-items:center; }
+  button { font:inherit; border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink); padding:6px 12px; cursor:pointer; }
+  button.primary { background:var(--gold); border-color:var(--gold); color:#fff; font-weight:600; }
+  .layout { display:grid; grid-template-columns: minmax(0,1fr); gap:16px; padding:16px; max-width:1500px; margin:0 auto; }
+  @media (min-width: 1000px) { .layout { grid-template-columns: minmax(0,1fr) 520px; } .viewer { position:sticky; top:64px; height:calc(100vh - 80px); } }
+  .viewer { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:auto; padding:8px; }
+  .viewer img { width:100%; display:block; }
+  .viewer .hint { color:var(--dim); padding:24px; text-align:center; }
+  .notes { background:var(--flagbg); color:var(--flag); border-radius:10px; padding:10px 14px; margin-bottom:12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px; }
+  .card.passage { border-left:5px solid var(--gold); }
+  .card.flagged { border-color:#f4b4ae; }
+  .card.checked { border-color:#9fd8b8; }
+  .card.removed { opacity:.45; }
+  .card .qs { margin-top:12px; padding-left:12px; border-left:2px dashed var(--line); }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:6px 0; }
+  .num { font-weight:700; min-width:44px; }
+  .field-label { font-size:12px; color:var(--dim); text-transform:uppercase; letter-spacing:.04em; margin-top:8px; }
+  textarea, input[type=text], select { width:100%; font:inherit; border:1px solid var(--line); border-radius:8px; padding:6px 8px; background:#fffdf8; color:var(--ink); }
+  textarea { resize:vertical; }
+  .opt { display:grid; grid-template-columns: 28px minmax(0,1fr) 30px; gap:6px; align-items:center; margin:4px 0; }
+  .opt.correct input { border-color:var(--ok); background:var(--okbg); }
+  .flags { margin:8px 0 0; padding:0; list-style:none; }
+  .flags li { background:var(--flagbg); color:var(--flag); border-radius:6px; padding:4px 8px; margin:4px 0; font-size:13px; }
+  .pagechip { font-size:12px; padding:2px 8px; border-radius:999px; }
+  .key { font-size:13px; color:var(--dim); }
+  .ticks { display:flex; gap:16px; margin-top:8px; font-size:14px; }
+  .toast { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; padding:10px 16px; border-radius:10px; max-width:min(92vw,720px); white-space:pre-line; display:none; z-index:10; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Paper review</h1>
+  <span class="stats" id="stats"></span>
+  <label><input type="checkbox" id="onlyFlagged"> Only show flagged</label>
+  <button id="saveBtn">Save progress</button>
+  <button id="approveBtn" class="primary">Approve for the app</button>
+</header>
+<div class="layout">
+  <main id="list"></main>
+  <aside class="viewer" id="viewer"><div class="hint">Click a “page” button to see the original page here.</div></aside>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+let draft;
+const $ = s => document.querySelector(s);
+const L = i => String.fromCharCode(65 + i);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function toast(msg, ms = 3500) {
+  const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', ms);
+}
+function showPage(n) {
+  $('#viewer').innerHTML = `<div class="key">Page ${n}</div><img alt="Page ${n} of the original paper" src="pages/page-${String(n).padStart(3, '0')}.png">`;
+  if (window.innerWidth < 1000) $('#viewer').scrollIntoView({ behavior: 'smooth' });
+}
+const pageChips = pages => (pages || []).map(p => `<button class="pagechip" data-page="${p}">page ${p}</button>`).join(' ');
+const flagList = f => f && f.length ? `<ul class="flags">${f.map(x => `<li>⚠ ${esc(x)}</li>`).join('')}</ul>` : '';
+const ticks = (obj, path) => `
+  <div class="ticks">
+    ${obj.flags && obj.flags.length ? `<label><input type="checkbox" data-path="${path}.checked" ${obj.checked ? 'checked' : ''}> Checked</label>` : ''}
+    <label><input type="checkbox" data-path="${path}.removed" ${obj.removed ? 'checked' : ''}> Remove</label>
+  </div>`;
+const cls = o => ['card', o.flags && o.flags.length ? (o.checked ? 'checked' : 'flagged') : '', o.removed ? 'removed' : ''].join(' ');
+
+function questionHTML(q, path, showInstr) {
+  const opts = q.options.map((o, i) => `
+    <div class="opt ${q.answer === i ? 'correct' : ''}">
+      <strong>${L(i)}.</strong>
+      <input type="text" value="${esc(o)}" data-path="${path}.options.${i}">
+      <button title="Remove option" data-delopt="${path}" data-i="${i}">✕</button>
+    </div>`).join('');
+  return `
+  <div class="${cls(q)}" data-flagged="${!!(q.flags && q.flags.length)}">
+    <div class="row"><span class="num">Q${esc(q.number)}</span> ${pageChips(q.pages)}
+      <span class="key">Answer key: ${q.keyLetter ? esc(q.keyLetter) : 'not found'}</span></div>
+    ${showInstr ? `<div class="field-label">Instruction for this group</div>
+      <textarea rows="2" data-path="${path}.instruction">${esc(q.instruction || '')}</textarea>` : ''}
+    <div class="field-label">Question</div>
+    <textarea rows="2" data-path="${path}.stem">${esc(q.stem)}</textarea>
+    <div class="field-label">Options</div>
+    ${opts}
+    <button data-addopt="${path}">+ Add option</button>
+    <div class="row"><span class="field-label" style="margin:0">Correct answer</span>
+      <select data-path="${path}.answer" data-int="1" style="width:auto">
+        <option value="">— choose —</option>
+        ${q.options.map((_, i) => `<option value="${i}" ${q.answer === i ? 'selected' : ''}>${L(i)}</option>`).join('')}
+      </select></div>
+    ${flagList(q.flags)}
+    ${ticks(q, path)}
+  </div>`;
+}
+
+function render() {
+  const only = $('#onlyFlagged').checked;
+  const qs = draft.blocks.flatMap(b => b.type === 'passage' ? b.questions : [b.question]);
+  const open = qs.filter(q => q.flags.length && !q.checked && !q.removed).length;
+  $('#title').textContent = `${draft.subject} ${draft.year}`;
+  $('#stats').textContent = `${qs.length} questions · ${qs.filter(q => q.answer !== null && q.answer !== undefined).length} with answers · ${open} flagged still to check`;
+  let html = draft.keyNotes && draft.keyNotes.length ? `<div class="notes">Answer key: ${draft.keyNotes.map(esc).join('; ')}</div>` : '';
+  draft.blocks.forEach((b, bi) => {
+    if (b.type === 'passage') {
+      const anyFlag = b.flags.length || b.questions.some(q => q.flags.length && !q.checked);
+      if (only && !anyFlag) return;
+      html += `<section class="${cls(b)} passage">
+        <div class="row"><input type="text" value="${esc(b.title)}" data-path="blocks.${bi}.title" style="max-width:240px"> ${pageChips(b.pages)}</div>
+        <div class="field-label">Instruction</div>
+        <textarea rows="2" data-path="blocks.${bi}.instruction">${esc(b.instruction)}</textarea>
+        <div class="field-label">Passage text</div>
+        <textarea rows="10" data-path="blocks.${bi}.text">${esc(b.text)}</textarea>
+        ${flagList(b.flags)}${ticks(b, `blocks.${bi}`)}
+        <div class="qs">${b.questions.map((q, qi) => (only && !(q.flags.length && !q.checked)) ? '' : questionHTML(q, `blocks.${bi}.questions.${qi}`, false)).join('')}</div>
+      </section>`;
+    } else {
+      if (only && !(b.question.flags.length && !b.question.checked)) return;
+      html += questionHTML(b.question, `blocks.${bi}.question`, true);
+    }
+  });
+  $('#list').innerHTML = html || '<div class="card">Nothing to show.</div>';
+}
+
+function setPath(path, value) {
+  const parts = path.split('.'); let o = draft;
+  parts.slice(0, -1).forEach(p => o = o[p]);
+  o[parts.at(-1)] = value;
+}
+function getPath(path) { return path.split('.').reduce((o, p) => o[p], draft); }
+
+document.addEventListener('input', e => {
+  const el = e.target; if (!el.dataset.path) return;
+  let v = el.type === 'checkbox' ? el.checked : el.value;
+  if (el.dataset.int) v = v === '' ? null : parseInt(v, 10);
+  setPath(el.dataset.path, v);
+  if (el.type === 'checkbox' || el.tagName === 'SELECT') render();
+});
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.dataset.page) showPage(+t.dataset.page);
+  if (t.dataset.addopt) { getPath(t.dataset.addopt).options.push(''); render(); }
+  if (t.dataset.delopt) {
+    const q = getPath(t.dataset.delopt), i = +t.dataset.i;
+    q.options.splice(i, 1);
+    if (q.answer === i) q.answer = null; else if (q.answer > i) q.answer--;
+    render();
+  }
+});
+$('#onlyFlagged').addEventListener('change', render);
+
+async function post(url) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(draft) });
+  return [r.ok, await r.json()];
+}
+$('#saveBtn').addEventListener('click', async () => {
+  const [ok] = await post('save'); toast(ok ? 'Progress saved.' : 'Could not save — is the review server still running?');
+});
+$('#approveBtn').addEventListener('click', async () => {
+  const [ok, res] = await post('approve');
+  if (ok) toast(`Approved ${res.questions} questions → ${res.file}\nNext: run add_to_bank.py (see README).`, 8000);
+  else toast('Not approved yet:\n• ' + (res.errors || ['unknown error']).slice(0, 12).join('\n• ') + (res.errors && res.errors.length > 12 ? `\n…and ${res.errors.length - 12} more` : ''), 12000);
+});
+
+fetch('draft').then(r => r.json()).then(d => { draft = d; render(); });
+</script>
+</body>
+</html>

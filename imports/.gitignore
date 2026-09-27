@@ -1,0 +1,4 @@
+# Working files from the import tool (page images, OCR text, drafts) and any
+# source PDFs stay on your machine. Only approved/*.json is committed.
+work/
+*.pdf

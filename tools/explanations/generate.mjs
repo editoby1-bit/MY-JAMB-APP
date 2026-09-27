@@ -38,11 +38,11 @@ const root = path.resolve(here, '..', '..');
 // ── Which app are we in? ────────────────────────────────────────────────
 const APPS = {
   jamb: {
-    bankFile: 'questions.js', appFile: 'app.js', outDir: 'explanations',
+    bankFiles: ['questions.js', 'imported-questions.js'], appFile: 'app.js', outDir: 'explanations',
     bankVars: ['QUESTION_BANK'], fns: ['qHash', 'teachCacheKey'],
   },
   mea: {
-    bankFile: 'data/questions.js', appFile: 'js/app.js', outDir: 'data/explanations',
+    bankFiles: ['data/questions.js'], appFile: 'js/app.js', outDir: 'data/explanations',
     bankVars: ['EXAM_BANK', 'SUBJECTS'], fns: ['teachCacheKey'],
   },
 };
@@ -71,7 +71,9 @@ function extractFunction(src, name) {
 }
 
 const appSrc = fs.readFileSync(path.join(root, APP.appFile), 'utf8');
-const bankSrc = fs.readFileSync(path.join(root, APP.bankFile), 'utf8');
+// Every bank file the page loads, in order (imported papers extend the bank).
+const bankSrc = APP.bankFiles.filter(f => fs.existsSync(path.join(root, f)))
+  .map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n;\n');
 const bankVarsObj = `{ ${APP.bankVars.join(', ')} }`;
 const loaded = new Function(`${bankSrc}\n;return ${bankVarsObj};`)();
 const bank = loaded[APP.bankVars[0]];
