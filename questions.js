@@ -1,9 +1,10 @@
 /**
  * MY JAMB APP — Question Bank
- * Questions sourced and adapted from publicly available JAMB UTME past question compilations.
- * References: jambite.com | myschool.ng | schoolngr.com | pastquestionsforum.com | waecdirect.org (public sections)
- * All questions are in the public domain as released examination questions by JAMB (Joint Admissions
- * and Matriculation Board, Nigeria). Diagrams are SVG representations of standard exam figures.
+ * Questions compiled and adapted from JAMB UTME past-question compilations
+ * (jambite.com | myschool.ng | schoolngr.com | pastquestionsforum.com | waecdirect.org).
+ * Past examination papers remain the copyright of JAMB; they are not public domain.
+ * Papers imported and checked with tools/paper-import live in imported-questions.js.
+ * Diagrams are SVG redrawings of standard exam figures.
  */
 
 const QUESTION_BANK = {

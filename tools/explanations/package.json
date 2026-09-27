@@ -1,0 +1,9 @@
+{
+  "name": "teach-me-explanations",
+  "private": true,
+  "type": "module",
+  "description": "Pre-generates Teach Me explanations for the official question bank",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0"
+  }
+}
