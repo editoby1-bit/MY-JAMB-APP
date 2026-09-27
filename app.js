@@ -2647,6 +2647,7 @@
   function updateAICreditsBadge() {
     const badge = document.getElementById('aiCreditsBadge');
     if (!badge) return;
+    if (isPlusUser()) { badge.textContent = 'Unlimited · Plus'; badge.style.color = '#27ae60'; return; }
     const c = getAICredits();
     badge.textContent = `${c} credit${c===1?'':'s'} left`;
     badge.style.color = c < 10 ? '#e74c3c' : '#27ae60';
@@ -2712,10 +2713,11 @@
     }
     const q = state.currentQuestions[state.currentIndex];
     if (!q) return;
-    // Already-fetched explanations stay viewable even at 0 credits.
+    // Plus is unlimited; already-fetched explanations stay viewable at 0 credits.
+    const plus = isPlusUser();
     const alreadyCached = !!getCachedTeach(teachCacheKey(q.sourceSubject || state.subject, q));
     const credits = getAICredits();
-    if (credits <= 0 && !alreadyCached) {
+    if (!plus && credits <= 0 && !alreadyCached) {
       alert(`You've used all ${AI_QUARTERLY} AI explanation credits for this quarter.\n\nTop up: ₦500 = 50 more explanations.`);
       return;
     }
@@ -2758,6 +2760,21 @@
     const local = getCachedTeach(cacheKey);
     if (local) { show(local); return; }
 
+    // Plus never spends credits; everyone else spends one per new explanation.
+    const spend = () => plus || useAICredit();
+    const refund = () => { if (!plus) refundAICredit(); };
+
+    // Layer 2: explanations pre-generated for the whole official bank
+    // (explanations/<subject>.json, downloaded once per subject on first
+    // Teach Me tap). No AI call at all.
+    const premade = await getPremadeTeach(subject, cacheKey);
+    if (premade) {
+      if (!spend()) { loading?.classList.add('hidden'); panel?.classList.add('hidden'); alert('No AI credits remaining this quarter.'); return; }
+      putCachedTeach(cacheKey, premade);
+      show(premade);
+      return;
+    }
+
     // Student-agnostic on purpose (see youLine above): explains the right
     // answer AND every wrong option, so it serves whoever picked anything.
     const prompt = `You are a JAMB/UTME exam tutor helping Nigerian students prepare.
@@ -2774,7 +2791,7 @@ Give a clear, concise explanation in 3-5 sentences:
 Use plain English. Be encouraging. Keep it brief — students are studying under pressure.`;
 
     try {
-      if (!useAICredit()) {
+      if (!spend()) {
         loading?.classList.add('hidden');
         alert('No AI credits remaining this quarter.');
         panel?.classList.add('hidden');
@@ -2797,7 +2814,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
       putCachedTeach(cacheKey, text);
       show(text);
     } catch(err) {
-      refundAICredit(); // the student got nothing — don't charge them
+      refund(); // the student got nothing — don't charge them
       loading?.classList.add('hidden');
       if (response) {
         response.innerHTML = '<p style="color:#e74c3c">Could not reach AI. Check your connection and try again.</p>';
@@ -2805,6 +2822,29 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
       }
       updateAICreditsBadge();
     }
+  }
+
+  // Pre-generated explanations, one file per subject, fetched at most once
+  // per page load. A missing file (subject not generated yet) or no network
+  // just means "no pre-made explanation" — the live path takes over.
+  const _premade = new Map();
+  async function getPremadeTeach(subject, key) {
+    if (!_premade.has(subject)) {
+      _premade.set(subject, fetch(`explanations/${encodeURIComponent(subject)}.json`, { cache: 'no-cache' })
+        .then(r => (r.ok ? r.json() : {}))
+        .catch(() => { _premade.delete(subject); return {}; }));
+    }
+    const data = await _premade.get(subject);
+    return data && typeof data[key] === 'string' ? data[key] : null;
+  }
+
+  // Student Pass Plus (bought here, or on My Exams App — same device storage)
+  // gets unlimited Teach Me.
+  function isPlusUser() {
+    if (!checkAccess()) return false;
+    if (loadPref(SK_TIER) === 'plus') return true;
+    const ex = loadPref('mea-access-v1');
+    return loadPref('mea-tier-v1') === 'plus' && !!(ex?.expires && new Date(ex.expires) > new Date());
   }
 
   const SK_TEACH_CACHE = 'jamb-teach-cache-v1';
