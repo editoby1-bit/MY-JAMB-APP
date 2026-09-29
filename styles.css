@@ -737,6 +737,18 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
   margin-top: 0.65rem;
 }
 
+.key-check {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius);
+  color: #78350f;
+}
+.key-check p { margin: 0.3rem 0 0; }
+.key-check-title { font-weight: 700; font-size: 0.85rem; }
+.key-check-tip { font-style: italic; }
+
 /* ─── NAV ROW ─── */
 .nav-row {
   display: flex;

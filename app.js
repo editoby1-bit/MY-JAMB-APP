@@ -71,6 +71,32 @@
     return out;
   }
 
+  // A few past questions officially accept more than one option (the key
+  // lists e.g. "A/D"); those carry `alsoAccept`. Always score through this.
+  function isCorrect(q, a) {
+    return a !== null && a !== undefined &&
+      (a === q.answer || (Array.isArray(q.alsoAccept) && q.alsoAccept.includes(a)));
+  }
+
+  // Past questions whose official answer key we checked and found wanting
+  // carry keyVerdict ('corrected' | 'multiple' | 'none'), keyAnswer (the
+  // key's letter) and answerNote (why). Shown under the explanation.
+  function keyCheckHtml(q) {
+    if (!q.keyVerdict || !q.answerNote) return '';
+    const L = i => String.fromCharCode(65 + i);
+    const right = [q.answer, ...(q.alsoAccept || [])].map(L).join(' or ');
+    const head = {
+      corrected: `The official answer key says <strong>${escHtml(q.keyAnswer)}</strong>, but that is wrong. The correct answer is <strong>${right}</strong>.`,
+      multiple:  `The official answer key accepts <strong>${escHtml(q.keyAnswer)}</strong>: more than one option is correct, so any of <strong>${right}</strong> is marked right here.`,
+      none:      `None of the options is fully correct; the examiners set a flawed question. The official answer is <strong>${escHtml(q.keyAnswer)}</strong>, which is also the closest option, so that is what we mark right.`,
+    }[q.keyVerdict];
+    if (!head) return '';
+    return `<div class="key-check"><div class="key-check-title">⚖️ Answer key check</div>`
+      + `<p>${head}</p><p>${escHtml(q.answerNote)}</p>`
+      + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning.</p>` : '')
+      + `</div>`;
+  }
+
   function groupAwarePick(pool, count) {
     return fillFromUnits(shuffle(toUnits(pool)), count);
   }
@@ -653,8 +679,8 @@
 
       if (state.reviewMode || state.mode === 'practice') {
         if (selectedAnswer !== null) {
-          if (idx === q.answer) btn.classList.add('correct');
-          if (idx === selectedAnswer && selectedAnswer !== q.answer) btn.classList.add('wrong');
+          if (isCorrect(q, idx)) btn.classList.add('correct');
+          if (idx === selectedAnswer && !isCorrect(q, selectedAnswer)) btn.classList.add('wrong');
         }
       }
 
@@ -689,7 +715,7 @@
     el.toggleExplanationBtn.classList.toggle('hidden', !shouldShowToggle);
     el.toggleExplanationBtn.textContent = state.showReviewExplanation ? '🙈 Hide Explanation' : '💡 Show Explanation';
     el.explanationBox.classList.toggle('hidden', !shouldShowExpl);
-    if (shouldShowExpl) el.explanationBox.textContent = q.explanation || '';
+    if (shouldShowExpl) el.explanationBox.innerHTML = escHtml(q.explanation || '') + keyCheckHtml(q);
 
     // Nav buttons — on the very first question, "Previous" has nowhere to
     // go, so it becomes the exit action instead of just being greyed out.
@@ -740,9 +766,9 @@
     if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
 
     const correct = state.currentQuestions.reduce((sum, q, i) =>
-      sum + (state.answers[i] === q.answer ? 1 : 0), 0);
+      sum + (isCorrect(q, state.answers[i]) ? 1 : 0), 0);
     const total = state.currentQuestions.length;
-    const wrong = state.answers.filter((a, i) => a !== null && a !== state.currentQuestions[i].answer).length;
+    const wrong = state.answers.filter((a, i) => a !== null && !isCorrect(state.currentQuestions[i], a)).length;
     const skipped = state.answers.filter(a => a === null).length;
     const percent = Math.round((correct / total) * 100);
 
@@ -790,7 +816,7 @@
         if (!range) return '';
         const qs = state.currentQuestions.slice(range.start, range.end + 1);
         const c = qs.reduce((sum, q, i) =>
-          sum + (state.answers[range.start + i] === q.answer ? 1 : 0), 0);
+          sum + (isCorrect(q, state.answers[range.start + i]) ? 1 : 0), 0);
         const pct = Math.round((c / qs.length) * 100);
         return `
           <div class="sbdown-row">
@@ -823,7 +849,7 @@
     // stable across sessions, which is what "missed more than once" needs.
     if (total > 0) {
       const missed = state.currentQuestions
-        .map((q, i) => (state.answers[i] !== null && state.answers[i] !== q.answer)
+        .map((q, i) => (state.answers[i] !== null && !isCorrect(q, state.answers[i]))
           ? qHash(q.sourceSubject || state.subject, q.passageId ? q.passageId + '|' + q.question : q.question) : null)
         .filter(Boolean);
       recordClassSession({
@@ -1309,7 +1335,10 @@
     if (!Array.isArray(arr)) return [];
     // Passage-bound questions ("According to the passage…") are meaningless
     // in a fast game loop without the passage, so games skip them.
-    return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage);
+    // Questions with several accepted answers or no correct option need
+    // the answer-key note to make sense, so games skip them too.
+    return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage
+      && !q.alsoAccept && q.keyVerdict !== 'none');
   }
 
   // Memory Match needs short text to fit on a card — a subject can pass
@@ -2731,7 +2760,7 @@
     const correctOpt = q.options[q.answer];
     const studentAns = state.answers[state.currentIndex];
     const studentOpt = studentAns !== null && studentAns !== undefined ? q.options[studentAns] : null;
-    const wasCorrect = studentAns === q.answer;
+    const wasCorrect = isCorrect(q, studentAns);
     const subject = q.sourceSubject || state.subject;
     const L = i => String.fromCharCode(65 + i);
 
@@ -2745,7 +2774,7 @@
     const show = text => {
       loading?.classList.add('hidden');
       if (response) {
-        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>`;
+        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q)}`;
         response.classList.remove('hidden');
       }
       updateAICreditsBadge();
