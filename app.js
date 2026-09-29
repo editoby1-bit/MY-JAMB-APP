@@ -184,6 +184,8 @@
     comboQCountSelect: document.getElementById('comboQCountSelect'),
     modeSelect: document.getElementById('modeSelect'),
     questionCountSelect: document.getElementById('questionCountSelect'),
+    yearSelect: document.getElementById('yearSelect'),
+    yearField: document.getElementById('yearField'),
     durationSelect: document.getElementById('durationSelect'),
     startBtn: document.getElementById('startBtn'),
     switchUserBtn: document.getElementById('switchUserBtn'),
@@ -297,6 +299,22 @@
 
     const total = subjects.reduce((sum, s) => sum + QUESTION_BANK[s].length, 0);
     el.statQuestions.textContent = String(total);
+    populateYears();
+  }
+
+  // Year picker for single-subject sessions. Lists only the years that have
+  // dated past-paper questions for the chosen subject; hidden when none do.
+  // "All years" keeps today's behaviour (every question, mixed).
+  function populateYears() {
+    if (!el.yearSelect) return;
+    const pool = QUESTION_BANK[el.subjectSelect.value] || [];
+    const counts = {};
+    pool.forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
+    const years = Object.keys(counts).map(Number).sort((a, b) => b - a);
+    el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
+      years.map(y => `<option value="${y}">JAMB ${y} · ${counts[y]} questions</option>`).join('');
+    el.yearSelect.value = 'all';
+    el.yearField.classList.toggle('hidden', !years.length);
   }
 
   function bindEvents() {
@@ -342,7 +360,7 @@
     });
 
     el.modeSelect.addEventListener('change', () => { syncDurationUi(); syncStartButton(); });
-    el.subjectSelect.addEventListener('change', () => syncStartButton());
+    el.subjectSelect.addEventListener('change', () => { populateYears(); syncStartButton(); });
     el.sessionTypeSelect.addEventListener('change', syncSessionTypeUi);
     el.toggleExplanationBtn.addEventListener('click', toggleReviewExplanation);
     // New features
@@ -447,14 +465,21 @@
 
   function buildSingleSession() {
     const subject = el.subjectSelect.value;
-    const pool = QUESTION_BANK[subject];
+    const yearVal = el.yearSelect ? el.yearSelect.value : 'all';
+    const year = yearVal && yearVal !== 'all' ? Number(yearVal) : null;
+    const pool = year ? QUESTION_BANK[subject].filter(q => q.year === year) : QUESTION_BANK[subject];
     const countValue = el.questionCountSelect.value;
     const count = countValue === 'all' ? pool.length : Math.min(Number(countValue), pool.length);
-    const questions = groupAwarePick(pool, count).map(q => ({ ...q, sourceSubject: subject }));
+    // A whole year's paper is served in the paper's own order, like sitting
+    // the real exam; any other selection is shuffled (passages kept whole).
+    const picked = year && count === pool.length
+      ? fillFromUnits(toUnits(pool), count)
+      : groupAwarePick(pool, count);
+    const questions = picked.map(q => ({ ...q, sourceSubject: subject }));
     return {
       questions,
       subjects: [subject],
-      sessionLabel: fmt(subject),
+      sessionLabel: year ? `${fmt(subject)} · JAMB ${year}` : fmt(subject),
       subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
     };
   }
@@ -648,7 +673,7 @@
     }
 
     el.questionNumberBadge.textContent = `Question ${state.currentIndex + 1} of ${state.currentQuestions.length}`;
-    el.questionSubjectMeta.textContent = fmt(q.sourceSubject || state.subject);
+    el.questionSubjectMeta.textContent = fmt(q.sourceSubject || state.subject) + (q.year ? ` · JAMB ${q.year}` : '');
 
     // Subject position indicator (e.g. "Q6 of 40 in Physics")
     const range = state.subjectRanges[q.sourceSubject];
