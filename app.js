@@ -85,13 +85,15 @@
     if (!q.keyVerdict || !q.answerNote) return '';
     const L = i => String.fromCharCode(65 + i);
     const right = [q.answer, ...(q.alsoAccept || [])].map(L).join(' or ');
+    // Wording allows for the error being a printing mistake in the answer
+    // key in circulation rather than JAMB's own.
     const head = {
-      corrected: `The official answer key says <strong>${escHtml(q.keyAnswer)}</strong>, but that is wrong. The correct answer is <strong>${right}</strong>.`,
-      multiple:  `The official answer key accepts <strong>${escHtml(q.keyAnswer)}</strong>: more than one option is correct, so any of <strong>${right}</strong> is marked right here.`,
-      none:      `None of the options is fully correct; the examiners set a flawed question. The official answer is <strong>${escHtml(q.keyAnswer)}</strong>, which is also the closest option, so that is what we mark right.`,
+      corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
+      multiple:  `More than one option is correct here, so <strong>${right}</strong> are all marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
+      none:      `None of the options is fully correct as printed. The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>, which is also the closest option, so that is what we mark right.`,
     }[q.keyVerdict];
     if (!head) return '';
-    return `<div class="key-check"><div class="key-check-title">⚖️ Answer key check</div>`
+    return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`
       + `<p>${head}</p><p>${escHtml(q.answerNote)}</p>`
       + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning.</p>` : '')
       + `</div>`;
@@ -2842,7 +2844,8 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
         body: JSON.stringify({
           prompt,
           teach: { app: 'jamb', v: 1, subject, question: q.question, options: q.options,
-                   answer: q.answer, passage: q.passage || null, passageTitle: q.passageTitle || null }
+                   answer: q.answer, passage: q.passage || null, passageTitle: q.passageTitle || null,
+                   alsoAccept: q.alsoAccept || null, note: q.keyVerdict ? (q.answerNote || null) : null }
         })
       });
       const data = await res.json().catch(() => ({}));
