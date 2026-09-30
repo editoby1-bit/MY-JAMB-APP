@@ -84,12 +84,14 @@
   function keyCheckHtml(q) {
     if (!q.keyVerdict || !q.answerNote) return '';
     const L = i => String.fromCharCode(65 + i);
-    const right = [q.answer, ...(q.alsoAccept || [])].map(L).join(' or ');
+    const all = [q.answer, ...(q.alsoAccept || [])].sort((a, b) => a - b).map(L);
+    const right = all.join(' or ');
+    const both = all.length === 2 ? `${all[0]} and ${all[1]} are both` : `${all.slice(0, -1).join(', ')} and ${all[all.length - 1]} are all`;
     // Wording allows for the error being a printing mistake in the answer
     // key in circulation rather than JAMB's own.
     const head = {
       corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
-      multiple:  `More than one option is correct here, so <strong>${right}</strong> are all marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
+      multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
       none:      `None of the options is fully correct as printed. The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>, which is also the closest option, so that is what we mark right.`,
     }[q.keyVerdict];
     if (!head) return '';
