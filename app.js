@@ -144,8 +144,17 @@
   function getFreeUsedCount(){return loadPref(SK_FREE)?.n||0;}
   function getCurrentQuarter(){const d=new Date();return `${d.getFullYear()}-Q${Math.ceil((d.getMonth()+1)/3)}`;}
   function getAICredits(){const d=loadPref(SK_AI_CREDITS);if(!d||d.quarter!==getCurrentQuarter()){savePref(SK_AI_CREDITS,{n:AI_QUARTERLY,quarter:getCurrentQuarter()});return AI_QUARTERLY;}return d.n;}
-  function useAICredit(){const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
-  function refundAICredit(){const c=getAICredits();savePref(SK_AI_CREDITS,{n:c+1,quarter:getCurrentQuarter()});}
+  // Student Pass Plus (bought here, via a school bundle, or on My Exams App,
+  // which shares this origin's storage) gets unlimited Teach Me: each
+  // explanation is generated once and cached for everyone, so usage can't
+  // grow the API bill. Other plans keep the quarterly credit allowance.
+  function isPlusUser(){
+    if(!checkAccess())return false;
+    if(loadPref(SK_TIER)==='plus')return true;
+    return !!(loadPref(SK_ACCESS)?.fromExamsApp && loadPref('mea-tier-v1')==='plus');
+  }
+  function useAICredit(){if(isPlusUser())return true;const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
+  function refundAICredit(){if(isPlusUser())return;const c=getAICredits();savePref(SK_AI_CREDITS,{n:c+1,quarter:getCurrentQuarter()});}
   function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');}
   function refreshUpgradeBar(){
     const bar=document.getElementById('jambUpgradeBar');
@@ -1049,9 +1058,9 @@
         saveClassMembership({ classCode, name, pin });
         if (result.entitlement) {
           // Backend speaks My Exams App's tier vocabulary ('student'/'plus')
-          // since that's shared across both apps' bundle logic — JAMB's own
-          // tier is just 'jamb' (access here is binary, not tiered).
-          grantAccess(result.entitlement.days, 'jamb');
+          // since that's shared across both apps' bundle logic.
+          // Branded/Premium bundles grant 'plus' (unlimited Teach Me).
+          grantAccess(result.entitlement.days, result.entitlement.tier === 'plus' ? 'plus' : 'jamb');
         } else {
           showInfoToast('Joined class!');
         }
@@ -2705,6 +2714,7 @@
   function updateAICreditsBadge() {
     const badge = document.getElementById('aiCreditsBadge');
     if (!badge) return;
+    if (isPlusUser()) { badge.textContent = 'Unlimited · Plus'; badge.style.color = '#27ae60'; return; }
     const c = getAICredits();
     badge.textContent = `${c} credit${c===1?'':'s'} left`;
     badge.style.color = c < 10 ? '#e74c3c' : '#27ae60';
@@ -2773,7 +2783,7 @@
     // Already-fetched explanations stay viewable even at 0 credits.
     const alreadyCached = !!getCachedTeach(teachCacheKey(q.sourceSubject || state.subject, q));
     const credits = getAICredits();
-    if (credits <= 0 && !alreadyCached) {
+    if (credits <= 0 && !alreadyCached && !isPlusUser()) {
       alert(`You've used all ${AI_QUARTERLY} AI explanation credits for this quarter.\n\nTop up: ₦500 = 50 more explanations.`);
       return;
     }
