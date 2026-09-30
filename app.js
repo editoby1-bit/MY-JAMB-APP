@@ -312,6 +312,8 @@
 
     const total = subjects.reduce((sum, s) => sum + QUESTION_BANK[s].length, 0);
     el.statQuestions.textContent = String(total);
+    // Plan cards quote the live bank size, so it never goes stale.
+    document.querySelectorAll('[data-qcount]').forEach(n => { n.textContent = String(total); });
     populateYears();
   }
 
