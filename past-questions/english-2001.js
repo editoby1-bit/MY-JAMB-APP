@@ -3,8 +3,8 @@
  * Transcribed from the 2001 question paper; answers from the JAMB/UTME
  * English Language answer key 2001–2020.
  *
- * Every answer was checked against the paper. Where the official key is
- * wanting, the question carries keyVerdict + keyAnswer + answerNote, which
+ * Every answer was checked against the paper. Where the answer key in
+ * circulation is wrong (often a printing error), the question carries keyVerdict + keyAnswer + answerNote, which
  * the app shows as an "Answer key check" under the explanation:
  *   'corrected' key is wrong; `answer` is the correct option
  *   'multiple'  key accepts several options; extras are in `alsoAccept`
@@ -97,7 +97,7 @@
     q(GAP + "The meeting was called to _____ divergent views on the subject of a national conference.", ["re-present", "reconstitute", "reconcile", "recommend"], C, "Divergent (differing) views are reconciled — brought into agreement."),
     q(GAP + "The police came early enough to _____ the bomb planted by the rioters.", ["detonate", "insulate", "diffuse", "defuse"], D, "To defuse a bomb is to remove its fuse so it can't explode. 'Diffuse' means to spread out; 'detonate' means to explode it."),
     q(GAP + "The government which _____ recruiting _____ workers suddenly stopped doing so.", ["is / their", "were / their", "was / its", "are / its"], C, "'The government' here is one body acting as a unit, and 'stopped' is past, so singular past verb and singular pronoun: was … its."),
-    q(GAP + "They had to _____ the generator when the electricity failed.", ["resort to", "switch on", "light up", "fall back on"], A, "'Had to' tells us the generator was a backup they were forced to turn to. Both 'resort to' and 'fall back on' mean turning to an alternative when the usual option fails, so either is right. 'Light up' is wrong for a generator.", { alsoAccept: [D], keyVerdict: 'multiple', keyAnswer: 'A or D', answerNote: "The examiners' own key lists two answers (A/D), which a single-answer question should never have. 'Switch on' (B) is also good English, but it only describes pressing the button; 'had to' points to turning to a backup, which is what 'resort to' and 'fall back on' express." }),
+    q(GAP + "They had to _____ the generator when the electricity failed.", ["resort to", "switch on", "light up", "fall back on"], A, "'Had to' tells us the generator was a backup they were forced to turn to. Both 'resort to' and 'fall back on' mean turning to an alternative when the usual option fails, so either is right. 'Light up' is wrong for a generator.", { alsoAccept: [D], keyVerdict: 'multiple', keyAnswer: 'A or D', answerNote: "The answer key lists two answers (A/D), because both are correct. 'Switch on' (B) is also good English, but it only describes pressing the button; 'had to' points to turning to a backup, which is what 'resort to' and 'fall back on' express." }),
     q(GAP + "I do not think any sane person would have acted in such a _____ manner.", ["rational", "cruel", "secret", "composed"], B, "'Any sane person would NOT have acted…' — the manner must be one a sane person would avoid: cruel."),
     q(GAP + "Neither Agbo nor his parents _____ the meetings now.", ["has attended", "attend", "attends", "attended"], B, "With 'neither…nor', the verb agrees with the nearer subject, 'his parents' (plural), and 'now' needs the present tense → attend."),
     q(GAP + "Modern dancing has become rather scientific and so requires _____.", ["a rapping voice", "bizarre costuming", "immense instrumentation", "some choreographic skill"], D, "Choreography is the art of designing dance movements — the skill a 'scientific' approach to dancing requires."),
