@@ -2831,23 +2831,24 @@
     handler.openIframe();
   }
 
-  function redeemJambCode() {
-    const code = (document.getElementById('jambCodeInput')?.value || '').trim().toUpperCase();
+  // Access codes for testers are checked on the server (they used to be
+  // listed here, readable by anyone who viewed the page source).
+  async function redeemJambCode() {
+    const input = document.getElementById('jambCodeInput');
+    const code = (input?.value || '').trim().toUpperCase();
     if (!code) return;
-    const codes = {
-      'MEA-DEMO-2025': { days:90, tier:'plus' }, // Student Pass demo
-      'JAMB-PROMO':    { days:90, tier:'jamb' },
-      'MEA-PLUS-DEMO': { days:90, tier:'plus' },
-      'TEST7':         { days:7,  tier:'plus' }, // Student Pass demo
-    };
-    if (codes[code]) {
-      grantAccess(codes[code].days, codes[code].tier);
-      // Demo snaps come from the server (5 per code per network).
-      fetch(API_BASE + '/api/verify-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ demoSnaps: true, code }) })
-        .then(r => r.json()).then(d => { if (d.ok) setSnapPass(d.snapToken, d.snapsLeft); }).catch(() => {});
-    } else {
-      alert('Invalid or expired code.');
+    const btn = document.getElementById('jambRedeemBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Checking…'; }
+    try {
+      const r = await fetch(API_BASE + '/api/verify-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ redeemCode: true, code }) });
+      const d = await r.json().catch(() => ({}));
+      if (d.ok) grantAccess(d.days, d.tier, null, d);
+      else alert(d.error || 'Invalid or expired code.');
+    } catch {
+      alert('No connection. Check your internet and try again.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Redeem'; }
     }
   }
 
