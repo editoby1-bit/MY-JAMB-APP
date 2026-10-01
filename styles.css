@@ -1786,3 +1786,4 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 /* Early-access price line on the JAMB paywall */
 .jpw-ea { margin: 0.4rem 0 0.2rem; font-size: 0.85rem; font-weight: 600; color: #fbbf24; text-align: center; }
 .jpw-was { font-size: 0.6em; color: #94a3b8; margin-left: 0.35rem; font-weight: 500; }
+.jpw-restore-link { background: none; border: none; padding: 0; color: #fbbf24; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
