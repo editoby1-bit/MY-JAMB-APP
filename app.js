@@ -3,12 +3,13 @@
   const SW_SUBJECTS    = ['mathematics','physics','chemistry','economics','accounting'];
   const SW_SUBJECTS_LBL = { mathematics:'Mathematics', physics:'Physics', chemistry:'Chemistry', economics:'Economics', accounting:'Accounting' };
   const SK_SW_CREDITS  = 'jamb-sw-credits-v1';
-  const SW_QUARTERLY   = 20; // snaps per period (see SW_PERIOD_DAYS)
-  // Snap allowances count from the student's payment date, not calendar
-  // quarters. The JAMB pass gets one batch of 20 (plus top-ups) for the
-  // whole run-up to the exam: the period is longer than any pass, so it
-  // never refills mid-pass. A new payment starts a fresh batch.
-  const SW_PERIOD_DAYS = 365;
+  const SW_QUARTERLY   = 20; // Show Working snaps included with a JAMB pass (server: ALLOWANCE.jamb)
+  // Snaps are counted on the server, one shared balance per pass, so every
+  // phone on a pass (and My Exams App, for a Student Pass) draws from the
+  // same 20. The pass's secret snap token is saved here; the count below is
+  // just the last balance the server reported, for display.
+  const SK_SNAP_TOKEN  = 'jamb-snap-token-v1';
+  const MEA_SNAP_TOKEN = 'mea-snap-token-v1';
   const SNAP_API_URL   = 'https://editoby-api.vercel.app/api/mark';
   // Same Vercel project as My Exams App — /api/verify-payment and /api/teach
   // are shared across both apps.
@@ -110,27 +111,37 @@
     return fillFromUnits(shuffle(toUnits(pool)), count);
   }
 
-  // Start of the current snap period: the payment date, then every
-  // SW_PERIOD_DAYS after it. Access saved before this change has no start
-  // date, so it gets one (today) the first time it's needed.
-  function swPeriodStart() {
-    const acc = loadPref(SK_ACCESS);
-    let start = acc?.start;
-    if (!start) { start = Date.now(); if (acc) savePref(SK_ACCESS, { ...acc, start }); }
-    const P = SW_PERIOD_DAYS * 86400000;
-    return start + Math.max(0, Math.floor((Date.now() - start) / P)) * P;
+  // The pass's snap token: its own, or a My Exams App Student Pass's (same
+  // origin storage) when access comes from there.
+  function snapToken() {
+    return loadPref(SK_SNAP_TOKEN) || (loadPref(SK_ACCESS)?.fromExamsApp ? loadPref(MEA_SNAP_TOKEN) : null);
   }
+  function setSnapPass(token, left) {
+    if (token) savePref(SK_SNAP_TOKEN, token);
+    if (typeof left === 'number') setSWLeft(left);
+  }
+  function setSWLeft(n) {
+    savePref(SK_SW_CREDITS, { n: Math.max(0, n) });
+    document.querySelectorAll('#swCredits').forEach(b => { b.textContent = Math.max(0, n) + ' snaps left'; });
+  }
+  // Last balance the server reported (0 with no pass on this phone).
   function getSWCredits() {
-    const ps = swPeriodStart();
-    const d  = loadPref(SK_SW_CREDITS);
-    if (!d || d.periodStart !== ps) { savePref(SK_SW_CREDITS,{n:SW_QUARTERLY,periodStart:ps}); return SW_QUARTERLY; }
-    return d.n;
+    if (!snapToken()) return 0;
+    const d = loadPref(SK_SW_CREDITS);
+    return typeof d?.n === 'number' ? d.n : SW_QUARTERLY;
   }
-  function useSWCredit() {
-    const c = getSWCredits();
-    if (c<=0) return false;
-    savePref(SK_SW_CREDITS,{n:c-1,periodStart:swPeriodStart()});
-    return true;
+  // Refreshes the balance from the server (it changes when another phone on
+  // the pass uses a snap or tops up). Returns the balance, or null offline.
+  async function syncSWCredits() {
+    const token = snapToken();
+    if (!token) return 0;
+    try {
+      const r = await fetch(SNAP_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkSnaps: true, snapToken: token }) });
+      const d = await r.json();
+      if (typeof d.snapsLeft === 'number') { setSWLeft(d.snapsLeft); return d.snapsLeft; }
+    } catch {}
+    return null;
   }
 
   const storageKeys = {
@@ -382,6 +393,13 @@
       if (panel) panel.classList.add('hidden');
     });
 
+    // Main "Snap My Working" button (it had no handler, so only the lock
+    // bar's Snap button worked).
+    document.getElementById('swSnapBtn')?.addEventListener('click', triggerSWSnap);
+    // The chosen photo goes to handleSWFile (this was never wired either, so
+    // a snapped photo was silently dropped).
+    document.getElementById('swFileInput')?.addEventListener('change', handleSWFile);
+
     // SW lock bar snap button
     const swLockSnapBtn = document.getElementById('swLockSnapBtn');
     if (swLockSnapBtn) swLockSnapBtn.addEventListener('click', () => {
@@ -477,7 +495,7 @@
 
     if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
     if (state.mode === 'exam') startTimer();
-    if (state.mode === 'showworking') showSWIntroBanner();
+    if (state.mode === 'showworking') { showSWIntroBanner(); syncSWCredits(); }
 
     el.sidebarStudent.textContent = state.student;
     el.sidebarMode.textContent = state.mode === 'exam'
@@ -1078,7 +1096,7 @@
           // Backend speaks My Exams App's tier vocabulary ('student'/'plus')
           // since that's shared across both apps' bundle logic.
           // Every school bundle gives students the full Student Pass.
-          grantAccess(result.entitlement.days, 'plus');
+          grantAccess(result.entitlement.days, 'plus', null, result);
         } else {
           showInfoToast('Joined class!');
         }
@@ -2578,12 +2596,12 @@
      PAYWALL + ACCESS CONTROL
   ════════════════════════════════════════════════════ */
 
-  function grantAccess(days, tier, reference) {
+  // snap: { snapToken, snapsLeft } from the server, when the pass has one.
+  function grantAccess(days, tier, reference, snap) {
     const exp = new Date();
     exp.setDate(exp.getDate() + days);
-    // `start` anchors the snap periods: a new payment starts a fresh batch.
     savePref(SK_ACCESS, { expires: exp.toISOString(), start: Date.now() });
-    localStorage.removeItem(SK_SW_CREDITS);
+    if (snap?.snapToken) setSnapPass(snap.snapToken, snap.snapsLeft);
     savePref(SK_TIER, tier || 'jamb');
     document.getElementById('jambPaywall')?.classList.add('hidden');
     refreshChallengeBtn();
@@ -2762,6 +2780,7 @@
         const d = await res.json().catch(() => ({}));
         if (!d.restored) return fail(d.error || 'Could not restore. Please try again.');
         savePref(SK_ACCESS, { expires: d.expires, start: Date.parse(d.paidAt) || Date.now() });
+        if (d.snapToken) setSnapPass(d.snapToken, d.snapsLeft);
         savePref(SK_TIER, d.tier || 'jamb');
         close();
         document.getElementById('jambPaywall')?.classList.add('hidden');
@@ -2805,7 +2824,7 @@
             alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
             return;
           }
-          grantAccess(data.days || 90, data.tier || 'jamb', response.reference);
+          grantAccess(data.days || 90, data.tier || 'jamb', response.reference, data);
         })();
       }
     });
@@ -2823,6 +2842,10 @@
     };
     if (codes[code]) {
       grantAccess(codes[code].days, codes[code].tier);
+      // Demo snaps come from the server (5 per code per network).
+      fetch(API_BASE + '/api/verify-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ demoSnaps: true, code }) })
+        .then(r => r.json()).then(d => { if (d.ok) setSnapPass(d.snapToken, d.snapsLeft); }).catch(() => {});
     } else {
       alert('Invalid or expired code.');
     }
@@ -4114,39 +4137,44 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     if (lockBar) lockBar.classList.toggle('hidden', unlock);
   }
 
-  function triggerSWSnap() {
+  async function triggerSWSnap() {
     if (!checkAccess()) { showPaywall('feature'); return; }
-    const credits = getSWCredits();
-    if (credits <= 0) {
-      showSWTopUp();
+    if (!snapToken()) {
+      alert('Snaps are linked to your pass. If you paid on another phone, tap "Restore access" on the payment screen to use your snaps here.');
       return;
     }
-    document.getElementById('swFileInput')?.click();
+    // Open the camera straight away (browsers only allow it from the tap
+    // itself); the server makes the final check when the photo is sent.
+    if (getSWCredits() > 0) { document.getElementById('swFileInput')?.click(); syncSWCredits(); return; }
+    const left = await syncSWCredits();
+    if (left > 0) { alert(`You have ${left} snaps — tap Snap again.`); return; }
+    showSWTopUp();
   }
 
+  // Out of snaps: offer the ₦500 top-up. (It used to reuse an
+  // 'exitConfirmModal' that this page doesn't have, so nothing appeared.)
   function showSWTopUp() {
-    const modal = document.getElementById('exitConfirmModal');
-    const icon  = document.getElementById('exitModalIcon');
-    const title = document.getElementById('exitModalTitle');
-    const sub   = document.getElementById('exitModalSub');
-    if (!modal) return;
-    icon.textContent  = '📸';
-    title.textContent = 'Snaps Exhausted';
-    sub.textContent   = `You have used all ${SW_QUARTERLY} Show Working snaps included with your pass. Top up with 10 more snaps for ₦500.`;
-    const stay  = document.getElementById('exitModalStay');
-    const leave = document.getElementById('exitModalLeave');
-    const newStay  = stay.cloneNode(true);
-    const newLeave = leave.cloneNode(true);
-    stay.parentNode.replaceChild(newStay, stay);
-    leave.parentNode.replaceChild(newLeave, leave);
-    document.getElementById('exitModalStay').textContent  = 'Not Now';
-    document.getElementById('exitModalLeave').textContent = 'Top Up — ₦500 →';
-    document.getElementById('exitModalStay').addEventListener('click',  () => modal.classList.add('hidden'));
-    document.getElementById('exitModalLeave').addEventListener('click', () => {
-      modal.classList.add('hidden');
-      handleSWTopUpPayment();
-    });
-    modal.classList.remove('hidden');
+    document.getElementById('swTopUpOverlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'swTopUpOverlay';
+    overlay.style.cssText = `position:fixed; inset:0; background:rgba(5,10,20,.72); display:flex; align-items:center;
+      justify-content:center; z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);`;
+    overlay.innerHTML = `
+      <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px; padding:1.6rem 1.4rem;
+                  max-width:340px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+        <div style="font-size:2rem;">📸</div>
+        <h3 style="margin:.4rem 0; color:#fff; font-size:1.05rem;">You've used all your snaps</h3>
+        <p style="margin:0 0 1.1rem; color:var(--text-dim,#9aa5b1); font-size:.88rem; line-height:1.45;">
+          Get 10 more Show Working snaps for ₦500. They're added to your pass, on every phone it's on.</p>
+        <div style="display:flex; gap:.6rem;">
+          <button id="swTopUpNo" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a; background:transparent; color:#fff; font-weight:600;">Not now</button>
+          <button id="swTopUpYes" style="flex:1; padding:.65rem; border-radius:9px; border:none; background:var(--gold,#d4af37); color:#0a1628; font-weight:700;">Top up — ₦500</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#swTopUpNo').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    overlay.querySelector('#swTopUpYes').addEventListener('click', () => { overlay.remove(); handleSWTopUpPayment(); });
   }
 
   async function handleSWTopUpPayment() {
@@ -4169,7 +4197,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
           const res = await fetch(API_BASE + '/api/verify-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reference: response.reference })
+            body: JSON.stringify({ reference: response.reference, snapToken: snapToken() })
           }).catch(() => null);
           const data = res ? await res.json().catch(() => ({})) : {};
           if (!res || !res.ok || !data.verified) {
@@ -4177,11 +4205,9 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
             return;
           }
           const addCredits = data.credits || 10;
-          const current = getSWCredits();
-          savePref(SK_SW_CREDITS, { n: current + addCredits, periodStart: swPeriodStart() });
-          const badge = document.getElementById('swCredits');
-          if (badge) badge.textContent = getSWCredits() + ' snaps left';
-          alert(`✅ ${addCredits} snaps added! You now have ` + getSWCredits() + ' snaps remaining.');
+          if (data.snapToken && !loadPref(SK_SNAP_TOKEN) && data.snapToken !== snapToken()) savePref(SK_SNAP_TOKEN, data.snapToken);
+          if (typeof data.snapsLeft === 'number') setSWLeft(data.snapsLeft);
+          alert(`✅ ${addCredits} snaps added! You now have ${getSWCredits()} snaps for your pass.`);
         })();
       }
     });
@@ -4229,63 +4255,36 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     const proc = document.getElementById('swProcessing');
     if (proc) proc.classList.remove('hidden');
 
-    if (!useSWCredit()) {
-      if (proc) proc.classList.add('hidden');
-      alert('No working snaps remaining.');
-      return;
-    }
 
     const subjectKey  = (el.subjectSelect?.value||state.subject||'').toLowerCase();
     const subjectName = SW_SUBJECTS_LBL[subjectKey] || state.subject;
-    const correctOpt  = q.options[q.answer];
-
-    const prompt = `You are a JAMB examiner checking a student's working for a ${subjectName} question.
-
-QUESTION: ${q.question}
-OPTIONS: ${q.options.map((o,i)=>String.fromCharCode(65+i)+'. '+o).join(' | ')}
-CORRECT ANSWER: ${correctOpt}
-
-The student has shown their working on paper. Evaluate ONLY the method and steps — do NOT reveal which option letter is correct.
-
-Return ONLY valid JSON:
-{
-  "workingCorrect": true or false,
-  "approach": "one sentence describing the student's approach",
-  "steps": [
-    { "step": "description of what student did", "correct": true/false, "comment": "brief feedback" }
-  ],
-  "feedback": "2-3 sentence overall feedback on the working method",
-  "hint": "one hint to guide them to the answer without revealing it"
-}`;
 
     try {
+      // The server builds the examiner prompt from these fields and takes
+      // one snap from the pass's shared balance (refunded if marking fails).
       const res = await fetch(SNAP_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          snapToken: snapToken(),
+          mode: 'working',
           image: base64, mediaType,
-          question: prompt,
-          scheme: [{ point: 'Correct working method', marks: 1 }],
-          totalMarks: 1,
+          question: q.question,
+          options: q.options,
+          answer: q.answer,
           subject: subjectName,
-          examBody: 'JAMB',
         }),
       });
 
       if (proc) proc.classList.add('hidden');
+      const data = await res.json().catch(() => ({}));
+      if (typeof data.snapsLeft === 'number') setSWLeft(data.snapsLeft);
 
-      const data = await res.json();
-      // Parse the feedback from the API — the API returns breakdown/feedback
-      // We sent a custom prompt so parse from the feedback field
-      let parsed;
-      try {
-        // Try to extract JSON from the feedback field
-        const raw = data.feedback || '';
-        const match = raw.match(/\{[\s\S]*\}/);
-        parsed = match ? JSON.parse(match[0]) : null;
-      } catch(e) { parsed = null; }
+      if (data.code === 'NO_SNAPS') { showSWTopUp(); return; }
+      if (data.code === 'NO_PASS') { alert(data.error || 'Snaps are linked to your pass. Tap "Restore access" on the payment screen.'); return; }
+      if (!res.ok || !data.working) { alert(data.error || 'Could not mark your working. Your snap was not used — please try again.'); return; }
 
-      showSWResult(parsed, data);
+      showSWResult(data.working, data);
 
     } catch(err) {
       if (proc) proc.classList.add('hidden');
