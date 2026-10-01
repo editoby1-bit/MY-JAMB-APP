@@ -186,7 +186,7 @@
     if(txt){
       const used=getFreeUsedCount();
       const msgs=[
-        `⚡ ${used} of 10 free sessions used — unlock everything until your exam, from ₦2,000`,
+        `⚡ ${used} of 10 free sessions used — unlock everything till the exams, from ₦2,000`,
         `🧠 The only JAMB app where AI explains every answer — unlimited`,
         `🏆 Subscribe to challenge friends and unlock community quiz`,
         `📅 ${10-used} free session${10-used===1?'':'s'} remaining — upgrade anytime`,
@@ -2621,7 +2621,7 @@
     const eaEl = document.getElementById('jambEaLine');
     const btn = document.getElementById('jambPayBtn');
     const periodEl = document.getElementById('jambPassPeriod');
-    if (periodEl) periodEl.textContent = `Access until ${passUntilLabel()}`;
+    if (periodEl) periodEl.textContent = `Full access till the exams (ends ${passUntilLabel()})`;
     if (left > 0) {
       if (amountEl) amountEl.innerHTML = '₦2,000 <s class="jpw-was">₦2,500</s>';
       if (eaEl) { eaEl.textContent = `🔥 Early access: first 100 students pay ₦2,000 — ${left} spot${left === 1 ? '' : 's'} left`; eaEl.classList.remove('hidden'); }
@@ -4070,7 +4070,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     if (!modal) return;
     icon.textContent  = '📸';
     title.textContent = 'Snaps Exhausted';
-    sub.textContent   = `You have used all ${SW_QUARTERLY} Show Working snaps for now. They refill ${SW_PERIOD_DAYS / 30} months after your payment date. Top up with 10 more snaps for ₦300.`;
+    sub.textContent   = `You have used all ${SW_QUARTERLY} Show Working snaps included with your pass. Top up with 10 more snaps for ₦300.`;
     const stay  = document.getElementById('exitModalStay');
     const leave = document.getElementById('exitModalLeave');
     const newStay  = stay.cloneNode(true);
