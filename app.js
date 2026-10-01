@@ -3,7 +3,11 @@
   const SW_SUBJECTS    = ['mathematics','physics','chemistry','economics','accounting'];
   const SW_SUBJECTS_LBL = { mathematics:'Mathematics', physics:'Physics', chemistry:'Chemistry', economics:'Economics', accounting:'Accounting' };
   const SK_SW_CREDITS  = 'jamb-sw-credits-v1';
-  const SW_QUARTERLY   = 20; // snaps per quarter
+  const SW_QUARTERLY   = 20; // snaps per period (see SW_PERIOD_DAYS)
+  // Snap allowances run in periods counted from the student's payment date,
+  // not calendar quarters. 4 months means a pass bought for the February
+  // exam gets one batch of 20 (plus top-ups) for the whole run-up.
+  const SW_PERIOD_DAYS = 120;
   const SNAP_API_URL   = 'https://editoby-api.vercel.app/api/mark';
   // Same Vercel project as My Exams App — /api/verify-payment and /api/teach
   // are shared across both apps.
@@ -105,16 +109,26 @@
     return fillFromUnits(shuffle(toUnits(pool)), count);
   }
 
+  // Start of the current snap period: the payment date, then every
+  // SW_PERIOD_DAYS after it. Access saved before this change has no start
+  // date, so it gets one (today) the first time it's needed.
+  function swPeriodStart() {
+    const acc = loadPref(SK_ACCESS);
+    let start = acc?.start;
+    if (!start) { start = Date.now(); if (acc) savePref(SK_ACCESS, { ...acc, start }); }
+    const P = SW_PERIOD_DAYS * 86400000;
+    return start + Math.max(0, Math.floor((Date.now() - start) / P)) * P;
+  }
   function getSWCredits() {
-    const qtr = getCurrentQuarter();
-    const d   = loadPref(SK_SW_CREDITS);
-    if (!d || d.quarter !== qtr) { savePref(SK_SW_CREDITS,{n:SW_QUARTERLY,quarter:qtr}); return SW_QUARTERLY; }
+    const ps = swPeriodStart();
+    const d  = loadPref(SK_SW_CREDITS);
+    if (!d || d.periodStart !== ps) { savePref(SK_SW_CREDITS,{n:SW_QUARTERLY,periodStart:ps}); return SW_QUARTERLY; }
     return d.n;
   }
   function useSWCredit() {
     const c = getSWCredits();
     if (c<=0) return false;
-    savePref(SK_SW_CREDITS,{n:c-1,quarter:getCurrentQuarter()});
+    savePref(SK_SW_CREDITS,{n:c-1,periodStart:swPeriodStart()});
     return true;
   }
 
@@ -2566,7 +2580,9 @@
   function grantAccess(days, tier) {
     const exp = new Date();
     exp.setDate(exp.getDate() + days);
-    savePref(SK_ACCESS, { expires: exp.toISOString() });
+    // `start` anchors the snap periods: a new payment starts a fresh batch.
+    savePref(SK_ACCESS, { expires: exp.toISOString(), start: Date.now() });
+    localStorage.removeItem(SK_SW_CREDITS);
     savePref(SK_TIER, tier || 'jamb');
     document.getElementById('jambPaywall')?.classList.add('hidden');
     refreshChallengeBtn();
@@ -2637,7 +2653,9 @@
   function grantJambFromExamsApp() {
     const examsAccess = loadPref('mea-access-v1');
     if (!examsAccess?.expires) return;
-    savePref(SK_ACCESS, { expires: examsAccess.expires, fromExamsApp: true });
+    const mine = loadPref(SK_ACCESS);
+    savePref(SK_ACCESS, { expires: examsAccess.expires, fromExamsApp: true,
+      start: examsAccess.start || (mine?.fromExamsApp ? mine.start : undefined) || Date.now() });
     refreshChallengeBtn();
   }
 
@@ -4052,7 +4070,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     if (!modal) return;
     icon.textContent  = '📸';
     title.textContent = 'Snaps Exhausted';
-    sub.textContent   = 'You have used all 20 Show Working snaps for this quarter. Top up with 10 more snaps for ₦300.';
+    sub.textContent   = `You have used all ${SW_QUARTERLY} Show Working snaps for now. They refill ${SW_PERIOD_DAYS / 30} months after your payment date. Top up with 10 more snaps for ₦300.`;
     const stay  = document.getElementById('exitModalStay');
     const leave = document.getElementById('exitModalLeave');
     const newStay  = stay.cloneNode(true);
@@ -4096,7 +4114,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
           }
           const addCredits = data.credits || 10;
           const current = getSWCredits();
-          savePref(SK_SW_CREDITS, { n: current + addCredits, quarter: getCurrentQuarter() });
+          savePref(SK_SW_CREDITS, { n: current + addCredits, periodStart: swPeriodStart() });
           const badge = document.getElementById('swCredits');
           if (badge) badge.textContent = getSWCredits() + ' snaps left';
           alert(`✅ ${addCredits} snaps added! You now have ` + getSWCredits() + ' snaps remaining.');
