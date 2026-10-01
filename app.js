@@ -127,12 +127,17 @@
   const SK_ACCESS     = 'jamb-access-v1';
   const SK_FREE       = 'jamb-free-v1';
   const SK_TIER       = 'jamb-tier-v1';
-  const SK_EASOLD     = 'jamb-ea-sold-v1';
   const SK_AI_CREDITS = 'jamb-ai-credits-v1';
   const SK_CLASS       = 'jamb-class-v1';       // { classCode, name, pin } — this device's class membership
   const SK_CLASS_ADMIN = 'jamb-class-admin-v1'; // { classCode, adminSecret, schoolName } — teacher device only
   const JAMB_FREE_LIMIT = 10;
-  const JAMB_EA_CAP     = 100;
+  // My JAMB App is sold as an "until your exam" pass. Keep JAMB_PASS_UNTIL
+  // in sync with the same constant in editoby-api/api/verify-payment.js,
+  // which decides the days actually granted.
+  const JAMB_PASS_UNTIL = '2027-02-28';
+  const JAMB_PRICE      = 250000; // ₦2,500 in kobo
+  const JAMB_EA_PRICE   = 200000; // ₦2,000 in kobo, first 100 students (counted by the server)
+  const passUntilLabel  = () => new Date(JAMB_PASS_UNTIL + 'T12:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
   const AI_QUARTERLY    = 100;
   const PAYSTACK_KEY    = 'pk_live_5d12ee2a90900116dc222107e059a06214c085ff';
   // 🔑 Replace above with pk_live_ key when Paystack approves
@@ -144,16 +149,11 @@
   function getFreeUsedCount(){return loadPref(SK_FREE)?.n||0;}
   function getCurrentQuarter(){const d=new Date();return `${d.getFullYear()}-Q${Math.ceil((d.getMonth()+1)/3)}`;}
   function getAICredits(){const d=loadPref(SK_AI_CREDITS);if(!d||d.quarter!==getCurrentQuarter()){savePref(SK_AI_CREDITS,{n:AI_QUARTERLY,quarter:getCurrentQuarter()});return AI_QUARTERLY;}return d.n;}
-  // Student Pass holders (bought on My Exams App, which shares this
-  // origin's storage, via a school bundle, or a Student Pass demo code) get
-  // unlimited Teach Me: each explanation is generated once and cached for
-  // everyone, so usage can't grow the API bill. JAMB Only keeps the
-  // quarterly credit allowance.
-  function isPlusUser(){
-    if(!checkAccess())return false;
-    if(loadPref(SK_TIER)==='plus')return true;
-    return !!loadPref(SK_ACCESS)?.fromExamsApp;
-  }
+  // Every paid user (JAMB pass, Student Pass from My Exams App, school
+  // bundle, demo code) gets unlimited Teach Me: each explanation is
+  // generated once and cached for everyone, so usage can't grow the API
+  // bill. The credit helpers stay for the record but never block a payer.
+  function isPlusUser(){ return checkAccess(); }
   function useAICredit(){if(isPlusUser())return true;const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
   function refundAICredit(){if(isPlusUser())return;const c=getAICredits();savePref(SK_AI_CREDITS,{n:c+1,quarter:getCurrentQuarter()});}
   function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');}
@@ -172,8 +172,8 @@
     if(txt){
       const used=getFreeUsedCount();
       const msgs=[
-        `⚡ ${used} of 10 free sessions used — unlock full access for ₦1,500`,
-        `🧠 The only JAMB app with AI explanations — ₦1,500`,
+        `⚡ ${used} of 10 free sessions used — unlock everything until your exam, from ₦2,000`,
+        `🧠 The only JAMB app where AI explains every answer — unlimited`,
         `🏆 Subscribe to challenge friends and unlock community quiz`,
         `📅 ${10-used} free session${10-used===1?'':'s'} remaining — upgrade anytime`,
       ];
@@ -2570,7 +2570,8 @@
     savePref(SK_TIER, tier || 'jamb');
     document.getElementById('jambPaywall')?.classList.add('hidden');
     refreshChallengeBtn();
-    alert(`✅ Access granted for ${days} days! Welcome to My JAMB App.`);
+    const until = exp.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+    alert(`✅ Access granted until ${until}! Welcome to My JAMB App.`);
   }
 
 
@@ -2578,6 +2579,42 @@
     const badge = document.getElementById('jambPaywallBadge');
     if (badge) badge.textContent = reason === 'trial' ? 'FREE TRIAL COMPLETE' : 'PREMIUM FEATURE';
     document.getElementById('jambPaywall')?.classList.remove('hidden');
+    updateJambPriceUi();
+  }
+
+  // Asks the server how many of the first-100 ₦2,000 spots are taken (and
+  // whether this email holds one). null if the server can't be reached.
+  async function fetchJambEarlyStatus(email) {
+    try {
+      const res = await fetch(API_BASE + '/api/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ earlyAdopterStatus: true, app: 'jamb', email: email || '' })
+      });
+      const d = await res.json();
+      return res.ok && typeof d.sold === 'number' ? d : null;
+    } catch { return null; }
+  }
+
+  // Paywall price: ₦2,000 while early spots remain, else ₦2,500. If the
+  // server can't be reached the offer is hidden rather than guessed.
+  async function updateJambPriceUi() {
+    const ea = await fetchJambEarlyStatus();
+    const left = ea ? Math.max(0, ea.cap - ea.sold) : 0;
+    const amountEl = document.querySelector('#jambPaywall .jpw-amount');
+    const eaEl = document.getElementById('jambEaLine');
+    const btn = document.getElementById('jambPayBtn');
+    const periodEl = document.getElementById('jambPassPeriod');
+    if (periodEl) periodEl.textContent = `Access until ${passUntilLabel()}`;
+    if (left > 0) {
+      if (amountEl) amountEl.innerHTML = '₦2,000 <s class="jpw-was">₦2,500</s>';
+      if (eaEl) { eaEl.textContent = `🔥 Early access: first 100 students pay ₦2,000 — ${left} spot${left === 1 ? '' : 's'} left`; eaEl.classList.remove('hidden'); }
+      if (btn) btn.textContent = 'Get Early Access — ₦2,000 →';
+    } else {
+      if (amountEl) amountEl.textContent = '₦2,500';
+      if (eaEl) eaEl.classList.add('hidden');
+      if (btn) btn.textContent = 'Get Access — ₦2,500 →';
+    }
   }
 
   function initPaywall() {
@@ -2660,9 +2697,11 @@
   async function handleJambPayment() {
     const email = await getEmailViaModal();
     if (!email) return; // cancelled
-    const sold = loadPref(SK_EASOLD) || 0;
-    const isEA = sold < JAMB_EA_CAP;
-    const amount = 150000; // ₦1,500 in kobo
+    // The server holds the first-100 count (by email), so an early-access
+    // student keeps ₦2,000 on any device.
+    const ea = await fetchJambEarlyStatus(email);
+    const isEA = !!ea && (ea.member || ea.sold < ea.cap);
+    const amount = isEA ? JAMB_EA_PRICE : JAMB_PRICE;
 
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_KEY,
@@ -2670,7 +2709,7 @@
       currency: 'NGN',
       ref: 'JAMB-' + Date.now(),
       metadata: { custom_fields: [
-        { display_name: 'Plan', variable_name: 'plan', value: 'My JAMB App' },
+        { display_name: 'Plan', variable_name: 'plan', value: `My JAMB App — until ${passUntilLabel()}${isEA ? ' (early access)' : ''}` },
         { display_name: 'App',  variable_name: 'app',  value: 'My JAMB App' },
       ]},
       onClose() {},
@@ -2686,7 +2725,6 @@
             alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
             return;
           }
-          if (isEA) savePref(SK_EASOLD, sold + 1);
           grantAccess(data.days || 90, data.tier || 'jamb');
         })();
       }
@@ -2717,7 +2755,7 @@
   function updateAICreditsBadge() {
     const badge = document.getElementById('aiCreditsBadge');
     if (!badge) return;
-    if (isPlusUser()) { badge.textContent = 'Unlimited · Student Pass'; badge.style.color = '#27ae60'; return; }
+    if (isPlusUser()) { badge.textContent = 'Unlimited'; badge.style.color = '#27ae60'; return; }
     const c = getAICredits();
     badge.textContent = `${c} credit${c===1?'':'s'} left`;
     badge.style.color = c < 10 ? '#e74c3c' : '#27ae60';

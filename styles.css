@@ -1782,3 +1782,7 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .ai-you { font-size: .85rem; margin: .4rem 0 .6rem; }
 .ai-you-right strong { color: #2e9d5b; }
 .ai-you-wrong strong { color: #e57373; }
+
+/* Early-access price line on the JAMB paywall */
+.jpw-ea { margin: 0.4rem 0 0.2rem; font-size: 0.85rem; font-weight: 600; color: #fbbf24; text-align: center; }
+.jpw-was { font-size: 0.6em; color: #94a3b8; margin-left: 0.35rem; font-weight: 500; }
