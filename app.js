@@ -4,10 +4,11 @@
   const SW_SUBJECTS_LBL = { mathematics:'Mathematics', physics:'Physics', chemistry:'Chemistry', economics:'Economics', accounting:'Accounting' };
   const SK_SW_CREDITS  = 'jamb-sw-credits-v1';
   const SW_QUARTERLY   = 20; // snaps per period (see SW_PERIOD_DAYS)
-  // Snap allowances run in periods counted from the student's payment date,
-  // not calendar quarters. 4 months means a pass bought for the February
-  // exam gets one batch of 20 (plus top-ups) for the whole run-up.
-  const SW_PERIOD_DAYS = 120;
+  // Snap allowances count from the student's payment date, not calendar
+  // quarters. The JAMB pass gets one batch of 20 (plus top-ups) for the
+  // whole run-up to the exam: the period is longer than any pass, so it
+  // never refills mid-pass. A new payment starts a fresh batch.
+  const SW_PERIOD_DAYS = 365;
   const SNAP_API_URL   = 'https://editoby-api.vercel.app/api/mark';
   // Same Vercel project as My Exams App — /api/verify-payment and /api/teach
   // are shared across both apps.
@@ -148,7 +149,7 @@
   // My JAMB App is sold as an "until your exam" pass. Keep JAMB_PASS_UNTIL
   // in sync with the same constant in editoby-api/api/verify-payment.js,
   // which decides the days actually granted.
-  const JAMB_PASS_UNTIL = '2027-02-28';
+  const JAMB_PASS_UNTIL = '2027-04-30'; // UTME date not announced yet; it won't be later than April
   const JAMB_PRICE      = 250000; // ₦2,500 in kobo
   const JAMB_EA_PRICE   = 200000; // ₦2,000 in kobo, first 100 students (counted by the server)
   const passUntilLabel  = () => new Date(JAMB_PASS_UNTIL + 'T12:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -2577,7 +2578,7 @@
      PAYWALL + ACCESS CONTROL
   ════════════════════════════════════════════════════ */
 
-  function grantAccess(days, tier) {
+  function grantAccess(days, tier, reference) {
     const exp = new Date();
     exp.setDate(exp.getDate() + days);
     // `start` anchors the snap periods: a new payment starts a fresh batch.
@@ -2587,7 +2588,9 @@
     document.getElementById('jambPaywall')?.classList.add('hidden');
     refreshChallengeBtn();
     const until = exp.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
-    alert(`✅ Access granted until ${until}! Welcome to My JAMB App.`);
+    alert(`✅ Access granted until ${until}! Welcome to My JAMB App.` + (reference
+      ? `\n\nYour payment reference: ${reference}\nKeep it (it's also in your Paystack receipt email). With it you can restore your pass on another phone.`
+      : ''));
   }
 
 
@@ -2639,6 +2642,7 @@
     });
     document.getElementById('jambPayBtn')?.addEventListener('click', handleJambPayment);
     document.getElementById('jambRedeemBtn')?.addEventListener('click', redeemJambCode);
+    document.getElementById('jambRestoreBtn')?.addEventListener('click', openRestoreModal);
     // Check for shared access from My Exams App
     const examsAccess = loadPref('mea-access-v1');
     if (examsAccess?.expires && new Date(examsAccess.expires) > new Date()) {
@@ -2712,6 +2716,64 @@
     });
   }
 
+  // Restore a pass on another phone: the email it was paid with plus the
+  // reference from the Paystack receipt email (see verify-payment.js).
+  function openRestoreModal() {
+    document.getElementById('restoreModalOverlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'restoreModalOverlay';
+    overlay.style.cssText = `position:fixed; inset:0; background:rgba(5,10,20,.72); display:flex; align-items:center;
+      justify-content:center; z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);`;
+    const field = 'width:100%; box-sizing:border-box; padding:.7rem .85rem; border-radius:9px; border:1.5px solid #26344a; background:#0d1b2a; color:#fff; font-size:.95rem; outline:none; margin-top:.5rem;';
+    overlay.innerHTML = `
+      <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px; padding:1.75rem 1.5rem;
+                  max-width:360px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+        <h3 style="margin:0 0 .5rem; color:#fff; font-size:1.05rem; font-weight:700;">Restore your pass</h3>
+        <p style="margin:0 0 .4rem; color:var(--text-dim,#9aa5b1); font-size:.85rem; line-height:1.45;">
+          Paid on another phone, or a parent paid? Enter the email used to pay and the
+          <strong>reference</strong> from the Paystack receipt email.
+        </p>
+        <input id="restoreEmail" type="email" inputmode="email" autocomplete="email" placeholder="Email used to pay" style="${field}" />
+        <input id="restoreRef" type="text" autocomplete="off" placeholder="Reference, e.g. JAMB-1730000000000" style="${field}" />
+        <p id="restoreMsg" style="display:none; color:var(--red,#e55); font-size:.8rem; margin:.5rem 0 0; line-height:1.4;"></p>
+        <div style="display:flex; gap:.6rem; margin-top:1.1rem;">
+          <button id="restoreCancel" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a; background:transparent; color:#fff; font-weight:600; font-size:.85rem;">Cancel</button>
+          <button id="restoreGo" style="flex:1; padding:.65rem; border-radius:9px; border:none; background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">Restore</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const msg = overlay.querySelector('#restoreMsg');
+    const go = overlay.querySelector('#restoreGo');
+    const close = () => overlay.remove();
+    overlay.querySelector('#restoreCancel').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    go.addEventListener('click', async () => {
+      const email = overlay.querySelector('#restoreEmail').value.trim();
+      const reference = overlay.querySelector('#restoreRef').value.trim();
+      const fail = t => { msg.textContent = t; msg.style.display = 'block'; go.disabled = false; go.textContent = 'Restore'; };
+      if (!email.includes('@') || !reference) return fail('Enter both the email and the reference.');
+      go.disabled = true; go.textContent = 'Checking…';
+      try {
+        const res = await fetch(API_BASE + '/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restore: true, app: 'jamb', email, reference })
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!d.restored) return fail(d.error || 'Could not restore. Please try again.');
+        savePref(SK_ACCESS, { expires: d.expires, start: Date.parse(d.paidAt) || Date.now() });
+        savePref(SK_TIER, d.tier || 'jamb');
+        close();
+        document.getElementById('jambPaywall')?.classList.add('hidden');
+        refreshChallengeBtn();
+        const until = new Date(d.expires).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+        alert(`✅ Pass restored on this phone. Access until ${until}.`);
+      } catch {
+        fail('No connection. Check your internet and try again.');
+      }
+    });
+  }
+
   async function handleJambPayment() {
     const email = await getEmailViaModal();
     if (!email) return; // cancelled
@@ -2743,7 +2805,7 @@
             alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
             return;
           }
-          grantAccess(data.days || 90, data.tier || 'jamb');
+          grantAccess(data.days || 90, data.tier || 'jamb', response.reference);
         })();
       }
     });
@@ -4070,7 +4132,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     if (!modal) return;
     icon.textContent  = '📸';
     title.textContent = 'Snaps Exhausted';
-    sub.textContent   = `You have used all ${SW_QUARTERLY} Show Working snaps included with your pass. Top up with 10 more snaps for ₦300.`;
+    sub.textContent   = `You have used all ${SW_QUARTERLY} Show Working snaps included with your pass. Top up with 10 more snaps for ₦500.`;
     const stay  = document.getElementById('exitModalStay');
     const leave = document.getElementById('exitModalLeave');
     const newStay  = stay.cloneNode(true);
@@ -4078,7 +4140,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     stay.parentNode.replaceChild(newStay, stay);
     leave.parentNode.replaceChild(newLeave, leave);
     document.getElementById('exitModalStay').textContent  = 'Not Now';
-    document.getElementById('exitModalLeave').textContent = 'Top Up — ₦300 →';
+    document.getElementById('exitModalLeave').textContent = 'Top Up — ₦500 →';
     document.getElementById('exitModalStay').addEventListener('click',  () => modal.classList.add('hidden'));
     document.getElementById('exitModalLeave').addEventListener('click', () => {
       modal.classList.add('hidden');
@@ -4093,11 +4155,13 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_KEY,
       email,
-      amount: 30000,
+      amount: 50000, // ₦500 in kobo
       currency: 'NGN',
       ref: 'SW-TOPUP-' + Date.now(),
       metadata: { custom_fields: [
         { display_name: 'Product', variable_name: 'product', value: 'Show Working Top-up 10 snaps' },
+        // The server tells this ₦500 apart from Holiday Hub's ₦500 by app.
+        { display_name: 'App', variable_name: 'app', value: 'My JAMB App' },
       ]},
       onClose() {},
       callback(response) {
