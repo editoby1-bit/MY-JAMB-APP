@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My JAMB App — UTME Past Questions + AI Explanations</title>
-  <meta name="description" content="The only JAMB app with AI explanations. Real JAMB past questions across 11 subjects. Full combo simulation. ₦1,500."/>
+  <meta name="description" content="The only JAMB app where AI explains every answer. Real JAMB past questions across 11 subjects, answers checked against the official papers. Full combo simulation."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
@@ -104,7 +104,7 @@
             <div class="jamb-upgrade-bar hidden" id="jambUpgradeBar">
               <div class="jub-left">
                 <span class="jub-icon">⚡</span>
-                <span id="jambUpgradeText">Unlock full access — ₦1,500. AI explanations included.</span>
+                <span id="jambUpgradeText">Unlock everything until your exam — from ₦2,000.</span>
               </div>
               <button class="jub-btn" id="jambUpgradeBarBtn">Upgrade →</button>
             </div>
@@ -249,11 +249,11 @@
               <div class="juc-icon">🧠</div>
               <div class="juc-text">
                 <div class="juc-title">The only JAMB app with AI explanations.</div>
-                <div class="juc-sub">Unlimited sessions · AI explains every answer · Challenge friends · ₦1,500 full access</div>
+                <div class="juc-sub">Unlimited sessions · AI explains every answer · Challenge friends · Access until your exam</div>
               </div>
             </div>
-            <button class="juc-btn" id="jambUpgradeCardBtn">Get Full Access — ₦1,500 →</button>
-            <div class="juc-suite">Also writing WAEC/NECO? <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" target="_blank">Student Pass covers both apps — ₦2,500</a></div>
+            <button class="juc-btn" id="jambUpgradeCardBtn">Get Full Access — from ₦2,000 →</button>
+            <div class="juc-suite">Also writing WAEC/NECO? <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" target="_blank">My Exams App is coming for WAEC &amp; NECO</a></div>
           </div>
 
           <div class="jamb-crosssell-card" id="jambCrosssell">
@@ -416,24 +416,26 @@
         <button class="jpw-close" id="jambPaywallClose">✕</button>
         <div class="jpw-badge" id="jambPaywallBadge">FREE TRIAL COMPLETE</div>
         <h2 class="jpw-title">Unlock My JAMB App</h2>
-        <p class="jpw-sub">The only JAMB app with AI explanations. Challenge friends. Full combo simulation. ₦1,500 — that's it.</p>
+        <p class="jpw-sub">The only JAMB app where AI explains every answer. Challenge friends. Full combo simulation. One payment, access until your exam.</p>
 
         <div class="jpw-hero-price">
-          <span class="jpw-amount">₦1,500</span>
-          <span class="jpw-period">Full access</span>
+          <span class="jpw-amount">₦2,500</span>
+          <span class="jpw-period" id="jambPassPeriod">Access until 28 Feb 2027</span>
         </div>
-        <p class="jpw-positioning">Most JAMB apps charge ₦1,000–₦2,000 as a one-time fee and give you nothing but questions. We give you questions <em>and</em> AI that explains every answer.</p>
+        <p class="jpw-ea hidden" id="jambEaLine"></p>
+        <p class="jpw-positioning">Most JAMB apps give you questions and nothing else. We give you questions, AI that explains every answer, and answers checked against the official papers, with errors in the usual answer keys flagged.</p>
 
         <ul class="jpw-perks">
           <li>✓ <span data-qcount>760+</span> questions across 11 subjects</li>
           <li>✓ Full JAMB combo simulation (60 Eng + 40×3)</li>
-          <li>✓ <strong>100 AI explanations</strong> — unique to us</li>
+          <li>✓ <strong>Unlimited AI explanations</strong> — unique to us</li>
+          <li>✓ Show Working — snap your maths working, get it marked</li>
           <li>✓ Challenge friends — community quiz</li>
           <li>✓ Share your results with friends</li>
           <li>✓ Practice and Exam modes</li>
         </ul>
 
-        <button class="jpw-pay-btn" id="jambPayBtn">Get Access — ₦1,500 →</button>
+        <button class="jpw-pay-btn" id="jambPayBtn">Get Access — ₦2,500 →</button>
         <p class="jpw-note">Already have My Exams App Student Pass? Your access covers JAMB too.</p>
 
         <div class="jpw-code-row">
@@ -443,9 +445,9 @@
         <p class="jpw-demo">Demo code: <strong>MEA-DEMO-2025</strong></p>
 
         <div class="jpw-suite-nudge">
-          <span class="jpw-suite-text">Want WAEC, NECO, GCE & NABTEB too?</span>
-          <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" class="jpw-suite-link" target="_blank">Get the full Student Pass →</a>
-          <span class="jpw-suite-note">₦2,500/quarter — covers both apps including JAMB</span>
+          <span class="jpw-suite-text">Writing WAEC, NECO, GCE or NABTEB too?</span>
+          <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" class="jpw-suite-link" target="_blank">My Exams App is coming →</a>
+          <span class="jpw-suite-note">One Student Pass will cover both apps, JAMB included</span>
         </div>
       </div>
     </div>
@@ -455,7 +457,7 @@
       <div class="ai-panel-inner">
         <div class="ai-panel-head">
           <span class="ai-panel-title">🧠 AI Explanation</span>
-          <div class="ai-credits-badge" id="aiCreditsBadge">100 credits left</div>
+          <div class="ai-credits-badge" id="aiCreditsBadge">Unlimited</div>
           <button class="ai-panel-close" id="aiPanelClose">✕</button>
         </div>
         <div id="aiPanelContent" class="ai-panel-content">
@@ -692,7 +694,7 @@
         <div class="jss-footer">
           <p class="jss-cta">Think you can beat it?</p>
           <button class="jss-try" id="jambSsTry">Start Same Subject →</button>
-          <p class="jss-note">My JAMB App — The only JAMB app with AI explanations. ₦1,500.</p>
+          <p class="jss-note">My JAMB App — the only JAMB app where AI explains every answer.</p>
         </div>
       </div>
     </div>
