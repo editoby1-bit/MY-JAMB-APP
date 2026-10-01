@@ -3928,11 +3928,11 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
      UPGRADE BAR + CROSS-SELL
   ════════════════════════════════════════════════════ */
   const CROSSSELL_MSGS = [
-    { title: 'Writing WAEC this year?',      sub: 'My Exams App covers 15 subjects — WAEC, NECO, GCE, NABTEB. Your JAMB subscription covers it too.' },
-    { title: 'NECO coming up next?',          sub: 'Same subscription. Switch to My Exams App and drill NECO past questions with full marking schemes.' },
-    { title: 'Done with JAMB prep?',          sub: 'My Exams App has 665+ past questions across 4 exam bodies. Your access transfers — no extra payment.' },
-    { title: 'Score high in JAMB. Ace WAEC too.', sub: 'One subscription covers both apps. My Exams App — try it free today.' },
-    { title: 'Theory giving you trouble?',    sub: 'My Exams App has snap-and-mark — write your answer, snap it, get marked against the official scheme.' },
+    { title: 'Writing WAEC this year?',      sub: 'My Exams App is coming: 15 subjects across WAEC, NECO, GCE and NABTEB, with the same AI explanations.' },
+    { title: 'NECO coming up next?',          sub: 'My Exams App is coming, with NECO past questions and full marking schemes.' },
+    { title: 'Done with JAMB prep?',          sub: 'My Exams App is coming, with past questions from WAEC, NECO, GCE and NABTEB. We will let you know when it opens.' },
+    { title: 'Score high in JAMB. Ace WAEC too.', sub: 'My Exams App is coming for WAEC and NECO, built the same way as this app.' },
+    { title: 'Theory giving you trouble?',    sub: 'My Exams App is coming with snap-and-mark: write your theory answer, snap it, get marked against the official scheme.' },
   ];
 
   function initUpgradeBar() {
