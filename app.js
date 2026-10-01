@@ -4292,4 +4292,10 @@ Return ONLY valid JSON:
   // the file caused "Cannot access 'CROSSSELL_MSGS' before initialization".
   init();
 
+  // Offline support (see sw.js). Only over http(s): service workers don't
+  // run from file:// and need a secure origin, which GitHub Pages is.
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+
 })();
