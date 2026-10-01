@@ -144,14 +144,15 @@
   function getFreeUsedCount(){return loadPref(SK_FREE)?.n||0;}
   function getCurrentQuarter(){const d=new Date();return `${d.getFullYear()}-Q${Math.ceil((d.getMonth()+1)/3)}`;}
   function getAICredits(){const d=loadPref(SK_AI_CREDITS);if(!d||d.quarter!==getCurrentQuarter()){savePref(SK_AI_CREDITS,{n:AI_QUARTERLY,quarter:getCurrentQuarter()});return AI_QUARTERLY;}return d.n;}
-  // Student Pass Plus (bought here, via a school bundle, or on My Exams App,
-  // which shares this origin's storage) gets unlimited Teach Me: each
-  // explanation is generated once and cached for everyone, so usage can't
-  // grow the API bill. Other plans keep the quarterly credit allowance.
+  // Student Pass holders (bought on My Exams App, which shares this
+  // origin's storage, via a school bundle, or a Student Pass demo code) get
+  // unlimited Teach Me: each explanation is generated once and cached for
+  // everyone, so usage can't grow the API bill. JAMB Only keeps the
+  // quarterly credit allowance.
   function isPlusUser(){
     if(!checkAccess())return false;
     if(loadPref(SK_TIER)==='plus')return true;
-    return !!(loadPref(SK_ACCESS)?.fromExamsApp && loadPref('mea-tier-v1')==='plus');
+    return !!loadPref(SK_ACCESS)?.fromExamsApp;
   }
   function useAICredit(){if(isPlusUser())return true;const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
   function refundAICredit(){if(isPlusUser())return;const c=getAICredits();savePref(SK_AI_CREDITS,{n:c+1,quarter:getCurrentQuarter()});}
@@ -1061,8 +1062,8 @@
         if (result.entitlement) {
           // Backend speaks My Exams App's tier vocabulary ('student'/'plus')
           // since that's shared across both apps' bundle logic.
-          // Branded/Premium bundles grant 'plus' (unlimited Teach Me).
-          grantAccess(result.entitlement.days, result.entitlement.tier === 'plus' ? 'plus' : 'jamb');
+          // Every school bundle gives students the full Student Pass.
+          grantAccess(result.entitlement.days, 'plus');
         } else {
           showInfoToast('Joined class!');
         }
@@ -1219,7 +1220,7 @@
             <span class="jqc-score-name">${tierLabel} Bundle — Active</span>
             <span class="jqc-pending-sub" style="margin:0;">Expires ${expDate}</span>
           </div>
-          <p class="jqc-pending-sub">${bundle.seatsUsed} of ${bundle.tier === 'standard' ? bundle.seatLimit : 'unlimited'} seats used · students who join get ${bundle.tier === 'standard' ? 'access' : 'full Plus access'} automatically</p>
+          <p class="jqc-pending-sub">${bundle.seatsUsed} of ${bundle.tier === 'standard' ? bundle.seatLimit : 'unlimited'} seats used · students who join get full Student Pass access automatically</p>
           ${nearExpiry ? `<button class="jqc-btn jqc-secondary" id="bundleRenewBtn" style="margin-top:.5rem;">Renew Bundle</button>` : ''}
         </div>
         <div id="bundlePickerOut"></div>
@@ -2697,10 +2698,10 @@
     const code = (document.getElementById('jambCodeInput')?.value || '').trim().toUpperCase();
     if (!code) return;
     const codes = {
-      'MEA-DEMO-2025': { days:90, tier:'jamb' },
+      'MEA-DEMO-2025': { days:90, tier:'plus' }, // Student Pass demo
       'JAMB-PROMO':    { days:90, tier:'jamb' },
       'MEA-PLUS-DEMO': { days:90, tier:'plus' },
-      'TEST7':         { days:7,  tier:'jamb' },
+      'TEST7':         { days:7,  tier:'plus' }, // Student Pass demo
     };
     if (codes[code]) {
       grantAccess(codes[code].days, codes[code].tier);
@@ -2716,7 +2717,7 @@
   function updateAICreditsBadge() {
     const badge = document.getElementById('aiCreditsBadge');
     if (!badge) return;
-    if (isPlusUser()) { badge.textContent = 'Unlimited · Plus'; badge.style.color = '#27ae60'; return; }
+    if (isPlusUser()) { badge.textContent = 'Unlimited · Student Pass'; badge.style.color = '#27ae60'; return; }
     const c = getAICredits();
     badge.textContent = `${c} credit${c===1?'':'s'} left`;
     badge.style.color = c < 10 ? '#e74c3c' : '#27ae60';
