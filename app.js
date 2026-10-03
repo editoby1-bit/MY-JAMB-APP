@@ -2967,8 +2967,9 @@
     const show = text => {
       loading?.classList.add('hidden');
       if (response) {
-        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q)}`;
+        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q)}${teachExtrasHtml(q, subject)}`;
         response.classList.remove('hidden');
+        wireTeachExtras(response, q, subject);
       }
       updateAICreditsBadge();
     };
@@ -3033,6 +3034,136 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
       }
       updateAICreditsBadge();
     }
+  }
+
+  /* ── Under Teach Me: the topic lesson and up to 3 follow-up questions ── */
+  // Where students go when 3 follow-ups weren't enough. Leave a field blank
+  // to hide that option.
+  const SUPPORT_CONTACT = { whatsapp: '', email: '' }; // whatsapp: digits only, e.g. '2348012345678'
+  const FOLLOWUPS_PER_QUESTION = 3;
+  const SK_FOLLOWUPS = 'jamb-followups-v1';
+  const fuHistory = {}; // this visit's conversation per question
+
+  function topicLessonFor(q, subject) {
+    const t = window.TEACH_TOPICS?.[subject];
+    const id = t?.of?.[teachMeKey(q)];
+    return id && t.lessons?.[id] ? t.lessons[id] : null;
+  }
+  function followUpsLeft(key) {
+    const m = loadPref(SK_FOLLOWUPS, {}) || {};
+    return typeof m[key] === 'number' ? m[key] : FOLLOWUPS_PER_QUESTION;
+  }
+  function setFollowUpsLeft(key, n) {
+    const m = loadPref(SK_FOLLOWUPS, {}) || {};
+    m[key] = Math.max(0, n);
+    const keys = Object.keys(m);
+    if (keys.length > 300) keys.slice(0, keys.length - 300).forEach(k => delete m[k]);
+    savePref(SK_FOLLOWUPS, m);
+  }
+  function fuText(text) {
+    return escHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
+  }
+
+  function teachExtrasHtml(q, subject) {
+    const lesson = topicLessonFor(q, subject);
+    const key = qHash(subject, teachMeKey(q));
+    const left = followUpsLeft(key);
+    const past = (fuHistory[key] || []).map(h =>
+      `<div class="fu-q">${escHtml(h.q)}</div><div class="fu-a">${fuText(h.a)}</div>`).join('');
+    return `${lesson ? `<details class="topic-lesson"><summary>📘 Learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${fuText(lesson.body)}</div></details>` : ''}
+      <div class="fu-box" data-key="${key}">
+        <div class="fu-thread">${past}</div>
+        <div class="fu-ask ${left > 0 ? '' : 'hidden'}">
+          <div class="fu-label">Still confused? Ask a follow-up <span class="fu-left">(${left} left for this question)</span></div>
+          <div class="fu-row">
+            <input type="text" class="fu-input" maxlength="300" placeholder="e.g. Why is C wrong?" />
+            <button class="fu-send" type="button">Ask</button>
+          </div>
+          <div class="fu-status"></div>
+        </div>
+        <div class="fu-done ${left > 0 ? 'hidden' : ''}">${closeLoopHtml(q, !!lesson)}</div>
+      </div>`;
+  }
+
+  // After the 3 follow-ups: point the student somewhere useful instead of a dead end.
+  function closeLoopHtml(q, hasLesson) {
+    const msg = `Hi, I need help with this JAMB question: "${q.question.substring(0, 200)}"`;
+    const opts = [];
+    if (hasLesson) opts.push(`<button class="fu-opt fu-open-lesson" type="button">📘 Read the full topic lesson</button>`);
+    opts.push(`<button class="fu-opt fu-next" type="button">➡️ Try the next question and come back to this one later</button>`);
+    if (SUPPORT_CONTACT.whatsapp) opts.push(`<a class="fu-opt" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(SUPPORT_CONTACT.whatsapp)}?text=${encodeURIComponent(msg)}">💬 Ask a tutor on WhatsApp</a>`);
+    if (SUPPORT_CONTACT.email) opts.push(`<a class="fu-opt" href="mailto:${encodeURIComponent(SUPPORT_CONTACT.email)}?subject=${encodeURIComponent('Help with a JAMB question')}&body=${encodeURIComponent(msg)}">✉️ Email us privately</a>`);
+    return `<div class="fu-done-title">You've used your 3 follow-ups for this question.</div>
+      <div class="fu-done-sub">Here's what to do next. A teacher or study partner can help too.</div>${opts.join('')}`;
+  }
+
+  function wireTeachExtras(root, q, subject) {
+    const box = root.querySelector('.fu-box');
+    if (!box) return;
+    const key = box.dataset.key;
+    const input = box.querySelector('.fu-input');
+    const send = box.querySelector('.fu-send');
+    const status = box.querySelector('.fu-status');
+    const openLesson = () => {
+      const d = root.querySelector('.topic-lesson');
+      if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    };
+    box.querySelector('.fu-open-lesson')?.addEventListener('click', openLesson);
+    box.querySelector('.fu-next')?.addEventListener('click', () => {
+      document.getElementById('aiPanel')?.classList.add('hidden');
+      // On the last question "Next" would finish the session, so just close.
+      if (state.currentIndex < state.currentQuestions.length - 1) document.getElementById('nextBtn')?.click();
+    });
+    const finish = () => {
+      box.querySelector('.fu-ask')?.classList.add('hidden');
+      box.querySelector('.fu-done')?.classList.remove('hidden');
+    };
+    const ask = async () => {
+      const text = (input.value || '').trim();
+      if (!text) return;
+      const token = snapToken();
+      if (!token) { status.textContent = 'Follow-ups come with a paid pass. If you paid on another phone, use Restore access.'; return; }
+      if (!navigator.onLine) { status.textContent = "You're offline. Follow-ups need internet — the topic lesson above works offline."; return; }
+      send.disabled = true; input.disabled = true;
+      status.textContent = 'Thinking…';
+      const hist = fuHistory[key] || [];
+      try {
+        const res = await fetch(API_BASE + '/api/teach', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            followUp: true, snapToken: token, ask: text, history: hist.slice(-2),
+            teach: { app: 'jamb', v: 1, subject, question: q.question, options: q.options,
+                     answer: q.answer, passage: q.passage || null, passageTitle: q.passageTitle || null,
+                     alsoAccept: q.alsoAccept || null, note: q.keyVerdict ? (q.answerNote || null) : null }
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (typeof data.left === 'number') setFollowUpsLeft(key, data.left);
+        if (data.text) {
+          hist.push({ q: text, a: data.text });
+          fuHistory[key] = hist;
+          box.querySelector('.fu-thread').insertAdjacentHTML('beforeend',
+            `<div class="fu-q">${escHtml(text)}</div><div class="fu-a">${fuText(data.text)}</div>`);
+          input.value = '';
+          status.textContent = '';
+        } else if (data.code === 'FOLLOWUP_LIMIT') {
+          setFollowUpsLeft(key, 0);
+        } else {
+          status.textContent = data.code === 'NOT_READY'
+            ? 'Follow-up questions are switched on soon. For now, read the topic lesson above.'
+            : (data.error || 'Could not answer right now. Your follow-up was not used.');
+        }
+      } catch (e) {
+        status.textContent = 'Could not reach the tutor. Check your connection — your follow-up was not used.';
+      }
+      send.disabled = false; input.disabled = false;
+      const left = followUpsLeft(key);
+      box.querySelector('.fu-left').textContent = `(${left} left for this question)`;
+      if (left <= 0) finish();
+    };
+    send?.addEventListener('click', ask);
+    input?.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
   }
 
   const SK_TEACH_CACHE = 'jamb-teach-cache-v1';
