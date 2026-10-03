@@ -2919,6 +2919,12 @@
     document.getElementById('aiExplainTeaserBtn')?.classList.add('hidden');
   }
 
+  // Key for explanations written in advance (teach/<subject>.js). Options
+  // are part of it because some questions share the same wording.
+  function teachMeKey(q) {
+    return (q.passageId || '') + '|' + q.question + '|' + q.options.join('|');
+  }
+
   async function triggerAIExplain() {
     if (!checkAccess()) { showPaywall('feature'); return; }
     if (!(state.mode === 'practice' || state.reviewMode)) {
@@ -2949,14 +2955,15 @@
     const wasCorrect = isCorrect(q, studentAns);
     const subject = q.sourceSubject || state.subject;
     const L = i => String.fromCharCode(65 + i);
+    const right = [q.answer, ...(q.alsoAccept || [])].sort((a, b) => a - b).map(L).join(' or ');
 
     // The student-specific line lives OUTSIDE the explanation, so one
     // explanation per question can be reused for every student.
     const youLine = studentOpt === null
-      ? `<div class="ai-you">You didn't answer this one. The answer is <strong>${L(q.answer)}</strong>.</div>`
+      ? `<div class="ai-you">You didn't answer this one. The answer is <strong>${right}</strong>.</div>`
       : wasCorrect
         ? `<div class="ai-you ai-you-right">You chose <strong>${L(studentAns)}</strong> — correct ✓</div>`
-        : `<div class="ai-you ai-you-wrong">You chose <strong>${L(studentAns)}</strong>. The answer is <strong>${L(q.answer)}</strong>.</div>`;
+        : `<div class="ai-you ai-you-wrong">You chose <strong>${L(studentAns)}</strong>. The answer is <strong>${right}</strong>.</div>`;
     const show = text => {
       loading?.classList.add('hidden');
       if (response) {
@@ -2965,6 +2972,11 @@
       }
       updateAICreditsBadge();
     };
+
+    // Layer 0: written in advance and shipped with the app (teach/<subject>.js)
+    // — instant, offline, free.
+    const written = window.TEACH_ME?.[subject]?.[teachMeKey(q)];
+    if (written) { show(written); return; }
 
     // Layer 1: this device already fetched it — show instantly, no credit,
     // no network. (Layer 2, shared across ALL students, is the server-side
