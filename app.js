@@ -161,7 +161,9 @@
   // in sync with the same constant in editoby-api/api/verify-payment.js,
   // which decides the days actually granted.
   const JAMB_PASS_UNTIL = '2027-04-30'; // UTME date not announced yet; it won't be later than April
-  const JAMB_PRICE      = 250000; // ₦2,500 in kobo
+  // ₦2,499, not ₦2,499: Paystack adds a flat ₦100 fee from ₦2,499 up, so
+  // this nets about ₦99 more per pass.
+  const JAMB_PRICE      = 249900; // ₦2,499 in kobo
   const JAMB_EA_PRICE   = 200000; // ₦2,000 in kobo, first 100 students (counted by the server)
   const passUntilLabel  = () => new Date(JAMB_PASS_UNTIL + 'T12:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
   const AI_QUARTERLY    = 100;
@@ -2633,7 +2635,7 @@
     } catch { return null; }
   }
 
-  // Paywall price: ₦2,000 while early spots remain, else ₦2,500. If the
+  // Paywall price: ₦2,000 while early spots remain, else ₦2,499. If the
   // server can't be reached the offer is hidden rather than guessed.
   async function updateJambPriceUi() {
     const ea = await fetchJambEarlyStatus();
@@ -2644,13 +2646,13 @@
     const periodEl = document.getElementById('jambPassPeriod');
     if (periodEl) periodEl.textContent = `Full access till the exams (ends ${passUntilLabel()})`;
     if (left > 0) {
-      if (amountEl) amountEl.innerHTML = '₦2,000 <s class="jpw-was">₦2,500</s>';
+      if (amountEl) amountEl.innerHTML = '₦2,000 <s class="jpw-was">₦2,499</s>';
       if (eaEl) { eaEl.textContent = `🔥 Early access: first 100 students pay ₦2,000 — ${left} spot${left === 1 ? '' : 's'} left`; eaEl.classList.remove('hidden'); }
       if (btn) btn.textContent = 'Get Early Access — ₦2,000 →';
     } else {
-      if (amountEl) amountEl.textContent = '₦2,500';
+      if (amountEl) amountEl.textContent = '₦2,499';
       if (eaEl) eaEl.classList.add('hidden');
-      if (btn) btn.textContent = 'Get Access — ₦2,500 →';
+      if (btn) btn.textContent = 'Get Access — ₦2,499 →';
     }
   }
 
