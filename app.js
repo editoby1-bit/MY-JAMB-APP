@@ -3039,7 +3039,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   /* ── Under Teach Me: the topic lesson and up to 3 follow-up questions ── */
   // Where students go when 3 follow-ups weren't enough. Leave a field blank
   // to hide that option.
-  const SUPPORT_CONTACT = { whatsapp: '', email: '' }; // whatsapp: digits only, e.g. '2348012345678'
+  const SUPPORT_CONTACT = { whatsapp: '', email: 'myexamsapp@gmail.com' }; // whatsapp: digits only, e.g. '2348012345678'
   const FOLLOWUPS_PER_QUESTION = 3;
   const SK_FOLLOWUPS = 'jamb-followups-v1';
   const fuHistory = {}; // this visit's conversation per question
