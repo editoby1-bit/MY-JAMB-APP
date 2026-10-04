@@ -1023,6 +1023,7 @@
   "|Choose the option that has the same vowel sound as the letter(s) in capitals: indIct|bright|fish|pick|brick": "vowels",
   "|Choose the option that has the same vowel sound as the letter(s) in capitals: rOAred|towered|coast|brought|rod": "vowels",
   "|Choose the option that has the same consonant sound as the letter(s) in capitals: sheaTH|bathe|length|months|paths": "consonants",
+  "|Choose the option that has the same consonant sound as the letter(s) in capitals: High (the paper underlines 'gh'; this is a misprint for the h at the start)|what|honest|who|vehicle": "consonants",
   "|Choose the option that has the same consonant sound as the letter(s) in capitals: oF course|plough|dough|over|orphan": "consonants",
   "|Choose the option that rhymes with the given word: Boys|stays|moist|noise|elbows": "vowels",
   "|Choose the option that rhymes with the given word: Shine|clean|fine|machine|lain": "vowels",

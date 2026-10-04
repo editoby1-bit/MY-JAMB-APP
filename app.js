@@ -87,7 +87,8 @@
   // Past questions whose official answer key we checked and found wanting
   // carry keyVerdict ('corrected' | 'multiple' | 'none'), keyAnswer (the
   // key's letter) and answerNote (why). Shown under the explanation.
-  function keyCheckHtml(q) {
+  // inTeach: already inside the Teach Me panel, so no pointer back to it.
+  function keyCheckHtml(q, inTeach) {
     if (!q.keyVerdict || !q.answerNote) return '';
     const L = i => String.fromCharCode(65 + i);
     const all = [q.answer, ...(q.alsoAccept || [])].sort((a, b) => a - b).map(L);
@@ -99,11 +100,13 @@
       corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
       multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
       none:      `None of the options is fully correct as printed. The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>, which is also the closest option, so that is what we mark right.`,
+      misprint:  `The question paper has a printing error here, so we mark the answer to the question as JAMB intended it: <strong>${right}</strong>.`,
     }[q.keyVerdict];
     if (!head) return '';
     return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`
       + `<p>${head}</p><p>${escHtml(q.answerNote)}</p>`
       + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning.</p>` : '')
+      + (inTeach ? '' : `<p class="key-check-teach">Because the answers conflict, this question needs a fuller explanation. <button type="button" class="key-check-teach-btn">🧠 Open Teach Me</button></p>`)
       + `</div>`;
   }
 
@@ -791,7 +794,10 @@
     el.toggleExplanationBtn.classList.toggle('hidden', !shouldShowToggle);
     el.toggleExplanationBtn.textContent = state.showReviewExplanation ? '🙈 Hide Explanation' : '💡 Show Explanation';
     el.explanationBox.classList.toggle('hidden', !shouldShowExpl);
-    if (shouldShowExpl) el.explanationBox.innerHTML = escHtml(q.explanation || '') + keyCheckHtml(q);
+    if (shouldShowExpl) {
+      el.explanationBox.innerHTML = escHtml(q.explanation || '') + keyCheckHtml(q);
+      el.explanationBox.querySelector('.key-check-teach-btn')?.addEventListener('click', triggerAIExplain);
+    }
 
     // Nav buttons — on the very first question, "Previous" has nowhere to
     // go, so it becomes the exit action instead of just being greyed out.
@@ -2967,7 +2973,7 @@
     const show = text => {
       loading?.classList.add('hidden');
       if (response) {
-        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q)}${teachExtrasHtml(q, subject)}`;
+        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q, true)}${teachExtrasHtml(q, subject)}`;
         response.classList.remove('hidden');
         wireTeachExtras(response, q, subject);
       }
