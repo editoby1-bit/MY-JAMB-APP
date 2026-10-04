@@ -106,7 +106,7 @@
     return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`
       + `<p>${head}</p><p>${escHtml(q.answerNote)}</p>`
       + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning.</p>` : '')
-      + (inTeach ? '' : `<p class="key-check-teach">Because the answers conflict, this question needs a fuller explanation. <button type="button" class="key-check-teach-btn">🧠 Open Teach Me</button></p>`)
+      + (inTeach ? '' : `<p class="key-check-teach">Because the answers conflict, this question needs a fuller explanation. Tap Teach Me to learn more. <button type="button" class="key-check-teach-btn">🧠 Teach Me: learn more</button></p>`)
       + `</div>`;
   }
 
