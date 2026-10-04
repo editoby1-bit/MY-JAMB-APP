@@ -24,7 +24,9 @@ try { const ctx={window:{}}; vm.createContext(ctx); vm.runInContext(fs.readFileS
 const out={}, missing=[];
 flat.forEach((q,i)=>{ const t=texts[i]||existing[key(q)]; if(!t) missing.push(i); else out[key(q)]=t; });
 if (missing.length) { console.error("MISSING", missing); process.exit(1); }
-if (Object.keys(out).length!==flat.length) { console.error("KEY CLASH", Object.keys(out).length, flat.length); process.exit(1); }
+// JAMB sometimes reuses a question word for word in a later year; identical
+// questions share one explanation, so compare against the unique count.
+if (Object.keys(out).length!==new Set(flat.map(key)).size) { console.error("KEY CLASH", Object.keys(out).length, flat.length); process.exit(1); }
 fs.mkdirSync("teach",{recursive:true});
 fs.writeFileSync(`teach/${subject}.js`, `/**
  * Teach Me explanations for ${subject}, written in advance so they load
