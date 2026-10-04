@@ -104,7 +104,7 @@
     }[q.keyVerdict];
     if (!head) return '';
     return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`
-      + `<p>${head}</p><p>${escHtml(q.answerNote)}</p>`
+      + `<p>${head}</p><p>${mathHtml(q.answerNote)}</p>`
       + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning.</p>` : '')
       + (inTeach ? '' : `<p class="key-check-teach">Because the answers conflict, this question needs a fuller explanation. Tap Teach Me to learn more. <button type="button" class="key-check-teach-btn">🧠 Teach Me: learn more</button></p>`)
       + `</div>`;
@@ -740,7 +740,7 @@
       el.subjectPositionTag.classList.add('hidden');
     }
     renderPassage(q);
-    el.questionText.innerHTML = escHtml(q.question).replace(/\n/g, '<br>');
+    el.questionText.innerHTML = mathHtml(q.question).replace(/\n/g, '<br>');
 
     const hasDiagram = Boolean(q.diagram);
     el.diagramBox.classList.toggle('hidden', !hasDiagram);
@@ -752,7 +752,7 @@
     q.options.forEach((opt, idx) => {
       const btn = document.createElement('button');
       btn.className = 'option-btn';
-      btn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> ${escHtml(opt)}`;
+      btn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> ${mathHtml(opt)}`;
 
       if (selectedAnswer === idx) btn.classList.add('selected');
 
@@ -795,7 +795,7 @@
     el.toggleExplanationBtn.textContent = state.showReviewExplanation ? '🙈 Hide Explanation' : '💡 Show Explanation';
     el.explanationBox.classList.toggle('hidden', !shouldShowExpl);
     if (shouldShowExpl) {
-      el.explanationBox.innerHTML = escHtml(q.explanation || '') + keyCheckHtml(q);
+      el.explanationBox.innerHTML = mathHtml(q.explanation || '') + keyCheckHtml(q);
       el.explanationBox.querySelector('.key-check-teach-btn')?.addEventListener('click', triggerAIExplain);
     }
 
@@ -2591,6 +2591,11 @@
 
   function normalizeName(val) { return String(val).replace(/\s+/g, ' ').trim(); }
 
+  // Maths notation in question text: x^{2} → superscript, a_{n} → subscript.
+  // Escapes first, so it is safe for any text.
+  function mathHtml(s) {
+    return escHtml(s).replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>').replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>');
+  }
   function escHtml(text) {
     return String(text)
       .replace(/&/g, '&amp;')
@@ -2973,7 +2978,7 @@
     const show = text => {
       loading?.classList.add('hidden');
       if (response) {
-        response.innerHTML = `<div class="ai-q-recap"><strong>${escHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${escHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q, true)}${teachExtrasHtml(q, subject)}`;
+        response.innerHTML = `<div class="ai-q-recap"><strong>${mathHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${mathHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q, true)}${teachExtrasHtml(q, subject)}`;
         response.classList.remove('hidden');
         wireTeachExtras(response, q, subject);
       }
@@ -3067,7 +3072,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     savePref(SK_FOLLOWUPS, m);
   }
   function fuText(text) {
-    return escHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
+    return mathHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
   }
 
   function teachExtrasHtml(q, subject) {

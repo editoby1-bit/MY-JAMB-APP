@@ -1811,3 +1811,4 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .fu-opt { display: block; width: 100%; text-align: left; margin-top: .4rem; padding: .55rem .7rem; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #fff; font-size: .82rem; text-decoration: none; cursor: pointer; }
 .key-check-teach { margin-top: .5rem; font-size: .82rem; }
 .key-check-teach-btn { margin-left: .35rem; padding: .3rem .65rem; border-radius: 8px; border: 0; background: #2e6fd8; color: #fff; font-weight: 600; font-size: .8rem; cursor: pointer; }
+.diagram-box img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 6px; background: #fff; }
