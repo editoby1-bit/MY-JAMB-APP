@@ -1,0 +1,487 @@
+## number-bases | Number bases: converting and calculating
+JAMB tests converting between bases and doing simple arithmetic in a base.
+
+Converting TO base ten: multiply each digit by the base raised to its place value, then add.
+• 1011_{2} = 1×2^{3} + 0×2^{2} + 1×2^{1} + 1×2^{0} = 8 + 0 + 2 + 1 = 11.
+• 214_{5} = 2×25 + 1×5 + 4 = 59.
+
+Converting FROM base ten: divide repeatedly by the new base and read the remainders from the bottom up.
+• 59 in base 5: 59 ÷ 5 = 11 r 4, 11 ÷ 5 = 2 r 1, 2 ÷ 5 = 0 r 2 → 214_{5}.
+
+Between two bases that are not ten, go through base ten.
+
+Finding an unknown base: if 25_{x} = 17_{10}, then 2x + 5 = 17, so x = 6.
+
+Arithmetic in a base: work as usual, but "carry" when you reach the base. In base 5, 4 + 3 = 7 = 1×5 + 2, so write 2, carry 1.
+
+Common traps:
+• A digit can never equal or exceed the base (no 5 in base 5). Use this to rule out options fast.
+• The right-hand digit has place value base^{0} = 1, not the base.
+
+Memory tip: "multiply and add" to get into base ten; "divide and read remainders upwards" to get out.
+
+## fractions-decimals | Fractions, decimals and approximation
+Fractions: to add or subtract, use a common denominator; to multiply, multiply tops and bottoms; to divide, multiply by the reciprocal. Simplify mixed numbers into improper fractions first.
+
+Decimal places (d.p.) count digits after the point; significant figures (s.f.) count from the first non-zero digit.
+• 0.012856 to 3 s.f. = 0.0129; to 4 d.p. = 0.0129.
+• 52 461 to 2 s.f. = 52 000.
+Rounding rule: look at the next digit; 5 or more rounds up.
+
+Standard form: A × 10^{n} with 1 ≤ A < 10. 0.00054 = 5.4 × 10^{-4}; 37 000 = 3.7 × 10^{4}.
+
+Long calculations without tables: write each number in standard form, group the powers of ten, and cancel before multiplying.
+
+Percentage error = (error ÷ actual value) × 100%.
+
+Common traps:
+• Counting leading zeros as significant figures (they are not).
+• Rounding in the middle of a calculation; round only at the end.
+
+Memory tip: significant figures start at the first non-zero digit; decimal places start at the point.
+
+## indices | Laws of indices
+The laws (same base a):
+• a^{m} × a^{n} = a^{m+n}
+• a^{m} ÷ a^{n} = a^{m−n}
+• (a^{m})^{n} = a^{mn}
+• a^{0} = 1
+• a^{−n} = 1/a^{n}
+• a^{1/n} = ⁿ√a, and a^{m/n} = (ⁿ√a)^{m}
+
+Evaluating: take the root first, then the power. 27^{2/3} = (∛27)^{2} = 3^{2} = 9. 16^{−3/4} = 1/(⁴√16)^{3} = 1/8.
+
+Solving index equations: make the bases the same, then equate the powers.
+• 2^{x+1} = 32 = 2^{5} → x + 1 = 5 → x = 4.
+• 9^{x} = 27 → 3^{2x} = 3^{3} → x = 3/2.
+If two different bases appear, write both as powers of a common prime (4 = 2^{2}, 8 = 2^{3}, 9 = 3^{2}, 27 = 3^{3}).
+
+Common traps:
+• a^{m} + a^{n} is NOT a^{m+n}; only multiplication adds powers.
+• A negative power gives a reciprocal, not a negative number: 2^{−3} = 1/8.
+
+Memory tip: "root first, then power" for fractional indices; "same base, then equate powers" for equations.
+
+## logarithms | Logarithms
+Definition: log_{a} b = c means a^{c} = b. So log_{2} 8 = 3, log_{10} 0.01 = −2, log_{a} a = 1, log_{a} 1 = 0.
+
+Laws (same base):
+• log x + log y = log (xy)
+• log x − log y = log (x/y)
+• log x^{n} = n log x
+• Change of base: log_{a} b = log b / log a
+
+Simplifying: collect logs into a single log, then evaluate.
+• log_{3} 18 − log_{3} 2 = log_{3} 9 = 2.
+• 2 log 5 + log 4 = log 25 + log 4 = log 100 = 2 (base 10).
+
+Solving log equations: combine into one log, convert to index form, then CHECK the answer makes every original log defined (the inside of a log must be positive).
+• log_{2} x + log_{2} (x − 2) = 3 → x(x − 2) = 8 → x = 4 (reject x = −2).
+
+Using tables/characteristics (older papers): the characteristic is the power of ten in standard form; a bar shows a negative characteristic, e.g. log 0.05 = 2̄.6990.
+
+Common traps:
+• log (x + y) is NOT log x + log y.
+• Forgetting to reject solutions that make a log of a negative number.
+
+Memory tip: a log is just "what power?" — log_{a} b asks "a to what power gives b?"
+
+## surds | Surds
+A surd is a root that cannot be simplified to a whole number, like √2.
+
+Simplify by taking out square factors: √72 = √(36 × 2) = 6√2. √48 = 4√3.
+
+Add and subtract only like surds: 3√2 + 5√2 = 8√2. First simplify: √50 + √18 = 5√2 + 3√2 = 8√2.
+
+Multiply: √a × √b = √(ab); (√a)^{2} = a. Expand brackets as in algebra, e.g. (√3 + √5)(√3 − √5) = 3 − 5 = −2.
+
+Rationalise the denominator:
+• 1/√2 = √2/2.
+• For a + √b, multiply top and bottom by its conjugate a − √b: 1/(2 + √3) = (2 − √3)/(4 − 3) = 2 − √3.
+
+Common traps:
+• √a + √b is NOT √(a + b).
+• Forgetting that (√a + √b)^{2} = a + b + 2√(ab), not just a + b.
+
+Memory tip: to clear a surd from the bottom, multiply by its "partner with the opposite sign".
+
+## commercial | Percentages, profit and loss, interest and ratio
+Percentage of: 15% of ₦4,000 = 0.15 × 4000 = ₦600.
+Percentage change = (change ÷ original) × 100%.
+
+Profit and loss are percentages of the COST price:
+• Profit % = (SP − CP)/CP × 100%. Selling at a 25% loss means SP = 75% of CP.
+• To find CP from SP: CP = SP × 100/(100 ± %). E.g. SP ₦180,000 at a 25% loss → CP = 180000 × 100/75 = ₦240,000.
+
+Simple interest: I = PRT/100. Amount = P + I.
+Compound interest: A = P(1 + r/100)^{n}. Depreciation: A = P(1 − r/100)^{n}.
+
+Ratio and sharing: to share ₦600 in the ratio 2 : 3, total parts = 5, so shares are 240 and 360.
+Proportion: if 5 men take 45 days, then (inverse) 25 men take 45 × 5/25 = 9 days.
+
+Shares and dividends, commission and discount use the same idea: a percentage of the right base amount.
+
+Common traps:
+• Taking profit or loss as a percentage of the selling price.
+• Adding percentages that apply one after another; a 10% rise then a 10% fall is a 1% fall overall.
+
+Memory tip: always ask "percentage OF WHAT?" — the original amount is the base.
+
+## variation | Variation
+• Direct: y ∝ x → y = kx. If x doubles, y doubles.
+• Inverse: y ∝ 1/x → y = k/x. If x doubles, y halves.
+• Joint: y ∝ xz → y = kxz.
+• Partial: y is partly constant and partly varies with x → y = a + bx (two unknowns, so you need two pairs of values).
+Powers and roots: "y varies as the square of x" → y = kx^{2}; "inversely as the square root of x" → y = k/√x.
+
+Method (always the same):
+1. Write the equation with k.
+2. Use the given pair of values to find k.
+3. Use k to find the unknown.
+
+Example: y varies inversely as x^{2}; y = 4 when x = 3. Then 4 = k/9, k = 36. When x = 6, y = 36/36 = 1.
+
+Common traps:
+• Mixing up direct and inverse.
+• For partial variation, forgetting the constant term.
+
+Memory tip: "find k first" — every variation question is solved by finding the constant.
+
+## sets | Sets and Venn diagrams
+Notation: ∪ union (in either), ∩ intersection (in both), A′ complement (not in A), ⊂ subset, ∅ empty set, n(A) number of elements.
+
+Two sets: n(A ∪ B) = n(A) + n(B) − n(A ∩ B).
+Example: 220 students take Biology or Maths; 125 take Biology and 110 take Maths. Both = 125 + 110 − 220 = 15, so Biology only = 125 − 15 = 110.
+
+Three sets: draw a Venn diagram and fill it from the CENTRE outwards: first all three, then each pair (minus the centre), then each "only" region. Use x for the unknown region and form one equation from the total.
+
+Number of subsets of a set with n elements = 2^{n} (including ∅ and the set itself); proper subsets = 2^{n} − 1.
+
+Common traps:
+• Forgetting to subtract the overlap, so elements in both sets are counted twice.
+• Confusing "only A" with "A".
+
+Memory tip: in Venn questions, fill the middle first and work outwards.
+
+## algebra | Algebraic expressions and functions
+Expanding: (a + b)^{2} = a^{2} + 2ab + b^{2}; (a − b)^{2} = a^{2} − 2ab + b^{2}; (a + b)(a − b) = a^{2} − b^{2}.
+
+Factorising: take out common factors first; spot the difference of two squares; for ax^{2} + bx + c, find two numbers with product ac and sum b.
+
+Algebraic fractions: factorise top and bottom, then cancel common FACTORS (never terms). Add with a common denominator.
+
+Change of subject: undo the operations around the required letter in reverse order, doing the same to both sides.
+• From T = 2π√(l/g): T/(2π) = √(l/g) → T^{2}/(4π^{2}) = l/g → l = gT^{2}/(4π^{2}).
+
+Functions: f(x) = 2x + 3 means f(4) = 11. Composite f(g(x)): put g(x) into f. Inverse f^{−1}: swap x and y and solve for y.
+
+Remainder and factor theorems: the remainder when f(x) is divided by (x − a) is f(a); (x − a) is a factor if f(a) = 0.
+
+Common traps:
+• Cancelling terms instead of factors: (x + 2)/2 is not x + 1.
+• Sign errors when expanding a minus outside a bracket.
+
+Memory tip: factorise before you cancel, and substitute to check.
+
+## equations | Linear and simultaneous equations
+Linear: collect x-terms on one side and numbers on the other. With fractions, multiply every term by the LCM of the denominators first.
+
+Simultaneous equations:
+• Elimination: make the coefficients of one letter equal, then add or subtract the equations.
+• Substitution: make one letter the subject of one equation and substitute into the other.
+Example: 2x + y = 7 and x − y = 2 → adding gives 3x = 9, x = 3, y = 1.
+
+Word problems: let x be the unknown, write the equation from the words, solve, and answer the question asked.
+
+Checking: substitute your answers into BOTH original equations. In a JAMB question you can also test each option.
+
+Common traps:
+• Multiplying only some terms by the LCM.
+• Answering x when the question asks for y, or for x + y.
+
+Memory tip: with four options, substituting each option back is often the fastest method.
+
+## quadratics | Quadratic equations
+Standard form: ax^{2} + bx + c = 0.
+
+Solving:
+• Factorisation: x^{2} − 5x + 6 = 0 → (x − 2)(x − 3) = 0 → x = 2 or 3.
+• Formula: x = [−b ± √(b^{2} − 4ac)]/(2a).
+• Completing the square.
+
+Roots α and β: α + β = −b/a, αβ = c/a. The equation with roots α and β is x^{2} − (α + β)x + αβ = 0.
+Example: roots 2 and −3 → x^{2} + x − 6 = 0.
+Useful: α^{2} + β^{2} = (α + β)^{2} − 2αβ.
+
+The discriminant b^{2} − 4ac: positive → two real roots; zero → equal roots; negative → no real roots.
+
+Cubics in JAMB: find one root by testing small numbers (f(1), f(−1), …), then factorise. For x^{3} − 5x^{2} − x + 5 = 0, f(1) = 0, f(−1) = 0, f(5) = 0, so x = 1, −1 or 5.
+
+Common traps:
+• Sign of the sum: α + β = −b/a (note the minus).
+• Dividing both sides by x and losing the root x = 0.
+
+Memory tip: "sum = −b/a, product = c/a".
+
+## inequalities | Inequalities and linear programming
+Solve like equations, EXCEPT: multiplying or dividing by a negative number reverses the sign.
+• −3x > 6 → x < −2.
+
+Double inequalities: do the same to all three parts. −1 < 2x + 3 ≤ 7 → −4 < 2x ≤ 4 → −2 < x ≤ 2.
+
+Quadratic inequalities: find the roots, then test a value in each region. (x − 1)(x − 4) < 0 → 1 < x < 4.
+
+On a number line or graph: an open circle or dotted line = strict (< or >); a closed circle or solid line = ≤ or ≥.
+
+Linear programming: graph each inequality, find the region satisfying all of them, then test the corners of that region in the objective (e.g. maximise P = 3x + 2y). The maximum or minimum is always at a corner.
+
+To find an inequality from a shaded graph: get the line's equation from two points, then test a point inside the region (like (0, 0)) to choose the sign.
+
+Common traps:
+• Forgetting to flip the sign when dividing by a negative.
+• Testing a point that lies on the boundary line.
+
+Memory tip: negative multiplier → flip the sign; in linear programming, the answer lives at a corner.
+
+## sequences | Sequences: AP and GP
+Arithmetic progression (AP): constant difference d.
+• nth term: T_{n} = a + (n − 1)d
+• Sum: S_{n} = n/2 [2a + (n − 1)d] = n/2 (first + last)
+
+Geometric progression (GP): constant ratio r.
+• nth term: T_{n} = ar^{n−1}
+• Sum: S_{n} = a(r^{n} − 1)/(r − 1)
+• Sum to infinity (only when −1 < r < 1): S_{∞} = a/(1 − r)
+
+From a sum formula: T_{n} = S_{n} − S_{n−1}.
+Means: the arithmetic mean of a and b is (a + b)/2; the geometric mean is √(ab).
+
+Finding a and d (or r): turn the two facts into two equations. E.g. T_{3} = 7 and T_{7} = 19 → 4d = 12, d = 3, a = 1.
+
+Common traps:
+• Using n instead of (n − 1) in the nth-term formula.
+• Using the sum to infinity when |r| ≥ 1.
+
+Memory tip: AP = adding the same number; GP = multiplying by the same number.
+
+## matrices | Matrices and determinants
+Adding and subtracting: matrices must be the same size; combine matching entries.
+
+Multiplying: row × column. A (2 × 3) times a (3 × 2) gives a 2 × 2. The number of columns of the first must equal the number of rows of the second. In general AB ≠ BA.
+
+2 × 2 matrix with rows (a, b) and (c, d):
+• Determinant = ad − bc.
+• Inverse = 1/(ad − bc) × [rows (d, −b) and (−c, a)]. Swap a and d, negate b and c, divide by the determinant.
+• A matrix with determinant 0 is singular and has no inverse.
+
+3 × 3 determinant: expand along the top row with alternating signs + − +, using the 2 × 2 determinants of the minors.
+
+Solving simultaneous equations with matrices: X = A^{−1}B, or use Cramer's rule.
+
+Common traps:
+• Sign errors in the alternating + − + pattern.
+• Assuming AB = BA.
+
+Memory tip: inverse of a 2 × 2 is "swap the diagonal, negate the others, divide by the determinant".
+
+## binary-operations | Binary operations
+A binary operation * combines two elements using a given rule, e.g. a * b = a + b + 2ab.
+
+Evaluating: substitute carefully. With that rule, 2 * 3 = 2 + 3 + 12 = 17. Work out brackets first: (1 * 2) * 3.
+
+Properties:
+• Closure: the result is always in the set.
+• Commutative: a * b = b * a for all a, b.
+• Associative: (a * b) * c = a * (b * c).
+• Identity e: a * e = a for every a. Solve a * e = a for e.
+• Inverse of a: the element a^{−1} with a * a^{−1} = e.
+
+Example: for a * b = a + b + 2ab, a * e = a gives e + 2ae = 0, so e = 0. The inverse of a satisfies a + x + 2ax = 0, so x = −a/(1 + 2a).
+
+Tables: the identity's row repeats the header row; check symmetry about the main diagonal for commutativity.
+
+Common traps:
+• Treating * as ordinary multiplication.
+• Finding the inverse before finding the identity.
+
+Memory tip: identity first (a * e = a), then inverse (a * x = e).
+
+## geometry | Angles, polygons, triangles and circles
+Angles: on a straight line add to 180°; at a point add to 360°; vertically opposite angles are equal. With parallel lines: corresponding angles are equal, alternate angles are equal, co-interior angles add to 180°.
+
+Triangles: angles add to 180°; an exterior angle equals the sum of the two interior opposite angles. Isosceles: base angles are equal. Similar triangles: corresponding sides are in the same ratio.
+
+Polygons (n sides): interior angles add to (n − 2) × 180°; exterior angles add to 360°. Each exterior angle of a regular polygon = 360°/n.
+
+Circle theorems:
+• The angle at the centre is twice the angle at the circumference on the same arc.
+• Angles in the same segment are equal.
+• The angle in a semicircle is 90°.
+• Opposite angles of a cyclic quadrilateral add to 180°.
+• A tangent is perpendicular to the radius at the point of contact; two tangents from a point are equal.
+• Alternate segment theorem: the angle between a tangent and a chord equals the angle in the alternate segment.
+
+Loci: points a fixed distance from a point form a circle; equidistant from two points form the perpendicular bisector; equidistant from two lines form the angle bisector.
+
+Memory tip: in circle questions, mark the centre and radii first; most answers come from isosceles triangles and "centre = 2 × circumference".
+
+## mensuration | Lengths, areas and volumes
+Plane shapes:
+• Rectangle A = lb; triangle A = ½bh = ½ab sin C; parallelogram A = bh; trapezium A = ½(a + b)h.
+• Circle: C = 2πr, A = πr^{2}.
+• Arc length = (θ/360) × 2πr; sector area = (θ/360) × πr^{2}.
+
+Solids:
+• Cuboid V = lbh; cylinder V = πr^{2}h, curved surface = 2πrh.
+• Cone V = ⅓πr^{2}h, curved surface = πrl (l = slant height, l^{2} = r^{2} + h^{2}).
+• Sphere V = 4/3 πr^{3}, surface = 4πr^{2}. Pyramid V = ⅓ × base area × height.
+• Frustum = big cone − small cone.
+
+A sector folded into a cone: the arc length becomes the base circumference, and the sector radius becomes the slant height.
+
+Similar shapes: if lengths scale by k, areas scale by k^{2} and volumes by k^{3}.
+
+Common traps:
+• Using the diameter instead of the radius.
+• Mixing units (cm and m) in one calculation.
+
+Memory tip: check units: length (cm), area (cm²), volume (cm³). The answer's unit tells you which formula family you need.
+
+## coordinate | Coordinate geometry of straight lines
+For points (x_{1}, y_{1}) and (x_{2}, y_{2}):
+• Gradient m = (y_{2} − y_{1})/(x_{2} − x_{1}).
+• Distance = √[(x_{2} − x_{1})^{2} + (y_{2} − y_{1})^{2}].
+• Midpoint = ((x_{1} + x_{2})/2, (y_{1} + y_{2})/2).
+
+Equation of a line: y = mx + c (c = y-intercept), or y − y_{1} = m(x − x_{1}).
+From ax + by + c = 0, the gradient is −a/b.
+
+Parallel lines have equal gradients. Perpendicular lines: m_{1} × m_{2} = −1.
+
+Gradient of a curve at a point = gradient of the tangent there (use differentiation).
+
+Intercepts: put x = 0 to find the y-intercept; put y = 0 to find the x-intercept.
+
+Common traps:
+• Subtracting coordinates in different orders on the top and bottom of the gradient.
+• Forgetting the minus sign in −a/b.
+
+Memory tip: gradient = "rise over run"; perpendicular = "flip and change the sign".
+
+## trigonometry | Trigonometry
+Right-angled triangles: SOH CAH TOA. sin θ = opposite/hypotenuse, cos θ = adjacent/hypotenuse, tan θ = opposite/adjacent.
+
+Special angles: sin 30° = ½, cos 30° = √3/2, tan 30° = 1/√3; sin 45° = cos 45° = 1/√2, tan 45° = 1; sin 60° = √3/2, cos 60° = ½, tan 60° = √3.
+
+Signs by quadrant (All, Sin, Tan, Cos for quadrants 1–4): only sin is positive between 90° and 180°, so sin 150° = sin 30° = ½ but cos 150° = −√3/2.
+
+Identities: sin^{2} θ + cos^{2} θ = 1; tan θ = sin θ/cos θ. If sin θ = 3/5 (acute), draw a 3-4-5 triangle: cos θ = 4/5, tan θ = 3/4.
+
+Any triangle: sine rule a/sin A = b/sin B; cosine rule a^{2} = b^{2} + c^{2} − 2bc cos A; area = ½ab sin C.
+
+Bearings are measured clockwise from north, written with three figures (e.g. 060°). Angles of elevation and depression are measured from the horizontal.
+
+Common traps:
+• Calculator in the wrong mode, or forgetting the quadrant sign.
+• Measuring a bearing from the wrong point.
+
+Memory tip: draw the triangle; for an acute angle given as a fraction, use a Pythagorean triple (3-4-5, 5-12-13).
+
+## differentiation | Differentiation
+Power rule: d/dx (x^{n}) = nx^{n−1}. Constants differentiate to 0.
+• y = 3x^{2} − 2x + 5 → dy/dx = 6x − 2.
+
+Standard results: d/dx (sin x) = cos x; d/dx (cos x) = −sin x; d/dx (e^{x}) = e^{x}; d/dx (ln x) = 1/x.
+
+Rules:
+• Chain rule: d/dx f(g(x)) = f′(g(x)) × g′(x). E.g. y = sin^{2} 5x → dy/dx = 2 sin 5x × cos 5x × 5 = 10 sin 5x cos 5x.
+• Product rule: (uv)′ = u′v + uv′. Quotient rule: (u/v)′ = (u′v − uv′)/v^{2}.
+
+Uses:
+• The gradient of the tangent at a point = dy/dx at that x.
+• Turning points: dy/dx = 0; the second derivative tells max (negative) or min (positive).
+• Rates of change: dA/dt = dA/dr × dr/dt. E.g. A = πr^{2}, r = 5, dr/dt = 0.2 → dA/dt = 2π(5)(0.2) = 2π.
+
+Common traps:
+• Forgetting the "inner derivative" in the chain rule.
+• Writing d/dx(cos x) = sin x (it is −sin x).
+
+Memory tip: "power down in front, reduce the power by one", then multiply by the inside's derivative.
+
+## integration | Integration
+Integration reverses differentiation.
+
+Power rule: ∫ x^{n} dx = x^{n+1}/(n + 1) + C (n ≠ −1). ∫ 1/x dx = ln x + C.
+Standard results: ∫ sin x dx = −cos x + C; ∫ cos x dx = sin x + C; ∫ e^{x} dx = e^{x} + C.
+With ax inside: ∫ sin 3x dx = −⅓ cos 3x + C (divide by the coefficient of x).
+
+Definite integrals: ∫_{a}^{b} f(x) dx = F(b) − F(a). No + C is needed.
+• ∫_{0}^{2} 3x^{2} dx = [x^{3}] from 0 to 2 = 8.
+
+Area under a curve between x = a and x = b = ∫_{a}^{b} y dx. A region below the x-axis gives a negative value; take its size.
+
+Finding y from dy/dx: integrate, then use the given point to find C.
+
+Common traps:
+• Dividing by n instead of n + 1.
+• Forgetting the minus sign in ∫ sin x dx = −cos x.
+
+Memory tip: to check an integral, differentiate your answer; you should get back the original.
+
+## statistics | Statistics
+Measures of central tendency:
+• Mean = Σx/n; for a frequency table, mean = Σfx/Σf.
+• Median: the middle value when the data are arranged in order (average the two middle values for an even count).
+• Mode: the most frequent value.
+
+Spread:
+• Range = highest − lowest.
+• Variance = Σ(x − x̄)^{2}/n; standard deviation = √variance.
+• Mean deviation = Σ|x − x̄|/n.
+
+Grouped data: use class mid-points as x. Cumulative frequency curves (ogives) give the median (at n/2) and quartiles (at n/4 and 3n/4); interquartile range = Q_{3} − Q_{1}.
+
+Charts: in a pie chart, a sector angle = (frequency/total) × 360°. Histograms use areas; for equal class widths, bar heights show frequencies.
+
+Common traps:
+• Forgetting to sort the data before finding the median.
+• Using Σx/n instead of Σfx/Σf for a frequency table.
+
+Memory tip: the mean uses every value; the median uses position; the mode uses frequency.
+
+## probability | Probability
+P(event) = number of favourable outcomes ÷ total number of equally likely outcomes. 0 ≤ P ≤ 1, and P(not A) = 1 − P(A).
+
+AND (independent events): multiply. P(two heads) = ½ × ½ = ¼.
+OR (mutually exclusive events): add. P(a 2 or a 5 on a die) = 1/6 + 1/6 = 1/3.
+In general, P(A or B) = P(A) + P(B) − P(A and B).
+
+Without replacement, the second probability changes: from 5 red and 3 blue, P(two reds) = 5/8 × 4/7 = 5/14.
+
+Two dice: there are 36 outcomes. List them in a 6 × 6 table for sums and differences (a sum of 7 occurs 6 times, so P = 1/6).
+
+"At least one": P(at least one) = 1 − P(none).
+
+Common traps:
+• Adding when you should multiply (AND = multiply).
+• Forgetting to reduce the totals when items are not replaced.
+
+Memory tip: AND → ×, OR → +, "at least one" → 1 − none.
+
+## permutations | Permutations and combinations
+Factorial: n! = n × (n − 1) × … × 1; 0! = 1.
+
+Permutations (order matters): ⁿP_{r} = n!/(n − r)!. The ways to arrange 3 of 5 books on a shelf = 5 × 4 × 3 = 60.
+Combinations (order does not matter): ⁿC_{r} = n!/[r!(n − r)!]. The ways to choose 3 of 5 students = 10.
+
+Arranging letters with repeats: divide by the factorial of each repeat. In "ADDED", 5!/(3!) = 20 (three Ds).
+
+Committees with conditions: multiply the choices from each group. 2 men from 5 and 1 woman from 4 = ⁵C_{2} × ⁴C_{1} = 10 × 4 = 40.
+
+Circular arrangements of n objects: (n − 1)!.
+
+Common traps:
+• Using permutations when the order does not matter (committees and selections are combinations).
+• Forgetting to divide for repeated letters.
+
+Memory tip: "arrange → permutation; choose → combination".
