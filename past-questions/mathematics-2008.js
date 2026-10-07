@@ -105,7 +105,10 @@
       "∫cos x dx = sin x. sin(π/2) − sin(−π/2) = 1 − (−1) = 2."),
     q("On a pie chart, there are six sectors of which four angles are 30°, 45°, 60°, 90° and the remaining two angles are in the ratio 2 : 1. Find the smaller of the remaining two angles.", ["15°", "30°", "45°", "60°"], C,
       "30 + 45 + 60 + 90 = 225°, leaving 360 − 225 = 135°. Split 2 : 1: 90° and 45°. The smaller is 45°."),
-    // 43–50 (Q42 left out: bar chart unreadable)
+    q("The bar chart above shows the number of times the words a, and, in, it, the, to appear in a paragraph in a book. What is the ratio of the least frequent word to that of the most frequent word?", ["1/6", "1/3", "2/3", "3/4"], A,
+      "Least frequent: 'and', 2 times. Most frequent: 'the', 12 times. Ratio = 2/12 = 1/6.",
+      { diagram: IMG('maths-2008-q42.png'), keyVerdict: 'misprint', answerNote: "The paper prints option A as 1/4, a printing error: the bars give 'and' = 2 and 'the' = 12, so the ratio is 2/12 = 1/6. A clearer copy of the paper shows A as 1/6, which matches the key's A." }),
+    // 43–50
     q("What is the mean of the data t, 2t − 1, t − 2, 2t − 1, 4t and 2t + 2?", ["2t", "2t − 1", "(2t/3)t + 1", "2t − 1/3"], D,
       "Sum = t + 2t − 1 + t − 2 + 2t − 1 + 4t + 2t + 2 = 12t − 2. Mean = (12t − 2)/6 = 2t − 1/3."),
     q("Find the median of 4, 1, 4, 1, 0, 4, 4, 2 and 0.", ["0", "1", "2", "4"], C,

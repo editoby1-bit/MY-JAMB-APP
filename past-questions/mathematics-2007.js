@@ -101,7 +101,10 @@
       "∫ −2 cos x dx = −2 sin x. From 0 to π/2: −2(sin π/2 − sin 0) = −2(1 − 0) = −2."),
     q("Mark: 3, 4, 5, 6, 7, 8. Frequency: 5, y − 1, y, 9, 4, 1. The table gives the frequency distribution of marks obtained by a group of students in a test. If the total mark scored is 200, calculate the value of y.", ["9", "11", "13", "15"], B,
       "Σfx = 15 + 4(y − 1) + 5y + 54 + 28 + 8 = 9y + 101 = 200, so 9y = 99 and y = 11."),
-    // paper 43–50 (paper Q42 left out)
+    q("The histogram above represents the weight of students who travelled out of their school for an examination. How many people made the trip?", ["29", "38", "69", "78"], A,
+      "Add the heights of the bars: 2 + 3 + 5 + 6 + 8 + 4 + 1 = 29 students.",
+      { diagram: IMG('maths-2007-q42.png') }),
+    // paper 43–50
     q("The pie chart above illustrates the amount of private time a student spends in a week studying various subjects (Maths 105°, Science 75°, Social Studies 2k, English 3k, Others k). Find the value of k.", ["15°", "30°", "60°", "90°"], B,
       "The angles add up to 360°: 105 + 75 + 2k + 3k + k = 360, so 6k = 180 and k = 30°.",
       { diagram: IMG('maths-2007-q43.png') }),
