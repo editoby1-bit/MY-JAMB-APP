@@ -91,7 +91,7 @@
     q("Choose the option that rhymes with the given word: grey", ["crow", "groom", "pray", "glow"], C, "Grey and pray both end in /eɪ/."),
     q(OPP + "We have learnt the THEORETICAL aspect of the course.", ["practical", "abstract", "written", "hypothetical"], A, "Theoretical (based on ideas) is the opposite of practical (based on doing)."),
     q(OPP + "Many people dislike the present AUSTERITY measures.", ["harsh", "rigid", "miserly", "buoyant"], D, "Austerity is a time of tight spending and hardship; its opposite is a buoyant (prosperous, thriving) economy."),
-    q(OPP + "Women admire men who tell VERITABLE stories.", ["fantastic", "real", "negative", "archaic"], A, "Veritable means true and genuine; fantastic means imaginary or far-fetched, the opposite.", { keyVerdict: 'corrected', keyAnswer: 'D', answerNote: "Veritable means real, true or genuine. Its opposite is fantastic (A): fanciful, imaginary, unbelievable. Archaic (D) means very old or out of date, which is not the opposite of 'true'; real (B) is a synonym." }),
+    q(OPP + "Women admire men who tell VERITABLE stories.", ["fantastic", "real", "negative", "archaic"], A, "Veritable means true and genuine; fantastic means imaginary or far-fetched, the opposite."),
     q(OPP + "Kolo has considerable ALLUREMENT for white shirts.", ["fascination", "repulsion", "attraction", "temptation"], B, "Allurement is attraction; its opposite is repulsion."),
     q(OPP + "He did not see the LIKELIHOOD of passing the examination.", ["difficulty", "probability", "impossibility", "practicability"], C, "Likelihood is the chance that something will happen; its opposite is impossibility."),
   ];
