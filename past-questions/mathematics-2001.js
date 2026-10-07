@@ -14,9 +14,7 @@
   QUESTION_BANK.mathematics = QUESTION_BANK.mathematics.concat([
     // 1–10
     q("Evaluate 21.05347 − 1.6324 × 0.43 to 3 decimal places.", ["20.980", "20.351", "20.981", "20.352"], D,
-      "Multiply first: 1.6324 × 0.43 = 0.701932. Then 21.05347 − 0.701932 = 20.351538, which is 20.352 to 3 decimal places (the fourth decimal digit is 5, so round up).",
-      { keyVerdict: 'corrected', keyAnswer: 'B',
-        answerNote: "The key gives B (20.351), but 21.05347 − 0.701932 = 20.351538. The digit after the third decimal place is 5, so we round up to 20.352 (D). 20.351 comes from cutting off the digits instead of rounding." }),
+      "Multiply first: 1.6324 × 0.43 = 0.701932. Then 21.05347 − 0.701932 = 20.351538, which is 20.352 to 3 decimal places (the fourth decimal digit is 5, so round up).",),
     q("Simplify (∛(64a³))^{−1}.", ["4a", "1/(8a)", "8a", "1/(4a)"], D,
       "∛(64a³) = 4a, and the power −1 means the reciprocal: (4a)^{−1} = 1/(4a)."),
     q("Given that p = 1 + √2 and q = 1 − √2, evaluate (p² − q²)/(2pq).", ["2(2 + √2)", "−2(2 + √2)", "2√2", "−2√2"], D,
@@ -69,9 +67,7 @@
     q("A straight line makes an angle of 30° with the positive x-axis and cuts the y-axis at y = 5. Find the equation of the straight line.", ["y = x/10 + 5", "y = x + 5", "√3y = −x + 5√3", "√3y = x + 5√3"], D,
       "Gradient = tan 30° = 1/√3 and intercept 5: y = x/√3 + 5. Multiplying by √3: √3y = x + 5√3."),
     q("Find the value of p if the line joining (p, 4) and (6, −2) is perpendicular to the line joining (2, p) and (−1, 3).", ["4", "6", "3", "0"], A,
-      "Gradients: (−2 − 4)/(6 − p) = −6/(6 − p) and (3 − p)/(−1 − 2) = (p − 3)/3. Perpendicular: product = −1, so −6(p − 3) = −3(6 − p), giving −6p + 18 = −18 + 3p, 9p = 36, p = 4. Check: gradients −3 and 1/3.",
-      { keyVerdict: 'corrected', keyAnswer: 'D',
-        answerNote: "The key gives D (p = 0), but with p = 0 the gradients are −6/6 = −1 and 3/(−3) = −1: the lines are then parallel, not perpendicular. With p = 4 the gradients are −6/2 = −3 and (3 − 4)/(−3) = 1/3, and (−3)(1/3) = −1. So p = 4 (A)." }),
+      "Gradients: (−2 − 4)/(6 − p) = −6/(6 − p) and (3 − p)/(−1 − 2) = (p − 3)/3. Perpendicular: product = −1, so −6(p − 3) = −3(6 − p), giving −6p + 18 = −18 + 3p, 9p = 36, p = 4. Check: gradients −3 and 1/3.",),
     // 26–35
     q("Find the number of sides of a regular polygon whose interior angle is twice the exterior angle.", ["6", "2", "3", "8"], A,
       "Interior + exterior = 180° and interior = 2 × exterior, so the exterior angle is 60°. Number of sides = 360° ÷ 60° = 6."),
@@ -113,9 +109,7 @@
       { keyVerdict: 'none', keyAnswer: 'B',
         answerNote: "From the printed table the mean is exactly 172 ÷ 20 = 8.6, which is not among the options. The key's 8.7 (B) is the closest option and is probably a misprint for 8.6; 70, 9.5 and 11.0 are far off." }),
     q("Teams P and Q are involved in a game of football. What is the probability that the game ends in a draw?", ["2/3", "1/2", "1/3", "1/4"], C,
-      "There are three possible results: P wins, Q wins, or a draw. Taking them as equally likely, P(draw) = 1/3.",
-      { keyVerdict: 'corrected', keyAnswer: 'B',
-        answerNote: "The key gives B (½), but a football match has three results, not two: P wins, Q wins, or a draw. Treating them as equally likely, P(draw) = 1/3 (C). ½ wrongly counts only 'draw' and 'not draw' as if they were equally likely." }),
+      "There are three possible results: P wins, Q wins, or a draw. Taking them as equally likely, P(draw) = 1/3.",),
     q("If ^{6}P_{r} = 6, find the value of ^{6}P_{r+1}.", ["30", "33", "35", "15"], A,
       "^{6}P_{r} = 6!/(6 − r)! = 6 only when r = 1. Then ^{6}P_{2} = 6 × 5 = 30. (The paper prints the question as \"find the value of ^{6}P_{r+1} if ^{6}P_{r+1}\", with a stray repeated phrase.)"),
     q("The graph above shows the cumulative frequency of the distribution of masses of fertilizer for 48 workers in one institution. Which of the following gives the interquartile range?", ["Q_{3} − Q_{2}", "½(Q_{3} − Q_{1})", "Q_{3} − Q_{1}", "Q_{2} − Q_{1}"], C,
