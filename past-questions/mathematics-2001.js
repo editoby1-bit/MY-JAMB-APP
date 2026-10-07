@@ -29,6 +29,9 @@
       "(0.14)² = 0.0196; 0.0196 × 0.275 = 0.00539; 7 × 0.02 = 0.14. 0.00539 ÷ 0.14 = 0.0385, which is 0.039 to 3 decimal places."),
     q("Divide a^{3x} − 26a^{2x} + 156a^{x} − 216 by a^{2x} − 24a^{x} + 108.", ["a^{x} − 2", "a^{x} + 2", "a^{x} − 18", "a^{x} − 6"], A,
       "Let u = a^{x}. The divisor u² − 24u + 108 = (u − 6)(u − 18), and u³ − 26u² + 156u − 216 = (u − 2)(u − 6)(u − 18). The quotient is u − 2 = a^{x} − 2."),
+    q("Triangle SPT is the solution of the linear inequalities", ["2y − x − 2 ≤ 0, y + 2x + 2 ≥ 0, −2 ≤ x ≤ −1", "−2 ≤ x ≤ 2, y ≥ 0, y + 2x + 2 ≤ 0, x ≤ 0", "2y − x − 2 ≤ 0, y + 2x + 2 ≤ 0, y ≥ 0, x ≤ 0", "2y − x − 2 ≥ 0, y + 2x + 2 ≤ 0, x ≤ 0"], C,
+      "The triangle has vertices S(−2, 0), T(−1, 0) and P(−6/5, 2/5). Testing a point inside it, such as (−1.4, 0.1): 2y − x − 2 = −0.4 ≤ 0, y + 2x + 2 = −0.7 ≤ 0 and y ≥ 0 (it lies above the x-axis). Only C has all three; x ≤ 0 is also true there.",
+      { diagram: IMG('maths-2001-q9.png') }),
     q("The table defines an operation ⊕ on {K, L, M} (row element ⊕ column element). Row K: K⊕K = L, K⊕L = M, K⊕M = K. Row L: L⊕K = M, L⊕L = K, L⊕M = L. Row M: M⊕K = K, M⊕L = L, M⊕M = M. The identity element with respect to the operation shown in the table above is", ["O", "M", "L", "K"], B,
       "The identity e leaves every element unchanged. Row M reads K, L, M and column M reads K, L, M, so M ⊕ x = x ⊕ M = x for every x. The identity is M. (The paper prints M as a small \"m\" in two table cells and in option B.)"),
     // 11–20
