@@ -161,6 +161,7 @@
   "|Find the principal which amounts to ₦5,500 at simple interest in 5 years at 2% per annum.|₦4,900|₦5,000|₦4,700|₦4,800": "commercial",
   "|Evaluate ((0.14)² × 0.275)/(7(0.02)) correct to 3 decimal places.|0.039|0.358|0.03|0.308": "fractions-decimals",
   "|Divide a^{3x} − 26a^{2x} + 156a^{x} − 216 by a^{2x} − 24a^{x} + 108.|a^{x} − 2|a^{x} + 2|a^{x} − 18|a^{x} − 6": "algebra",
+  "|Triangle SPT is the solution of the linear inequalities|2y − x − 2 ≤ 0, y + 2x + 2 ≥ 0, −2 ≤ x ≤ −1|−2 ≤ x ≤ 2, y ≥ 0, y + 2x + 2 ≤ 0, x ≤ 0|2y − x − 2 ≤ 0, y + 2x + 2 ≤ 0, y ≥ 0, x ≤ 0|2y − x − 2 ≥ 0, y + 2x + 2 ≤ 0, x ≤ 0": "inequalities",
   "|The table defines an operation ⊕ on {K, L, M} (row element ⊕ column element). Row K: K⊕K = L, K⊕L = M, K⊕M = K. Row L: L⊕K = M, L⊕L = K, L⊕M = L. Row M: M⊕K = K, M⊕L = L, M⊕M = M. The identity element with respect to the operation shown in the table above is|O|M|L|K": "binary-operations",
   "|A man saves ₦100.00 in the first year of work and each year saves ₦20.00 more than in the preceding year. In how many years will he save ₦5,800.00?|100 years|58 years|29 years|20 years": "sequences",
   "|If P = [[3, −2, 4], [5, 0, 6], [7, 5, −1]], then −2P is|[[−6, 4, −8], [−10, 0, −12], [−14, −10, 2]]|[[−6, −4, 2], [−10, −2, −12], [−14, −10, 3]]|[[−6, 4, −8], [−10, 0, 6], [−14, 5, −1]]|[[−6, 4, −8], [5, 0, 6], [7, 5, −1]]": "matrices",
