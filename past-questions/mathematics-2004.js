@@ -62,8 +62,8 @@
       "From the table, 5 came up 20 times out of 100: probability = 20/100 = 1/5."),
     // 21–30
     q("The pie chart shows the distribution of the crops harvested from a farmland in a year. If 3000 tonnes of millet is harvested, what amount of beans is harvested?", ["6000 tonnes", "1500 tonnes", "1200 tonnes", "9000 tonnes"], C,
-      "Millet 150° = 3000 t, so 1° = 20 t. The maize sector is drawn and marked as a right angle (90°), so beans = 360° − 150° − 60° − 90° = 60°, giving 60 × 20 = 1200 t.",
-      { diagram: IMG('maths-2004-q21.png'), keyVerdict: 'misprint', answerNote: "The chart prints only Others 60° and Millet 150°; the maize angle is marked but its size is not printed, so beans + maize = 150° is all that can be read. The key's 1200 tonnes (C) follows when maize is the right angle it appears to be (90°): beans = 60°, and 60 × (3000 ÷ 150) = 1200 t." }),
+      "Millet 150° = 3000 t, so 1° = 20 t. Beans = 360° − 150° − 90° − 60° = 60°, so beans = 60 × 20 = 1200 tonnes.",
+      { diagram: IMG('maths-2004-q21.png') }),
     q("In how many ways can 2 students be selected from a group of 5 students in a debating competition?", ["25 ways", "10 ways", "15 ways", "20 ways"], B,
       "Order does not matter: ⁵C₂ = (5 × 4)/2 = 10 ways."),
     q("The mean age of a group of students is 15 years. When the age of a teacher, 45 years old, is added to the ages of the students, the mean of their ages becomes 18 years. Find the number of students in the group.", ["9", "7", "42", "15"], A,

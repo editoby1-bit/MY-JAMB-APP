@@ -68,8 +68,7 @@
     // 25–29
     q("In the diagram above, PQ // RS. The size of the angle marked x is", ["100°", "80°", "50°", "30°"], B,
       "The two slanting lines and PQ form a triangle with angles 50° (vertically opposite the marked 50°) and 30°. x is the exterior angle of this triangle at the lower crossing, so x = 50° + 30° = 80°.",
-      { diagram: IMG('maths-2008-q25.png'), keyVerdict: 'corrected', keyAnswer: 'D',
-        answerNote: "The key gives D (30°), but x is the exterior angle of the triangle formed by PQ and the two slanting lines: x = 50° + 30° = 80° (the interior angle there is 180° − 80° = 100°). 30° is the angle at the vertex, not x." }),
+      { diagram: IMG('maths-2008-q25.png') }),
     q("Find the exterior angle of a 12-sided regular polygon.", ["12°", "24°", "25°", "30°"], D,
       "The exterior angles of any polygon add up to 360°, so each one is 360° ÷ 12 = 30°."),
     q("In the diagram above, ∠OPQ is", ["90°", "53°", "36°", "26°"], B,
