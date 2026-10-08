@@ -691,6 +691,7 @@
   "|Evaluate ∫_{0}^{1} (3 − 2x) dx.|3|5|2|6": "integration",
   "|Find ∫ cos 4x dx.|3/4 sin 4x + K|−3/4 sin 4x + K|1/4 sin 4x + K|−1/4 sin 4x + K": "integration",
   "|The pie chart shows the distribution of courses offered by students. What percentage of the students offer English?|30%|35%|20%|25%": "statistics",
+  "|The bar chart above shows the distribution of SS2 students in a school. Find the total number of students.|180|210|105|135": "statistics",
   "|The sum of four consecutive integers is 34. Find the least of these numbers.|7|8|5|6": "equations",
   "|Numbers: 0, 1, 2, 3, 4, 5. Frequency: 1, 4, 3, 8, 2, 5. From the table, find the median and range of the data respectively.|(8, 5)|(5, 8)|(5, 3)|(3, 5)": "statistics",
   "|Class interval: 0–2, 3–5, 6–8, 9–11. Frequency: 3, 2, 5, 3. Find the mode of the distribution.|9|10|7|8": "statistics",
