@@ -103,6 +103,16 @@
               <span class="jdb-arrow">→</span>
             </div>
 
+            <!-- JAMB's Tricky Questions — several right answers, or none fully right -->
+            <div class="jamb-dash-banner jamb-tricky-banner" id="jambTrickyBanner">
+              <span class="jdb-icon">🧩</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">JAMB's Tricky Questions</span>
+                <span class="jdb-sub">More than one right answer · No fully correct option</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
             <!-- Key Points — every topic lesson behind the past questions -->
             <div class="jamb-dash-banner jamb-keypoints-banner" id="jambKeyPointsBanner">
               <span class="jdb-icon">📘</span>
@@ -624,6 +634,16 @@
         <h2 class="jqc-title">Most Repeated Questions</h2>
         <p class="jqc-sub">JAMB rarely sets a brand-new question: most can be traced to earlier papers. These are the questions set more than once, most-repeated first. Master them.</p>
         <div id="jambRepeatBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambTrickyModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambTrickyClose">✕</button>
+        <div class="jqc-icon">🧩</div>
+        <h2 class="jqc-title">JAMB's Tricky Questions</h2>
+        <p class="jqc-sub">Real JAMB questions where more than one option is right, or where no option is fully right. Most apps just repeat the answer key; here you learn what is really going on.</p>
+        <div id="jambTrickyBody" style="text-align:left;"></div>
       </div>
     </div>
 

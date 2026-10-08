@@ -99,13 +99,13 @@
     const head = {
       corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
       multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
-      none:      `None of the options is fully correct as printed. The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>, which is also the closest option, so that is what we mark right.`,
+      none:      `None of the options is fully correct. JAMB's answer is <strong>${escHtml(q.keyAnswer)}</strong>, so that is what scores in the exam and here, but it is not fully correct. Here is why:`,
       misprint:  `The question paper has a printing error here, so we mark the answer to the question as JAMB intended it: <strong>${right}</strong>.`,
     }[q.keyVerdict];
     if (!head) return '';
     return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`
       + `<p>${head}</p><p>${mathHtml(q.answerNote)}</p>`
-      + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning.</p>` : '')
+      + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning; that is usually JAMB's answer.</p>` : '')
       + (inTeach ? '' : `<p class="key-check-teach">Because the answers conflict, this question needs a fuller explanation. Tap Teach Me to learn more. <button type="button" class="key-check-teach-btn">🧠 Teach Me: learn more</button></p>`)
       + `</div>`;
   }
@@ -411,6 +411,8 @@
     const nRep = years.length ? mostRepeatedPool(el.subjectSelect.value).length : 0;
     el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
       (nRep ? `<option value="repeated">🔁 Most repeated questions · ${nRep}</option>` : '') +
+      Object.keys(TRICKY).map(k => { const n = years.length ? trickyPool(el.subjectSelect.value, k).length : 0;
+        return n ? `<option value="tricky-${k}">${TRICKY[k].icon} ${TRICKY[k].label} · ${n}</option>` : ''; }).join('') +
       years.map(y => `<option value="${y}">JAMB ${y} · ${counts[y]} questions</option>`).join('');
     el.yearSelect.value = 'all';
     el.yearField.classList.toggle('hidden', !years.length);
@@ -582,6 +584,18 @@
         questions,
         subjects: [subject],
         sessionLabel: `${fmt(subject)} · Most repeated`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
+    if (yearVal && yearVal.startsWith('tricky-')) {
+      const kind = yearVal.slice(7);
+      const all = trickyPool(subject, kind);
+      const n = countValue === 'all' ? all.length : Math.min(Number(countValue), all.length);
+      const questions = groupAwarePick(all, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · ${TRICKY[kind].label}`,
         subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
       };
     }
@@ -823,6 +837,12 @@
       if (state.reviewMode || state.mode === 'practice') {
         if (selectedAnswer !== null) {
           if (isCorrect(q, idx)) btn.classList.add('correct');
+          // No option is fully right: JAMB's key answer still scores, but is
+          // marked in its own colour so it never looks like a clean answer.
+          if (q.keyVerdict === 'none' && idx === q.answer) {
+            btn.classList.add('key-only');
+            btn.insertAdjacentHTML('beforeend', '<span class="key-only-tag">JAMB\'s answer · not fully correct</span>');
+          }
           if (idx === selectedAnswer && !isCorrect(q, selectedAnswer)) btn.classList.add('wrong');
         }
       }
@@ -1106,6 +1126,8 @@
     document.getElementById('jambGamesClose')?.addEventListener('click', closeGamesHub);
     document.getElementById('jambRepeatBanner')?.addEventListener('click', openRepeatHub);
     document.getElementById('jambRepeatClose')?.addEventListener('click', closeRepeatHub);
+    document.getElementById('jambTrickyBanner')?.addEventListener('click', openTrickyHub);
+    document.getElementById('jambTrickyClose')?.addEventListener('click', closeTrickyHub);
     document.getElementById('jambKeyPointsBanner')?.addEventListener('click', openKeyPoints);
     document.getElementById('jambKeyPointsClose')?.addEventListener('click', closeKeyPoints);
     document.getElementById('gameHistoryClose')?.addEventListener('click', closeGameHistory);
@@ -1523,6 +1545,48 @@
     el.subjectSelect.value = subject;
     populateYears();
     el.yearSelect.value = 'repeated';
+    startSession();
+  }
+
+  /* ── JAMB's Tricky Questions ──
+     Two kinds of past question JAMB students rarely get explained:
+     'multi' = more than one option is correct (all are accepted);
+     'none'  = no option is fully correct (JAMB's answer is marked apart). */
+  const TRICKY = {
+    multi: { label: 'More Than One Right Answer', icon: '✌️', sub: 'Two or more options are correct; learn why each one works.' },
+    none:  { label: 'No Fully Correct Option', icon: '🚫', sub: "None of the options is fully right; see JAMB's answer and why it falls short." },
+  };
+  function trickyPool(subject, kind) {
+    const arr = QUESTION_BANK[subject];
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(q => Array.isArray(q.options) && (kind === 'none'
+      ? q.keyVerdict === 'none'
+      : Array.isArray(q.alsoAccept) && q.alsoAccept.length && q.keyVerdict !== 'none'));
+  }
+  function openTrickyHub() {
+    const body = document.getElementById('jambTrickyBody');
+    const subjects = Object.keys(QUESTION_BANK).filter(s => trickyPool(s, 'multi').length || trickyPool(s, 'none').length);
+    body.innerHTML = subjects.length ? Object.keys(TRICKY).map(kind => {
+      const t = TRICKY[kind];
+      const cards = subjects.map(s => ({ s, n: trickyPool(s, kind).length })).filter(x => x.n).map(x =>
+        `<div class="game-type-card tricky-subject" data-subject="${x.s}" data-kind="${kind}">
+          <span class="gtc-icon">${t.icon}</span>
+          <div class="gtc-body"><div class="gtc-title">${fmt(x.s)}</div>
+          <div class="gtc-sub">${x.n} question${x.n === 1 ? '' : 's'}</div></div>
+        </div>`).join('');
+      return cards ? `<h3 class="tricky-h">${t.icon} ${t.label}</h3><p class="tricky-sub">${t.sub}</p>${cards}` : '';
+    }).join('') : '<p class="jqc-sub">No tricky questions yet.</p>';
+    body.querySelectorAll('.tricky-subject').forEach(c => c.addEventListener('click', () => startTrickyPractice(c.dataset.subject, c.dataset.kind)));
+    document.getElementById('jambTrickyModal')?.classList.remove('hidden');
+  }
+  function closeTrickyHub() { document.getElementById('jambTrickyModal')?.classList.add('hidden'); }
+  function startTrickyPractice(subject, kind) {
+    closeTrickyHub();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    el.yearSelect.value = 'tricky-' + kind;
     startSession();
   }
 
@@ -3098,11 +3162,12 @@
 
     // The student-specific line lives OUTSIDE the explanation, so one
     // explanation per question can be reused for every student.
+    const keyOnly = q.keyVerdict === 'none';
     const youLine = studentOpt === null
-      ? `<div class="ai-you">You didn't answer this one. The answer is <strong>${right}</strong>.</div>`
+      ? `<div class="ai-you">You didn't answer this one. ${keyOnly ? `JAMB's answer is <strong>${right}</strong> (no option is fully correct).` : `The answer is <strong>${right}</strong>.`}</div>`
       : wasCorrect
-        ? `<div class="ai-you ai-you-right">You chose <strong>${L(studentAns)}</strong> — correct ✓</div>`
-        : `<div class="ai-you ai-you-wrong">You chose <strong>${L(studentAns)}</strong>. The answer is <strong>${right}</strong>.</div>`;
+        ? `<div class="ai-you ai-you-right">You chose <strong>${L(studentAns)}</strong> — ${keyOnly ? "JAMB's answer ✓ (but no option is fully correct)" : 'correct ✓'}</div>`
+        : `<div class="ai-you ai-you-wrong">You chose <strong>${L(studentAns)}</strong>. ${keyOnly ? `JAMB's answer is <strong>${right}</strong>, though no option is fully correct.` : `The answer is <strong>${right}</strong>.`}</div>`;
     const show = text => {
       loading?.classList.add('hidden');
       if (response) {
