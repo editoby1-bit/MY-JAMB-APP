@@ -836,7 +836,7 @@
   "|If sin θ = 12/13, find the value of 1 + cos θ.|25/11|18/13|8/13|5/13": "trigonometry",
   "|If y = 4x³ − 2x² + x, find dy/dx.|8x² − 2x + 1|8x² − 4x + 1|12x² − 2x + 1|12x² − 4x + 1": "differentiation",
   "|If y = cos 3x, find dy/dx.|(1/3) sin 3x|−(1/3) sin 3x|3 sin 3x|−3 sin 3x": "differentiation",
-  "|Find the minimum value of y = x² − 2x − 3.|4|1|−1|−4": "differentiation",
+  "|Find the minimum value of y = x² − 2x − 3.|4|1|−1|−4": "quadratics",
   "|Evaluate ∫ sin 2x dx.|cos 2x + k|(1/2) cos 2x + k|−(1/2) cos 2x + k|−cos 2x + k": "integration",
   "|Evaluate ∫ (2x + 3)^{1/2} dx.|(1/12)(2x + 3)^{6} + k|(1/3)(2x + 3)^{1/2} + k|(1/3)(2x + 3)^{3/2} + k|(1/12)(2x + 3)^{3/4} + k": "integration",
   "|The pie chart above shows the monthly distribution of a man's salary on food items. If he spent ₦8,000 on rice, how much did he spend on yam?|₦24,000|₦18,000|₦16,000|₦12,000": "statistics",
@@ -1036,6 +1036,7 @@
   "|If the average of the scores 15, 21, 17, 26, 18 and 29 is 21, calculate the variance of the scores.|5|25|6|150": "statistics",
   "|Find the gradient of the tangent to the curve y = x² − 3x + 4 at the point (−1, 8).|5|−1|−5|1": "differentiation",
   "|Solve the inequality −1/4 < (3/4)(3y − 2) < 1/2.|5/9 < y < 8/9|8/9 < y < 5/9|2/7 < y < 1/7|1/7 < y < 2/7": "inequalities",
+  "|If y ∝ 1/x² and x = 3 when y = 2, find y when x = 3/2.|6|10|12|8": "variation",
   "|A binary operation on the set of real numbers is defined by x * y = (x + y)/2 for all x, y ∈ R. Find the value of y if 3 * y = 24.|84|48|22|45": "binary-operations",
   "|Calculate the length of the straight line joining the points (−1, 0) and (2, −2).|√6 units|√13 units|2√5 units|√2 units": "coordinate",
   "|Calculate the volume of a cone 7.0 cm deep with base radius 1½ cm. [π = 22/7]|16½ cm³|14 cm³|14½ cm³|16 cm³": "mensuration",
@@ -1064,6 +1065,15 @@
   "|Which of the shaded regions in the following diagrams represents A ∩ B′ ∩ C?|A|B|C|D": "sets",
   "|The fourth term of an A.P. is 37 and the 6th term is 12 more than the fourth term. Find the seventh term.|55|19|36|65": "sequences",
   "|In the diagram, O is the centre of the circle ABCD. If |AB| = |BC| and ∠CDA = 64°, find ∠BAD.|85°|58°|32°|64°": "geometry",
-  "|Find the value(s) of a for which the matrix [[a − 2, 2], [1, a − 3]] has no inverse.|1|2|1, 2|1, 4": "matrices"
+  "|Find the value(s) of a for which the matrix [[a − 2, 2], [1, a − 3]] has no inverse.|1|2|1, 2|1, 4": "matrices",
+  "|From the Venn diagram above, the shaded part represents|(P∩Q)∪(P∩R)|(P∪Q)(P∪R)|(P∪Q)∪(P∪R)|(P∩Q)∩(P∩R)": "sets",
+  "|y varies directly as w². When y = 8, w = 2. Find y when w = 3.|18|12|8|6": "variation",
+  "|Solve the inequality x/2 + 3/4 ≤ 5x/6 − 7/12.|x ≥ 4|x ≤ 3|x ≥ −3|x ≤ −4": "inequalities",
+  "|Find y, if [[5, −6], [2, −7]] × [[x], [y]] = [[7], [−11]].|8|5|3|2": "matrices",
+  "|Find the value of the determinant |0 3 2; 1 7 8; 0 5 4| (rows (0, 3, 2), (1, 7, 8), (0, 5, 4)).|−12|10|−1|−2": "matrices",
+  "|Values: 0, 1, 2, 3, 4 with frequencies 1, 2, 2, 1, 9 respectively. Find the mode of the distribution.|1|2|3|4": "statistics",
+  "|Simplify 5⅓ × 7¼ ÷ 116/27.|3|9|8|6": "fractions-decimals",
+  "|The gradient of the line joining (x, 4) and (1, 2) is ½. Find the value of x.|5|3|−3|−5": "coordinate",
+  "|Evaluate ∫ sin 2x dx.|cos 2x + k|½ cos 2x + k|−½ cos 2x + k|−cos 2x + k": "integration"
  }
 };
