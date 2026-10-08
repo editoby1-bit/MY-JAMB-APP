@@ -771,6 +771,7 @@
   "|If a binary operation * is defined by x * y = x + 2y, find 2 * (3 * 4).|14|26|24|16": "binary-operations",
   "|If P = [[5, 3], [2, 1]] and Q = [[4, 2], [3, 5]], find 2P + Q.|[[7, 7], [8, 14]]|[[14, 8], [7, 7]]|[[7, 7], [14, 8]]|[[7, 7], [8, 14]]": "matrices",
   "|Find the inverse of [[5, 3], [6, 4]].|[[2, 3/2], [3, −5/2]]|[[2, 3/2], [−3, 5/2]]|[[2, −3/2], [−3, 5/2]]|[[2, −3/2], [−3, −5/2]]": "matrices",
+  "|In the diagram above, |AD| = |DC|, ∠ABD = 110° and ∠ACD = 15°. Find the value of x.|45°|15°|30°|40°": "geometry",
   "|The value of x in the figure above is|70°|130°|110°|100°": "geometry",
   "|If the angles of a quadrilateral are (3y + 10)°, (2y + 30)°, (y + 20)° and 4y°, find the value of y.|66°|12°|30°|42°": "geometry",
   "|A square tile has side 30 cm. How many of these tiles will cover a rectangular floor of length 7.2 m and width 4.2 m?|720|336|420|576": "mensuration",
