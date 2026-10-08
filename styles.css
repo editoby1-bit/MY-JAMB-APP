@@ -1839,3 +1839,14 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .jamb-tricky-banner .jdb-sub { color: rgba(255,255,255,.8); }
 .tricky-h { color: #fff; font-size: 1rem; margin: 1rem 0 .2rem; }
 .tricky-sub { color: rgba(255,255,255,.7); font-size: .82rem; margin: 0 0 .5rem; }
+.jamb-traps-banner { background: linear-gradient(135deg, #b91c1c, #f87171); }
+.jamb-traps-banner .jdb-text, .jamb-traps-banner .jdb-arrow { color: #fff; }
+.jamb-traps-banner .jdb-sub { color: rgba(255,255,255,.82); }
+.trap-list { list-style: none; margin: 0; padding: 0 .8rem .4rem; }
+.trap-item { padding: .6rem 0; border-top: 1px solid rgba(255,255,255,.08); }
+.trap-q { font-size: .82rem; color: rgba(255,255,255,.7); }
+.trap-text { margin-top: .3rem; font-size: .88rem; color: #fde68a; }
+.trap-years { margin-top: .2rem; font-size: .7rem; color: rgba(255,255,255,.45); }
+.trap-practise { margin: .2rem .8rem .8rem; background: #f87171; color: #2a0505; border: 0; border-radius: 8px; padding: .45rem .8rem; font-weight: 700; cursor: pointer; }
+.trap-opts { display: flex; flex-wrap: wrap; gap: .25rem .8rem; margin-top: .25rem; font-size: .78rem; color: rgba(255,255,255,.6); }
+.trap-opts .trap-right { color: #4ade80; font-weight: 700; }

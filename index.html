@@ -113,6 +113,16 @@
               <span class="jdb-arrow">→</span>
             </div>
 
+            <!-- Exam Traps — the tempting wrong options, by topic -->
+            <div class="jamb-dash-banner jamb-traps-banner" id="jambTrapsBanner">
+              <span class="jdb-icon">⚠️</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Exam Traps</span>
+                <span class="jdb-sub">The wrong options that catch students, topic by topic</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
             <!-- Key Points — every topic lesson behind the past questions -->
             <div class="jamb-dash-banner jamb-keypoints-banner" id="jambKeyPointsBanner">
               <span class="jdb-icon">📘</span>
@@ -644,6 +654,17 @@
         <h2 class="jqc-title">JAMB's Tricky Questions</h2>
         <p class="jqc-sub">Real JAMB questions where more than one option is right, or where no option is fully right. Most apps just repeat the answer key; here you learn what is really going on.</p>
         <div id="jambTrickyBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambTrapsModal" class="jqc-overlay hidden">
+      <div class="jqc-card kp-card">
+        <button class="jqc-close" id="jambTrapsClose">✕</button>
+        <div class="jqc-icon">⚠️</div>
+        <h2 class="jqc-title">Exam Traps</h2>
+        <p class="jqc-sub">The wrong options that sit closest to the right answer, and why students fall for them. Read a topic, then practise its questions.</p>
+        <select id="trapSubjectSelect" class="select-input kp-subject"></select>
+        <div id="jambTrapsBody" style="text-align:left;"></div>
       </div>
     </div>
 

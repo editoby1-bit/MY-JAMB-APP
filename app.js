@@ -587,6 +587,18 @@
         subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
       };
     }
+    if (yearVal && yearVal.startsWith('traps-')) {
+      const topic = yearVal.slice(6);
+      const all = trapPool(subject, topic);
+      const n = countValue === 'all' ? all.length : Math.min(Number(countValue), all.length);
+      const questions = groupAwarePick(all, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · Exam Traps`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
     if (yearVal && yearVal.startsWith('tricky-')) {
       const kind = yearVal.slice(7);
       const all = trickyPool(subject, kind);
@@ -1129,6 +1141,8 @@
     document.getElementById('jambTrickyBanner')?.addEventListener('click', openTrickyHub);
     document.getElementById('jambTrickyClose')?.addEventListener('click', closeTrickyHub);
     document.getElementById('jambKeyPointsBanner')?.addEventListener('click', openKeyPoints);
+    document.getElementById('jambTrapsBanner')?.addEventListener('click', openTraps);
+    document.getElementById('jambTrapsClose')?.addEventListener('click', closeTraps);
     document.getElementById('jambKeyPointsClose')?.addEventListener('click', closeKeyPoints);
     document.getElementById('gameHistoryClose')?.addEventListener('click', closeGameHistory);
     document.getElementById('jambCommunityBanner')?.addEventListener('click', openCommunityScreen);
@@ -1621,6 +1635,82 @@
       return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}</div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
+  }
+
+  /* ── Exam Traps: the genuinely tempting wrong options, by topic ──
+     Built from the "The trap:" sentence of each Teach Me (written only
+     where a wrong option is really close to the answer). The same trap from
+     a repeated question is shown once, with how often it was set. */
+  const TRAP_RE = /The trap:\s*([\s\S]*?)(?=\s*(?:Memory tip|Step \d+:|$))/;
+  const trapCache = {};
+  function trapIndex(subject) {
+    if (trapCache[subject]) return trapCache[subject];
+    const T = window.TEACH_ME?.[subject] || {};
+    const of = window.TEACH_TOPICS?.[subject]?.of || {};
+    const byTopic = {};
+    (QUESTION_BANK[subject] || []).forEach(q => {
+      if (!Array.isArray(q.options)) return;
+      const k = teachMeKey(q);
+      const m = (T[k] || '').match(TRAP_RE);
+      if (!m) return;
+      const topic = of[k] || 'other';
+      const list = byTopic[topic] = byTopic[topic] || new Map();
+      const g = list.get(m[1]) || { text: m[1], qs: [] };
+      g.qs.push(q); list.set(m[1], g);
+    });
+    return (trapCache[subject] = byTopic);
+  }
+  function openTraps() {
+    const sel = document.getElementById('trapSubjectSelect');
+    const subjects = Object.keys(QUESTION_BANK).filter(s => Object.keys(trapIndex(s)).length);
+    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
+    if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
+    sel.onchange = renderTraps;
+    renderTraps();
+    document.getElementById('jambTrapsModal')?.classList.remove('hidden');
+  }
+  function closeTraps() { document.getElementById('jambTrapsModal')?.classList.add('hidden'); }
+  function renderTraps() {
+    const subject = document.getElementById('trapSubjectSelect').value;
+    const body = document.getElementById('jambTrapsBody');
+    const idx = trapIndex(subject);
+    const lessons = window.TEACH_TOPICS?.[subject]?.lessons || {};
+    const ids = Object.keys(idx).sort((a, b) => idx[b].size - idx[a].size);
+    if (!ids.length) { body.innerHTML = '<p class="jqc-sub">No traps for this subject yet.</p>'; return; }
+    const paid = checkAccess();
+    body.innerHTML = ids.map((id, i) => {
+      const title = escHtml(lessons[id]?.title || 'Other');
+      const n = idx[id].size;
+      const meta = `<span class="kp-count">${n} trap${n === 1 ? '' : 's'}</span>`;
+      if (!paid && i >= KP_FREE_TOPICS) return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${title}</span>${meta}</div>`;
+      const items = [...idx[id].values()].map(g => {
+        const q = g.qs[0];
+        const years = [...new Set(g.qs.map(x => x.year).filter(Boolean))].sort();
+        return `<li class="trap-item"><div class="trap-q">${mathHtml(q.question.length > 140 ? q.question.slice(0, 140) + '…' : q.question)}</div>`
+          + `<div class="trap-opts">${q.options.map((o, j) => `<span${isCorrect(q, j) ? ' class="trap-right"' : ''}>${String.fromCharCode(65 + j)}. ${mathHtml(o)}</span>`).join('')}</div>`
+          + `<div class="trap-text">⚠️ ${mathHtml(g.text)}</div>`
+          + (years.length ? `<div class="trap-years">JAMB ${years.join(', ')}</div>` : '') + `</li>`;
+      }).join('');
+      return `<details class="kp-topic"><summary>${title} ${meta}</summary><div class="topic-body"><ul class="trap-list">${items}</ul>`
+        + `<button type="button" class="trap-practise" data-topic="${id}">Practise these ${n} question${n === 1 ? '' : 's'} →</button></div></details>`;
+    }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
+    body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeTraps(); showPaywall('premium'); }));
+    body.querySelectorAll('.trap-practise').forEach(b => b.addEventListener('click', () => startTrapPractice(subject, b.dataset.topic)));
+  }
+  function trapPool(subject, topic) {
+    return [...(trapIndex(subject)[topic]?.values() || [])].map(g => g.qs[g.qs.length - 1]);
+  }
+  function startTrapPractice(subject, topic) {
+    closeTraps();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    const title = window.TEACH_TOPICS?.[subject]?.lessons?.[topic]?.title || 'Exam Traps';
+    el.yearSelect.insertAdjacentHTML('beforeend', `<option value="traps-${topic}">⚠️ Exam Traps: ${escHtml(title)}</option>`);
+    el.yearSelect.value = 'traps-' + topic;
+    if (el.questionCountSelect) el.questionCountSelect.value = 'all';
+    startSession();
   }
 
   function openGamesHub() {
