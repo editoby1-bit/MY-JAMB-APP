@@ -1829,3 +1829,13 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .kp-count { font-size: .72rem; font-weight: 500; color: rgba(255,255,255,.55); margin-left: .35rem; white-space: nowrap; }
 .kp-unlock { margin-top: .9rem; font-size: .85rem; color: rgba(255,255,255,.75); }
 .kp-unlock-btn { margin-left: .4rem; background: var(--amber,#f5a623); color: #1a1000; border: 0; border-radius: 8px; padding: .35rem .7rem; font-weight: 700; cursor: pointer; }
+
+/* No option fully correct: JAMB's key answer, in amber rather than green */
+.option-btn.correct.key-only { border-color: #d97706; background: #fef3c7; color: #92400e; }
+.option-btn.correct.key-only strong { color: #92400e; }
+.key-only-tag { display: block; margin-top: .3rem; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: #b45309; text-transform: uppercase; }
+.jamb-tricky-banner { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+.jamb-tricky-banner .jdb-text, .jamb-tricky-banner .jdb-arrow { color: #fff; }
+.jamb-tricky-banner .jdb-sub { color: rgba(255,255,255,.8); }
+.tricky-h { color: #fff; font-size: 1rem; margin: 1rem 0 .2rem; }
+.tricky-sub { color: rgba(255,255,255,.7); font-size: .82rem; margin: 0 0 .5rem; }
