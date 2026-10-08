@@ -98,6 +98,12 @@
     q("Evaluate ∫_{0}^{π/2} sin x dx.", ["−2", "2", "1", "−1"], C,
       "∫ sin x dx = −cos x. [−cos x] from 0 to π/2 = (−cos π/2) − (−cos 0) = 0 + 1 = 1."),
     // paper 42–50 (40, 41 left out)
+    q("The bar chart above shows the allotment of time (in minutes) per week for selected subjects in a certain school. What is the total time allocated to the six subjects per week?", ["960 mins", "200 mins", "450 mins", "720 mins"], D,
+      "Add the six bars: 80 + 160 + 200 + 80 + 128 + 72 = 720 minutes.",
+      { diagram: IMG('maths-2013-q40.png') }),
+    q("The pie chart above shows the statistical distribution of 80 students in five subjects in an examination. Calculate how many students offer mathematics.", ["50", "20", "30", "11"], D,
+      "The angles add to 360°: 5x + (16x − 24) + 5x + (4x + 12) + (6x + 12) = 36x = 360, so x = 10 and Maths = 5x = 50°. Students = 50/360 × 80 = 11.1, i.e. 11 students to the nearest whole student.",
+      { diagram: IMG('maths-2013-q41.png') }),
     q("Find the mean of t + 2, 2t − 4, 3t + 2 and 2t.", ["2t + 1", "t", "t + 1", "2t"], D,
       "Sum = (t + 2t + 3t + 2t) + (2 − 4 + 2) = 8t. Mean = 8t ÷ 4 = 2t."),
     q("The mean of seven numbers is 10. If six of the numbers are 2, 4, 8, 14, 16 and 18, find the mode.", ["14", "2", "6", "8"], D,
