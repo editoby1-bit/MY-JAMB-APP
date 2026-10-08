@@ -34,6 +34,9 @@
     q("Solve the inequality −1/4 < (3/4)(3y − 2) < 1/2.", ["5/9 < y < 8/9", "8/9 < y < 5/9", "2/7 < y < 1/7", "1/7 < y < 2/7"], A,
       "Multiply through by 4/3: −1/3 < 3y − 2 < 2/3. Add 2: 5/3 < 3y < 8/3. Divide by 3: 5/9 < y < 8/9."),
     // paper 11–20 (paper Q10 left out)
+    q("If y ∝ 1/x² and x = 3 when y = 2, find y when x = 3/2.", ["6", "10", "12", "8"], D,
+      "y = k/x², so k = 2 × 3² = 18. When x = 3/2, y = 18 ÷ (9/4) = 18 × 4/9 = 8.",
+      { keyVerdict: 'misprint', answerNote: "The paper prints option (d) as 18, a printing slip: y = 18 ÷ (3/2)² = 8, so option (d) is shown corrected as 8." }),
     q("A binary operation on the set of real numbers is defined by x * y = (x + y)/2 for all x, y ∈ R. Find the value of y if 3 * y = 24.", ["84", "48", "22", "45"], D,
       "3 * y = (3 + y)/2 = 24, so 3 + y = 48 and y = 45.",
       { keyVerdict: 'misprint', answerNote: "The paper prints option (d) as 54, with the digits swapped. (3 + y)/2 = 24 gives y = 45, so the corrected option is shown here." }),
