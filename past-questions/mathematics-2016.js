@@ -25,8 +25,7 @@
       "Students offering at least one subject = 150 − 20 = 130. 80 + 60 − both = 130, so both = 10."),
     // paper 6–11
     q("If the 2nd term of a G.P. is 8/9 and the 6th term is 4½, find the common ratio.", ["2", "3/2", "2/3", "3"], B,
-      "ar = 8/9 and ar⁵ = 9/2. Dividing: r⁴ = (9/2) ÷ (8/9) = 81/16, so r = 3/2.",
-      { keyVerdict: 'misprint', answerNote: "The paper prints only \"If the 2nd term of a G.P. is\" before the options; the rest of the question did not print. Another copy of this question gives it in full, shown here: the 2nd term is 8/9 and the 6th term is 4½. The common ratio is 3/2 (B)." }),
+      "ar = 8/9 and ar⁵ = 9/2. Dividing: r⁴ = (9/2) ÷ (8/9) = 81/16, so r = 3/2."),
     q("From the diagram above, find the value of ∠OTQ.", ["230°", "55°", "115°", "65°"], D,
       "P is the centre, so ∠OPQ = 130° is the angle at the centre on arc ORQ; the angle at the circumference on the same arc is half of it: ∠OTQ = 130° ÷ 2 = 65°.",
       { diagram: IMG('maths-2016-q6.png') }),
@@ -34,8 +33,7 @@
       "(n − 2) × 180° = 1080°, so n − 2 = 6 and n = 8."),
     q("In the diagram above, l₁ is parallel to l₂. Find the value of ∠PMT.", ["82°", "36°", "72°", "118°"], A,
       "The angle between MP and l₂ (to the right of M) is alternate to the 118° angle, so (2y + 10)° + y° = 118°: 3y = 108, y = 36. ∠PMT = 2(36) + 10 = 82°.",
-      { diagram: IMG('maths-2016-q8.png'), keyVerdict: 'misprint',
-        answerNote: "The paper labels ∠PMT as (2y − 10)°, which gives no option (3y − 10 = 118 makes y a fraction). The intended label is (2y + 10)°, shown here, which gives y = 36 and ∠PMT = 82° (A)." }),
+      { diagram: IMG('maths-2016-q8.png') }),
     q("From the diagram above, find the value of ∠ROP.", ["110°", "70°", "95°", "85°"], C,
       "OPQR is a cyclic quadrilateral. The exterior angle at Q (95°) equals the interior opposite angle at O, so ∠ROP = 95°.",
       { diagram: IMG('maths-2016-q9.png') }),
@@ -68,7 +66,7 @@
     // paper 22–30
     q("In the diagram, RT is a diameter of the circle with centre O, the line UOA passes through O, RA is a tangent to the circle at R and ∠RAO = 60°. The area of the shaded part is A₁, while the area of the circle is A₂. Find the ratio A₁/A₂.", ["1/3", "1/5", "1/4", "1/6"], D,
       "RA is a tangent at R, so ∠ORA = 90°; in △ORA, ∠ROA = 180° − 90° − 60° = 30°. ∠UOT = ∠ROA = 30° (vertically opposite). Shaded angle = 30° + 30° = 60°, so A₁/A₂ = 60/360 = 1/6.",
-      { diagram: IMG('maths-2016-q21.png'), keyVerdict: 'misprint', answerNote: "The diagram on the original paper was too unclear to read, so we redrew it and stated in words what it shows: RA is a tangent at R and the angle at A is 60°. With these facts the answer is 1/6 (D)." }),
+      { diagram: IMG('maths-2016-q21.png') }),
     q("Simplify (0.026 × 0.36)/0.69, leaving your answer in standard form.", ["1.36 × 10^{−4}", "1.36 × 10^{−3}", "1.36 × 10^{−1}", "1.36 × 10^{−2}"], D,
       "0.026 × 0.36 = 0.00936; 0.00936 ÷ 0.69 = 0.01357 ≈ 1.36 × 10^{−2}."),
     q("A number of pencils were shared out among Bisi, Sola and Tunde in the ratio 2 : 3 : 5 respectively. If Bisi got 5, how many were shared out?", ["15", "25", "30", "50"], B,
@@ -108,8 +106,7 @@
       "f(x) ≥ 0 where the curve is on or above the x-axis: between the crossing points x = −1 and x = 4, so −1 ≤ x ≤ 4.",
       { diagram: IMG('maths-2016-q39.png') }),
     q("Evaluate ∫(sin x − 5x²) dx.", ["−cos x − 10x + k", "cos x − 5x³/3 + k", "−cos x − 5x³/3 + k", "cos x − 10x + k"], C,
-      "∫sin x dx = −cos x and ∫5x² dx = 5x³/3, so the answer is −cos x − 5x³/3 + k.",
-      { keyVerdict: 'misprint', answerNote: "The paper printed \"Evaluate (sin x − 5x²) dx\" with the integral sign missing; it is shown here as ∫(sin x − 5x²) dx. The answer is C." }),
+      "∫sin x dx = −cos x and ∫5x² dx = 5x³/3, so the answer is −cos x − 5x³/3 + k."),
     // paper 41–48
     q("If N = (P/2)((T_{1} − T_{2})/T_{1}), find P when N = 12, T_{1} = 27 and T_{2} = 24.", ["48", "108", "54", "216"], D,
       "12 = (P/2) × (27 − 24)/27 = (P/2) × 1/9 = P/18, so P = 12 × 18 = 216."),
