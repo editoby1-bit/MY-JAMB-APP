@@ -66,6 +66,9 @@
     q("Given U = {x : x is a positive integer less than 15} and P = {x : x is an even number from 1 to 14}, find the complement of P.", ["{1, 3, 5, 7, 9, 11, 13, 15}", "{2, 3, 5, 7, 9, 11, 13}", "{1, 3, 5, 7, 9, 11, 13}", "{2, 3, 5, 7, 11, 15}"], C,
       "U = {1, 2, …, 14} and P = {2, 4, …, 14}. P′ = the members of U not in P = {1, 3, 5, 7, 9, 11, 13}."),
     // paper 22–30
+    q("In the diagram, RT is a diameter of the circle with centre O, the line UOA passes through O, RA is a tangent to the circle at R and ∠RAO = 60°. The area of the shaded part is A₁, while the area of the circle is A₂. Find the ratio A₁/A₂.", ["1/3", "1/5", "1/4", "1/6"], D,
+      "RA is a tangent at R, so ∠ORA = 90°; in △ORA, ∠ROA = 180° − 90° − 60° = 30°. ∠UOT = ∠ROA = 30° (vertically opposite). Shaded angle = 30° + 30° = 60°, so A₁/A₂ = 60/360 = 1/6.",
+      { diagram: IMG('maths-2016-q21.png'), keyVerdict: 'misprint', answerNote: "The diagram on the original paper was too unclear to read, so we redrew it and stated in words what it shows: RA is a tangent at R and the angle at A is 60°. With these facts the answer is 1/6 (D)." }),
     q("Simplify (0.026 × 0.36)/0.69, leaving your answer in standard form.", ["1.36 × 10^{−4}", "1.36 × 10^{−3}", "1.36 × 10^{−1}", "1.36 × 10^{−2}"], D,
       "0.026 × 0.36 = 0.00936; 0.00936 ÷ 0.69 = 0.01357 ≈ 1.36 × 10^{−2}."),
     q("A number of pencils were shared out among Bisi, Sola and Tunde in the ratio 2 : 3 : 5 respectively. If Bisi got 5, how many were shared out?", ["15", "25", "30", "50"], B,

@@ -63,6 +63,9 @@
     q("Evaluate lim_{x→2} (x² − 1)/(x + 1).", ["0", "3", "2", "1"], D,
       "The denominator is not zero at x = 2, so substitute: (4 − 1)/(2 + 1) = 3/3 = 1. (Or simplify first: (x − 1)(x + 1)/(x + 1) = x − 1 = 1.)"),
     // paper 24–33
+    q("The pie chart above shows the sectoral allocation of fruits. Find the allocation for oranges.", ["100°", "40°", "60°", "80°"], D,
+      "The sectors add up to 360°: 3x + 3x + 3x + 5x + 4x = 18x = 360°, so x = 20°. Oranges = 4x = 80°.",
+      { diagram: IMG('maths-2015-q23.png'), keyVerdict: 'misprint', answerNote: "On the original paper the chart's labels add up to only 17x (Plantain is printed as 2x), which gives no option. The original was not clear enough to use as printed, so we redrew the chart with Plantain as 3x, the same size as Banana in the drawing. Then 18x = 360°, x = 20° and oranges = 80° (D)." }),
     q("Simplify 1/(2 − √3) in the form a + b√3.", ["2 + √3", "−2 − √3", "−2 + √3", "2 − √3"], A,
       "Multiply top and bottom by 2 + √3: (2 + √3)/(4 − 3) = 2 + √3."),
     q("If y = x² + √x, find dy/dx.", ["2x + x^{1/2}", "−(1/2)x^{−1/2}", "2x − x^{−1/2}", "2x + (1/2)x^{−1/2}"], D,
