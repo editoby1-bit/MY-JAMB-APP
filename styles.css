@@ -1138,7 +1138,7 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
 }
 .jqc-close { position:absolute;top:.75rem;right:.75rem;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer; }
 .jqc-icon { font-size: 2.25rem; margin-bottom: .4rem; }
-.jqc-title { font-family:'DM Serif Display',serif; font-size:1.4rem; font-weight:700; margin-bottom:.4rem; }
+.jqc-title { font-family:'DM Serif Display',serif; font-size:1.4rem; font-weight:700; margin-bottom:.4rem; color:#fff; }
 .jqc-section { font-family:'DM Serif Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:.75rem; }
 .jqc-sub { font-size:.83rem; color:rgba(255,255,255,.6); margin-bottom:1.25rem; line-height:1.6; }
 .jqc-actions { display:flex; flex-direction:column; gap:.5rem; }
@@ -1812,3 +1812,20 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .key-check-teach { margin-top: .5rem; font-size: .82rem; }
 .key-check-teach-btn { margin-left: .35rem; padding: .3rem .65rem; border-radius: 8px; border: 0; background: #2e6fd8; color: #fff; font-weight: 600; font-size: .8rem; cursor: pointer; }
 .diagram-box img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 6px; background: #fff; }
+
+/* Repeated questions + Key Points */
+.jamb-repeat-banner { background: linear-gradient(135deg, #ea580c, #fb923c); }
+.jamb-repeat-banner .jdb-text, .jamb-repeat-banner .jdb-arrow { color: #2a0f02; }
+.jamb-repeat-banner .jdb-sub { color: rgba(42,15,2,.65); }
+.jamb-keypoints-banner { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+.jamb-keypoints-banner .jdb-text, .jamb-keypoints-banner .jdb-arrow { color: #06173d; }
+.jamb-keypoints-banner .jdb-sub { color: rgba(6,23,61,.65); }
+.repeat-note { margin-top: .7rem; padding: .6rem .85rem; background: #fff7ed; border-left: 4px solid #ea580c; border-radius: 8px; color: #7c2d12; font-size: .88rem; line-height: 1.5; }
+.kp-card { max-height: 88vh; overflow-y: auto; }
+.kp-subject { width: 100%; margin: .4rem 0 .8rem; }
+.kp-topic { margin-top: .55rem; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: rgba(255,255,255,.04); }
+.kp-topic summary { cursor: pointer; padding: .65rem .8rem; font-size: .9rem; font-weight: 600; color: #8ab4f8; }
+.kp-locked { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .65rem .8rem; color: rgba(255,255,255,.55); font-size: .9rem; cursor: pointer; }
+.kp-count { font-size: .72rem; font-weight: 500; color: rgba(255,255,255,.55); margin-left: .35rem; white-space: nowrap; }
+.kp-unlock { margin-top: .9rem; font-size: .85rem; color: rgba(255,255,255,.75); }
+.kp-unlock-btn { margin-left: .4rem; background: var(--amber,#f5a623); color: #1a1000; border: 0; border-radius: 8px; padding: .35rem .7rem; font-weight: 700; cursor: pointer; }
