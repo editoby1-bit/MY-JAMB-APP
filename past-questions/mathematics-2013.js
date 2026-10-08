@@ -64,6 +64,9 @@
     q("Find the inverse of [[5, 3], [6, 4]].", ["[[2, 3/2], [3, −5/2]]", "[[2, 3/2], [−3, 5/2]]", "[[2, −3/2], [−3, 5/2]]", "[[2, −3/2], [−3, −5/2]]"], C,
       "Determinant = 20 − 18 = 2. Inverse = (1/2)[[4, −3], [−6, 5]] = [[2, −3/2], [−3, 5/2]]."),
     // paper 25–34 (24 left out)
+    q("In the diagram above, |AD| = |DC|, ∠ABD = 110° and ∠ACD = 15°. Find the value of x.", ["45°", "15°", "30°", "40°"], D,
+      "AD = DC, so triangle ADC is isosceles and ∠DAC = ∠DCA = 15°. The exterior angle ∠ADB = 15° + 15° = 30°. In triangle ABD: x = 180° − 110° − 30° = 40°.",
+      { diagram: IMG('maths-2013-q24.png') }),
     q("The value of x in the figure above is", ["70°", "130°", "110°", "100°"], B,
       "Draw a line through R parallel to PQ. Co-interior angles: 180° − 110° = 70° and 180° − 120° = 60°. x = 70° + 60° = 130°.",
       { diagram: IMG('maths-2013-q25.png') }),
