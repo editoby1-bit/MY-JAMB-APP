@@ -90,8 +90,7 @@
       "Right triangle 3, 4, 5: sin θ = 3/5, cos θ = 4/5 (θ acute). Sum = 7/5 = 1 2/5."),
     // paper 35–39
     q("If y = (2x + 2)³, find dy/dx.", ["3(2x + 2)", "6(2x + 2)²", "3(2x + 2)²", "6(2x + 2)"], B,
-      "Chain rule: dy/dx = 3(2x + 2)² × 2 = 6(2x + 2)².",
-      { keyVerdict: 'misprint', answerNote: "The paper asks for dx/dy, but all the options are expressions for dy/dx (dx/dy would be 1/(6(2x + 2)²), which is not offered). The question is shown asking for dy/dx; the answer is 6(2x + 2)² (B)." }),
+      "Chain rule: dy/dx = 3(2x + 2)² × 2 = 6(2x + 2)²."),
     q("If y = x sin x, find dy/dx.", ["cos x + sin x", "sin x + x cos x", "sin x − cos x", "cos x − x sin x"], B,
       "Product rule: dy/dx = 1 × sin x + x × cos x = sin x + x cos x."),
     q("The radius of a circle is increasing at the rate of 0.02 cm s^{−1}. Find the rate at which the area is increasing when the radius of the circle is 7 cm.", ["0.35 cm² s^{−1}", "0.88 cm² s^{−1}", "0.75 cm² s^{−1}", "0.53 cm² s^{−1}"], B,

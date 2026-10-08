@@ -81,7 +81,7 @@
       "Shaded ring = πR² − πr² = πR² − π(4/25)R² = (21/25)πR².",
       { diagram: IMG('maths-2002-q32.png') }),
     q("A bucket is 12 cm in diameter at the top, 8 cm in diameter at the bottom and 4 cm deep. Calculate its volume.", ["(304/3)π cm³", "144π cm³", "(128/3)π cm³", "72π cm³"], A,
-      "Frustum: V = (πh/3)(R² + Rr + r²) = (4π/3)(36 + 24 + 16) = (304/3)π cm³. (The paper prints the units as cm²; a volume is in cm³.)"),
+      "Frustum: V = (πh/3)(R² + Rr + r²) = (4π/3)(36 + 24 + 16) = (304/3)π cm³."),
     q("In the diagram above, a cylinder is surmounted by a hemispherical bowl. Calculate the volume of the solid.", ["180π cm³", "162π cm³", "216π cm³", "198π cm³"], D,
       "Radius 3 cm, cylinder height 20 cm: π × 9 × 20 + (2/3)π × 27 = 180π + 18π = 198π cm³.",
       { diagram: IMG('maths-2002-q34.png') }),

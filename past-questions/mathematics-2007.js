@@ -58,7 +58,7 @@
       "(−3/4)(6) + (−3/4) + 6 = −9/2 − 3/4 + 6 = (−18 − 3 + 24)/4 = 3/4."),
     // 21–30
     q("A binary operation Δ is defined by a Δ b = a + b + 1 for any real numbers a and b. Find the inverse of the real number 7 under the operation Δ, if the identity element is −1.", ["9", "5", "−7", "−9"], D,
-      "The inverse b satisfies 7 Δ b = identity: 7 + b + 1 = −1, so b = −9. (The paper prints \"identify\" for \"identity\".)"),
+      "The inverse b satisfies 7 Δ b = identity: 7 + b + 1 = −1, so b = −9."),
     q("Evaluate [[3, −2], [−7, 5]] + 2[[−2, 4], [3, −1]].", ["[[3, 4], [2, 6]]", "[[−1, 6], [1, 3]]", "[[4, 3], [−2, 6]]", "[[−1, 6], [−1, 3]]"], D,
       "2[[−2, 4], [3, −1]] = [[−4, 8], [6, −2]]. Adding entry by entry: [[3 − 4, −2 + 8], [−7 + 6, 5 − 2]] = [[−1, 6], [−1, 3]]."),
     q("If f(x) = 3x − 2, P = [[2, 1], [−1, 0]] and I is the 2 × 2 identity matrix, evaluate f(P).", ["[[8, 3], [−3, 2]]", "[[6, 3], [−3, 0]]", "[[4, 3], [−3, −2]]", "[[2, 0], [0, −2]]"], C,
@@ -73,7 +73,7 @@
     q("The area of a square is 144 cm². Find the length of the diagonal.", ["11√3 cm", "12 cm", "12√2 cm", "13 cm"], C,
       "Side = √144 = 12 cm. Diagonal = side × √2 = 12√2 cm."),
     q("Calculate the length of an arc of a circle of diameter 14 cm that subtends an angle of 90° at the centre of the circle.", ["7π/4", "7π/2", "7π", "14π"], B,
-      "r = 7 cm. Arc = (90/360) × 2πr = ¼ × 14π = 7π/2 cm. (The paper prints \"what subtends\" for \"that subtends\".)"),
+      "r = 7 cm. Arc = (90/360) × 2πr = ¼ × 14π = 7π/2 cm."),
     q("The volume of a hemispherical bowl is 718⅔ cm³. Find its radius.", ["3.8 cm", "4.0 cm", "5.6 cm", "7.0 cm"], D,
       "With π = 22/7: (2/3)πr³ = 2156/3, so r³ = 2156/3 × 3/2 × 7/22 = 343 and r = 7.0 cm."),
     q("Find the locus of points equidistant from two straight lines y − 5 = 0 and y − 3 = 0.", ["y − 1 = 0", "y − 2 = 0", "y − 3 = 0", "y − 4 = 0"], D,

@@ -17,7 +17,7 @@
     // paper 2–11
     q("The bar chart above shows the allotment of time (in minutes) per week for selected subjects in a certain school. What is the total time allocated to the six subjects per week?", ["200 mins", "460 mins", "720 mins", "960 mins"], C,
       "Add the six bars: 80 + 160 + 200 + 80 + 128 + 72 = 720 minutes.",
-      { diagram: IMG('maths-2015-q1.png'), keyVerdict: 'misprint', answerNote: "The paper prints option (c) as 710 mins, a printing slip: the six bars add up to 720 minutes, and another copy of this question prints 720 mins as option (c). The corrected option is shown here." }),
+      { diagram: IMG('maths-2015-q1.png') }),
     q("Find the gradient of the line joining the points P(5, 6) and Q(3, 3).", ["3", "1/2", "3/2", "2"], C,
       "Gradient = (y₂ − y₁)/(x₂ − x₁) = (3 − 6)/(3 − 5) = (−3)/(−2) = 3/2."),
     q("If gt² − k − w = 0, make g the subject of the formula.", ["(k + w)/t²", "(k − w)/t", "(k + w)/t", "(k − w)/t²"], A,
@@ -65,7 +65,7 @@
     // paper 24–33
     q("The pie chart above shows the sectoral allocation of fruits. Find the allocation for oranges.", ["100°", "40°", "60°", "80°"], D,
       "The sectors add up to 360°: 3x + 3x + 3x + 5x + 4x = 18x = 360°, so x = 20°. Oranges = 4x = 80°.",
-      { diagram: IMG('maths-2015-q23.png'), keyVerdict: 'misprint', answerNote: "On the original paper the chart's labels add up to only 17x (Plantain is printed as 2x), which gives no option. The original was not clear enough to use as printed, so we redrew the chart with Plantain as 3x, the same size as Banana in the drawing. Then 18x = 360°, x = 20° and oranges = 80° (D)." }),
+      { diagram: IMG('maths-2015-q23.png') }),
     q("Simplify 1/(2 − √3) in the form a + b√3.", ["2 + √3", "−2 − √3", "−2 + √3", "2 − √3"], A,
       "Multiply top and bottom by 2 + √3: (2 + √3)/(4 − 3) = 2 + √3."),
     q("If y = x² + √x, find dy/dx.", ["2x + x^{1/2}", "−(1/2)x^{−1/2}", "2x − x^{−1/2}", "2x + (1/2)x^{−1/2}"], D,
@@ -78,8 +78,7 @@
     q("Convert 27_{10} to a number in base three.", ["1000_{3}", "1100_{3}", "1010_{3}", "1001_{3}"], A,
       "27 = 3³ = 1 × 27 + 0 × 9 + 0 × 3 + 0 × 1, so 27_{10} = 1000_{3}."),
     q("In a right-angled triangle, if tan θ = 3/4, what is cos θ − sin θ?", ["4/5", "1/5", "2/5", "3/5"], B,
-      "tan θ = 3/4 gives a 3-4-5 triangle: sin θ = 3/5, cos θ = 4/5. cos θ − sin θ = 4/5 − 3/5 = 1/5.",
-      { keyVerdict: 'misprint', answerNote: "The paper prints tan θ = 2/4. That gives cos θ − sin θ = 2/√5 − 1/√5 = 1/√5 ≈ 0.447, which is not among the options. All the options are fifths, which come from a 3-4-5 triangle, so the 2 is a slip for 3: with tan θ = 3/4 the answer is 1/5 (B)." }),
+      "tan θ = 3/4 gives a 3-4-5 triangle: sin θ = 3/5, cos θ = 4/5. cos θ − sin θ = 4/5 − 3/5 = 1/5."),
     q("The third term of a G.P. is 4 while the sixth term is 32. Find the common ratio.", ["1/2", "8", "4", "2"], D,
       "ar² = 4 and ar⁵ = 32. Divide: r³ = 8, so r = 2."),
     q("Use the conversion table — Base ten: 1, 2, 3, 4, 5, 6, 7, 8; Base eight: 1, 2, 3, 4, 5, 6, 7, 10; Base two: 1, 10, 011, 100, 101, 110, 111, 1000. Find the value of 101,100,011 (base two) in base eight.", ["543_{8}", "545_{8}", "544_{8}", "534_{8}"], A,
