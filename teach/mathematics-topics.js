@@ -786,6 +786,8 @@
   "|The radius of a circle is increasing at the rate of 0.02 cm s^{−1}. Find the rate at which the area is increasing when the radius of the circle is 7 cm.|0.35 cm² s^{−1}|0.88 cm² s^{−1}|0.75 cm² s^{−1}|0.53 cm² s^{−1}": "differentiation",
   "|Integrate (1 + x)/x³ dx.|2x² − 1/4 + k|−1/(2x²) − 1/x + k|−x²/2 − 1/x − k|x² − 1/x + k": "integration",
   "|Evaluate ∫_{0}^{π/2} sin x dx.|−2|2|1|−1": "integration",
+  "|The bar chart above shows the allotment of time (in minutes) per week for selected subjects in a certain school. What is the total time allocated to the six subjects per week?|960 mins|200 mins|450 mins|720 mins": "statistics",
+  "|The pie chart above shows the statistical distribution of 80 students in five subjects in an examination. Calculate how many students offer mathematics.|50|20|30|11": "statistics",
   "|Find the mean of t + 2, 2t − 4, 3t + 2 and 2t.|2t + 1|t|t + 1|2t": "statistics",
   "|The mean of seven numbers is 10. If six of the numbers are 2, 4, 8, 14, 16 and 18, find the mode.|14|2|6|8": "statistics",
   "|Calculate the median age of the frequency distribution in the table below.\nAge: 20, 25, 30, 35, 40, 45\nNo. of people: 3, 5, 1, 1, 2, 3|35|20|25|30": "statistics",
