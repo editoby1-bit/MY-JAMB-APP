@@ -107,6 +107,9 @@
       "The English sector is marked with a right angle, 90°. 90/360 × 100% = 25%.",
       { diagram: IMG('maths-2011-q41.png') }),
     // Paper Q43, Q44, Q47–Q50
+    q("The bar chart above shows the distribution of SS2 students in a school. Find the total number of students.", ["180", "210", "105", "135"], A,
+      "Read each bar on the scale (steps of 15): class I 45, class II 60, class III 30, class IV 45. Total = 45 + 60 + 30 + 45 = 180.",
+      { diagram: IMG('maths-2011-q42.png') }),
     q("The sum of four consecutive integers is 34. Find the least of these numbers.", ["7", "8", "5", "6"], A,
       "n + (n + 1) + (n + 2) + (n + 3) = 4n + 6 = 34, so n = 7 (the numbers are 7, 8, 9, 10)."),
     q("Numbers: 0, 1, 2, 3, 4, 5. Frequency: 1, 4, 3, 8, 2, 5. From the table, find the median and range of the data respectively.", ["(8, 5)", "(5, 8)", "(5, 3)", "(3, 5)"], D,
