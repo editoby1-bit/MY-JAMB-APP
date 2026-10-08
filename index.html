@@ -92,6 +92,26 @@
               </div>
               <span class="jdb-arrow">→</span>
             </div>
+
+            <!-- Most repeated questions — JAMB re-sets past questions -->
+            <div class="jamb-dash-banner jamb-repeat-banner" id="jambRepeatBanner">
+              <span class="jdb-icon">🔁</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Most Repeated Questions</span>
+                <span class="jdb-sub">The questions JAMB sets again and again</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- Key Points — every topic lesson behind the past questions -->
+            <div class="jamb-dash-banner jamb-keypoints-banner" id="jambKeyPointsBanner">
+              <span class="jdb-icon">📘</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Key Points</span>
+                <span class="jdb-sub">Every topic in brief · learn before you practise</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
           </div>
         </div>
 
@@ -597,6 +617,27 @@
     </div>
 
     <!-- GAMES HUB -->
+    <div id="jambRepeatModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambRepeatClose">✕</button>
+        <div class="jqc-icon">🔁</div>
+        <h2 class="jqc-title">Most Repeated Questions</h2>
+        <p class="jqc-sub">JAMB rarely sets a brand-new question: most can be traced to earlier papers. These are the questions set more than once, most-repeated first. Master them.</p>
+        <div id="jambRepeatBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambKeyPointsModal" class="jqc-overlay hidden">
+      <div class="jqc-card kp-card">
+        <button class="jqc-close" id="jambKeyPointsClose">✕</button>
+        <div class="jqc-icon">📘</div>
+        <h2 class="jqc-title">Key Points</h2>
+        <p class="jqc-sub">The lessons behind every past question, topic by topic. Topics that come up most are listed first.</p>
+        <select id="kpSubjectSelect" class="select-input kp-subject"></select>
+        <div id="jambKeyPointsBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
     <div id="jambGamesModal" class="jqc-overlay hidden">
       <div class="jqc-card">
         <button class="jqc-close" id="jambGamesClose">✕</button>

@@ -110,6 +110,56 @@
       + `</div>`;
   }
 
+  /* ── Repeated questions ──
+     JAMB re-sets many past questions, word for word or with the options
+     shuffled. Questions are grouped when their text (and passage, if any)
+     match and they share at least three options; the group's years show how
+     often JAMB has set it. Built once, on first use, from the bank itself. */
+  let repeatIndex = null; // subject -> Map(teachMeKey -> group)
+  function repNorm(s) { return String(s || '').toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]/g, ''); }
+  function buildRepeatIndex() {
+    repeatIndex = {};
+    Object.keys(QUESTION_BANK).forEach(subject => {
+      const arr = QUESTION_BANK[subject];
+      if (!Array.isArray(arr)) return;
+      const byText = new Map();
+      const groupOf = new Map();
+      arr.forEach(q => {
+        if (!q || !q.question || !q.year) return;
+        const t = repNorm(q.question) + '|' + (q.passage ? repNorm(q.passage).slice(0, 80) : '');
+        const opts = new Set((q.options || []).map(repNorm));
+        let list = byText.get(t);
+        if (!list) { list = []; byText.set(t, list); }
+        let g = list.find(g => {
+          let n = 0; opts.forEach(o => { if (g.opts.has(o)) n++; });
+          return n >= Math.min(3, opts.size);
+        });
+        if (!g) { g = { opts, qs: [] }; list.push(g); }
+        g.qs.push(q);
+        groupOf.set(teachMeKey(q), g);
+      });
+      repeatIndex[subject] = groupOf;
+    });
+  }
+  function repeatGroup(q, subject) {
+    if (!repeatIndex) buildRepeatIndex();
+    return repeatIndex[subject]?.get(teachMeKey(q)) || null;
+  }
+  function repeatYears(g) { return [...new Set(g.qs.map(x => x.year))].sort((a, b) => a - b); }
+  function repeatHtml(q, subject) {
+    const g = repeatGroup(q, subject);
+    if (!g || g.qs.length < 2) return '';
+    const years = repeatYears(g);
+    return `<div class="repeat-note">🔁 <strong>Repeated question:</strong> JAMB has set this question <strong>${g.qs.length} times</strong> (${years.join(', ')}). Questions that repeat are likely to come again, so make sure you master this one.</div>`;
+  }
+  // One question per repeated group (its latest appearance), most-repeated first.
+  function mostRepeatedPool(subject) {
+    if (!repeatIndex) buildRepeatIndex();
+    const groups = [...new Set(repeatIndex[subject]?.values() || [])].filter(g => g.qs.length >= 2);
+    groups.sort((a, b) => b.qs.length - a.qs.length || Math.max(...b.qs.map(x => x.year)) - Math.max(...a.qs.map(x => x.year)));
+    return groups.map(g => g.qs.reduce((best, x) => (x.year > best.year ? x : best), g.qs[0]));
+  }
+
   function groupAwarePick(pool, count) {
     return fillFromUnits(shuffle(toUnits(pool)), count);
   }
@@ -358,7 +408,9 @@
     const counts = {};
     pool.forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
     const years = Object.keys(counts).map(Number).sort((a, b) => b - a);
+    const nRep = years.length ? mostRepeatedPool(el.subjectSelect.value).length : 0;
     el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
+      (nRep ? `<option value="repeated">🔁 Most repeated questions · ${nRep}</option>` : '') +
       years.map(y => `<option value="${y}">JAMB ${y} · ${counts[y]} questions</option>`).join('');
     el.yearSelect.value = 'all';
     el.yearField.classList.toggle('hidden', !years.length);
@@ -520,9 +572,21 @@
   function buildSingleSession() {
     const subject = el.subjectSelect.value;
     const yearVal = el.yearSelect ? el.yearSelect.value : 'all';
+    const countValue = el.questionCountSelect.value;
+    if (yearVal === 'repeated') {
+      // Most-repeated first, in that order: the questions JAMB sets most often.
+      const rep = mostRepeatedPool(subject);
+      const n = countValue === 'all' ? rep.length : Math.min(Number(countValue), rep.length);
+      const questions = rep.slice(0, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · Most repeated`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
     const year = yearVal && yearVal !== 'all' ? Number(yearVal) : null;
     const pool = year ? QUESTION_BANK[subject].filter(q => q.year === year) : QUESTION_BANK[subject];
-    const countValue = el.questionCountSelect.value;
     const count = countValue === 'all' ? pool.length : Math.min(Number(countValue), pool.length);
     // A whole year's paper is served in the paper's own order, like sitting
     // the real exam; any other selection is shuffled (passages kept whole).
@@ -795,7 +859,7 @@
     el.toggleExplanationBtn.textContent = state.showReviewExplanation ? '🙈 Hide Explanation' : '💡 Show Explanation';
     el.explanationBox.classList.toggle('hidden', !shouldShowExpl);
     if (shouldShowExpl) {
-      el.explanationBox.innerHTML = mathHtml(q.explanation || '') + keyCheckHtml(q);
+      el.explanationBox.innerHTML = mathHtml(q.explanation || '') + keyCheckHtml(q) + repeatHtml(q, q.sourceSubject || state.subjects?.[0]);
       el.explanationBox.querySelector('.key-check-teach-btn')?.addEventListener('click', triggerAIExplain);
     }
 
@@ -1040,6 +1104,10 @@
     document.getElementById('jambDashClose')?.addEventListener('click', closeDashModal);
     document.getElementById('jambGamesBanner')?.addEventListener('click', openGamesHub);
     document.getElementById('jambGamesClose')?.addEventListener('click', closeGamesHub);
+    document.getElementById('jambRepeatBanner')?.addEventListener('click', openRepeatHub);
+    document.getElementById('jambRepeatClose')?.addEventListener('click', closeRepeatHub);
+    document.getElementById('jambKeyPointsBanner')?.addEventListener('click', openKeyPoints);
+    document.getElementById('jambKeyPointsClose')?.addEventListener('click', closeKeyPoints);
     document.getElementById('gameHistoryClose')?.addEventListener('click', closeGameHistory);
     document.getElementById('jambCommunityBanner')?.addEventListener('click', openCommunityScreen);
     document.getElementById('communityClose')?.addEventListener('click', () => document.getElementById('communityModal')?.classList.add('hidden'));
@@ -1429,6 +1497,66 @@
   // same filter, not just gameQuestionPool.
   function memoryEligiblePool(subjectKey) {
     return gameQuestionPool(subjectKey).filter(q => q.question.length <= 70 && q.options[q.answer].length <= 22);
+  }
+
+  /* ── Most Repeated Questions hub ── */
+  function openRepeatHub() {
+    document.getElementById('jambRepeatModal')?.classList.remove('hidden');
+    const body = document.getElementById('jambRepeatBody');
+    const subjects = Object.keys(QUESTION_BANK).filter(s => mostRepeatedPool(s).length);
+    body.innerHTML = subjects.length ? subjects.map(s => {
+      const pool = mostRepeatedPool(s);
+      const top = repeatGroup(pool[0], s);
+      return `<div class="game-type-card repeat-subject" data-subject="${s}">
+        <span class="gtc-icon">🔁</span>
+        <div class="gtc-body"><div class="gtc-title">${fmt(s)}</div>
+        <div class="gtc-sub">${pool.length} repeated questions · the most repeated was set ${top ? top.qs.length : 2} times</div></div>
+      </div>`;
+    }).join('') : '<p class="jqc-sub">No repeated questions yet.</p>';
+    body.querySelectorAll('.repeat-subject').forEach(c => c.addEventListener('click', () => startRepeatPractice(c.dataset.subject)));
+  }
+  function closeRepeatHub() { document.getElementById('jambRepeatModal')?.classList.add('hidden'); }
+  function startRepeatPractice(subject) {
+    closeRepeatHub();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    el.yearSelect.value = 'repeated';
+    startSession();
+  }
+
+  /* ── Key Points: the topic lessons, browsable on their own ── */
+  const KP_FREE_TOPICS = 3; // free users can open this many topics per subject
+  function openKeyPoints() {
+    const sel = document.getElementById('kpSubjectSelect');
+    const subjects = Object.keys(window.TEACH_TOPICS || {}).filter(s => QUESTION_BANK[s]);
+    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
+    if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
+    sel.onchange = renderKeyPoints;
+    renderKeyPoints();
+    document.getElementById('jambKeyPointsModal')?.classList.remove('hidden');
+  }
+  function closeKeyPoints() { document.getElementById('jambKeyPointsModal')?.classList.add('hidden'); }
+  function renderKeyPoints() {
+    const subject = document.getElementById('kpSubjectSelect').value;
+    const t = window.TEACH_TOPICS?.[subject];
+    const body = document.getElementById('jambKeyPointsBody');
+    if (!t) { body.innerHTML = '<p class="jqc-sub">No lessons for this subject yet.</p>'; return; }
+    const counts = {};
+    Object.values(t.of || {}).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+    const ids = Object.keys(t.lessons || {}).sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+    const paid = checkAccess();
+    body.innerHTML = ids.map((id, i) => {
+      const L = t.lessons[id];
+      const n = counts[id] || 0;
+      const meta = n ? `<span class="kp-count">${n} past question${n === 1 ? '' : 's'}</span>` : '';
+      if (!paid && i >= KP_FREE_TOPICS) {
+        return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
+      }
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}</div></details>`;
+    }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
+    body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
   }
 
   function openGamesHub() {
@@ -2978,7 +3106,7 @@
     const show = text => {
       loading?.classList.add('hidden');
       if (response) {
-        response.innerHTML = `<div class="ai-q-recap"><strong>${mathHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${mathHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q, true)}${teachExtrasHtml(q, subject)}`;
+        response.innerHTML = `<div class="ai-q-recap"><strong>${mathHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${mathHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q, true)}${repeatHtml(q, subject)}${teachExtrasHtml(q, subject)}`;
         response.classList.remove('hidden');
         wireTeachExtras(response, q, subject);
       }
