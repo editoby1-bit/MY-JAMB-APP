@@ -1,0 +1,120 @@
+/**
+ * JAMB/UTME 2013 — MATHEMATICS
+ * From the 2013 question paper; answers from the JAMB/UTME Mathematics answer key 2001–2020,
+ * each verified by working the question. Key errors carry keyVerdict/keyAnswer/answerNote.
+ * Left out: Q1 (asks only which question paper type the candidate was given), Q24 (triangle
+ * diagram is unclear; no reading of it gives one of the options), Q40 (bar chart unreadable in
+ * the scan) and Q41 (pie chart: the answer, 100/9 students, is not a whole number and no option fits).
+ */
+(function () {
+  const Y = 2013;
+  const SRC = 'JAMB UTME 2013';
+  const A = 0, B = 1, C = 2, D = 3;
+  const q = (question, options, answer, explanation, extra) =>
+    Object.assign({ question, options, answer, explanation, year: Y, source: SRC }, extra || {});
+  const IMG = f => `<img src="past-questions/img/${f}" alt="Diagram for this question" loading="lazy">`;
+
+  QUESTION_BANK.mathematics = QUESTION_BANK.mathematics.concat([
+    // paper 2–11
+    q("Convert 27_{10} to another number in base three.", ["1100_{3}", "1000_{3}", "1001_{3}", "1010_{3}"], B,
+      "27 = 3³ = 1 × 27 + 0 × 9 + 0 × 3 + 0 × 1, so 27_{10} = 1000_{3}."),
+    q("3 girls share a number of apples in the ratio 5 : 3 : 2. If the highest share is 40 apples, find the smallest share.", ["16", "38", "36", "24"], A,
+      "5 parts = 40, so 1 part = 8. Smallest share = 2 parts = 16."),
+    q("Evaluate (1.25 × 0.025)/0.05, correct to 1 decimal place.", ["6.3", "0.5", "0.6", "6.2"], C,
+      "1.25 × 0.025 = 0.03125; 0.03125 ÷ 0.05 = 0.625 = 0.6 to 1 decimal place."),
+    q("Calculate the time taken for ₦3,000 to earn ₦600 if invested at 8% simple interest.", ["3 1/2 years", "1 1/2 years", "2 1/2 years", "3 years"], C,
+      "T = 100I/(PR) = (100 × 600)/(3000 × 8) = 60000/24000 = 2.5 years."),
+    q("Simplify (3^{−5n}/9^{1−n}) × 27^{n+1}.", ["3^{5}", "3", "3^{2}", "3^{3}"], B,
+      "In base 3: 3^{−5n} ÷ 3^{2−2n} × 3^{3n+3} = 3^{−5n − 2 + 2n + 3n + 3} = 3^{1} = 3."),
+    q("If log_{10} 4 = 0.6021, evaluate log_{10} 4^{1/3}.", ["1.8063", "0.2007", "0.3011", "0.9021"], B,
+      "log_{10} 4^{1/3} = (1/3) log_{10} 4 = 0.6021 ÷ 3 = 0.2007."),
+    q("Simplify √5(√147 − √12)/√15.", ["1/9", "9", "5", "1/5"], C,
+      "√147 = 7√3 and √12 = 2√3, so the bracket is 5√3. √5 × 5√3 = 5√15; 5√15 ÷ √15 = 5."),
+    q("P, Q and R are subsets of the universal set U. The Venn diagram showing the relationship (P ∩ Q) ∪ R is", ["Diagram A", "Diagram B", "Diagram C", "Diagram D"], C,
+      "(P ∩ Q) ∪ R is the whole of circle R together with the part where P and Q overlap: diagram C.",
+      { diagram: IMG('maths-2013-q9.png') }),
+    q("If P = {x : x is odd, −1 < x ≤ 20} and Q = {y : y is prime, −2 < y ≤ 25}, find P ∩ Q.", ["{3, 5, 7, 11, 13, 17, 19}", "{2, 3, 5, 7, 11, 13, 17, 19}", "{3, 5, 7, 11, 17, 19}", "{3, 5, 11, 13, 17, 19}"], A,
+      "P = {1, 3, 5, …, 19}; Q = {2, 3, 5, 7, 11, 13, 17, 19, 23}. Common: {3, 5, 7, 11, 13, 17, 19}."),
+    q("If S = √(t² − 4t + 4), find t in terms of S.", ["S − 2", "S² + 2", "S² − 2", "S + 2"], D,
+      "t² − 4t + 4 = (t − 2)², so S = t − 2 (for t ≥ 2) and t = S + 2."),
+    // paper 12–23
+    q("If x − 4 is a factor of x² − x − k, then k is", ["20", "2", "4", "12"], D,
+      "Factor theorem: put x = 4: 16 − 4 − k = 0, so k = 12."),
+    q("The remainder when 6p³ − p² − 47p + 30 is divided by p − 3 is", ["63", "18", "21", "42"], D,
+      "Remainder = f(3) = 6(27) − 9 − 141 + 30 = 162 − 9 − 141 + 30 = 42."),
+    q("P varies jointly as m and u, and varies inversely as q. Given that P = 4, m = 3 and u = 2 when q = 1, find the value of P when m = 6, u = 4 and q = 8/5.", ["10", "288/5", "128/5", "15"], A,
+      "P = kmu/q: 4 = k × 6, so k = 2/3. P = (2/3)(6 × 4) ÷ (8/5) = 16 × 5/8 = 10."),
+    q("If r varies inversely as the square root of s and t, how does s vary with r and t?", ["s varies directly as r² and t²", "s varies directly as r and t", "s varies inversely as r and t²", "s varies inversely as r² and t"], D,
+      "r = k/√(st), so r² = k²/(st) and s = k²/(r²t): s varies inversely as r² and t."),
+    q("Solve 3(x + 2) > 6(x + 3).", ["x < −4", "x > 4", "x < 5", "−2 < x < 3"], A,
+      "3x + 6 > 6x + 18, so −12 > 3x and x < −4."),
+    q("The graph above is correctly represented by", ["y = x² − x − 1", "y = x² + x + 2", "y = x² − x − 2", "y = x² − 3x + 2"], C,
+      "The curve cuts the y-axis at −2 and the x-axis at 2. Only y = x² − x − 2 = (x − 2)(x + 1) has y = −2 at x = 0 and y = 0 at x = 2.",
+      { diagram: IMG('maths-2013-q17.png') }),
+    q("Solve for x: |x − 2| < 3.", ["−1 < x < 5", "x < 5", "x ≤ 5", "−2 < x < 3"], A,
+      "|x − 2| < 3 means −3 < x − 2 < 3; add 2: −1 < x < 5."),
+    q("If the sum of the first two terms of a G.P. is 3, and the sum of the second and the third is −6, find the sum of the first term and the common ratio.", ["−5", "5", "−2", "−3"], A,
+      "a(1 + r) = 3 and ar(1 + r) = −6; dividing, r = −2. Then a(−1) = 3, a = −3. a + r = −5."),
+    q("The nth term of the progression 4/2, 7/3, 10/4, 13/5, … is", ["(3n + 1)/(n − 1)", "(3n − 1)/(n + 1)", "(1 − 3n)/(n + 1)", "(3n + 1)/(n + 1)"], D,
+      "Numerators 4, 7, 10, 13 go up by 3: 3n + 1. Denominators 2, 3, 4, 5: n + 1. So T_{n} = (3n + 1)/(n + 1)."),
+    q("If a binary operation * is defined by x * y = x + 2y, find 2 * (3 * 4).", ["14", "26", "24", "16"], C,
+      "3 * 4 = 3 + 8 = 11; 2 * 11 = 2 + 22 = 24."),
+    q("If P = [[5, 3], [2, 1]] and Q = [[4, 2], [3, 5]], find 2P + Q.", ["[[7, 7], [8, 14]]", "[[14, 8], [7, 7]]", "[[7, 7], [14, 8]]", "[[7, 7], [8, 14]]"], B,
+      "2P = [[10, 6], [4, 2]]; adding Q: [[14, 8], [7, 7]]."),
+    q("Find the inverse of [[5, 3], [6, 4]].", ["[[2, 3/2], [3, −5/2]]", "[[2, 3/2], [−3, 5/2]]", "[[2, −3/2], [−3, 5/2]]", "[[2, −3/2], [−3, −5/2]]"], C,
+      "Determinant = 20 − 18 = 2. Inverse = (1/2)[[4, −3], [−6, 5]] = [[2, −3/2], [−3, 5/2]]."),
+    // paper 25–34 (24 left out)
+    q("The value of x in the figure above is", ["70°", "130°", "110°", "100°"], B,
+      "Draw a line through R parallel to PQ. Co-interior angles: 180° − 110° = 70° and 180° − 120° = 60°. x = 70° + 60° = 130°.",
+      { diagram: IMG('maths-2013-q25.png') }),
+    q("If the angles of a quadrilateral are (3y + 10)°, (2y + 30)°, (y + 20)° and 4y°, find the value of y.", ["66°", "12°", "30°", "42°"], C,
+      "The angles add up to 360°: 10y + 60 = 360, so 10y = 300 and y = 30."),
+    q("A square tile has side 30 cm. How many of these tiles will cover a rectangular floor of length 7.2 m and width 4.2 m?", ["720", "336", "420", "576"], B,
+      "720 cm ÷ 30 cm = 24 tiles along; 420 cm ÷ 30 cm = 14 tiles across. 24 × 14 = 336."),
+    q("Find the length of a chord which subtends an angle of 90° at the centre of a circle whose radius is 8 cm.", ["8√3 cm", "4 cm", "8 cm", "8√2 cm"], D,
+      "The two radii and the chord form a right-angled triangle: chord = √(8² + 8²) = √128 = 8√2 cm."),
+    q("A chord of a circle subtends an angle of 120° at the centre of a circle of diameter 4√3 cm. Calculate the area of the major sector.", ["32π cm²", "4π cm²", "8π cm²", "16π cm²"], C,
+      "r = 2√3, so r² = 12. The major sector angle is 360° − 120° = 240°. Area = (240/360) × π × 12 = 8π cm²."),
+    q("The locus of the points which are equidistant from the line PQ forms a", ["perpendicular line to PQ", "circle centre P", "circle centre Q", "pair of parallel lines to PQ"], D,
+      "Points at a fixed distance from a straight line lie on two lines parallel to it, one on each side."),
+    q("If the mid-point of the line PQ is (2, 3) and the point P is (−2, 1), find the coordinates of the point Q.", ["(8, 6)", "(5, 6)", "(0, 4)", "(6, 5)"], D,
+      "Q = (2 × 2 − (−2), 2 × 3 − 1) = (6, 5)."),
+    q("Find the equation of the perpendicular bisector of the line joining P(2, −3) to Q(−5, 1).", ["8y + 14x + 13 = 0", "8y − 14x + 13 = 0", "8y − 14x − 13 = 0", "8y + 14x − 13 = 0"], C,
+      "Midpoint (−3/2, −1); gradient PQ = 4/(−7) = −4/7, so the bisector's gradient is 7/4. y + 1 = (7/4)(x + 3/2) gives 8y − 14x − 13 = 0."),
+    q("In triangle PQR, q = 8 cm, r = 6 cm and cos P = 1/12. Calculate the value of p.", ["9 cm", "√92 cm", "10 cm", "√108 cm"], B,
+      "Cosine rule: p² = q² + r² − 2qr cos P = 64 + 36 − 2 × 8 × 6 × 1/12 = 100 − 8 = 92, so p = √92 cm."),
+    q("If tan θ = 3/4, find the value of sin θ + cos θ.", ["1 1/3", "1 2/3", "1 3/5", "1 2/5"], D,
+      "Right triangle 3, 4, 5: sin θ = 3/5, cos θ = 4/5 (θ acute). Sum = 7/5 = 1 2/5."),
+    // paper 35–39
+    q("If y = (2x + 2)³, find dy/dx.", ["3(2x + 2)", "6(2x + 2)²", "3(2x + 2)²", "6(2x + 2)"], B,
+      "Chain rule: dy/dx = 3(2x + 2)² × 2 = 6(2x + 2)².",
+      { keyVerdict: 'misprint', answerNote: "The paper asks for dx/dy, but all the options are expressions for dy/dx (dx/dy would be 1/(6(2x + 2)²), which is not offered). The question is shown asking for dy/dx; the answer is 6(2x + 2)² (B)." }),
+    q("If y = x sin x, find dy/dx.", ["cos x + sin x", "sin x + x cos x", "sin x − cos x", "cos x − x sin x"], B,
+      "Product rule: dy/dx = 1 × sin x + x × cos x = sin x + x cos x."),
+    q("The radius of a circle is increasing at the rate of 0.02 cm s^{−1}. Find the rate at which the area is increasing when the radius of the circle is 7 cm.", ["0.35 cm² s^{−1}", "0.88 cm² s^{−1}", "0.75 cm² s^{−1}", "0.53 cm² s^{−1}"], B,
+      "A = πr², so dA/dt = 2πr × dr/dt = 2 × 22/7 × 7 × 0.02 = 0.88 cm² s^{−1}."),
+    q("Integrate (1 + x)/x³ dx.", ["2x² − 1/4 + k", "−1/(2x²) − 1/x + k", "−x²/2 − 1/x − k", "x² − 1/x + k"], B,
+      "(1 + x)/x³ = x^{−3} + x^{−2}. Integrating: x^{−2}/(−2) + x^{−1}/(−1) + k = −1/(2x²) − 1/x + k."),
+    q("Evaluate ∫_{0}^{π/2} sin x dx.", ["−2", "2", "1", "−1"], C,
+      "∫ sin x dx = −cos x. [−cos x] from 0 to π/2 = (−cos π/2) − (−cos 0) = 0 + 1 = 1."),
+    // paper 42–50 (40, 41 left out)
+    q("Find the mean of t + 2, 2t − 4, 3t + 2 and 2t.", ["2t + 1", "t", "t + 1", "2t"], D,
+      "Sum = (t + 2t + 3t + 2t) + (2 − 4 + 2) = 8t. Mean = 8t ÷ 4 = 2t."),
+    q("The mean of seven numbers is 10. If six of the numbers are 2, 4, 8, 14, 16 and 18, find the mode.", ["14", "2", "6", "8"], D,
+      "Total = 7 × 10 = 70. The six add to 62, so the seventh is 8. 8 now appears twice, so the mode is 8."),
+    q("Calculate the median age of the frequency distribution in the table below.\nAge: 20, 25, 30, 35, 40, 45\nNo. of people: 3, 5, 1, 1, 2, 3", ["35", "20", "25", "30"], C,
+      "There are 15 people, so the median is the 8th age. Cumulative frequencies: 3, 8, … so the 8th person is aged 25."),
+    q("If the variance of 3 + x, 6, 4, x and 7 − x is 4 and the mean is 5, find the standard deviation.", ["3", "√2", "√3", "2"], D,
+      "Standard deviation = √variance = √4 = 2. (Check: mean (20 + x)/5 = 5 gives x = 5; the numbers 8, 6, 4, 5, 2 have variance 20/5 = 4.)"),
+    q("The table below shows the scores of 20 students in a Further Mathematics test.\nScore: 3, 4, 5, 6, 7, 8, 9, 10\nFrequency: 1, 0, 7, 5, 2, 3, 1, 1\nWhat is the range of the distribution?", ["3", "10", "7", "6"], C,
+      "Range = highest score − lowest score = 10 − 3 = 7."),
+    q("In how many ways can a student select 2 subjects from 5 subjects?", ["5!/(2!3!)", "5!/2!", "5!/3!", "5!/(2!2!)"], A,
+      "Order does not matter, so use combinations: ⁵C₂ = 5!/(2!3!) = 10."),
+    q("In how many ways can 3 seats be occupied if 5 people are willing to sit?", ["5", "120", "60", "20"], C,
+      "Order matters: ⁵P₃ = 5 × 4 × 3 = 60."),
+    q("What is the probability that an integer x (1 ≤ x ≤ 25) chosen at random is divisible by both 2 and 3?", ["4/25", "3/4", "1/25", "1/5"], A,
+      "Divisible by both 2 and 3 means divisible by 6: 6, 12, 18, 24. Probability = 4/25."),
+    q("A basket contains 9 apples, 8 bananas and 7 oranges. A fruit is picked from the basket. Find the probability that it is neither an apple nor an orange.", ["7/24", "2/3", "3/8", "1/3"], D,
+      "Neither an apple nor an orange means a banana: 8 out of 24 fruits. Probability = 8/24 = 1/3."),
+  ]);
+})();
