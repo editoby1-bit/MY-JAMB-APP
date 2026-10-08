@@ -73,6 +73,9 @@
     q("Find the locus of a point which is equidistant from the points X(1, 2) and Y(3, 5).", ["4x + 6y = 29", "6x + 4y = 29", "4x + 6y = 39", "6x + 4y = 39"], A,
       "(x − 1)² + (y − 2)² = (x − 3)² + (y − 5)² simplifies to −2x − 4y + 5 = −6x − 10y + 34, i.e. 4x + 6y = 29."),
     // paper 28–40 (paper Q27 left out)
+    q("Evaluate (log 4^{1/2}) ÷ (log 4).", ["−1/2", "1/2", "2", "−2"], B,
+      "log 4^{1/2} = (1/2) log 4, so (log 4^{1/2}) ÷ (log 4) = 1/2.",
+      { keyVerdict: 'misprint', answerNote: "The expression on the original paper was not printed clearly (it reads as log 4^{1/2} ÷ log 20^{1/4}, which gives about 0.93 and matches no option). We rebuilt the question as the paper intended, (log 4^{1/2}) ÷ (log 4); the answer is 1/2 (B)." }),
     q("Factorise the expression ax − 2bx − 4by + 2ay.", ["(x + 2y)(a + 2b)", "(x − 2y)(a + 2b)", "(x + 2y)(a − 2b)", "(x − 2y)(a − 2b)"], C,
       "Group: x(a − 2b) + 2y(a − 2b) = (x + 2y)(a − 2b)."),
     q("Which of the following about a rhombus may NOT necessarily be true?", ["The diagonals bisect each other", "They have equal diagonals", "The adjacent sides are equal", "Opposite angles are equal"], B,

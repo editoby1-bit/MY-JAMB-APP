@@ -1053,6 +1053,7 @@
   "|The sum of an infinite geometric series is 6 and the sum of the first two terms is 4½. Find the common ratio.|±1|±0.5|±3|±0.25": "sequences",
   "|Find the minimum value of the function y = 2x³ − 21x² + 36x − 20.|−3|−30|30|−128": "differentiation",
   "|Find the locus of a point which is equidistant from the points X(1, 2) and Y(3, 5).|4x + 6y = 29|6x + 4y = 29|4x + 6y = 39|6x + 4y = 39": "geometry",
+  "|Evaluate (log 4^{1/2}) ÷ (log 4).|−1/2|1/2|2|−2": "logarithms",
   "|Factorise the expression ax − 2bx − 4by + 2ay.|(x + 2y)(a + 2b)|(x − 2y)(a + 2b)|(x + 2y)(a − 2b)|(x − 2y)(a − 2b)": "algebra",
   "|Which of the following about a rhombus may NOT necessarily be true?|The diagonals bisect each other|They have equal diagonals|The adjacent sides are equal|Opposite angles are equal": "geometry",
   "|What is the total surface area of a right-angled triangular prism with sides 3 cm, 4 cm and 5 cm, if the length of the prism is 8 cm?|108 cm²|226 cm²|96 cm²|88 cm²": "mensuration",
