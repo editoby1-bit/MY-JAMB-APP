@@ -111,6 +111,8 @@
       "n + (n + 1) + (n + 2) + (n + 3) = 4n + 6 = 34, so n = 7 (the numbers are 7, 8, 9, 10)."),
     q("Numbers: 0, 1, 2, 3, 4, 5. Frequency: 1, 4, 3, 8, 2, 5. From the table, find the median and range of the data respectively.", ["(8, 5)", "(5, 8)", "(5, 3)", "(3, 5)"], D,
       "There are 23 values, so the median is the 12th. Cumulative frequencies 1, 5, 8, 16: the 12th value is 3. Range = 5 − 0 = 5. Answer (3, 5)."),
+    q("Class interval: 0–2, 3–5, 6–8, 9–11. Frequency: 3, 2, 5, 3. Find the mode of the distribution.", ["9", "10", "7", "8"], C,
+      "The modal class is 6–8 (highest frequency, 5). Mode = L + (d₁/(d₁ + d₂)) × c = 5.5 + (3/(3 + 2)) × 3 = 5.5 + 1.8 = 7.3, which is 7 to the nearest whole number. (7 is also the class mark of the modal class.)"),
     q("Class interval: 3–5, 6–8, 9–11. Frequency: 2, 2, 2. Find the standard deviation of the distribution.", ["√5", "√6", "√2", "√3"], B,
       "Class marks 4, 7, 10; mean = 7. Σf(x − mean)² = 2(9) + 2(0) + 2(9) = 36, and Σf = 6, so the variance = 36/6 = 6 and the standard deviation = √6.",
       { keyVerdict: 'misprint', answerNote: "The paper prints option B as √7, a printing error: the variance is 36 ÷ 6 = 6, so the standard deviation is √6. Another copy of this question prints √6 as option B, shown here." }),
