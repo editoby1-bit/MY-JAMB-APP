@@ -149,7 +149,7 @@
     q(GAP + "We won't leave until it _____ raining.", ["stops", "had stopped", "will stop", "stopped"], A, "After 'until' (a time clause) we use the present simple for the future: until it stops."),
     q(GAP + "The man is refurbishing the flat with a view to _____ it.", ["selling", "sell", "be selling", "have sold"], A, "In 'with a view to', 'to' is a preposition, so it is followed by the -ing form: selling."),
     q(GAP + "The first prize was _____ tray.", ["a carved attractive wooden", "an attractive carved wooden", "a carved wooden attractive", "a wooden attractive carved"], B, "Adjective order: opinion (attractive), then type/description (carved), then material (wooden)."),
-    q(GAP + "It is African for a younger person to show _____ to elders.", ["satisfaction", "deference", "understanding"], B, "Deference is humble respect, which a younger person shows to elders.", { keyVerdict: 'misprint', answerNote: "The paper's option D repeats 'over/surrounded' from the next question by mistake, so it is left out here. Deference (B) is the answer." }),
+    q(GAP + "It is African for a younger person to show _____ to elders.", ["satisfaction", "deference", "understanding", "ignorance"], B, "Deference is humble respect, which a younger person shows to elders."),
     q(GAP + "As we sat _____ the silence, my eyes _____ the room.", ["in/roamed", "under/looked", "along/observed", "over/surrounded"], A, "We sit in silence, and eyes roam (wander over) a room."),
     q(GAP + "The _____ event marked the beginning of a new life for the entire cabinet.", ["historic", "history of the", "historicity of the", "historical"], A, "Historic means important or memorable; historical means connected with history or the past."),
   ];
