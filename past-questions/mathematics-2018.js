@@ -1,0 +1,106 @@
+/**
+ * JAMB/UTME 2018 — MATHEMATICS
+ * From the 2018 question paper (40 questions); answers from the JAMB/UTME Mathematics answer
+ * key 2001–2020, each verified by working the question. Misprints carry keyVerdict/answerNote.
+ */
+(function () {
+  const Y = 2018;
+  const SRC = 'JAMB UTME 2018';
+  const A = 0, B = 1, C = 2, D = 3;
+  const q = (question, options, answer, explanation, extra) =>
+    Object.assign({ question, options, answer, explanation, year: Y, source: SRC }, extra || {});
+  const IMG = f => `<img src="past-questions/img/${f}" alt="Diagram for this question" loading="lazy">`;
+
+  QUESTION_BANK.mathematics = QUESTION_BANK.mathematics.concat([
+    // paper 1–10
+    q("Simplify 4√27 + 5√12 − 3√75.", ["7", "−7", "−7√3", "7√3"], D,
+      "4√27 = 4 × 3√3 = 12√3; 5√12 = 5 × 2√3 = 10√3; 3√75 = 3 × 5√3 = 15√3. So 12√3 + 10√3 − 15√3 = 7√3."),
+    q("Evaluate 0.00000231/0.007 and leave the answer in standard form.", ["3.3 × 10^{−5}", "3.3 × 10^{−2}", "3.3 × 10^{−4}", "3.3 × 10^{−6}"], C,
+      "0.00000231/0.007 = 0.00231/7 = 0.00033 = 3.3 × 10^{−4}."),
+    q("Calculate the simple interest on ₦6,500 for 4 years at 6%.", ["₦1,200", "₦1,560", "₦2,400", "₦2,200"], B,
+      "I = PRT/100 = 6500 × 6 × 4/100 = ₦1,560."),
+    q("What is the product of 2x² − x + 1 and 3 − 2x?", ["4x³ − 8x² + 5x + 3", "−4x³ + 8x² − 5x + 3", "−4x³ − 8x² + 5x + 3", "4x³ + 8x² − 5x + 3"], B,
+      "(2x² − x + 1)(3 − 2x) = 6x² − 3x + 3 − 4x³ + 2x² − 2x = −4x³ + 8x² − 5x + 3."),
+    q("y is inversely proportional to x and y = 6 when x = 7. Find the constant of the variation.", ["47", "42", "54", "48"], B,
+      "y = k/x, so k = xy = 7 × 6 = 42."),
+    q("Solve (x − 3)(x + 2) < 0.", ["2 < x < 3", "−3 < x < −2", "−2 < x < 3", "−3 < x < 2"], C,
+      "The roots are x = −2 and x = 3. The product of the two brackets is negative between the roots: −2 < x < 3."),
+    q("Find ∫(x² + 3x − 5) dx.", ["x³/3 − 3x²/2 − 5x + k", "x³/3 − 3x²/2 + 5x + k", "x³/3 + 3x²/2 − 5x + k", "x³/3 + 3x²/2 + 5x + k"], C,
+      "Integrate term by term (add 1 to the power, divide by the new power): x³/3 + 3x²/2 − 5x + k."),
+    q("Given the quadrilateral RSTO inscribed in the circle above with O as centre, find the size of angle ROT.", ["100°", "140°", "120°", "110°"], C,
+      "The angle at the centre is twice the angle at the circumference standing on the same arc RT: ∠ROT = 2 × 60° = 120°.",
+      { diagram: IMG('maths-2018-q8.png') }),
+    q("What is the geometric mean of 9 and 16?", ["14", "18", "15", "12"], D,
+      "Geometric mean = √(9 × 16) = √144 = 12."),
+    q("The locus of a point which is equidistant from the line PQ forms a", ["circle centre P", "pair of parallel lines each opposite to PQ", "centre circle Q", "perpendicular line to PQ"], B,
+      "All points at a fixed distance from a straight line lie on two lines parallel to it, one on each side."),
+    // paper 11–20
+    q("Evaluate (sin 45° + sin 30°) in surd form.", ["√3/(2√2)", "(√3 − 1)/2", "1/(2√2)", "(1 + √2)/2"], D,
+      "sin 45° = √2/2 and sin 30° = 1/2, so the sum is (√2 + 1)/2 = (1 + √2)/2."),
+    q("Scores: 5, 8, 3, 2 with frequencies 3, 1, 5, 6 respectively. From the table, calculate the mean of the scores.", ["3.2", "3.4", "3.1", "3.3"], D,
+      "Σfx = 15 + 8 + 15 + 12 = 50 and Σf = 15, so mean = 50/15 = 3.3 (to 1 d.p.)."),
+    q("Evaluate 1 − (1/5 × 1⅔) + (5 − 1⅔).", ["4", "3", "2⅔", "3⅔"], A,
+      "1/5 × 5/3 = 1/3 and 5 − 1⅔ = 3⅓. So 1 − 1/3 + 3⅓ = 4."),
+    q("Differentiate y = 3cos 2x − sin 4x.", ["−6sin 2x + 4cos 4x", "6sin 2x + 4cos 4x", "−6sin 2x − 4cos 4x", "6sin 2x − 4cos 4x"], C,
+      "d/dx(cos 2x) = −2sin 2x and d/dx(sin 4x) = 4cos 4x, so dy/dx = −6sin 2x − 4cos 4x."),
+    q("Evaluate 0.0028213/0.634 and give your answer in standard form.", ["4.45 × 10^{−3}", "4.45 × 10^{−6}", "4.45 × 10^{−5}", "4.45 × 10^{−4}"], A,
+      "0.0028213 ÷ 0.634 = 2.8213 ÷ 634 = 0.00445 = 4.45 × 10^{−3}."),
+    q("Given T = {even numbers from 1 to 12} and N = {common factors of 6, 8 and 12}, find T ∩ N.", ["{2, 3}", "{2, 3, 4}", "{3, 4, 6}", "{2}"], D,
+      "T = {2, 4, 6, 8, 10, 12}; the common factors of 6, 8 and 12 are 1 and 2, so N = {1, 2}. T ∩ N = {2}."),
+    q("In the diagram above, find x.", ["40°", "55°", "50°", "60°"], A,
+      "Angles at a point add up to 360°: 2x + 3x + 4x = 360°, so 9x = 360° and x = 40°.",
+      { diagram: IMG('maths-2018-q17.png') }),
+    q("Find the base in which the following addition was performed: 2312 + 1013 + 2131 = 11011.", ["7", "6", "5", "8"], C,
+      "In base 5: 2312 = 332, 1013 = 133, 2131 = 291; total 756, and 11011_{5} = 625 + 125 + 5 + 1 = 756. ✓"),
+    q("If temperature t is directly proportional to heat h, and when t = 20°C, h = 50 J, find t when h = 60 J.", ["24°C", "20°C", "34°C", "30°C"], A,
+      "t = kh, so k = 20/50 = 0.4. When h = 60, t = 0.4 × 60 = 24°C."),
+    q("In a class of 45 students, 20 offer Geography while 28 offer Chemistry. How many students offer both?", ["4", "5", "7", "3"], D,
+      "n(G ∪ C) = n(G) + n(C) − n(G ∩ C): 45 = 20 + 28 − n(G ∩ C), so n(G ∩ C) = 3."),
+    // paper 21–30
+    q("The base in which the operation 1101.01 + 1110.11 + 1011.10 = 100111.10 was performed was", ["6", "2", "4", "5"], B,
+      "Only the digits 0 and 1 appear. In base 2: 13.25 + 14.75 + 11.5 = 39.5, and 100111.10_{2} = 39.5. ✓"),
+    q("Find the number of ways that the letters of the word EXCELLENCE can be arranged.", ["10!/(2!2!2!)", "10!/(4!2!)", "10!/(4!2!2!)", "10!/(2!2!)"], C,
+      "EXCELLENCE has 10 letters: E four times, C twice, L twice. Arrangements = 10!/(4!2!2!)."),
+    q("A ladder 9 m long leans against a vertical wall so that its upper end is 6.5 m from the ground. How far is the ladder from the foot of the wall?", ["8.5 m", "7.8 m", "5.6 m", "6.2 m"], D,
+      "By Pythagoras, d = √(9² − 6.5²) = √(81 − 42.25) = √38.75 ≈ 6.2 m."),
+    q("Find the sum to infinity of the series 1/4, 1/8, 1/16, …", ["1/2", "3/5", "3/2", "2/3"], A,
+      "a = 1/4, r = 1/2. S∞ = a/(1 − r) = (1/4)/(1/2) = 1/2."),
+    q("Find the factors of 2x² + 5x − 3.", ["(x − 2)(x − 3)", "(2x − 1)(x + 3)", "(x + 3)(x + 2)", "(x − 2)(2x − 1)"], B,
+      "Split 5x as 6x − x: 2x² + 6x − x − 3 = 2x(x + 3) − 1(x + 3) = (2x − 1)(x + 3)."),
+    q("Find the value of x for which the function f(x) = 3x² − x − 6 is minimum.", ["−1/6", "−73/12", "1/6", "73/12"], C,
+      "f′(x) = 6x − 1 = 0 gives x = 1/6; f″(x) = 6 > 0, so this is a minimum."),
+    q("Find the inverse of the matrix [[3, 3], [5, 6]].", ["[[2, −1], [−5/3, 1]]", "[[2, 1], [−5/3, −1]]", "[[2, 1], [5/3, 1]]", "[[−2, −1], [5/3, 1]]"], A,
+      "Determinant = 3 × 6 − 3 × 5 = 3. Inverse = (1/3)[[6, −3], [−5, 3]] = [[2, −1], [−5/3, 1]]."),
+    q("The pie chart above shows the allocation of money to each sector in a farm. The total amount allocated to the farm is ₦80,000. The total amount allocated to Fertilizer is", ["₦35,000", "₦40,000", "₦25,000", "₦20,000"], D,
+      "Fertilizer has the right angle: 360° − (40° + 50° + 80° + 70° + 30°) = 90°. Amount = 90/360 × ₦80,000 = ₦20,000.",
+      { diagram: IMG('maths-2018-q28.png') }),
+    q("Find the range of the following set of numbers: 0.4, −0.4, 0.3, 0.47, −0.53, 0.2 and −0.2.", ["1.03", "0.07", "0.03", "1.0"], D,
+      "Range = largest − smallest = 0.47 − (−0.53) = 1.0."),
+    q("Scores: 6, 5, 4, 3, 2, 1 with frequencies 9, 8, 7, 10, 7, 1 respectively. Find the median of the distribution of scores.", ["4", "3", "2", "5"], A,
+      "There are 42 scores, so the median is the mean of the 21st and 22nd. In ascending order the cumulative frequencies are 1, 8, 18, 25, …, so both are 4: median = 4."),
+    // paper 31–40
+    q("A fair die is tossed twice. What is the probability of getting a sum greater than or equal to 7?", ["5/12", "1/8", "7/12", "3/4"], C,
+      "Of the 36 equally likely outcomes, 21 have a sum of 7 or more (6 + 5 + 4 + 3 + 2 + 1). P = 21/36 = 7/12."),
+    q("Find the equation of a line which passes through the points (1, −1) and (3, 2).", ["2x − y − 9 = 0", "2y + 3x − 5 = 0", "2x + y + 9 = 0", "2y − 3x + 5 = 0"], D,
+      "Gradient = (2 − (−1))/(3 − 1) = 3/2. y + 1 = (3/2)(x − 1) gives 2y + 2 = 3x − 3, i.e. 2y − 3x + 5 = 0."),
+    q("The operation * on the set R of real numbers is defined by x * y = 3x + 2y − 1. Find 3 * −1.", ["9", "−9", "6", "−6"], C,
+      "3 * (−1) = 3(3) + 2(−1) − 1 = 9 − 2 − 1 = 6.",
+      { keyVerdict: 'misprint', answerNote: "The paper prints the rule as \"x * y = 3x + 2y 1\": the minus sign before the 1 was lost in printing. The corrected rule 3x + 2y − 1 is shown here (with + 1 the answer would be 8, which is not an option)." }),
+    q("If K = [[3, 1], [4, 0]], find 5K − 4I.", ["[[11, 5], [20, 4]]", "[[11, 5], [20, −4]]", "[[11, −5], [20, 4]]", "[[−11, 5], [20, 4]]"], B,
+      "5K = [[15, 5], [20, 0]] and 4I = [[4, 0], [0, 4]], so 5K − 4I = [[11, 5], [20, −4]]."),
+    q("Find the area of a triangle PQR when |PQ| = 36 cm, |QR| = 15 cm and angle PQR = 90°.", ["240 cm²", "320 cm²", "270 cm²", "220 cm²"], C,
+      "PQ and QR are perpendicular, so area = ½ × 36 × 15 = 270 cm²."),
+    q("In the diagram above, MN, PQ and RS are parallel lines. What is the value of the angle marked x?", ["123°", "170°", "117°", "137°"], C,
+      "The angle at C between CB and CR corresponds to the 63° at A, so x = 180° − 63° = 117° (angles on a straight line).",
+      { diagram: IMG('maths-2018-q36.png') }),
+    q("Find the gradient of the line joining the points (3, 2) and (1, 4).", ["3/2", "1", "−1", "−3/2"], C,
+      "Gradient = (4 − 2)/(1 − 3) = 2/(−2) = −1."),
+    q("If a rod 10 cm in length was measured as 10.5 cm, calculate the percentage error.", ["5%", "10%", "8%", "7%"], A,
+      "Error = 10.5 − 10 = 0.5 cm. Percentage error = 0.5/10 × 100% = 5%."),
+    q("Given M = N√(SL/T), make T the subject of the formula.", ["NSL/M", "N²SL/M²", "N²SL/M", "NSL/M²"], B,
+      "Square both sides: M² = N²SL/T. Then T = N²SL/M².",
+      { keyVerdict: 'misprint', answerNote: "The paper prints the N small, in the position of a root index, so it looks like the N-th root of SL/T. Every option treats N as a multiplier in front of the square root (M = N√(SL/T)), which is the corrected form shown here." }),
+    q("In how many ways can the word MACICITA be arranged?", ["8!/2!", "8!/(3!2!)", "8!/(2!2!2!)", "8!"], C,
+      "MACICITA has 8 letters: A twice, C twice, I twice. Arrangements = 8!/(2!2!2!)."),
+  ]);
+})();
