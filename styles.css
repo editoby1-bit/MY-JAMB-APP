@@ -1850,3 +1850,11 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .trap-practise { margin: .2rem .8rem .8rem; background: #f87171; color: #2a0505; border: 0; border-radius: 8px; padding: .45rem .8rem; font-weight: 700; cursor: pointer; }
 .trap-opts { display: flex; flex-wrap: wrap; gap: .25rem .8rem; margin-top: .25rem; font-size: .78rem; color: rgba(255,255,255,.6); }
 .trap-opts .trap-right { color: #4ade80; font-weight: 700; }
+.jamb-booklet-banner { background: linear-gradient(135deg, #0f766e, #2dd4bf); }
+.jamb-booklet-banner .jdb-text, .jamb-booklet-banner .jdb-arrow { color: #fff; }
+.jamb-booklet-banner .jdb-sub { color: rgba(255,255,255,.85); }
+.trap-opts .bk-right, .bk-verdict .bk-right { color: #4ade80; font-weight: 700; }
+.trap-opts .bk-wrong, .bk-verdict .bk-wrong { color: #f87171; text-decoration: line-through; }
+.bk-verdict { margin-top: .3rem; font-size: .82rem; color: rgba(255,255,255,.75); }
+.bk-verdict .bk-wrong { text-decoration: line-through; }
+.bk-note { margin-top: .3rem; font-size: .86rem; color: #fde68a; }
