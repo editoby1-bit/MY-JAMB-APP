@@ -1033,7 +1033,7 @@
   "|\"Africa as the centrepiece of Nigeria's foreign policy\" could be traced back to the administration of|Sir Ahmadu Bello|Alhaji Shehu Shagari|Sir Abubakar Tafawa Balewa|Gen Yakubu Gowon": "foreign-policy",
   "|A president of a state performs a judicial function through|dismissal of judges|assent to bills|prerogative of mercy|appointment of judges": "organs",
   "|The highest and most powerful organ of OPEC is the|Conference|Secretariat|Council of Ministers|Board of Governors": "international-orgs",
-  "|Which of these is the first political party in Nigeria?|NYM|NNDP|NCNC|NPC": "parties-pressure-groups",
+  "|Which of these is the first political party in Nigeria?|NYM|NNDP|NCNC|NPC": "colonial",
   "|The military regime abolished the state ministries of local government in Nigeria in|1985|1957|1990|1989": "local-government",
   "|Government by the best men is referred to as|democratic|autocratic|aristocratic|totalitarianism": "forms-of-government",
   "|Human rights are usually enshrined in a constitution with a view to|avoid tenure elongation|promote peaceful co-existence|protect political office holders|protect the rights of individuals in a state": "citizenship-rights",
@@ -1041,6 +1041,12 @@
   "|The existence of the OAU was seriously threatened in 1982–1983 because of a conflict which led to the departure of|Rwanda and Angola|Namibia and South Africa|Morocco|Somalia and Ethiopia": "international-orgs",
   "|A factor that can cause hindrance to the effectiveness of the civil service in Nigeria is|executive control|low incentive|legal control|registration of civil servants": "public-administration",
   "|Which of the following commissions is responsible for sharing revenue based on an agreed formula in Nigeria?|Revenue Mobilisation Allocation and Fiscal Commission|National Planning Commission|National Human Rights Commission|Federal Civil Service Commission": "federalism-nigeria",
-  "|Public opinion is NOT formed through|mass media|symposia and lectures|documentary|advertisement": "parties-pressure-groups"
+  "|Public opinion is NOT formed through|mass media|symposia and lectures|documentary|advertisement": "parties-pressure-groups",
+  "|The tenet of non-alignment connotes|military alliance|political neutrality|political instability|political non-participation": "foreign-policy",
+  "|Laws made by military governments at the state level are called ____ while laws made by local governments are called ____.|acts; decrees|decrees; edicts|bye-laws; decrees|edicts; bye-laws": "military-rule",
+  "|Under whose regime were Akwa Ibom and Katsina States created in 1987?|Gen. Murtala Muhammed|Gen. Ibrahim Babangida|Gen. Sani Abacha|Gen. Yakubu Gowon": "federalism-nigeria",
+  "|Activities of pressure groups that influence governmental decisions are hampered by|its size|its leadership|its affiliation|the economy": "parties-pressure-groups",
+  "|Universal suffrage or franchise can be described as the right to|vote at elections|form political parties|vote and be voted for|contest in elections": "elections",
+  "|Which of the following nationalists was the founder of Nigeria's first political party, NNDP, in 1923?|Herbert Macaulay|Abubakar Tafawa Balewa|Ahmadu Bello|Nnamdi Azikiwe": "colonial"
  }
 };
