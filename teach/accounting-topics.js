@@ -934,6 +934,7 @@
   "|The account where the profit is distributed to the partners in their profit sharing ratio in a partnership is the|trading account|appropriation account|balance sheet|profit and loss account": "partnership",
   "|In manufacturing accounts, depreciation of office machine is charged to|trading account|appropriation account|balance sheet|profit and loss account": "manufacturing",
   "|Which of the following is not an item on the debit side of the sales ledger control account?|Cash refunds|Debit note issued|Dishonoured cheque|Purchases": "control-accounts",
+  "|Given:\nI. Cash refunds\nII. Debit note issued\nIII. Dishonoured cheque\nIV. Purchases\n\nThe items on the credit side of the purchases ledger control account include|I, II and III only|I and II only|III and IV only|I, III and IV only": "control-accounts",
   "|You add the following when starting with the balance as per cash book when preparing the bank reconciliation statement except|unpresented cheque|dividend|uncredited cheque|credit transfer": "bank-reconciliation",
   "|Which fund is used to meet unforeseen or urgent expenditure?|General reserve fund|Consolidated Reserve Fund|Contingencies fund|Special fund": "public-sector",
   "|In a period of rising prices, which method of stock valuation is most appropriate?|Last in First Out|Weighted average|First in First Out|Simple average": "stock-valuation",
