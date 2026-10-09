@@ -113,6 +113,16 @@
               <span class="jdb-arrow">→</span>
             </div>
 
+            <!-- Wrong answers in circulation — booklet answer keys that are wrong -->
+            <div class="jamb-dash-banner jamb-booklet-banner" id="jambBookletBanner">
+              <span class="jdb-icon">❌</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Wrong Answers in Circulation</span>
+                <span class="jdb-sub">Booklet and online answers that are wrong, and the right ones</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
             <!-- Exam Traps — the tempting wrong options, by topic -->
             <div class="jamb-dash-banner jamb-traps-banner" id="jambTrapsBanner">
               <span class="jdb-icon">⚠️</span>
@@ -657,6 +667,17 @@
       </div>
     </div>
 
+    <div id="jambBookletModal" class="jqc-overlay hidden">
+      <div class="jqc-card kp-card">
+        <button class="jqc-close" id="jambBookletClose">✕</button>
+        <div class="jqc-icon">❌</div>
+        <h2 class="jqc-title">Wrong Answers in Circulation</h2>
+        <p class="jqc-sub">Many past-question booklets and websites print wrong answers for some questions. If you have seen a different answer elsewhere, check here: we show the booklet answer, the correct one, and why. Don't lose marks to a bad answer key.</p>
+        <select id="bkSubjectSelect" class="select-input kp-subject"></select>
+        <div id="jambBookletBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
     <div id="jambTrapsModal" class="jqc-overlay hidden">
       <div class="jqc-card kp-card">
         <button class="jqc-close" id="jambTrapsClose">✕</button>
@@ -857,6 +878,7 @@
   <script src="teach/government-topics.js"></script>
   <script src="teach/accounting.js"></script>
   <script src="teach/accounting-topics.js"></script>
+  <script src="booklet/errors.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

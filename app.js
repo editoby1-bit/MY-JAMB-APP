@@ -587,6 +587,17 @@
         subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
       };
     }
+    if (yearVal === 'booklet') {
+      const all = bookletPool(subject);
+      const n = countValue === 'all' ? all.length : Math.min(Number(countValue), all.length);
+      const questions = groupAwarePick(all, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · Wrong answers in circulation`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
     if (yearVal && yearVal.startsWith('traps-')) {
       const topic = yearVal.slice(6);
       const all = trapPool(subject, topic);
@@ -1142,6 +1153,8 @@
     document.getElementById('jambTrickyClose')?.addEventListener('click', closeTrickyHub);
     document.getElementById('jambKeyPointsBanner')?.addEventListener('click', openKeyPoints);
     document.getElementById('jambTrapsBanner')?.addEventListener('click', openTraps);
+    document.getElementById('jambBookletBanner')?.addEventListener('click', openBooklet);
+    document.getElementById('jambBookletClose')?.addEventListener('click', closeBooklet);
     document.getElementById('jambTrapsClose')?.addEventListener('click', closeTraps);
     document.getElementById('jambKeyPointsClose')?.addEventListener('click', closeKeyPoints);
     document.getElementById('gameHistoryClose')?.addEventListener('click', closeGameHistory);
@@ -1709,6 +1722,67 @@
     const title = window.TEACH_TOPICS?.[subject]?.lessons?.[topic]?.title || 'Exam Traps';
     el.yearSelect.insertAdjacentHTML('beforeend', `<option value="traps-${topic}">⚠️ Exam Traps: ${escHtml(title)}</option>`);
     el.yearSelect.value = 'traps-' + topic;
+    if (el.questionCountSelect) el.questionCountSelect.value = 'all';
+    startSession();
+  }
+
+  /* ── Wrong Answers in Circulation ──
+     Past questions whose answer, as printed in popular booklets and websites,
+     is wrong. Students who see the booklet answer may think we are wrong, so
+     this section shows both, with the reason. Sources: q.bookletKey/
+     q.bookletNote, debatable 'corrected' verdicts, and window.BOOKLET_ERRORS
+     (subject -> teachMeKey -> {k: booklet letter, note}). Free for everyone. */
+  function bookletEntry(q, subject) {
+    if (!Array.isArray(q.options)) return null;
+    const ext = window.BOOKLET_ERRORS?.[subject]?.[teachMeKey(q)];
+    if (ext) return { k: ext.k, note: ext.note || q.answerNote || '' };
+    if (q.bookletKey) return { k: q.bookletKey, note: q.bookletNote || '' };
+    if (q.keyVerdict === 'corrected' && q.keyAnswer) return { k: q.keyAnswer, note: q.answerNote || '' };
+    return null;
+  }
+  function bookletPool(subject) {
+    return (QUESTION_BANK[subject] || []).filter(q => bookletEntry(q, subject));
+  }
+  function openBooklet() {
+    const sel = document.getElementById('bkSubjectSelect');
+    const subjects = Object.keys(QUESTION_BANK).filter(s => bookletPool(s).length);
+    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)} · ${bookletPool(s).length}</option>`).join('');
+    if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
+    sel.onchange = renderBooklet;
+    renderBooklet();
+    document.getElementById('jambBookletModal')?.classList.remove('hidden');
+  }
+  function closeBooklet() { document.getElementById('jambBookletModal')?.classList.add('hidden'); }
+  function renderBooklet() {
+    const subject = document.getElementById('bkSubjectSelect').value;
+    const body = document.getElementById('jambBookletBody');
+    const pool = bookletPool(subject);
+    if (!pool.length) { body.innerHTML = '<p class="jqc-sub">None found for this subject yet.</p>'; return; }
+    const byYear = {};
+    pool.forEach(q => { (byYear[q.year || 'Other'] = byYear[q.year || 'Other'] || []).push(q); });
+    const L = i => String.fromCharCode(65 + i);
+    body.innerHTML = Object.keys(byYear).sort().map(y => {
+      const items = byYear[y].map(q => {
+        const e = bookletEntry(q, subject);
+        const bi = e.k.charCodeAt(0) - 65;
+        const opts = q.options.map((o, j) => `<span class="${isCorrect(q, j) ? 'bk-right' : j === bi ? 'bk-wrong' : ''}">${L(j)}. ${mathHtml(o)}</span>`).join('');
+        return `<li class="trap-item"><div class="trap-q">${mathHtml(q.question.length > 160 ? q.question.slice(0, 160) + '…' : q.question)}</div>`
+          + `<div class="trap-opts">${opts}</div>`
+          + `<div class="bk-verdict">Booklet answer: <b class="bk-wrong">${escHtml(e.k)}</b> · Correct: <b class="bk-right">${[q.answer, ...(q.alsoAccept || [])].map(L).join(' or ')}</b></div>`
+          + (e.note ? `<div class="bk-note">${mathHtml(e.note)}</div>` : '') + `</li>`;
+      }).join('');
+      return `<details class="kp-topic"><summary>JAMB ${escHtml(String(y))} <span class="kp-count">${byYear[y].length} wrong in booklets</span></summary><div class="topic-body"><ul class="trap-list">${items}</ul></div></details>`;
+    }).join('') + `<button type="button" class="trap-practise bk-practise">Practise all ${pool.length} →</button>`;
+    body.querySelector('.bk-practise').addEventListener('click', () => startBookletPractice(subject));
+  }
+  function startBookletPractice(subject) {
+    closeBooklet();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    el.yearSelect.insertAdjacentHTML('beforeend', '<option value="booklet">❌ Wrong answers in circulation</option>');
+    el.yearSelect.value = 'booklet';
     if (el.questionCountSelect) el.questionCountSelect.value = 'all';
     startSession();
   }
