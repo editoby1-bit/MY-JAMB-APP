@@ -74,7 +74,7 @@
     q("The discount column on the left-hand side of the cash book represents a discount",
       ["received from a creditor", "allowed to a debtor", "received from a debtor", "allowed to a creditor"], B,
       "The left (debit) side of the cash book records money received, so its discount column shows discounts allowed to debtors who paid."),
-    // paper 21–30 (paper 26 left out: its statements I–IV were not printed)
+    // paper 21–30
     q("To which of these accounts are dissolution expenses debited?",
       ["Partners' capital account", "Revaluation account", "Partners' current account", "Realisation account"], D,
       "Dissolution (realisation) expenses reduce what the partners get from winding up, so they are debited to the realisation account and credited to cash or bank."),
@@ -90,6 +90,9 @@
     q("Which of the following is not an item on the debit side of the sales ledger control account?",
       ["Cash refunds", "Debit note issued", "Dishonoured cheque", "Purchases"], D,
       "Purchases have nothing to do with debtors; they belong to the purchases ledger. Cash refunded to customers, debit notes issued to them and dishonoured cheques all increase what debtors owe and are debited."),
+    q("Given:\nI. Cash refunds\nII. Debit note issued\nIII. Dishonoured cheque\nIV. Purchases\n\nThe items on the credit side of the purchases ledger control account include",
+      ["I, II and III only", "I and II only", "III and IV only", "I, III and IV only"], D,
+      "The purchases ledger control account is credited with whatever increases the amount owed to suppliers: credit purchases, cheques we paid that were dishonoured, and cash refunds received from suppliers. A debit note issued (returns outwards) reduces what we owe, so it goes on the debit side."),
     q("You add the following when starting with the balance as per cash book when preparing the bank reconciliation statement except",
       ["unpresented cheque", "dividend", "uncredited cheque", "credit transfer"], C,
       "Starting from a debit cash book balance, unpresented cheques, and dividends or credit transfers received by the bank but not yet in the cash book, are added; uncredited cheques (lodgements not yet credited) are deducted.",
