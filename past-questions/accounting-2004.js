@@ -1,6 +1,6 @@
 /**
  * JAMB/UTME 2004 — PRINCIPLES OF ACCOUNTS
- * From the 2004 question paper (questions 1–50, question 24 left out); answers from the JAMB/UTME
+ * From the 2004 question paper (questions 1–50; question 24 has no correct option); answers from the JAMB/UTME
  * Accounts answer key 2001–2020, each checked independently. Answer checks carry keyVerdict/answerNote.
  */
 (function () {
@@ -93,6 +93,10 @@
     q(INV + "Determine the amount for the beginning inventory.",
       ["₦20,140", "₦10,240", "₦8,140", "₦7,240"], B,
       "Beginning inventory = 80% × sales ₦12,800 = ₦10,240."),
+    q(INV + "What is the figure for purchases?",
+      ["₦2,400", "₦2,500", "₦4,200", "₦5,200"], A,
+      "No option is correct. Cost of sales = sales ₦12,800 − gross profit ₦5,900 = ₦6,900; purchases = ₦6,900 + ending inventory ₦4,800 − beginning inventory ₦10,240 = ₦1,460, which is not among the options.",
+      { keyVerdict: 'noanswer', answerNote: "Working: beginning inventory = 80% × ₦12,800 = ₦10,240. Cost of sales = ₦12,800 − ₦5,900 = ₦6,900. Purchases = cost of sales + ending inventory − beginning inventory = ₦6,900 + ₦4,800 − ₦10,240 = ₦1,460. Even if wages (₦1,040) are charged in the trading account, purchases come to ₦6,900 − ₦1,040 + ₦4,800 − ₦10,240 = ₦420. Neither figure is offered, and the answer key gives no answer for this question. How it could have been set to work: with an ending inventory of ₦5,840 instead of ₦4,800, purchases = ₦6,900 + ₦5,840 − ₦10,240 = ₦2,500 (option B). Or the options could simply have included ₦1,460." }),
     q("Cost classification in relation to charges is determined by the level of",
       ["raw materials", "labour", "activity", "profitability"], C,
       "Costs are classified as fixed, variable or semi-variable according to how they behave as the level of activity (output) changes."),

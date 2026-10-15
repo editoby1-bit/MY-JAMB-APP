@@ -1858,3 +1858,4 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .bk-verdict { margin-top: .3rem; font-size: .82rem; color: rgba(255,255,255,.75); }
 .bk-verdict .bk-wrong { text-decoration: line-through; }
 .bk-note { margin-top: .3rem; font-size: .86rem; color: #fde68a; }
+.option-btn.no-answer { border-color: #6b7280; background: #f3f4f6; color: #374151; }
