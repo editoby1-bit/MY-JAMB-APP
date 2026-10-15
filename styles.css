@@ -1080,12 +1080,16 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
   background: #0d1f38;
   border-top: 2px solid var(--amber,#f5a623);
   border-radius: 16px 16px 0 0;
-  padding: 1.25rem 1.5rem 2rem;
+  padding: 0 1.5rem 2rem;
   max-width: 720px; margin: 0 auto;
 }
 .ai-panel-head {
   display: flex; align-items: center; gap: .75rem;
   margin-bottom: 1rem;
+  /* Stays in view while the explanation scrolls, so ✕ is always reachable. */
+  position: sticky; top: 0; z-index: 2;
+  background: #0d1f38; padding: 1rem 0 .6rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .ai-panel-title { font-weight: 700; color: var(--amber,#f5a623); flex: 1; }
 .ai-credits-badge {
@@ -1094,8 +1098,9 @@ main { padding: 2rem 2rem 4rem; max-width: 1200px; margin: 0 auto; }
   padding: .2rem .65rem;
 }
 .ai-panel-close {
-  background: none; border: none;
-  color: rgba(255,255,255,.4); cursor: pointer; font-size: .9rem;
+  background: rgba(255,255,255,.1); border: none; border-radius: 50%;
+  width: 34px; height: 34px; flex-shrink: 0;
+  color: rgba(255,255,255,.85); cursor: pointer; font-size: 1rem;
 }
 .ai-loading { display: flex; align-items: center; gap: .75rem; color: rgba(255,255,255,.6); font-size: .85rem; }
 .ai-spinner {

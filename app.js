@@ -2783,6 +2783,13 @@
   }
 
   window.addEventListener('hashchange', () => {
+    // Back from the explainer: close it and stay on the question.
+    if (_aiPanelBackSkip) { _aiPanelBackSkip = false; return; }
+    const aiPanel = document.getElementById('aiPanel');
+    if (aiPanel && !aiPanel.classList.contains('hidden') && window.location.hash !== '#explain') {
+      aiPanel.classList.add('hidden');
+      return;
+    }
     // Challenge modal open — back button navigates its panels instead of
     // whatever the quiz-exit logic below would otherwise do.
     const modalEl = document.getElementById('jambQuizModal');
@@ -3278,9 +3285,7 @@
   }
 
   function initAIExplain() {
-    document.getElementById('aiPanelClose')?.addEventListener('click', () => {
-      document.getElementById('aiPanel')?.classList.add('hidden');
-    });
+    document.getElementById('aiPanelClose')?.addEventListener('click', closeAIPanel);
     document.getElementById('aiExplainBtn')?.addEventListener('click', triggerAIExplain);
     document.getElementById('aiExplainTeaserBtn')?.addEventListener('click', () => {
       showInfoToast('Explanations are only available in Practice Mode or when reviewing your results.');
@@ -3302,6 +3307,21 @@
     document.getElementById('aiExplainTeaserBtn')?.classList.remove('hidden');
   }
 
+  // The explainer gets its own history entry, so the phone's back button
+  // closes it and leaves the student on the question.
+  let _aiPanelBackSkip = false;
+  function openAIPanel() {
+    const p = document.getElementById('aiPanel');
+    if (!p || !p.classList.contains('hidden')) return;
+    p.classList.remove('hidden');
+    if (window.location.hash !== '#explain') history.pushState(null, '', window.location.pathname + '#explain');
+  }
+  function closeAIPanel() {
+    const p = document.getElementById('aiPanel');
+    if (!p || p.classList.contains('hidden')) return;
+    p.classList.add('hidden');
+    if (window.location.hash === '#explain') { _aiPanelBackSkip = true; history.back(); }
+  }
   function hideAIButton() {
     document.getElementById('aiExplainBtn')?.classList.add('hidden');
     document.getElementById('aiExplainTeaserBtn')?.classList.add('hidden');
@@ -3329,10 +3349,9 @@
       return;
     }
 
-    const panel = document.getElementById('aiPanel');
     const loading = document.getElementById('aiLoading');
     const response = document.getElementById('aiResponse');
-    panel?.classList.remove('hidden');
+    openAIPanel();
     loading?.classList.remove('hidden');
     response?.classList.add('hidden');
     updateAICreditsBadge();
@@ -3461,7 +3480,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     const left = followUpsLeft(key);
     const past = (fuHistory[key] || []).map(h =>
       `<div class="fu-q">${escHtml(h.q)}</div><div class="fu-a">${fuText(h.a)}</div>`).join('');
-    return `${lesson ? `<details class="topic-lesson"><summary>📘 Learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${fuText(lesson.body)}</div></details>` : ''}
+    return `${lesson ? `<details class="topic-lesson"><summary>📘 Click here to learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${fuText(lesson.body)}</div></details>` : ''}
       <div class="fu-box" data-key="${key}">
         <div class="fu-thread">${past}</div>
         <div class="fu-ask ${left > 0 ? '' : 'hidden'}">
@@ -3501,7 +3520,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     };
     box.querySelector('.fu-open-lesson')?.addEventListener('click', openLesson);
     box.querySelector('.fu-next')?.addEventListener('click', () => {
-      document.getElementById('aiPanel')?.classList.add('hidden');
+      closeAIPanel();
       // On the last question "Next" would finish the session, so just close.
       if (state.currentIndex < state.currentQuestions.length - 1) document.getElementById('nextBtn')?.click();
     });
