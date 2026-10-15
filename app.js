@@ -102,7 +102,7 @@
     const head = {
       corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
       multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
-      noanswer:  `<strong>No correct answer.</strong> None of the four options is correct, and the answer key gives no answer either. Whatever you chose, this question is not counted against you. Here is why, and what the right figure is:`,
+      noanswer:  `<strong>No correct answer.</strong> None of the four options is correct, so whatever you chose, this question is not counted against you. Here is why, and what the right answer is:`,
       none:      `None of the options is fully correct. JAMB's answer is <strong>${escHtml(q.keyAnswer)}</strong>, so that is what scores in the exam and here, but it is not fully correct. Here is why:`,
       misprint:  `The question paper has a printing error here, so we mark the answer to the question as JAMB intended it: <strong>${right}</strong>.`,
     }[q.keyVerdict];
