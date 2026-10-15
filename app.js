@@ -80,6 +80,9 @@
   // A few past questions officially accept more than one option (the key
   // lists e.g. "A/D"); those carry `alsoAccept`. Always score through this.
   function isCorrect(q, a) {
+    // No option is right and the key gives none: any attempt is credited,
+    // as JAMB normally does for a faulty question.
+    if (q.keyVerdict === 'noanswer') return a !== null && a !== undefined;
     return a !== null && a !== undefined &&
       (a === q.answer || (Array.isArray(q.alsoAccept) && q.alsoAccept.includes(a)));
   }
@@ -99,6 +102,7 @@
     const head = {
       corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
       multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
+      noanswer:  `<strong>No correct answer.</strong> None of the four options is correct, and the answer key gives no answer either. Whatever you chose, this question is not counted against you. Here is why, and what the right figure is:`,
       none:      `None of the options is fully correct. JAMB's answer is <strong>${escHtml(q.keyAnswer)}</strong>, so that is what scores in the exam and here, but it is not fully correct. Here is why:`,
       misprint:  `The question paper has a printing error here, so we mark the answer to the question as JAMB intended it: <strong>${right}</strong>.`,
     }[q.keyVerdict];
@@ -146,18 +150,29 @@
     return repeatIndex[subject]?.get(teachMeKey(q)) || null;
   }
   function repeatYears(g) { return [...new Set(g.qs.map(x => x.year))].sort((a, b) => a - b); }
+  // "set 3 times between 2018 and 2020 (2018 twice, 2020)": every printing
+  // counts, and a year that printed it more than once says so.
+  function repeatSummary(g) {
+    const years = repeatYears(g);
+    const per = y => g.qs.filter(x => x.year === y).length;
+    const times = n => n === 2 ? 'twice' : n + ' times';
+    if (years.length === 1) return `set this question <strong>${times(g.qs.length)} in the ${years[0]} paper</strong>`;
+    const list = years.map(y => per(y) > 1 ? `${y} ${times(per(y))}` : String(y)).join(', ');
+    return `set this question <strong>${times(g.qs.length)} between ${years[0]} and ${years[years.length - 1]}</strong> (${list})`;
+  }
   function repeatHtml(q, subject) {
     const g = repeatGroup(q, subject);
     if (!g || g.qs.length < 2) return '';
-    const years = repeatYears(g);
-    return `<div class="repeat-note">🔁 <strong>Repeated question:</strong> JAMB has set this question <strong>${g.qs.length} times</strong> (${years.join(', ')}). Questions that repeat are likely to come again, so make sure you master this one.</div>`;
+    return `<div class="repeat-note">🔁 <strong>Repeated question:</strong> JAMB has ${repeatSummary(g)}. Questions that repeat are likely to come again, so make sure you master this one.</div>`;
   }
-  // One question per repeated group (its latest appearance), most-repeated first.
+  // One question per repeated group, shown as first set (its earliest
+  // appearance), most-repeated first, then oldest first.
   function mostRepeatedPool(subject) {
     if (!repeatIndex) buildRepeatIndex();
     const groups = [...new Set(repeatIndex[subject]?.values() || [])].filter(g => g.qs.length >= 2);
-    groups.sort((a, b) => b.qs.length - a.qs.length || Math.max(...b.qs.map(x => x.year)) - Math.max(...a.qs.map(x => x.year)));
-    return groups.map(g => g.qs.reduce((best, x) => (x.year > best.year ? x : best), g.qs[0]));
+    const first = g => Math.min(...g.qs.map(x => x.year));
+    groups.sort((a, b) => b.qs.length - a.qs.length || first(a) - first(b));
+    return groups.map(g => g.qs.reduce((best, x) => (x.year < best.year ? x : best), g.qs[0]));
   }
 
   function groupAwarePick(pool, count) {
@@ -857,7 +872,13 @@
 
       if (selectedAnswer === idx) btn.classList.add('selected');
 
-      if (state.reviewMode || state.mode === 'practice') {
+      if ((state.reviewMode || state.mode === 'practice') && q.keyVerdict === 'noanswer') {
+        // No option is right: mark nothing green or red, just say so.
+        if (selectedAnswer !== null && idx === selectedAnswer) {
+          btn.classList.add('no-answer');
+          btn.insertAdjacentHTML('beforeend', '<span class="key-only-tag">No correct option · not counted against you</span>');
+        }
+      } else if (state.reviewMode || state.mode === 'practice') {
         if (selectedAnswer !== null) {
           if (isCorrect(q, idx)) btn.classList.add('correct');
           // No option is fully right: JAMB's key answer still scores, but is
@@ -1537,7 +1558,7 @@
     // Questions with several accepted answers or no correct option need
     // the answer-key note to make sense, so games skip them too.
     return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage
-      && !q.alsoAccept && q.keyVerdict !== 'none');
+      && !q.alsoAccept && q.keyVerdict !== 'none' && q.keyVerdict !== 'noanswer');
   }
 
   // Memory Match needs short text to fit on a card — a subject can pass
@@ -1559,7 +1580,7 @@
       return `<div class="game-type-card repeat-subject" data-subject="${s}">
         <span class="gtc-icon">🔁</span>
         <div class="gtc-body"><div class="gtc-title">${fmt(s)}</div>
-        <div class="gtc-sub">${pool.length} repeated questions · the most repeated was set ${top ? top.qs.length : 2} times</div></div>
+        <div class="gtc-sub">${pool.length} repeated questions · the most repeated was set ${top ? top.qs.length : 2} times${top && repeatYears(top).length > 1 ? ` between ${repeatYears(top)[0]} and ${repeatYears(top).slice(-1)[0]}` : ''}</div></div>
       </div>`;
     }).join('') : '<p class="jqc-sub">No repeated questions yet.</p>';
     body.querySelectorAll('.repeat-subject').forEach(c => c.addEventListener('click', () => startRepeatPractice(c.dataset.subject)));
@@ -1587,7 +1608,7 @@
     const arr = QUESTION_BANK[subject];
     if (!Array.isArray(arr)) return [];
     return arr.filter(q => Array.isArray(q.options) && (kind === 'none'
-      ? q.keyVerdict === 'none'
+      ? (q.keyVerdict === 'none' || q.keyVerdict === 'noanswer')
       : Array.isArray(q.alsoAccept) && q.alsoAccept.length && q.keyVerdict !== 'none'));
   }
   function openTrickyHub() {
@@ -3327,7 +3348,9 @@
     // The student-specific line lives OUTSIDE the explanation, so one
     // explanation per question can be reused for every student.
     const keyOnly = q.keyVerdict === 'none';
-    const youLine = studentOpt === null
+    const youLine = q.keyVerdict === 'noanswer'
+      ? `<div class="ai-you">${studentOpt === null ? "You didn't answer this one." : `You chose <strong>${L(studentAns)}</strong>.`} None of the options is correct, so this question has no answer.</div>`
+      : studentOpt === null
       ? `<div class="ai-you">You didn't answer this one. ${keyOnly ? `JAMB's answer is <strong>${right}</strong> (no option is fully correct).` : `The answer is <strong>${right}</strong>.`}</div>`
       : wasCorrect
         ? `<div class="ai-you ai-you-right">You chose <strong>${L(studentAns)}</strong> — ${keyOnly ? "JAMB's answer ✓ (but no option is fully correct)" : 'correct ✓'}</div>`
