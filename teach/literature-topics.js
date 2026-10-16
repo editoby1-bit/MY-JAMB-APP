@@ -268,6 +268,8 @@
   "|Based on George Orwell's Animal Farm: \nThe turn of events in the novel shows that the novelist is|iconoclastic|fatalistic|rhetorical|optimistic": "set-non-african-prose",
   "|Based on George Orwell's Animal Farm: \nThe events in the novel are set in|a possible social climate|the distant past|a real human society|an imagined world": "set-non-african-prose",
   "|Based on George Orwell's Animal Farm: \nThe last major battle in the novel is the battle|of the Cowshed|of the Windmill|to oust Mr. Jones|to overthrow Snowball": "set-non-african-prose",
-  "|Based on George Orwell's Animal Farm: \nThe ideological leader of the revolution in the novel is|Squealer|Old Major|Napoleon|Snowball": "set-non-african-prose"
+  "|Based on George Orwell's Animal Farm: \nThe ideological leader of the revolution in the novel is|Squealer|Old Major|Napoleon|Snowball": "set-non-african-prose",
+  "|Based on Abubakar Gimba's Witnesses to Tears: \n'A repulsive game, nonetheless. Majority participation in a vice doesn't turn it into a virtue, no matter the social standing of the participants.'\n\nThe game referred to in the passage above is|graft|gambling|draught|scrambling": "set-african-prose",
+  "|Based on S.I. Osammor's The Triumph of the Water Lily: \nThe preoccupation of the novel is|the life and times of Julian Odili|Norman Obi's courtship of Effua|the benefits of the extended family in Nigeria|the travails and successes of Nkem and Odili": "set-african-prose"
  }
 };
