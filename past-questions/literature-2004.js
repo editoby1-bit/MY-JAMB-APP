@@ -149,5 +149,15 @@
       ["Squealer", "Old Major", "Napoleon", "Snowball"], B,
       "Old Major, the prize boar, gives the speech and dream that become Animalism and inspire the rebellion, though he dies before it happens.",
       { setText: 'George Orwell, Animal Farm' }),
+
+    // ---- Abubakar Gimba, Witnesses to Tears (paper Q45–Q46) ----
+    q("Based on Abubakar Gimba's Witnesses to Tears: \n'A repulsive game, nonetheless. Majority participation in a vice doesn't turn it into a virtue, no matter the social standing of the participants.'\n\nThe game referred to in the passage above is",
+      ["graft", "gambling", "draught", "scrambling"], A,
+      "The 'repulsive game' is bribery and corruption, graft: Hussaina's upright father, Mr Anas Al-Amin, insists that the practice is wrong however many people, and however important, take part in it.",
+      { setText: 'Abubakar Gimba, Witnesses to Tears' }),
+    q("Based on S.I. Osammor's The Triumph of the Water Lily: \nThe preoccupation of the novel is",
+      ["the life and times of Julian Odili", "Norman Obi's courtship of Effua", "the benefits of the extended family in Nigeria", "the travails and successes of Nkem and Odili"], D,
+      "The novel centres on Nkem and her husband Odili, whose marriage is strained by childlessness and outside pressure; Effua narrates their trials and the final triumph of love and life, while her own courtship by Norman is a side story.",
+      { setText: 'Stella Ify Osammor, The Triumph of the Water Lily' }),
   ]);
 })();
