@@ -15,6 +15,7 @@
   const WR = "Based on J.P. Clark's The Wives' Revolt: \n";
   const SSC = "Based on Oliver Goldsmith's She Stoops to Conquer: \n";
   const AF = "Based on George Orwell's Animal Farm: \n";
+  const WT = "Based on Abubakar Gimba's Witnesses to Tears: \n";
   const PO = "Based on the prescribed poems: \n";
 
   QUESTION_BANK.literature = QUESTION_BANK.literature.concat([
@@ -111,72 +112,92 @@
       ["spinsters", "husbands", "wives", "old women"], B,
       "The men of Erhuwaren talk grandly in the town assembly, but once their wives walk out they are reduced to minding children at home: the husbands are mocked.",
       { setText: "J.P. Clark, The Wives' Revolt" }),
-    // 23 (paper 26)
+    // 23 (paper 25)
+    q(WR + "In their flight, the women settle at Iyara in order to",
+      ["forestall reconciliation", "seek peace", "trade in its market", "hurt their husbands"], D,
+      "Iyara (Eyara) is Erhuwaren's arch-enemy town, a place known for disease and poverty; by choosing to stay there the women deliberately taunt and wound their men.",
+      { setText: "J.P. Clark, The Wives' Revolt" }),
+    // 24 (paper 26)
     q(SSC + "'My heart thus pressing—fix'd my face and eye—\nWith a sententious look, that nothing means...'\n\nIn the lines above, the speaker implies that",
       ["his gesture means nothing", "he is a pious man", "he is being sentimental", "his heart is pressing against his face and eye"], A,
       "In the Prologue the actor mimics the pose of sentimental comedy (hand on heart, solemn look) and says outright that the look 'nothing means': the gesture is empty.",
       { setText: 'Oliver Goldsmith, She Stoops to Conquer' }),
-    // 24 (paper 27)
+    // 25 (paper 27)
     q(SSC + "The use of the traditional verse form in the play applies to",
       ["the character of Sir Charles Marlow", "the prologue, songs and the epilogue", "male characters", "female characters"], B,
       "The dialogue is in prose; only the Prologue, Tony's song 'The Three Pigeons' and the Epilogue are in rhymed verse.",
       { setText: 'Oliver Goldsmith, She Stoops to Conquer' }),
-    // 25 (paper 28)
+    // 26 (paper 28)
     q(SSC + "The story of the play would have been different but for",
       ["Miss Hardcastle's attitude towards her guests", "Mr. Hardcastle's ignorance of Young Marlow's true identity", "the insensitivity of Mrs. Hardcastle", "Tony's misinformation of Young Marlow and Mr. Hastings"], D,
       "Tony's prank of telling Marlow and Hastings that Hardcastle's house is an inn starts every mistake of the night.",
       { setText: 'Oliver Goldsmith, She Stoops to Conquer' }),
-    // 26 (paper 29)
+    // 27 (paper 29)
     q(SSC + "The success of the play as a comedy relies on the author's use of",
       ["dramatic irony", "stock comic characters", "comic relief", "stage and scenic disguise"], A,
       "The audience knows what the characters do not (the 'inn' is a private house, the 'barmaid' is Kate), and the laughter comes from that dramatic irony.",
       { setText: 'Oliver Goldsmith, She Stoops to Conquer' }),
-    // 27 (paper 30)
+    // 28 (paper 30)
     q(SSC + "The Dorothy of the play is",
       ["Tony Lumpkin's mother", "Young Marlow's mother", "Miss Neville's mother", "Kate, Hardcastle's daughter"], A,
       "Mr Hardcastle calls his wife 'Dorothy'; Mrs Hardcastle is Tony Lumpkin's mother by her first marriage.",
       { setText: 'Oliver Goldsmith, She Stoops to Conquer' }),
-    // 28 (paper 34)
+    // 29 (paper 32)
+    q(WT + "The subject matter of the novel is",
+      ["marital infidelity", "the evils of materialism", "child abuse", "the gains of love"], B,
+      "Lahab's greed for wealth and power drives him to bribery, corruption and ritual practice, and it ends in the death of his own son: the novel shows the evils of materialism.",
+      { setText: 'Abubakar Gimba, Witnesses to Tears' }),
+    // 30 (paper 33)
+    q(WT + "The stealing of three thousand naira by the messenger and the manner of its presentation can be interpreted as Gimba's",
+      ["sentimental attachment to money", "approbation of stealing", "condemnation of social injustice", "justification of social vices"], C,
+      "The weak, poor messenger bears a heavy punishment while the powerful, like Lahab, steal far more: Gimba uses the episode to condemn social injustice.",
+      { setText: 'Abubakar Gimba, Witnesses to Tears' }),
+    // 31 (paper 34)
     q(AF + "In the novel, 'animalism' is a system of thought that emphasizes",
       ["conformity", "equality", "animality", "disparity"], B,
       "Animalism's last and most important commandment is 'All animals are equal'.",
       { setText: 'George Orwell, Animal Farm' }),
-    // 29 (paper 35)
+    // 32 (paper 35)
     q(AF + "The dominant technique in the book is",
       ["irony", "foreshadowing", "symbolism", "reminiscence"], C,
       "Animal Farm is an allegory: every animal and event symbolises a person or event of the Russian Revolution. Irony also runs through the whole book.",
       { setText: 'George Orwell, Animal Farm', keyVerdict: 'multiple', alsoAccept: [A], answerNote: "Both C and A are fully right. The book works by symbolism (Napoleon stands for Stalin, the pigs for the Communist Party), and it is also ironic from start to finish: a revolution for equality ends with 'some animals are more equal than others'." }),
-    // 30 (paper 36)
+    // 33 (paper 36)
     q(AF + "In the novel, Boxer is respected for his",
       ["duplicity", "reticence", "intellect", "hard work"], D,
       "Boxer, the huge cart-horse, is admired for his strength and tireless labour; his mottoes are 'I will work harder' and 'Napoleon is always right'.",
       { setText: 'George Orwell, Animal Farm' }),
-    // 31 (paper 37)
+    // 34 (paper 37)
     q(AF + "The overthrow of Jones happens sooner than expected because the animals",
       ["experience acute suffering", "are milked by Jones", "are better schemers", "receive assistance from Foxwood"], A,
       "Jones gets drunk and his men go rabbiting without feeding the animals; starving, they break into the store-shed and drive the men out.",
       { setText: 'George Orwell, Animal Farm' }),
-    // 32 (paper 41)
+    // 35 (paper 41)
     q(PO + "In Robert Frost's 'Wild Grapes' the girl's brother throws down grapes in the manner he does to",
       ["make his sister have her fill", "allow himself time in-between to eat", "make his sister desire to climb the tree", "allow himself to have some fun"], B,
       "He 'threw me down grapes to miss and scatter / And have to hunt for', which 'gave him some time to himself to eat'.",
       { setText: "Robert Frost, Wild Grapes" }),
-    // 33 (paper 43)
+    // 36 (paper 43)
     q(PO + "Donne's 'Death, be not Proud' is",
       ["an epic", "a dirge", "a ballad", "a sonnet"], D,
       "'Death, be not proud' is one of John Donne's Holy Sonnets: fourteen lines, ending in a couplet.",
       { setText: "John Donne, Death, be not Proud" }),
-    // 34 (paper 44)
+    // 37 (paper 44)
     q(PO + "The arrangement of David Diop's 'Loser of Everything' in two stanzas reflects his use of",
       ["reinforcement", "enjambment", "contrast", "amplification"], C,
       "The first stanza paints the happy African past; the second shows its destruction by the colonisers. The two stanzas are set in contrast.",
       { setText: "David Diop, Loser of Everything" }),
-    // 35 (paper 48)
+    // 38 (paper 45)
+    q(PO + "The subject matter of Kassam's 'Maji Maji' is",
+      ["socio-economic crises", "independence", "politics", "colonialism"], D,
+      "The poem recalls the Maji Maji Rebellion (1905–1907) against German colonial rule in East Africa, with an old man remembering the Germans, their guns and the dead: its subject is colonialism.",
+      { setText: 'Yusuf O. Kassam, Maji Maji' }),
+    // 39 (paper 48)
     q(PO + "'As if men hung here unblown, Their mildewed buds of love like pollen, Late caught, damp in a swollen...'\nThe sound device in the stanza above from Kalu Uka's 'Earth to Earth' is",
       ["onomatopoeia", "a refrain", "rhyme", "repetition"], C,
       "'Pollen' and 'swollen' rhyme (and 'unblown' chimes with them): the sound device is rhyme.",
       { setText: "Kalu Uka, Earth to Earth" }),
-    // 36 (paper 50)
+    // 40 (paper 50)
     q(PO + "The tone of Kofi Awoonor's 'The Cathedral' is one of",
       ["reverence", "contempt", "indifference", "awe"], B,
       "The speaker calls the building that replaced the life-giving tree 'a huge senseless cathedral of doom': his tone is contemptuous.",
