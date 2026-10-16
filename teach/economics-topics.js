@@ -766,7 +766,7 @@
   "|A measure of national income used as comparison of standard of living among nations is|net national product|gross domestic product|gross national product|per capita income": "national-income",
   "|The speculative demand for money is inversely related to the|interest rate|level of income|exchange rate|inflation rate": "money-inflation",
   "|If Mr. K obtains a ₦50,000 loan from a bank for the purpose of providing household needs, the demand for money is said to be|transactionary|speculative|precautionary and speculative|transactional and speculative": "money-inflation",
-  "|Which of the following is used by the Central Bank of Nigeria to control inflation?|Tariff on imports|Tax rate|Exchange rate|Discount rate": "money-inflation",
+  "|Which of the following is used by the Central Bank of Nigeria to control inflation?|Tariff on imports|Tax rate|Exchange rate|Discount rate": "financial-institutions",
   "|If CBN reduces money supply, the interest rate will|fluctuate|rise|fall|remain unchanged": "money-inflation",
   "|An example of an expansionary fiscal policy action is|decrease in the corporate profit tax rates|decrease in welfare payments|purchase of government securities|decrease in the bank rate": "public-finance",
   "|A tax on land will ultimately fall|partly on agents and users|entirely on users|entirely on owners|partly on users and owners": "public-finance",
@@ -825,7 +825,7 @@
   "|An advantage of large-scale farming over peasant farming is in the area of|providing research and massive employment of labour|redistributing national income to various regions of the country|encouraging the use of traditional implements|encouraging urban-rural migration": "agriculture",
   "|A major disadvantage of localization of industry is|the risk of structural unemployment|over-utilization of installed industrial capacity|the risk of seasonal unemployment|under-utilization of installed industrial capacity": "production",
   "|One major factor that determines the location of an industry is|tax exemption grant|its proximity to the market|the capital base|the social responsibility of the firm": "production",
-  "|The major contribution of OPEC to the Nigerian economy is the|provision of social infrastructures|granting of subsidies on petroleum products|stabilization of oil prices|building of refineries": "industry-resources",
+  "|The major contribution of OPEC to the Nigerian economy is the|provision of social infrastructures|granting of subsidies on petroleum products|stabilization of oil prices|building of refineries": "international-organisations",
   "|The loading of crude oil at the terminal is an activity in the|downstream sector of the oil industry|upstream and downstream sector of the oil industry|upstream sector of the oil industry|midstream and upstream sectors of the oil industry": "industry-resources",
   "|The short-run average variable cost of a firm will rise owing to|the expansion of factory space|the building of new warehouse|an increase in the cost of labour|an increase in the salaries of directors": "costs-revenue",
   "|Firms embark on vertical integration in order to|take over markets formerly controlled by other firms|prevent other firms from entering the market|reduce advertisement and management cost|enjoy economies of large-scale production": "production",
@@ -1052,6 +1052,17 @@
   "|The main function of price mechanism is to|limit consumer demand|enable producers make profits|allocate scarce resources among competing ends|ensure consumers' sovereignty": "nature-concepts",
   "|Gains from trade depend on|comparative advantage|absolute advantage|distributive advantage|absolute cost advantage": "international-trade",
   "|The most important factor in ensuring economic development is the|effective mobilization of domestic savings|presence of foreign account|formulation of appropriate government policies|attraction of foreign aids and agents": "growth-development",
-  "|In the long-run, all production factors are|fixed|semi-fixed|variable|semi-variable": "production"
+  "|In the long-run, all production factors are|fixed|semi-fixed|variable|semi-variable": "production",
+  "|From the graph above, a combination of factors responsible for a shift from D₀D₀ to D₁D₁ are|consumers income and change in technology|price of the commodity and weather conditions|consumers income and population size|consumers taste and change in price": "demand-supply",
+  "|Use the pie chart below to answer the question: \nIf the GDP is ₦60 billion, what is the difference between the contributions of oil and manufacturing sectors?|₦11.7 billion|₦13.3 billion|₦21.7 billion|₦26.6 billion": "tools-analysis",
+  "|The main function of NNPC is to|oversee the development of the oil sector|develop the oil producing area|fix the price of products|regulate the activities of commercial banks": "industry-resources",
+  "|Find the median of the following set of data: 35, 10, 14, 38, 15, 18, 22, 30 and 28.|10|38|35|22": "tools-analysis",
+  "|A major obstacle to the development of Nigeria economy is|low capital formation|rural-urban migration|over dependence on oil|poor developmental policies": "growth-development",
+  "|Use the pie chart below to answer the question: \nWhat is the percentage contribution of services to the national income?|15%|10%|54%|24%": "tools-analysis",
+  "|Use the pie chart below to answer the question: \nIf the national income is ₦60m, the contribution of the manufacturing sector is|₦12m|₦9m|₦18m|₦17m": "tools-analysis",
+  "|Given that Qd = 40 − 2P and Qs = 6P + 24. Calculate the equilibrium price.|₦4|₦2|₦36|₦16": "demand-supply",
+  "|From the graph above, the consumer will attain equilibrium at point|J|K|L|M": "consumer-behaviour",
+  "|Use the pie chart below to answer the question: \nThe percentage contribution of agricultural sector is|67.5|40.0|32.4|25.0": "tools-analysis",
+  "|Which of the following can be used to measure the Gross National Product in an open economy?|C+I+G+(X+M)|C+I+G+X|C+I+G|C+I+G+(X−M)": "national-income"
  }
 };
