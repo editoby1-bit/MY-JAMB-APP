@@ -133,7 +133,7 @@
     q("Based on Oliver Goldsmith's She Stoops to Conquer: \nHardcastle: And I love everything that's old: old friends, old times, old manners, old books, old wines; and I believe, Dorothy (taking her hand) you'll own I have been pretty fond of an old wife.\nMrs. Hardcastle: Lord, Mr. Hardcastle, you're forever at your Dorothy's and your old wife's. You may be a Darby, but I'll be no Joan, I promise you. I am not so old as you'd make me, by more than one good year.\n\nThe dialogue above reveals the couple's",
       ["fear of the unknown", "difference in lifestyle", "love for each other", "humorous disposition"], B,
       "Hardcastle loves everything old and country-fashioned, while his wife longs for town fashions and refuses to be thought old: their tastes and ways of life differ.", SS),
-    // Paper Q46–49: The Wives' Revolt
+    // Paper Q46–50: The Wives' Revolt
     q("Based on J.P. Clark's The Wives' Revolt: \nCharacterization in the play is",
       ["economical but ineffective", "economical and effective", "elaborate but ineffective", "elaborate and effective"], B,
       "The play uses only three characters on stage (Okoro, his wife Koko and his friend Idama), yet through them it presents the whole conflict of the community: economical and effective.", WR),
@@ -146,5 +146,8 @@
     q("Based on J.P. Clark's The Wives' Revolt: \nThe plot of the play is lineal as reflected in the",
       ["episodic nature of the play", "movement of the women", "arrangement of the events in the play", "progression of the argument of Okoro"], C,
       "A lineal (linear) plot presents events in the order they happen, one after another; that lies in how the events are arranged.", WR),
+    q("Based on J.P. Clark's The Wives' Revolt: \nOKORO: I'll kill her today.\nIDAMA: No, you won't. There, run, Koko, oh, I say run! [He pushes her gently but firmly towards her room].\n\nThe event above happens in",
+      ["Iyara when Okoro discovers Koko's infidelity", "Erhuwaren when Koko suspects and accuses her husband", "Erhuwaren when Okoro suspects Koko of infidelity", "Erhuwaren before Koko's return from Iyara"], C,
+      "After the wives come back from Iyara with a disease, Okoro, at home in Erhuwaren, accuses Koko of sleeping with men at Iyara and turns on her; Idama, his friend, steps in and sends her to her room.", WR),
   ]);
 })();
