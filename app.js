@@ -1050,7 +1050,7 @@
     // not just whoever is on this exact device.
     const wasChallenge = !!state._challengeCode;
     if (state._challengeCode) {
-      submitJambChallengeScore(state._challengeCode, state.currentUser, correct, total, percent);
+      submitJambChallengeScore(state._challengeCode, state.currentUser, correct, total, percent, state.answers.slice());
     }
 
     // Best-effort report to the class dashboard (no-op if this device
@@ -2632,7 +2632,7 @@
     setTimeout(() => { CP.idx++; renderCommunityPracticeQ(); }, 700);
   }
 
-  async function submitJambChallengeScore(code, student, score, total, pct) {
+  async function submitJambChallengeScore(code, student, score, total, pct, answers) {
     // Update the local copy too — this is what lets the creator's own
     // device recognize "you've already completed this" without a network
     // round trip, and keeps it correct even if the submit call below fails.
@@ -2640,6 +2640,7 @@
     if (challenges[code]) {
       challenges[code].scores = challenges[code].scores || {};
       challenges[code].scores[student] = { score, total, pct, completedAt: Date.now() };
+      if (Array.isArray(answers)) challenges[code].answers = answers; // kept so a failed submit can be retried
       savePref(QC_STORE, challenges);
     }
     refreshJambChallengeBadgeState();
@@ -2647,14 +2648,22 @@
       const res = await fetch(API_BASE + '/api/challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'submit', code, student, score, total, pct }),
+        // The server grades the picked options itself; it never trusts a sent score.
+        body: JSON.stringify({ action: 'submit', code, student, answers: answers || [] }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) renderJambLeaderboard(code, data.scores);
+      if (res.ok && data.ok) renderJambLeaderboard(code, mergeScores(data.scores, code));
     } catch (err) {
       // Non-fatal — the student's own result screen already showed their
       // score; the shared leaderboard just won't update this time.
     }
+  }
+
+  // Server scores plus any this device recorded that the server lacks (e.g.
+  // a submit that failed offline), so a result never vanishes from the list.
+  function mergeScores(serverScores, code) {
+    const local = loadPref(QC_STORE, {})[code]?.scores || {};
+    return Object.assign({}, local, serverScores || {});
   }
 
   function renderJambLeaderboard(code, scores) {
@@ -4050,7 +4059,14 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
         body: JSON.stringify({ action: 'leaderboard', code }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) renderJambLeaderboard(code, data.scores);
+      if (res.ok && data.ok) {
+        renderJambLeaderboard(code, mergeScores(data.scores, code));
+        // This device's own result never reached the server: send it again.
+        const mine = local?.scores?.[state.currentUser];
+        if (mine && !(data.scores || {})[state.currentUser] && Array.isArray(local.answers)) {
+          submitJambChallengeScore(code, state.currentUser, mine.score, mine.total, mine.pct, local.answers);
+        }
+      }
     } catch (err) { /* local scores already shown as a fallback */ }
   }
 
