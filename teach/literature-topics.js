@@ -839,6 +839,27 @@
   "|Swans sing before they die — 'twere no bad thing\nShould certain people die before they sing!\n\nThe lines above represent|an epigram|a limerick|a rhetorical question|a parallelism": "appreciation-poetry",
   "|Come on and kill me. I do not care who kills who.\n\nThe persona in the extract above is|pessimistic|audacious|melancholic|beckoning": "appreciation-drama",
   "|Then the fish came alive, with his death in him.\nErnest Hemingway, The Old Man and the Sea\n\nThe extract above illustrates|metaphor|hyperbole|contrast|paradox": "appreciation-prose",
-  "|Our people must go home, father. No swimmer, however good, can swim beyond the river of the world. This world's journey has ended in catastrophe for us. Without your help we can no longer find our way back in the void.\nFemi Osofisan, Women of Owu\n\nThe extract above confirms|a necessity|an impossibility|an acknowledgement|an identity": "appreciation-drama"
+  "|Our people must go home, father. No swimmer, however good, can swim beyond the river of the world. This world's journey has ended in catastrophe for us. Without your help we can no longer find our way back in the void.\nFemi Osofisan, Women of Owu\n\nThe extract above confirms|a necessity|an impossibility|an acknowledgement|an identity": "appreciation-drama",
+  "|Based on the prescribed poems: \n'Twilight and evening bell,\nAnd after that the dark!'\nIn the extract above from Tennyson's Crossing the Bar, \"the dark\" represents|transition|silence|old age|death": "set-non-african-poetry",
+  "|Based on the prescribed poems: \n'...and at once I'm\nin my mother's lap a suckling;'\nThe extract above from Okara's Piano and Drums conveys the poet's|alertness|nostalgia|sincerity|innocence": "set-african-poetry",
+  "|Based on the prescribed poems: \nAdeoti draws on ____ and ____ to achieve the themes in the poem Ambush.|metaphor and diction|personification and metaphor|imagery and metaphor|irony and diction": "set-african-poetry",
+  "|Based on the prescribed poems: \n'Sew the old days for us, our fathers,\nthat we may wear them under our new garments'\nThe extract above from Kofi Awoonor's The Anvil and the Hammer accentuates|dilemma of culture|blend of culture|death of culture|clash of culture": "set-african-poetry",
+  "|Based on Bolaji Abdullahi's Sweet Sixteen: \nWhat is the name of Aliya's father?|Mr. Benjamin|Mr. Bright|Mr. Bellaola|Mr. Bello": "set-african-prose",
+  "|Based on Bolaji Abdullahi's Sweet Sixteen: \nWho is the writer of Sweet Sixteen?|Bolaji Abdullahi|Bola Abara|Bright Abdullahi|B. Bello": "set-african-prose",
+  "|Based on the prescribed poems: \nWilliam Blake's The School Boy is a ____ form of writing.|romance|Romantic|metaphysical|lyrical": "set-non-african-poetry",
+  "|Based on the prescribed poems: \nThe Pulley represents God as the|ultimate giver of all|creature|lovely one|restlessness": "set-non-african-poetry",
+  "|Based on the prescribed poems: \n'Caught between the anvil and the hammer\nin the forging house of the new life,\ntransforming the pangs that delivered me'\nIn Kofi Awoonor's The Anvil and the Hammer, the anvil represents|African culture|Western culture|schools|goldsmith's instrument": "set-african-poetry",
+  "|Based on the prescribed poems: \nWilliam Morris' The Proud King is all but one of the following|didactic|operatic|epic|dramatic": "set-non-african-poetry",
+  "|Based on William Shakespeare's Othello: \nThe words of Iago made Othello|jealous|angry|proud|weak": "set-non-african-drama",
+  "|Based on the prescribed poems: \nThe \"dinner\" in Gbanabom Hallowell's The Dining Table is a metaphor for|war|death|power|politics": "set-african-poetry",
+  "|Based on the prescribed poems: \nTennyson's Crossing the Bar represents death as|lovely|inevitable|bad|pitiful": "set-non-african-poetry",
+  "|Based on the prescribed poems: \nGabriel Okara's Piano and Drums depicts|cultural clash|influence of culture|African way as supreme|Western way as inferior": "set-african-poetry",
+  "|William Shakespeare's \"Shall I compare thee to a summer's day?\" ends with a|quatrain|couplet|heroic couplet|tercet": "poetry",
+  "|In comparing the beauty of his lover in \"Shall I compare thee to a summer's day?\", Shakespeare employs all but one of the following|apostrophe|imagery|hyperbole|allegory": "figures-of-speech",
+  "|He put himself in uniform, made one for his five-year-old son, and marched with the infant from dawn till noon every market day, on the main road singing 'Kayiwawa beturi...\n\nThe persona in the excerpt above is portrayed as|energetic|a policeman|a soldier|abnormal": "appreciation-prose",
+  "|'He is a faithful liar.'\nThe above is an example of|epigram|oxymoron|euphemism|antithesis": "figures-of-speech",
+  "|'You\nYour head is like a drum that is beaten for spirits.\nYou\nYour ears are like the fans used for blowing fire.'\nThe lines above are a good example of|caricature|ridicule|satire|lampoon": "appreciation-poetry",
+  "|'Come on and kill me. I do not care who kills who.'\nThe persona in the abstract above is|pessimistic|audacious|melancholic|beckoning": "appreciation-drama",
+  "|'Then the fish came alive, with his death in him.'\nErnest Hemingway, The Old Man and the Sea\n\nThe abstract above illustrates|metaphor|hyperbole|contrast|paradox": "appreciation-prose"
  }
 };
