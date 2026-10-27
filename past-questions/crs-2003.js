@@ -211,18 +211,15 @@
       "Hosea"
     ],
     "answer": 1,
-    "explanation": "Jeremiah uses this covenant promise, including in the new-covenant passage. However, Hosea 2:23 also says that the people are God's people and he is their God. Because the stem supplies no setting beyond a formula shared by prophets, both Jeremiah and Hosea are defensible.",
+    "explanation": "The quoted wording identifies Jeremiah: God promises to be the people’s God and they his people. Hosea 2:23 expresses a related covenant relationship, but in different words. A shared theme is not enough to identify the speaker of an exact quotation; B is retained.",
     "year": 2003,
     "source": "JAMB UTME 2003",
     "paperQuestion": 10,
     "printedKey": "B",
-    "reference": "Jeremiah 31:31–34",
-    "alsoAccept": [
-      3
-    ],
-    "keyVerdict": "multiple",
+    "reference": "Jeremiah 31:33; Hosea 2:23",
+    "keyVerdict": "debatable",
     "keyAnswer": "B",
-    "answerNote": "The covenant formula occurs in both Jeremiah 31:33 and Hosea 2:23. The source supplies no further setting, so B and D are accepted.",
+    "answerNote": "The quoted formula is Jeremiah 31:33, so B is retained. Hosea 2:23 expresses the related covenant relationship in different words; a similar promise must not be substituted for an exact quotation.",
     "sourceFile": "C.R.S 2003.pdf",
     "sourcePages": [
       1

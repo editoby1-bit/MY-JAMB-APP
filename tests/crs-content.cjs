@@ -42,7 +42,7 @@ for (let year = 2001; year <= 2004; year++) {
   assert.deepEqual(qs.map(q => q.paperQuestion), Array.from({ length: 50 }, (_, i) => i + 1));
 }
 assert.equal(bank.filter(q => q.bookletKey).length, 15);
-assert.equal(bank.filter(q => q.alsoAccept).length, 19);
+assert.equal(bank.filter(q => q.alsoAccept).length, 17);
 assert.equal(Object.keys(topics.lessons).length, 19);
 for (const lesson of Object.values(topics.lessons)) {
   const words = lesson.body.split(/\s+/).length;

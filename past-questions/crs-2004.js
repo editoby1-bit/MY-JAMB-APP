@@ -893,18 +893,15 @@
       "Pronounce curses on it"
     ],
     "answer": 1,
-    "explanation": "Josiah demolished the altar and high place at Bethel, burning and pulverising the idolatrous installation. The key focuses on breaking down the altar, while burning is also part of the associated destruction. The passage describes several actions, so the short options need to be read with that distinction.",
+    "explanation": "Second Kings 23:15 says Josiah demolished the altar and high place, then describes burning the high place and reducing it to dust. B best describes the action on the altar. The burning option refers to an associated action on the high place; keep the objects distinct rather than accepting both automatically.",
     "year": 2004,
     "source": "JAMB UTME 2004",
     "paperQuestion": 40,
     "printedKey": "B",
     "reference": "2 Kings 23:15",
-    "alsoAccept": [
-      2
-    ],
-    "keyVerdict": "multiple",
+    "keyVerdict": "debatable",
     "keyAnswer": "B",
-    "answerNote": "2 Kings 23:15 describes demolishing the altar and high place, burning the installation and reducing it to dust. Both B and C describe parts of that destruction; neither should be penalised by this broad stem.",
+    "answerNote": "Second Kings 23:15 distinguishes demolishing the altar and high place from burning the high place. B is retained for the action on the altar; C names an associated action on a different object and is not treated as an additional accepted answer.",
     "sourceFile": "C.R.S 2004.pdf",
     "sourcePages": [
       3
