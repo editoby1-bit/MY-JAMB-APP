@@ -381,6 +381,10 @@
         "past-questions/crs-2002.js",
         "past-questions/crs-2003.js",
         "past-questions/crs-2004.js",
+        "past-questions/crs-2005.js",
+        "past-questions/crs-2006.js",
+        "past-questions/crs-2007.js",
+        "past-questions/crs-2008.js",
         "teach/crs.js",
         "teach/crs-topics.js",
         "booklet/errors.js"
@@ -390,18 +394,22 @@
         "2001": 50,
         "2002": 50,
         "2003": 50,
-        "2004": 50
+        "2004": 50,
+        "2005": 50,
+        "2006": 50,
+        "2007": 50,
+        "2008": 50
       },
-      "count": 250,
+      "count": 450,
       "repeats": 0,
-      "lessons": 19,
+      "lessons": 20,
       "traps": true,
       "tricky": {
-        "multi": 17,
-        "none": 0
+        "multi": 27,
+        "none": 1
       },
-      "gameCount": 233,
-      "memoryCount": 46
+      "gameCount": 422,
+      "memoryCount": 74
     },
     "economics": {
       "scripts": [
@@ -1464,13 +1472,29 @@
       "sha256": "f430278685bb4c30be81c50b54bf679330864413aa79e1ccdf8c861bd954656a",
       "bytes": 45881
     },
+    "past-questions/crs-2005.js": {
+      "sha256": "9d7178577ad216c295f54710bc1613a0a95defc26d3af06887d06d9066523923",
+      "bytes": 42384
+    },
+    "past-questions/crs-2006.js": {
+      "sha256": "327f6722d399c7a80126b8c2e0f88881b044fc7160fe944852f5771a29154acf",
+      "bytes": 38245
+    },
+    "past-questions/crs-2007.js": {
+      "sha256": "fbfb40d41a807d557ace66990ad903b248d12d620024c5c25d8241cf4504185f",
+      "bytes": 34781
+    },
+    "past-questions/crs-2008.js": {
+      "sha256": "1c45f955754c57f6d19ebdd62e6e6e83548b8792030083405ddf80a1dfc14990",
+      "bytes": 34141
+    },
     "teach/crs.js": {
-      "sha256": "470cc2ae3c701ae7d6443d7cc0414c15968ff15d1265cd38ea2087333cca659b",
-      "bytes": 124818
+      "sha256": "b952f97d9c5eb0b846b7cd2501f51a3a5f83626805ccdcc3c51f96d12caf267e",
+      "bytes": 238543
     },
     "teach/crs-topics.js": {
-      "sha256": "3095d361698189b41140520b21c95d8a7148f18de55d4dee8f434b738b62233a",
-      "bytes": 94202
+      "sha256": "f204402395ba53fb22d1dd95745770f0ba0dfae4c4e3871eb25853627b820f9f",
+      "bytes": 151852
     },
     "past-questions/economics-2001.js": {
       "sha256": "83ab7b609bd6108a2556797f7b843f2ad571b970137780c7c228f12f7ca0dbf0",
@@ -1853,5 +1877,5 @@
       "bytes": 320884
     }
   },
-  "version": "258df449878203ae"
+  "version": "d9d035d701bcbf0c"
 }
