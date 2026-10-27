@@ -103,7 +103,7 @@
     const head = {
       corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
       multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
-      noanswer:  `<strong>No correct answer.</strong> None of the four options is correct, so whatever you chose, this question is not counted against you. Here is why, and what the right answer is:`,
+      noanswer:  q.administrative ? `<strong>Original exam instruction.</strong> This item depends on the physical booklet issued in the exam, so it has no universal answer here. Any attempted answer receives credit.` : `<strong>No correct answer.</strong> None of the four options is correct, so whatever you chose, this question is not counted against you. Here is why, and what the right answer is:`,
       none:      `None of the options is fully correct. JAMB's answer is <strong>${escHtml(q.keyAnswer)}</strong>, so that is what scores in the exam and here, but it is not fully correct. Here is why:`,
       misprint:  `The printed question has a wording or printing problem. We mark the corrected reading: <strong>${right}</strong>.`,
       debatable: `This question needs careful reading. The marked answer is <strong>${right}</strong>; the note below explains its wording and context.`,
@@ -119,7 +119,8 @@
   /* ── Repeated questions ──
      JAMB re-sets many past questions, word for word or with the options
      shuffled. Questions are grouped when their text (and passage, if any)
-     match and they share at least three options; the group's years show how
+     match and they share at least three options. Reviewed content metadata
+     can also link variants testing the same fact; the group's years show how
      often JAMB has set it. Built once, on first use, from the bank itself. */
   let repeatIndex = null; // subject -> Map(teachMeKey -> group)
   function repNorm(s) { return String(s || '').toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]/g, ''); }
@@ -130,17 +131,20 @@
       if (!Array.isArray(arr)) return;
       const byText = new Map();
       const groupOf = new Map();
+      const reviewed = window.TEACH_TOPICS?.[subject]?.repeats || {};
       arr.forEach(q => {
         if (!q || !q.question || !q.year) return;
-        const t = repNorm(q.question) + '|' + (q.passage ? repNorm(q.passage).slice(0, 80) : '');
+        const variant = reviewed[q.id];
+        const t = variant ? 'reviewed:' + variant : repNorm(q.question) + '|' + (q.passage ? repNorm(q.passage).slice(0, 80) : '');
         const opts = new Set((q.options || []).map(repNorm));
         let list = byText.get(t);
         if (!list) { list = []; byText.set(t, list); }
         let g = list.find(g => {
+          if (variant) return true;
           let n = 0; opts.forEach(o => { if (g.opts.has(o)) n++; });
           return n >= Math.min(3, opts.size);
         });
-        if (!g) { g = { opts, qs: [] }; list.push(g); }
+        if (!g) { g = { opts, qs: [], reviewed: !!variant }; list.push(g); }
         g.qs.push(q);
         groupOf.set(teachMeKey(q), g);
       });
@@ -158,9 +162,10 @@
     const years = repeatYears(g);
     const per = y => g.qs.filter(x => x.year === y).length;
     const times = n => n === 2 ? 'twice' : n + ' times';
-    if (years.length === 1) return `set this question <strong>${times(g.qs.length)} in the ${years[0]} paper</strong>`;
+    const point = g.reviewed ? 'tested this point' : 'set this question';
+    if (years.length === 1) return `${point} <strong>${times(g.qs.length)} in the ${years[0]} paper</strong>`;
     const list = years.map(y => per(y) > 1 ? `${y} ${times(per(y))}` : String(y)).join(', ');
-    return `set this question <strong>${times(g.qs.length)} between ${years[0]} and ${years[years.length - 1]}</strong> (${list})`;
+    return `${point} <strong>${times(g.qs.length)} between ${years[0]} and ${years[years.length - 1]}</strong> (${list})`;
   }
   function repeatHtml(q, subject) {
     const g = repeatGroup(q, subject);
@@ -1641,7 +1646,7 @@
   function trickyPool(subject, kind) {
     const arr = QUESTION_BANK[subject];
     if (!Array.isArray(arr)) return [];
-    return arr.filter(q => Array.isArray(q.options) && (kind === 'none'
+    return arr.filter(q => !q.administrative && Array.isArray(q.options) && (kind === 'none'
       ? (q.keyVerdict === 'none' || q.keyVerdict === 'noanswer')
       : Array.isArray(q.alsoAccept) && q.alsoAccept.length && q.keyVerdict !== 'none'));
   }

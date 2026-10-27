@@ -23,16 +23,17 @@ for (const subject of subjects) {
   const years = {};
   for (const q of flat) if (q.year) years[q.year] = (years[q.year] || 0) + 1;
   const images = [...new Set([...JSON.stringify(raw).matchAll(/past-questions\/img\/[A-Za-z0-9_.-]+/g)].map(m => m[0]))].sort();
-  const study = JSON.parse(vm.runInContext(`JSON.stringify({lessons: window.TEACH_TOPICS?.[${JSON.stringify(subject)}]?.lessons || {}, teach: window.TEACH_ME?.[${JSON.stringify(subject)}] || {}})`, context));
+  const study = JSON.parse(vm.runInContext(`JSON.stringify({lessons: window.TEACH_TOPICS?.[${JSON.stringify(subject)}]?.lessons || {}, repeats: window.TEACH_TOPICS?.[${JSON.stringify(subject)}]?.repeats || {}, teach: window.TEACH_ME?.[${JSON.stringify(subject)}] || {}})`, context));
   const games = flat.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage && !q.passageId && !q.alsoAccept && q.keyVerdict !== 'none' && q.keyVerdict !== 'noanswer');
   const norm = text => String(text || '').toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]/g, '');
   const byText = new Map();
   for (const q of flat) {
     if (!q.question || !q.year) continue;
-    const key = norm(q.question) + '|' + (q.passage ? norm(q.passage).slice(0, 80) : '');
+    const variant = study.repeats[q.id];
+    const key = variant ? 'reviewed:' + variant : norm(q.question) + '|' + (q.passage ? norm(q.passage).slice(0, 80) : '');
     const options = new Set((q.options || []).map(norm));
     const groups = byText.get(key) || [];
-    let group = groups.find(g => [...options].filter(o => g.options.has(o)).length >= Math.min(3, options.size));
+    let group = groups.find(g => variant || [...options].filter(o => g.options.has(o)).length >= Math.min(3, options.size));
     if (!group) { group = { options, count: 0 }; groups.push(group); }
     group.count++;
     byText.set(key, groups);
@@ -42,7 +43,7 @@ for (const subject of subjects) {
     scripts, images, years, count: flat.length, repeats,
     lessons: Object.keys(study.lessons).length,
     traps: Object.values(study.teach).some(text => /The trap:\s*/.test(text)),
-    tricky: { multi: flat.filter(q => Array.isArray(q.alsoAccept) && q.alsoAccept.length && q.keyVerdict !== 'none').length, none: flat.filter(q => ['none', 'noanswer'].includes(q.keyVerdict)).length },
+    tricky: { multi: flat.filter(q => !q.administrative && Array.isArray(q.alsoAccept) && q.alsoAccept.length && q.keyVerdict !== 'none').length, none: flat.filter(q => !q.administrative && ['none', 'noanswer'].includes(q.keyVerdict)).length },
     gameCount: games.length,
     memoryCount: games.filter(q => q.question.length <= 70 && q.options[q.answer].length <= 22).length
   };

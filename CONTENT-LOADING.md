@@ -81,3 +81,26 @@ Not covered by these checks: real payments/AI/cloud services, Android packaging,
 and long-term cache eviction policies on physical phones. A first subject
 preparation includes all its papers and diagrams and can take time on a poor
 connection. No speculative subject downloads are started automatically.
+
+## Reviewed study metadata
+
+`TEACH_TOPICS[subject].repeats` is an optional question-ID to stable-group-ID
+map for reviewed variants that test the same fact with different wording or
+options. Keep the original occurrences in each paper. Review the source years
+and meaning before adding an ID; sharing a topic or passage is insufficient.
+The app and manifest builder use these groups before the existing exact-text
+and option-overlap matcher. Subjects without this map keep that matcher.
+Reviewed groups say “tested this point” and list the source years.
+
+Exam Traps requires an explicit `The trap:` paragraph in prepared Teach Me.
+Author it only for a genuinely tempting wrong choice. Put references before
+that final paragraph, because the extractor reads through the end of the text.
+Key Points expands with imported topics; it is not a complete-syllabus claim.
+Add or split lessons when needed, preserving earlier coverage and topic links.
+Original administrative instructions may be retained with `administrative:
+true` and `noanswer`, but receive no fabricated Bible lesson and are excluded
+from Tricky Questions. Any attempted choice receives credit in practice.
+
+`node tests/crs-content.cjs` checks the current CRS source/key provenance,
+prepared teaching, reviewed repeats, traps, lesson lengths, question scoring,
+study hubs and offline access. Browser tests block external service requests.
