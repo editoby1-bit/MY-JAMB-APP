@@ -1,76 +1,74 @@
-// sw.js: offline support for My JAMB App.
-//
-// Once a student has opened the app online, it keeps working with no
-// signal: questions, passages, written explanations, practice and exam
-// modes. Teach Me explanations already opened on the device are stored by
-// the app itself (localStorage), so those work offline too.
-//
-// Strategy: network-first for the app's own files, falling back to the
-// cached copy. Online students always get the latest version (no stale
-// pages after a deploy, and no ?v= bumps needed); offline students get the
-// last version they loaded. Fonts are cache-first. Payments (Paystack) and
-// the API (editoby-api) are never intercepted.
-//
-// The install step reads index.html and caches every local script and
-// stylesheet it references, so a new past-questions/<year>.js file is
-// picked up automatically, with no list to maintain here.
-
-const CACHE = 'jamb-app-v1';
+// Cache only the app shell at install. Subject packages are saved by
+// content-loader.js after integrity checks; keep them across shell updates.
+const CACHE = 'jamb-app-v2';
+const CONTENT_CACHE = 'jamb-content-v1';
 const FONT_CACHE = 'jamb-fonts-v1';
 
+async function network(request) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(request, { signal: controller.signal });
+    // Keep slow response bodies bounded too.
+    return new Response(await response.arrayBuffer(), { status: response.status, statusText: response.statusText, headers: response.headers });
+  } finally { clearTimeout(timer); }
+}
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    const cache = await caches.open(CACHE);
-    const res = await fetch('./index.html', { cache: 'no-cache' });
-    const html = await res.clone().text();
-    await cache.put('./index.html', res);
-    await cache.put('./', new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
+    const storage = await caches.open(CACHE);
+    const response = await network(new Request(new URL('./index.html', self.location), { cache: 'no-cache' }));
+    if (!response.ok) throw new Error('Shell unavailable');
+    const html = await response.clone().text();
+    await storage.put('./index.html', response);
+    await storage.put('./', new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
     const local = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)]
-      .map(m => m[1])
-      .filter(u => !/^(?:https?:)?\/\//.test(u));
-    await cache.addAll(local);
-    self.skipWaiting();
+      .map(m => m[1]).filter(url => !/^(?:https?:)?\/\//.test(url));
+    await storage.addAll([...new Set([...local, './content-manifest.json'])]);
+    await self.skipWaiting();
   })());
 });
-
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    const keep = [CACHE, FONT_CACHE];
-    for (const k of await caches.keys()) if (!keep.includes(k)) await caches.delete(k);
+    // Keep legacy downloads: the loader migrates verified files on demand.
+    // Never clear other apps' caches on the shared GitHub Pages origin.
     await self.clients.claim();
   })());
 });
-
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-
   if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     event.respondWith((async () => {
-      const cache = await caches.open(FONT_CACHE);
-      const hit = await cache.match(req);
+      const storage = await caches.open(FONT_CACHE);
+      const hit = await storage.match(req);
       if (hit) return hit;
-      const res = await fetch(req);
-      if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
-      return res;
+      const response = await fetch(req);
+      if (response.ok || response.type === 'opaque') await storage.put(req, response.clone());
+      return response;
     })());
     return;
   }
-
-  if (url.origin !== self.location.origin) return; // Paystack, API, etc.
-
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL('./', self.location).pathname)) return;
   event.respondWith((async () => {
-    const cache = await caches.open(CACHE);
+    const storage = await caches.open(CACHE);
+    const content = await caches.open(CONTENT_CACHE);
+    // Versioned packages and their prepared diagrams reopen without a
+    // network round trip. Online AI and payments are never intercepted.
+    const saved = await content.match(req);
+    if (saved && (url.searchParams.has('content') || url.pathname.includes('/past-questions/img/'))) return saved;
     try {
-      const res = await fetch(req);
-      if (res.ok) cache.put(req, res.clone());
-      return res;
+      const response = await network(req);
+      if (!response.ok) throw new Error('File unavailable');
+      if (!url.searchParams.has('content') && !/\/(?:past-questions|teach|booklet)\//.test(url.pathname)) {
+        await storage.put(req, response.clone());
+      }
+      return response;
     } catch (err) {
-      const hit = await cache.match(req, { ignoreSearch: true })
-        || (req.mode === 'navigate' && await cache.match('./index.html'));
+      const hit = await storage.match(req) || saved
+        || (req.mode === 'navigate' && await storage.match('./index.html'));
       if (hit) return hit;
-      throw err;
+      return new Response('This content has not been saved on this device. Reconnect and try again.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
     }
   })());
 });
