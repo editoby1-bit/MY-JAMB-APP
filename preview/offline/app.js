@@ -1,0 +1,4973 @@
+(() => {
+  // Show Working mode constants
+  const SW_SUBJECTS    = ['mathematics','physics','chemistry','economics','accounting'];
+  const SW_SUBJECTS_LBL = { mathematics:'Mathematics', physics:'Physics', chemistry:'Chemistry', economics:'Economics', accounting:'Accounting' };
+  const SK_SW_CREDITS  = 'jamb-sw-credits-v1';
+  const SW_QUARTERLY   = 20; // Show Working snaps included with a JAMB pass (server: ALLOWANCE.jamb)
+  // Snaps are counted on the server, one shared balance per pass, so every
+  // phone on a pass (and My Exams App, for a Student Pass) draws from the
+  // same 20. The pass's secret snap token is saved here; the count below is
+  // just the last balance the server reported, for display.
+  const SK_SNAP_TOKEN  = 'jamb-snap-token-v1';
+  const MEA_SNAP_TOKEN = 'mea-snap-token-v1';
+  const SNAP_API_URL   = 'https://editoby-api.vercel.app/api/mark';
+  // Same Vercel project as My Exams App — /api/verify-payment and /api/teach
+  // are shared across both apps.
+  const API_BASE = 'https://editoby-api.vercel.app';
+
+  /* ════════ PASSAGE-GROUPED QUESTIONS ════════
+     Comprehension / cloze content is stored in questions.js as ONE entry:
+       { passageId:'eng-2001-p2', passageTitle:'Passage II', year:2001,
+         instruction:'Read the passage and answer questions 6-10',
+         passage:'…', questions:[ {question, options, answer, explanation}, … ] }
+     It is flattened ONCE here into ordinary questions that each carry their
+     passage (+ passageId/passagePart/passageSize), so Challenge Mode,
+     dashboards and history keep working on flat arrays unchanged. Only
+     selection (keep a passage's questions together and in order), rendering
+     (show the passage), Teach Me (send the passage) and qHash need to know.
+     Existing flat questions are untouched. */
+  function normalizePassageBank(bank) {
+    Object.keys(bank).forEach(subject => {
+      const arr = bank[subject];
+      if (!Array.isArray(arr) || !arr.some(e => e && Array.isArray(e.questions))) return;
+      const flat = [];
+      arr.forEach((entry, gi) => {
+        if (!entry || !Array.isArray(entry.questions)) { flat.push(entry); return; }
+        const pid = entry.passageId || `${subject}-passage-${gi}`;
+        entry.questions.forEach((q, k) => flat.push({
+          ...q,
+          year: q.year ?? entry.year,
+          passage: entry.passage,
+          passageId: pid,
+          passageTitle: entry.passageTitle || 'Passage',
+          passageInstruction: entry.instruction || '',
+          passagePart: k + 1,
+          passageSize: entry.questions.length,
+        }));
+      });
+      bank[subject] = flat;
+    });
+  }
+  normalizePassageBank(QUESTION_BANK);
+
+  // Splits a flat pool into selection units: a standalone question is a unit
+  // of 1; all questions sharing a passageId form one unit, in passage order.
+  function toUnits(pool) {
+    const units = [], byId = new Map();
+    pool.forEach(q => {
+      if (!q.passageId) { units.push([q]); return; }
+      let u = byId.get(q.passageId);
+      if (!u) { u = []; byId.set(q.passageId, u); units.push(u); }
+      u.push(q);
+    });
+    units.forEach(u => { if (u.length > 1) u.sort((a, b) => (a.passagePart || 0) - (b.passagePart || 0)); });
+    return units;
+  }
+
+  // Picks up to `count` questions from already-ordered units without ever
+  // splitting a passage: a passage is only taken if all its questions fit in
+  // the slots left, so the requested count is never exceeded. If nothing fits
+  // at all (count smaller than every passage), the first unit is trimmed.
+  function fillFromUnits(units, count) {
+    const out = [];
+    for (const u of units) {
+      if (out.length >= count) break;
+      if (out.length + u.length <= count) out.push(...u);
+    }
+    if (!out.length && units.length) out.push(...units[0].slice(0, count));
+    return out;
+  }
+
+  // A few past questions officially accept more than one option (the key
+  // lists e.g. "A/D"); those carry `alsoAccept`. Always score through this.
+  function isCorrect(q, a) {
+    // No option is right and the key gives none: any attempt is credited,
+    // as JAMB normally does for a faulty question.
+    if (q.keyVerdict === 'noanswer') return a !== null && a !== undefined;
+    return a !== null && a !== undefined &&
+      (a === q.answer || (Array.isArray(q.alsoAccept) && q.alsoAccept.includes(a)));
+  }
+
+  // Past questions whose official answer key we checked and found wanting
+  // carry keyVerdict ('corrected' | 'multiple' | 'none'), keyAnswer (the
+  // key's letter) and answerNote (why). Shown under the explanation.
+  // inTeach: already inside the Teach Me panel, so no pointer back to it.
+  function keyCheckHtml(q, inTeach) {
+    if (!q.keyVerdict || !q.answerNote) return '';
+    const L = i => String.fromCharCode(65 + i);
+    const all = [q.answer, ...(q.alsoAccept || [])].sort((a, b) => a - b).map(L);
+    const right = all.join(' or ');
+    const both = all.length === 2 ? `${all[0]} and ${all[1]} are both` : `${all.slice(0, -1).join(', ')} and ${all[all.length - 1]} are all`;
+    // Wording allows for the error being a printing mistake in the answer
+    // key in circulation rather than JAMB's own.
+    const head = {
+      corrected: `The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>. That is an error, possibly a printing mistake, so we mark the correct answer: <strong>${right}</strong>.`,
+      multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
+      noanswer:  `<strong>No correct answer.</strong> None of the four options is correct, so whatever you chose, this question is not counted against you. Here is why, and what the right answer is:`,
+      none:      `None of the options is fully correct. JAMB's answer is <strong>${escHtml(q.keyAnswer)}</strong>, so that is what scores in the exam and here, but it is not fully correct. Here is why:`,
+      misprint:  `The question paper has a printing error here, so we mark the answer to the question as JAMB intended it: <strong>${right}</strong>.`,
+    }[q.keyVerdict];
+    if (!head) return '';
+    return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`
+      + `<p>${head}</p><p>${mathHtml(q.answerNote)}</p>`
+      + (q.keyVerdict === 'none' ? `<p class="key-check-tip">Exam tip: when no option is exactly right, pick the one closest to the correct meaning; that is usually JAMB's answer.</p>` : '')
+      + (inTeach ? '' : `<p class="key-check-teach">Because the answers conflict, this question needs a fuller explanation. Tap Teach Me to learn more. <button type="button" class="key-check-teach-btn">🧠 Teach Me: learn more</button></p>`)
+      + `</div>`;
+  }
+
+  /* ── Repeated questions ──
+     JAMB re-sets many past questions, word for word or with the options
+     shuffled. Questions are grouped when their text (and passage, if any)
+     match and they share at least three options; the group's years show how
+     often JAMB has set it. Built once, on first use, from the bank itself. */
+  let repeatIndex = null; // subject -> Map(teachMeKey -> group)
+  function repNorm(s) { return String(s || '').toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]/g, ''); }
+  function buildRepeatIndex() {
+    repeatIndex = {};
+    Object.keys(QUESTION_BANK).forEach(subject => {
+      const arr = QUESTION_BANK[subject];
+      if (!Array.isArray(arr)) return;
+      const byText = new Map();
+      const groupOf = new Map();
+      arr.forEach(q => {
+        if (!q || !q.question || !q.year) return;
+        const t = repNorm(q.question) + '|' + (q.passage ? repNorm(q.passage).slice(0, 80) : '');
+        const opts = new Set((q.options || []).map(repNorm));
+        let list = byText.get(t);
+        if (!list) { list = []; byText.set(t, list); }
+        let g = list.find(g => {
+          let n = 0; opts.forEach(o => { if (g.opts.has(o)) n++; });
+          return n >= Math.min(3, opts.size);
+        });
+        if (!g) { g = { opts, qs: [] }; list.push(g); }
+        g.qs.push(q);
+        groupOf.set(teachMeKey(q), g);
+      });
+      repeatIndex[subject] = groupOf;
+    });
+  }
+  function repeatGroup(q, subject) {
+    if (!repeatIndex) buildRepeatIndex();
+    return repeatIndex[subject]?.get(teachMeKey(q)) || null;
+  }
+  function repeatYears(g) { return [...new Set(g.qs.map(x => x.year))].sort((a, b) => a - b); }
+  // "set 3 times between 2018 and 2020 (2018 twice, 2020)": every printing
+  // counts, and a year that printed it more than once says so.
+  function repeatSummary(g) {
+    const years = repeatYears(g);
+    const per = y => g.qs.filter(x => x.year === y).length;
+    const times = n => n === 2 ? 'twice' : n + ' times';
+    if (years.length === 1) return `set this question <strong>${times(g.qs.length)} in the ${years[0]} paper</strong>`;
+    const list = years.map(y => per(y) > 1 ? `${y} ${times(per(y))}` : String(y)).join(', ');
+    return `set this question <strong>${times(g.qs.length)} between ${years[0]} and ${years[years.length - 1]}</strong> (${list})`;
+  }
+  function repeatHtml(q, subject) {
+    const g = repeatGroup(q, subject);
+    if (!g || g.qs.length < 2) return '';
+    return `<div class="repeat-note">🔁 <strong>Repeated question:</strong> JAMB has ${repeatSummary(g)}. Questions that repeat are likely to come again, so make sure you master this one.</div>`;
+  }
+  // One question per repeated group, shown as first set (its earliest
+  // appearance), most-repeated first, then oldest first.
+  function mostRepeatedPool(subject) {
+    if (!repeatIndex) buildRepeatIndex();
+    const groups = [...new Set(repeatIndex[subject]?.values() || [])].filter(g => g.qs.length >= 2);
+    const first = g => Math.min(...g.qs.map(x => x.year));
+    groups.sort((a, b) => b.qs.length - a.qs.length || first(a) - first(b));
+    return groups.map(g => g.qs.reduce((best, x) => (x.year < best.year ? x : best), g.qs[0]));
+  }
+
+  function groupAwarePick(pool, count) {
+    return fillFromUnits(shuffle(toUnits(pool)), count);
+  }
+
+  // The pass's snap token: its own, or a My Exams App Student Pass's (same
+  // origin storage) when access comes from there.
+  function snapToken() {
+    return loadPref(SK_SNAP_TOKEN) || (loadPref(SK_ACCESS)?.fromExamsApp ? loadPref(MEA_SNAP_TOKEN) : null);
+  }
+  function setSnapPass(token, left) {
+    if (token) savePref(SK_SNAP_TOKEN, token);
+    if (typeof left === 'number') setSWLeft(left);
+  }
+  function setSWLeft(n) {
+    savePref(SK_SW_CREDITS, { n: Math.max(0, n) });
+    document.querySelectorAll('#swCredits').forEach(b => { b.textContent = Math.max(0, n) + ' snaps left'; });
+  }
+  // Last balance the server reported (0 with no pass on this phone).
+  function getSWCredits() {
+    if (!snapToken()) return 0;
+    const d = loadPref(SK_SW_CREDITS);
+    return typeof d?.n === 'number' ? d.n : SW_QUARTERLY;
+  }
+  // Refreshes the balance from the server (it changes when another phone on
+  // the pass uses a snap or tops up). Returns the balance, or null offline.
+  async function syncSWCredits() {
+    const token = snapToken();
+    if (!token) return 0;
+    try {
+      const r = await fetch(SNAP_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkSnaps: true, snapToken: token }) });
+      const d = await r.json();
+      if (typeof d.snapsLeft === 'number') { setSWLeft(d.snapsLeft); return d.snapsLeft; }
+    } catch {}
+    return null;
+  }
+
+  const storageKeys = {
+    users: 'jamb-cbt-users-v3',
+    currentUser: 'jamb-cbt-current-user-v3'
+  };
+
+  // ── New feature constants — defined at top so available throughout ──
+  const SK_ACCESS     = 'jamb-access-v1';
+  const SK_FREE       = 'jamb-free-v1';
+  const SK_TIER       = 'jamb-tier-v1';
+  const SK_AI_CREDITS = 'jamb-ai-credits-v1';
+  const SK_CLASS       = 'jamb-class-v1';       // { classCode, name, pin } — this device's class membership
+  const SK_CLASS_ADMIN = 'jamb-class-admin-v1'; // { classCode, adminSecret, schoolName } — teacher device only
+  const JAMB_FREE_LIMIT = 10;
+  // My JAMB App is sold as an "until your exam" pass. Keep JAMB_PASS_UNTIL
+  // in sync with the same constant in editoby-api/api/verify-payment.js,
+  // which decides the days actually granted.
+  const JAMB_PASS_UNTIL = '2027-04-30'; // UTME date not announced yet; it won't be later than April
+  // ₦2,499, not ₦2,499: Paystack adds a flat ₦100 fee from ₦2,499 up, so
+  // this nets about ₦99 more per pass.
+  const JAMB_PRICE      = 249900; // ₦2,499 in kobo
+  const JAMB_EA_PRICE   = 200000; // ₦2,000 in kobo, first 100 students (counted by the server)
+  const passUntilLabel  = () => new Date(JAMB_PASS_UNTIL + 'T12:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+  const AI_QUARTERLY    = 100;
+  const PAYSTACK_KEY    = 'pk_live_5d12ee2a90900116dc222107e059a06214c085ff';
+  // 🔑 Replace above with pk_live_ key when Paystack approves
+
+  function savePref(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  function loadPref(k,d=null){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch(e){return d;}}
+  function checkAccess(){const d=loadPref(SK_ACCESS);return !!(d?.expires&&new Date(d.expires)>new Date());}
+  function getFreeUsed(){return loadPref(SK_FREE)?.n||0;}
+  function getFreeUsedCount(){return loadPref(SK_FREE)?.n||0;}
+  function getCurrentQuarter(){const d=new Date();return `${d.getFullYear()}-Q${Math.ceil((d.getMonth()+1)/3)}`;}
+  function getAICredits(){const d=loadPref(SK_AI_CREDITS);if(!d||d.quarter!==getCurrentQuarter()){savePref(SK_AI_CREDITS,{n:AI_QUARTERLY,quarter:getCurrentQuarter()});return AI_QUARTERLY;}return d.n;}
+  // Every paid user (JAMB pass, Student Pass from My Exams App, school
+  // bundle, demo code) gets unlimited Teach Me: each explanation is
+  // generated once and cached for everyone, so usage can't grow the API
+  // bill. The credit helpers stay for the record but never block a payer.
+  function isPlusUser(){ return checkAccess(); }
+  function useAICredit(){if(isPlusUser())return true;const c=getAICredits();if(c<=0)return false;savePref(SK_AI_CREDITS,{n:c-1,quarter:getCurrentQuarter()});return true;}
+  function refundAICredit(){if(isPlusUser())return;const c=getAICredits();savePref(SK_AI_CREDITS,{n:c+1,quarter:getCurrentQuarter()});}
+  function refreshChallengeBtn(){const btn=document.getElementById('jambChallengeBtn');if(!btn)return;if(state&&state.currentUser)btn.classList.remove('hidden');else btn.classList.add('hidden');}
+  function refreshUpgradeBar(){
+    const bar=document.getElementById('jambUpgradeBar');
+    const txt=document.getElementById('jambUpgradeText');
+    const card=document.getElementById('jambUpgradeCard');
+    if(!bar)return;
+    if(checkAccess()){
+      bar.classList.add('hidden');
+      if(card) card.classList.add('hidden');
+      return;
+    }
+    bar.classList.remove('hidden');
+    if(card) card.classList.remove('hidden');
+    if(txt){
+      const used=getFreeUsedCount();
+      const msgs=[
+        `⚡ ${used} of 10 free sessions used — unlock everything till the exams, from ₦2,000`,
+        `🧠 The only JAMB app where AI explains every answer — unlimited`,
+        `🏆 Subscribe to challenge friends and unlock community quiz`,
+        `📅 ${10-used} free session${10-used===1?'':'s'} remaining — upgrade anytime`,
+      ];
+      txt.textContent=msgs[Math.floor(Date.now()/30000)%msgs.length];
+    }
+  }
+
+  const el = {
+    homeScreen: document.getElementById('homeScreen'),
+    quizScreen: document.getElementById('quizScreen'),
+    resultScreen: document.getElementById('resultScreen'),
+    studentName: document.getElementById('studentName'),
+    loginBtn: document.getElementById('loginBtn'),
+    currentStudentBox: document.getElementById('currentStudentBox'),
+    sessionTypeSelect: document.getElementById('sessionTypeSelect'),
+    singleSubjectWrap: document.getElementById('singleSubjectWrap'),
+    comboConfig: document.getElementById('comboConfig'),
+    subjectSelect: document.getElementById('subjectSelect'),
+    comboSubject1: document.getElementById('comboSubject1'),
+    comboSubject2: document.getElementById('comboSubject2'),
+    comboSubject3: document.getElementById('comboSubject3'),
+    comboQCountSelect: document.getElementById('comboQCountSelect'),
+    modeSelect: document.getElementById('modeSelect'),
+    questionCountSelect: document.getElementById('questionCountSelect'),
+    yearSelect: document.getElementById('yearSelect'),
+    yearField: document.getElementById('yearField'),
+    durationSelect: document.getElementById('durationSelect'),
+    startBtn: document.getElementById('startBtn'),
+    switchUserBtn: document.getElementById('switchUserBtn'),
+    resetProgressBtn: document.getElementById('resetProgressBtn'),
+    statSessions: document.getElementById('statSessions'),
+    statAverage: document.getElementById('statAverage'),
+    statBest: document.getElementById('statBest'),
+    statQuestions: document.getElementById('statQuestions'),
+    historyTitle: document.getElementById('historyTitle'),
+    historyList: document.getElementById('historyList'),
+    // Sidebar
+    sidebarStudent: document.getElementById('sidebarStudent'),
+    sidebarMode: document.getElementById('sidebarMode'),
+    timerDisplay: document.getElementById('timerDisplay'),
+    progressText: document.getElementById('progressText'),
+    progressBar: document.getElementById('progressBar'),
+    questionPills: document.getElementById('questionPills'),
+    pillsLabel: document.getElementById('pillsLabel'),
+    subjectSwitcher: document.getElementById('subjectSwitcher'),
+    subjectTabs: document.getElementById('subjectTabs'),
+    submitBtn: document.getElementById('submitBtn'),
+    // Quiz main
+    questionNumberBadge: document.getElementById('questionNumberBadge'),
+    questionSubjectMeta: document.getElementById('questionSubjectMeta'),
+    subjectPositionTag: document.getElementById('subjectPositionTag'),
+    questionText: document.getElementById('questionText'),
+    diagramBox: document.getElementById('diagramBox'),
+    optionsList: document.getElementById('optionsList'),
+    toggleExplanationBtn: document.getElementById('toggleExplanationBtn'),
+    explanationBox: document.getElementById('explanationBox'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    backHomeBtn: document.getElementById('backHomeBtn'),
+    // Result
+    resultScore: document.getElementById('resultScore'),
+    resultSummary: document.getElementById('resultSummary'),
+    resultBreakdown: document.getElementById('resultBreakdown'),
+    subjectBreakdown: document.getElementById('subjectBreakdown'),
+    subjectBreakdownList: document.getElementById('subjectBreakdownList'),
+    reviewBtn: document.getElementById('reviewBtn'),
+    restartBtn: document.getElementById('restartBtn')
+  };
+
+  const state = {
+    users: loadUsers(),
+    currentUser: loadCurrentUser(),
+    currentQuestions: [],
+    answers: [],
+    currentIndex: 0,
+    mode: 'practice',
+    subject: '',
+    subjects: [],
+    student: '',
+    reviewMode: false,
+    showReviewExplanation: false,
+    timerId: null,
+    timeLeft: 0,
+    chosenDurationMinutes: null,
+    sessionType: 'single',
+    // Subject switching data
+    subjectRanges: {} // { subjectName: { start, end } }
+  };
+
+  // ─────────────────────────────────────────────────
+  function init() {
+    populateSubjects();
+    bindEvents();
+    renderCurrentUser();
+    renderStats();
+    renderHistory();
+    syncSessionTypeUi();
+    syncStartButton();
+    showScreen('home');
+    initPaywall();
+    initAIExplain();
+    initCommunityQuiz();
+    checkForSharedSession();
+    refreshChallengeBtn();
+    initUpgradeBar();
+    checkForStartedJambChallenges();
+    checkScheduledChallengeReminders();
+
+    // Without this, a student who creates or joins a scheduled/ready
+    // challenge and then just sits on some other screen would never
+    // find out it started until they happened to reopen the modal or
+    // log in again. This catches that regardless of which screen they're on.
+    setInterval(() => {
+      if (!state.currentUser) return;
+      checkForStartedJambChallenges();
+      checkScheduledChallengeReminders();
+    }, 45000);
+  }
+
+  function populateSubjects() {
+    const subjects = Object.keys(QUESTION_BANK);
+    // Single subject — no default, force conscious selection
+    el.subjectSelect.innerHTML =
+      '<option value="" disabled>— Select Subject —</option>' +
+      subjects.map(s => `<option value="${escHtml(s)}">${fmt(s)}</option>`).join('');
+    // Force browser to show placeholder — must set value after innerHTML
+    el.subjectSelect.value = '';
+
+    // Combo — English is always first fixed subject, no change needed
+    const combo = subjects.filter(s => s !== 'english');
+    const opts = combo.map(s => `<option value="${escHtml(s)}">${fmt(s)}</option>`).join('');
+    [el.comboSubject1, el.comboSubject2, el.comboSubject3].forEach(sel => { sel.innerHTML = opts; });
+
+    if (QUESTION_BANK['mathematics']) el.comboSubject1.value = 'mathematics';
+    if (QUESTION_BANK['physics'])     el.comboSubject2.value = 'physics';
+    if (QUESTION_BANK['chemistry'])   el.comboSubject3.value = 'chemistry';
+
+    const total = subjects.reduce((sum, s) => sum + (JambContent.manifest.subjects[s]?.count || QUESTION_BANK[s].length), 0);
+    el.statQuestions.textContent = String(total);
+    // Plan cards quote the live bank size, so it never goes stale.
+    document.querySelectorAll('[data-qcount]').forEach(n => { n.textContent = String(total); });
+    populateYears();
+  }
+
+  // Year picker for single-subject sessions. Lists only the years that have
+  // dated past-paper questions for the chosen subject; hidden when none do.
+  // "All years" keeps today's behaviour (every question, mixed).
+  function populateYears() {
+    if (!el.yearSelect) return;
+    const pool = QUESTION_BANK[el.subjectSelect.value] || [];
+    const counts = JambContent.isLoaded(el.subjectSelect.value) ? {} : { ...(JambContent.manifest.subjects[el.subjectSelect.value]?.years || {}) };
+    if (JambContent.isLoaded(el.subjectSelect.value)) pool.forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
+    const years = Object.keys(counts).map(Number).sort((a, b) => b - a);
+    const nRep = JambContent.isLoaded(el.subjectSelect.value) ? mostRepeatedPool(el.subjectSelect.value).length : (JambContent.manifest.subjects[el.subjectSelect.value]?.repeats || 0);
+    el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
+      (nRep ? `<option value="repeated">🔁 Most repeated questions · ${nRep}</option>` : '') +
+      Object.keys(TRICKY).map(k => { const n = JambContent.isLoaded(el.subjectSelect.value) ? trickyPool(el.subjectSelect.value, k).length : (JambContent.manifest.subjects[el.subjectSelect.value]?.tricky[k] || 0);
+        return n ? `<option value="tricky-${k}">${TRICKY[k].icon} ${TRICKY[k].label} · ${n}</option>` : ''; }).join('') +
+      years.map(y => `<option value="${y}">JAMB ${y} · ${counts[y]} questions</option>`).join('');
+    el.yearSelect.value = 'all';
+    el.yearField.classList.toggle('hidden', !years.length);
+  }
+
+  function bindEvents() {
+    el.loginBtn.addEventListener('click', loginStudent);
+    el.studentName.addEventListener('keydown', e => { if (e.key === 'Enter') loginStudent(); });
+    el.startBtn.addEventListener('click', startSession);
+    el.prevBtn.addEventListener('click', () => moveQuestion(-1));
+    el.nextBtn.addEventListener('click', () => moveQuestion(1));
+    el.submitBtn.addEventListener('click', finishQuiz);
+    el.backHomeBtn.addEventListener('click', confirmExit);
+    el.reviewBtn.addEventListener('click', enterReviewMode);
+    el.restartBtn.addEventListener('click', () => showScreen('home'));
+    el.resetProgressBtn.addEventListener('click', resetProgress);
+    el.switchUserBtn.addEventListener('click', switchUser);
+    // Config button groups
+    document.querySelectorAll('.config-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const group = btn.dataset.group;
+        document.querySelectorAll(`.config-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const hiddenId = group === 'session' ? 'sessionTypeSelect' : 'modeSelect';
+        const hidden = document.getElementById(hiddenId);
+        if (hidden) hidden.value = btn.dataset.value;
+        if (group === 'session') syncSessionTypeUi();
+        if (group === 'mode') syncDurationUi();
+        syncStartButton();
+      });
+    });
+
+    // SW close button
+    const swCloseBtn = document.getElementById('swCloseBtn');
+    if (swCloseBtn) swCloseBtn.addEventListener('click', () => {
+      const panel = document.getElementById('showWorkingPanel');
+      if (panel) panel.classList.add('hidden');
+    });
+
+    // Main "Snap My Working" button (it had no handler, so only the lock
+    // bar's Snap button worked).
+    document.getElementById('swSnapBtn')?.addEventListener('click', triggerSWSnap);
+    // The chosen photo goes to handleSWFile (this was never wired either, so
+    // a snapped photo was silently dropped).
+    document.getElementById('swFileInput')?.addEventListener('change', handleSWFile);
+
+    // SW lock bar snap button
+    const swLockSnapBtn = document.getElementById('swLockSnapBtn');
+    if (swLockSnapBtn) swLockSnapBtn.addEventListener('click', () => {
+      const panel = document.getElementById('showWorkingPanel');
+      if (panel) panel.classList.remove('hidden');
+      triggerSWSnap();
+    });
+
+    el.modeSelect.addEventListener('change', () => { syncDurationUi(); syncStartButton(); });
+    el.subjectSelect.addEventListener('change', () => { populateYears(); syncStartButton(); });
+    el.sessionTypeSelect.addEventListener('change', syncSessionTypeUi);
+    el.toggleExplanationBtn.addEventListener('click', toggleReviewExplanation);
+    // New features
+    const shareBtn = document.getElementById('shareResultBtn');
+    if (shareBtn) shareBtn.addEventListener('click', shareJambResult);
+    const challengeBtn = document.getElementById('jambChallengeBtn');
+    if (challengeBtn) challengeBtn.addEventListener('click', openJambChallenge);
+  }
+
+  // ─── SESSION START ────────────────────────────────
+  function loginStudent() {
+    const name = normalizeName(el.studentName.value);
+    if (!name) { alert('Enter a student name to continue.'); return; }
+    if (!state.users[name]) state.users[name] = { history: [] };
+    state.currentUser = name;
+    saveUsers(state.users);
+    saveCurrentUser(name);
+    renderCurrentUser();
+    renderStats();
+    renderHistory();
+    checkForStartedJambChallenges();
+    checkScheduledChallengeReminders();
+  }
+
+  let sessionStarting = false;
+  async function startSession() {
+    if (sessionStarting) return;
+    sessionStarting = true;
+    try {
+      if (!state.currentUser) {
+        loginStudent();
+        if (!state.currentUser) return;
+      }
+
+      // Validate all selections with gentle popups
+      const sessionType = document.getElementById('sessionTypeSelect')?.value || '';
+      const mode        = document.getElementById('modeSelect')?.value || '';
+      const subject     = el.subjectSelect?.value || '';
+
+      if (!sessionType) {
+        showGentlePopup('👇 Please select a Session Type first', document.getElementById('sessionTypeBtns'));
+        return;
+      }
+      if (!mode) {
+        showGentlePopup('👇 Please select a Mode first', document.getElementById('modeBtns'));
+        return;
+      }
+      if (sessionType === 'single' && !subject) {
+        showGentlePopup('👇 Please select a Subject first', el.subjectSelect);
+        return;
+      }
+
+      // Paywall check
+      if (!checkAccess()) {
+        const used = getFreeUsed();
+        if (used >= JAMB_FREE_LIMIT) {
+          showPaywall('trial');
+          return;
+        }
+
+      }
+
+      const subjects = sessionType === 'combo'
+        ? ['english', el.comboSubject1.value, el.comboSubject2.value, el.comboSubject3.value]
+        : [subject];
+      if (!await prepareContent(subjects, `Preparing ${sessionType === 'combo' ? 'your subjects' : fmt(subject)}…`)) return;
+
+      state.sessionType = el.sessionTypeSelect.value;
+      state.mode = el.modeSelect.value;
+      state.reviewMode = false;
+      state.showReviewExplanation = false;
+      state.currentIndex = 0;
+      state.student = state.currentUser;
+
+      const selection = state.sessionType === 'combo'
+        ? buildComboSession()
+        : buildSingleSession();
+
+      if (!selection || !selection.questions.length) {
+        alert('No questions available for the selected setup.');
+        return;
+      }
+
+      if (!checkAccess()) savePref(SK_FREE, { n: getFreeUsed() + 1 });
+      state.currentQuestions = selection.questions;
+      state.answers = new Array(state.currentQuestions.length).fill(null);
+      state.subject = selection.sessionLabel;
+      state.subjects = selection.subjects;
+      state.subjectRanges = selection.subjectRanges || {};
+      state.chosenDurationMinutes = getChosenDurationMinutes(state.currentQuestions.length, state.mode);
+      state.timeLeft = state.mode === 'exam' ? state.chosenDurationMinutes * 60 : 0;
+
+      if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+      if (state.mode === 'exam') startTimer();
+      if (state.mode === 'showworking') { showSWIntroBanner(); syncSWCredits(); }
+
+      el.sidebarStudent.textContent = state.student;
+      el.sidebarMode.textContent = state.mode === 'exam'
+        ? `Exam · ${state.chosenDurationMinutes} min`
+        : 'Practice Mode';
+
+      // Show/hide subject switcher
+      const isCombo = state.sessionType === 'combo' && state.subjects.length > 1;
+      el.subjectSwitcher.classList.toggle('hidden', !isCombo);
+      if (isCombo) buildSubjectSwitcher();
+
+      buildQuestionPills();
+      renderQuestion();
+      showScreen('quiz');
+    } finally { sessionStarting = false; }
+  }
+
+  function buildSingleSession() {
+    const subject = el.subjectSelect.value;
+    const yearVal = el.yearSelect ? el.yearSelect.value : 'all';
+    const countValue = el.questionCountSelect.value;
+    if (yearVal === 'repeated') {
+      // Most-repeated first, in that order: the questions JAMB sets most often.
+      const rep = mostRepeatedPool(subject);
+      const n = countValue === 'all' ? rep.length : Math.min(Number(countValue), rep.length);
+      const questions = rep.slice(0, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · Most repeated`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
+    if (yearVal === 'booklet') {
+      const all = bookletPool(subject);
+      const n = countValue === 'all' ? all.length : Math.min(Number(countValue), all.length);
+      const questions = groupAwarePick(all, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · Wrong answers in circulation`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
+    if (yearVal && yearVal.startsWith('traps-')) {
+      const topic = yearVal.slice(6);
+      const all = trapPool(subject, topic);
+      const n = countValue === 'all' ? all.length : Math.min(Number(countValue), all.length);
+      const questions = groupAwarePick(all, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · Exam Traps`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
+    if (yearVal && yearVal.startsWith('tricky-')) {
+      const kind = yearVal.slice(7);
+      const all = trickyPool(subject, kind);
+      const n = countValue === 'all' ? all.length : Math.min(Number(countValue), all.length);
+      const questions = groupAwarePick(all, n).map(q => ({ ...q, sourceSubject: subject }));
+      return {
+        questions,
+        subjects: [subject],
+        sessionLabel: `${fmt(subject)} · ${TRICKY[kind].label}`,
+        subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+      };
+    }
+    const year = yearVal && yearVal !== 'all' ? Number(yearVal) : null;
+    const pool = year ? QUESTION_BANK[subject].filter(q => q.year === year) : QUESTION_BANK[subject];
+    const count = countValue === 'all' ? pool.length : Math.min(Number(countValue), pool.length);
+    // A whole year's paper is served in the paper's own order, like sitting
+    // the real exam; any other selection is shuffled (passages kept whole).
+    const picked = year && count === pool.length
+      ? fillFromUnits(toUnits(pool), count)
+      : groupAwarePick(pool, count);
+    const questions = picked.map(q => ({ ...q, sourceSubject: subject }));
+    return {
+      questions,
+      subjects: [subject],
+      sessionLabel: year ? `${fmt(subject)} · JAMB ${year}` : fmt(subject),
+      subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
+    };
+  }
+
+  function buildComboSession() {
+    const chosen = [el.comboSubject1.value, el.comboSubject2.value, el.comboSubject3.value].filter(Boolean);
+    const unique = [...new Set(chosen)];
+    if (unique.length !== 3) {
+      alert('Choose 3 different subjects for the full JAMB combination.');
+      return null;
+    }
+
+    const countVal = el.comboQCountSelect ? el.comboQCountSelect.value : 'standard';
+    const isStandard = countVal === 'standard';
+    const engCount = isStandard ? 60 : parseInt(countVal);
+    const otherCount = isStandard ? 40 : parseInt(countVal);
+
+    const allSubjects = ['english', ...unique];
+    const subjectRanges = {};
+    let offset = 0;
+    let allQuestions = [];
+
+    const enPool = QUESTION_BANK.english;
+    const enQs = groupAwarePick(enPool, Math.min(engCount, enPool.length)).map(q => ({ ...q, sourceSubject: 'english' }));
+    subjectRanges['english'] = { start: offset, end: offset + enQs.length - 1 };
+    offset += enQs.length;
+    allQuestions.push(...enQs);
+
+    unique.forEach(subject => {
+      const pool = QUESTION_BANK[subject];
+      const qs = groupAwarePick(pool, Math.min(otherCount, pool.length)).map(q => ({ ...q, sourceSubject: subject }));
+      subjectRanges[subject] = { start: offset, end: offset + qs.length - 1 };
+      offset += qs.length;
+      allQuestions.push(...qs);
+    });
+
+    return {
+      questions: allQuestions,
+      subjects: allSubjects,
+      sessionLabel: allSubjects.map(fmt).join(' + '),
+      subjectRanges
+    };
+  }
+
+  // ─── SUBJECT SWITCHER ─────────────────────────────
+  function buildSubjectSwitcher() {
+    el.subjectTabs.innerHTML = '';
+    state.subjects.forEach(subject => {
+      const range = state.subjectRanges[subject];
+      const total = range ? (range.end - range.start + 1) : 0;
+      const answered = range
+        ? state.answers.slice(range.start, range.end + 1).filter(a => a !== null).length
+        : 0;
+
+      const btn = document.createElement('button');
+      btn.className = 'subject-tab-btn';
+      btn.dataset.subject = subject;
+      btn.innerHTML = `<span>${fmt(subject)}</span><span class="subject-tab-count">${answered}/${total}</span>`;
+      btn.addEventListener('click', () => jumpToSubject(subject));
+      el.subjectTabs.appendChild(btn);
+    });
+    syncSubjectTabs();
+  }
+
+  function updateSubjectSwitcherCounts() {
+    if (el.subjectSwitcher.classList.contains('hidden')) return;
+    const btns = el.subjectTabs.querySelectorAll('.subject-tab-btn');
+    btns.forEach(btn => {
+      const subject = btn.dataset.subject;
+      const range = state.subjectRanges[subject];
+      if (!range) return;
+      const total = range.end - range.start + 1;
+      const answered = state.answers.slice(range.start, range.end + 1).filter(a => a !== null).length;
+      const countEl = btn.querySelector('.subject-tab-count');
+      if (countEl) countEl.textContent = `${answered}/${total}`;
+    });
+    syncSubjectTabs();
+  }
+
+  function jumpToSubject(subject) {
+    const range = state.subjectRanges[subject];
+    if (!range) return;
+    state.currentIndex = range.start;
+    renderQuestion();
+    syncSubjectTabs();
+  }
+
+  function syncSubjectTabs() {
+    const current = state.currentQuestions[state.currentIndex];
+    if (!current) return;
+    const currentSubject = current.sourceSubject;
+    const btns = el.subjectTabs.querySelectorAll('.subject-tab-btn');
+    btns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.subject === currentSubject);
+    });
+  }
+
+  // ─── TIMER ────────────────────────────────────────
+  function getChosenDurationMinutes(count, mode) {
+    if (mode !== 'exam') return 0;
+    const raw = el.durationSelect.value;
+    if (raw === 'auto') return count;
+    return Math.max(1, Number(raw) || count);
+  }
+
+  function startTimer() {
+    updateTimerDisplay();
+    state.timerId = setInterval(() => {
+      state.timeLeft -= 1;
+      updateTimerDisplay();
+      if (state.timeLeft <= 0) {
+        clearInterval(state.timerId);
+        state.timerId = null;
+        finishQuiz(true);
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const t = Math.max(state.timeLeft, 0);
+    const m = Math.floor(t / 60);
+    const s = t % 60;
+    el.timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    el.timerDisplay.classList.toggle('urgent', state.mode === 'exam' && t < 300 && t > 0);
+  }
+
+  // ─── PILLS ────────────────────────────────────────
+  function buildQuestionPills() {
+    el.questionPills.innerHTML = '';
+    // If combo, show label; else show "Questions"
+    el.pillsLabel.textContent = state.sessionType === 'combo' ? 'All Questions' : 'Questions';
+
+    state.currentQuestions.forEach((_, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'pill';
+      btn.textContent = String(idx + 1);
+      btn.title = `Question ${idx + 1}${state.currentQuestions[idx].sourceSubject ? ' — ' + fmt(state.currentQuestions[idx].sourceSubject) : ''}`;
+      btn.addEventListener('click', () => {
+        state.currentIndex = idx;
+        renderQuestion();
+      });
+      el.questionPills.appendChild(btn);
+    });
+    syncPills();
+  }
+
+  function syncPills() {
+    [...el.questionPills.children].forEach((pill, idx) => {
+      pill.classList.toggle('current', idx === state.currentIndex);
+      pill.classList.toggle('answered', state.answers[idx] !== null);
+    });
+  }
+
+  // ─── RENDER QUESTION ─────────────────────────────
+  function renderQuestion() {
+    const q = state.currentQuestions[state.currentIndex];
+    if (!q) return;
+
+    // Show AI explain button only in Practice mode or when reviewing past
+    // results — never during a live, timed Exam Mode session, so it can't
+    // be used to see the answer to a question you're being tested on.
+    // Full Explain This in Practice Mode or when reviewing results; a small,
+    // inert teaser during a live Exam Mode session; nothing if not logged in.
+    if (!checkAccess()) hideAIButton();
+    else if (state.mode === 'practice' || state.reviewMode) showAIButton();
+    else showAITeaserButton();
+
+    // Show Working mode panel
+    const swPanel = document.getElementById('showWorkingPanel');
+    const isCalcSubject = SW_SUBJECTS.includes((el.subjectSelect?.value||state.subject||'').toLowerCase());
+    if (state.mode === 'showworking' && isCalcSubject) {
+      if (swPanel) swPanel.classList.remove('hidden');
+      // Reset for new question
+      state.swDone = false;
+      const swResult = document.getElementById('swResult');
+      if (swResult) swResult.classList.add('hidden');
+      const swCredits = document.getElementById('swCredits');
+      if (swCredits) swCredits.textContent = getSWCredits() + ' snaps left';
+      // Lock options until working is snapped
+      // Show SW panel inline and lock bar
+      const swPanel2 = document.getElementById('showWorkingPanel');
+      if (swPanel2) swPanel2.classList.remove('hidden');
+      lockOptionsUntilWorking(false);
+      const lockBar = document.getElementById('swLockBar');
+      if (lockBar) lockBar.classList.remove('hidden');
+    } else {
+      if (swPanel) swPanel.classList.add('hidden');
+      lockOptionsUntilWorking(true);
+      const lockBar = document.getElementById('swLockBar');
+      if (lockBar) lockBar.classList.add('hidden');
+    }
+
+    el.questionNumberBadge.textContent = `Question ${state.currentIndex + 1} of ${state.currentQuestions.length}`;
+    el.questionSubjectMeta.textContent = fmt(q.sourceSubject || state.subject) + (q.year ? ` · JAMB ${q.year}` : '');
+
+    // Subject position indicator (e.g. "Q6 of 40 in Physics")
+    const range = state.subjectRanges[q.sourceSubject];
+    if (range && el.subjectPositionTag) {
+      const posInSubject = state.currentIndex - range.start + 1;
+      const totalInSubject = range.end - range.start + 1;
+      el.subjectPositionTag.textContent = `${posInSubject} / ${totalInSubject} in ${fmt(q.sourceSubject)}`;
+      el.subjectPositionTag.classList.remove('hidden');
+    } else if (el.subjectPositionTag) {
+      el.subjectPositionTag.classList.add('hidden');
+    }
+    renderPassage(q);
+    el.questionText.innerHTML = mathHtml(q.question).replace(/\n/g, '<br>');
+
+    const hasDiagram = Boolean(q.diagram);
+    el.diagramBox.classList.toggle('hidden', !hasDiagram);
+    el.diagramBox.innerHTML = hasDiagram ? q.diagram : '';
+
+    el.optionsList.innerHTML = '';
+    const selectedAnswer = state.answers[state.currentIndex];
+
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> ${mathHtml(opt)}`;
+
+      if (selectedAnswer === idx) btn.classList.add('selected');
+
+      if ((state.reviewMode || state.mode === 'practice') && q.keyVerdict === 'noanswer') {
+        // No option is right: mark nothing green or red, just say so.
+        if (selectedAnswer !== null && idx === selectedAnswer) {
+          btn.classList.add('no-answer');
+          btn.insertAdjacentHTML('beforeend', '<span class="key-only-tag">No correct option · not counted against you</span>');
+        }
+      } else if (state.reviewMode || state.mode === 'practice') {
+        if (selectedAnswer !== null) {
+          if (isCorrect(q, idx)) btn.classList.add('correct');
+          // No option is fully right: JAMB's key answer still scores, but is
+          // marked in its own colour so it never looks like a clean answer.
+          if (q.keyVerdict === 'none' && idx === q.answer) {
+            btn.classList.add('key-only');
+            btn.insertAdjacentHTML('beforeend', '<span class="key-only-tag">JAMB\'s answer · not fully correct</span>');
+          }
+          if (idx === selectedAnswer && !isCorrect(q, selectedAnswer)) btn.classList.add('wrong');
+        }
+      }
+
+      btn.addEventListener('click', (e) => {
+        // Show Working mode — if not yet snapped, show warning near clicked option
+        if (state.mode === 'showworking' && !state.swDone) {
+          showGentlePopup('✍️ Snap your working first to unlock answers', e.currentTarget);
+          const panel = document.getElementById('showWorkingPanel');
+          if (panel) panel.classList.remove('hidden');
+          return;
+        }
+        selectAnswer(idx);
+      });
+      btn.disabled = state.reviewMode;
+      el.optionsList.appendChild(btn);
+    });
+
+    // Apply visual lock after options are built
+    if (state.mode === 'showworking' && !state.swDone) {
+      lockOptionsUntilWorking(false);
+    } else {
+      lockOptionsUntilWorking(true);
+    }
+
+    // Explanation logic
+    const shouldShowExpl = (
+      (state.mode === 'practice' && selectedAnswer !== null) ||
+      (state.reviewMode && (state.mode === 'practice' ? selectedAnswer !== null : state.showReviewExplanation))
+    );
+
+    const shouldShowToggle = state.reviewMode && state.mode === 'exam';
+    el.toggleExplanationBtn.classList.toggle('hidden', !shouldShowToggle);
+    el.toggleExplanationBtn.textContent = state.showReviewExplanation ? '🙈 Hide Explanation' : '💡 Show Explanation';
+    el.explanationBox.classList.toggle('hidden', !shouldShowExpl);
+    if (shouldShowExpl) {
+      el.explanationBox.innerHTML = mathHtml(q.explanation || '') + keyCheckHtml(q) + repeatHtml(q, q.sourceSubject || state.subjects?.[0]);
+      el.explanationBox.querySelector('.key-check-teach-btn')?.addEventListener('click', triggerAIExplain);
+    }
+
+    // Nav buttons — on the very first question, "Previous" has nowhere to
+    // go, so it becomes the exit action instead of just being greyed out.
+    el.prevBtn.disabled = false;
+    el.prevBtn.textContent = state.currentIndex === 0 ? '✕ Exit' : '← Previous';
+    el.nextBtn.textContent = state.currentIndex === state.currentQuestions.length - 1
+      ? 'Finish ✓'
+      : 'Next →';
+
+    // Progress
+    const answered = state.answers.filter(a => a !== null).length;
+    el.progressText.textContent = `${answered} / ${state.currentQuestions.length}`;
+    el.progressBar.style.width = `${(answered / state.currentQuestions.length) * 100}%`;
+
+    syncPills();
+    updateSubjectSwitcherCounts();
+    syncSubjectTabs();
+  }
+
+  function selectAnswer(idx) {
+    if (state.reviewMode) return;
+    state.answers[state.currentIndex] = idx;
+    renderQuestion();
+  }
+
+  function moveQuestion(step) {
+    if (step > 0 && state.currentIndex === state.currentQuestions.length - 1) {
+      finishQuiz(false);
+      return;
+    }
+    if (step < 0 && state.currentIndex === 0) {
+      confirmExit();
+      return;
+    }
+    state.currentIndex = Math.max(0, Math.min(state.currentQuestions.length - 1, state.currentIndex + step));
+    renderQuestion();
+  }
+
+  function toggleReviewExplanation() {
+    if (!(state.reviewMode && state.mode === 'exam')) return;
+    state.showReviewExplanation = !state.showReviewExplanation;
+    renderQuestion();
+  }
+
+  // ─── FINISH QUIZ ─────────────────────────────────
+  function finishQuiz(fromTimeout = false) {
+    if (!state.currentQuestions.length) return;
+    if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+
+    const correct = state.currentQuestions.reduce((sum, q, i) =>
+      sum + (isCorrect(q, state.answers[i]) ? 1 : 0), 0);
+    const total = state.currentQuestions.length;
+    const wrong = state.answers.filter((a, i) => a !== null && !isCorrect(state.currentQuestions[i], a)).length;
+    const skipped = state.answers.filter(a => a === null).length;
+    const percent = Math.round((correct / total) * 100);
+
+    if (!state.users[state.currentUser]) state.users[state.currentUser] = { history: [] };
+
+    const result = {
+      student: state.student,
+      subject: state.subject,
+      mode: state.mode,
+      sessionType: state.sessionType,
+      durationMinutes: state.chosenDurationMinutes,
+      total, correct, wrong, skipped, percent,
+      completedByTimeout: fromTimeout,
+      date: new Date().toLocaleString()
+    };
+
+    state.users[state.currentUser].history.unshift(result);
+    state.users[state.currentUser].history = state.users[state.currentUser].history.slice(0, 50);
+    saveUsers(state.users);
+
+    // Store for session sharing
+    window._jambLastResult    = result;
+    window._jambLastQuestions = [...state.currentQuestions];
+    window._jambLastAnswers   = [...state.answers];
+
+    // Score display + color
+    el.resultScore.textContent = `${percent}%`;
+    el.resultScore.style.color = percent >= 50
+      ? (percent >= 70 ? 'var(--green)' : 'var(--navy)')
+      : 'var(--red)';
+
+    el.resultSummary.textContent = `${result.student} scored ${correct} out of ${total} in ${result.subject}${fromTimeout ? ' (time elapsed).' : '.'}`;
+    el.resultBreakdown.innerHTML = [
+      statCard('Correct', correct),
+      statCard('Wrong', wrong),
+      statCard('Skipped', skipped),
+      statCard('Duration', result.mode === 'exam' ? `${result.durationMinutes} min` : '—')
+    ].join('');
+
+    // Per-subject breakdown for combo
+    if (state.sessionType === 'combo' && Object.keys(state.subjectRanges).length > 0) {
+      el.subjectBreakdown.classList.remove('hidden');
+      el.subjectBreakdownList.innerHTML = state.subjects.map(subject => {
+        const range = state.subjectRanges[subject];
+        if (!range) return '';
+        const qs = state.currentQuestions.slice(range.start, range.end + 1);
+        const c = qs.reduce((sum, q, i) =>
+          sum + (isCorrect(q, state.answers[range.start + i]) ? 1 : 0), 0);
+        const pct = Math.round((c / qs.length) * 100);
+        return `
+          <div class="sbdown-row">
+            <span class="sbdown-name">${fmt(subject)}</span>
+            <div class="sbdown-bar-wrap">
+              <div class="sbdown-bar" style="width:${pct}%"></div>
+            </div>
+            <span class="sbdown-score">${pct}%</span>
+          </div>`;
+      }).join('');
+    } else {
+      el.subjectBreakdown.classList.add('hidden');
+    }
+
+    renderStats();
+    renderHistory();
+    showScreen('result');
+
+    // If this was a Challenge Mode attempt, report the score to the shared
+    // leaderboard so the creator and anyone else with the code can see it —
+    // not just whoever is on this exact device.
+    const wasChallenge = !!state._challengeCode;
+    if (state._challengeCode) {
+      submitJambChallengeScore(state._challengeCode, state.currentUser, correct, total, percent, state.answers.slice());
+    }
+
+    // Best-effort report to the class dashboard (no-op if this device
+    // hasn't joined a class). This question bank has no stable per-question
+    // id, so a short hash of subject+question text stands in for one —
+    // stable across sessions, which is what "missed more than once" needs.
+    if (total > 0) {
+      const missed = state.currentQuestions
+        .map((q, i) => (state.answers[i] !== null && !isCorrect(q, state.answers[i]))
+          ? qHash(q.sourceSubject || state.subject, q.passageId ? q.passageId + '|' + q.question : q.question) : null)
+        .filter(Boolean);
+      recordClassSession({
+        subject: state.subject,
+        mode: wasChallenge ? 'challenge' : 'practice',
+        score: correct, total, missed,
+      });
+    }
+  }
+
+  // Shows the shared passage above a comprehension/cloze question. Opens
+  // expanded when the student arrives at a new passage; stays as the student
+  // left it (collapsed or open) while moving within the same passage.
+  function renderPassage(q) {
+    let box = document.getElementById('passageBox');
+    if (!box) {
+      box = document.createElement('details');
+      box.id = 'passageBox';
+      box.className = 'passage-box hidden';
+      el.questionText.parentNode.insertBefore(box, el.questionText);
+    }
+    if (!q.passage) { box.classList.add('hidden'); box.dataset.pid = ''; return; }
+    if (box.dataset.pid !== q.passageId) {
+      box.dataset.pid = q.passageId;
+      box.open = true;
+      box.innerHTML = `<summary><span class="passage-title">${escHtml(q.passageTitle)}</span><span class="passage-part" id="passagePartTag"></span></summary>`
+        + (q.passageInstruction ? `<p class="passage-instr">${escHtml(q.passageInstruction)}</p>` : '')
+        + `<div class="passage-text">${escHtml(q.passage).replace(/\n/g, '<br>')}</div>`;
+    }
+    const tag = document.getElementById('passagePartTag');
+    if (tag) tag.textContent = `Question ${q.passagePart} of ${q.passageSize} on this passage`;
+    box.classList.remove('hidden');
+  }
+
+  // Short, stable hash — same subject+question text always produces the
+  // same id, which is all the dashboard's "weak spot" detection needs.
+  function qHash(subject, text) {
+    const str = String(subject) + '|' + String(text);
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return 'q' + (h >>> 0).toString(36);
+  }
+
+  /* ════════ SCHOOL / PARENT DASHBOARDS ════════
+     A student joins a class with a class code + a 4-6 digit PIN they pick
+     (stops another student claiming their name). Every completed session
+     (practice, exam, or challenge) reports to /api/dashboard — best-effort,
+     never blocks the student's own result screen. A parent link is a
+     read-only code the student's own device generates for one child.
+     Shares the same backend and API_BASE as My Exams App's version. */
+  function getClassMembership() { return loadPref(SK_CLASS); }
+  function saveClassMembership(m) { savePref(SK_CLASS, m); }
+  function clearClassMembership() { try { localStorage.removeItem(SK_CLASS); } catch (e) {} }
+
+  async function dashApi(action, body) {
+    const res = await fetch(API_BASE + '/api/dashboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...body }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  async function recordClassSession({ subject, mode, score, total, missed }) {
+    const m = getClassMembership();
+    if (!m) return;
+    try {
+      await dashApi('record_session', {
+        classCode: m.classCode, name: m.name, pin: m.pin,
+        subject, mode, score, total, missed, timestamp: Date.now(),
+      });
+    } catch (e) { /* offline or class removed — not worth surfacing */ }
+  }
+
+  let _dashTab = null; // 'student' | 'teacher' | 'parent'
+
+  function openDashModal(tab) {
+    if (tab) _dashTab = tab;
+    if (!_dashTab) {
+      _dashTab = getClassMembership() ? 'student' : (loadPref(SK_CLASS_ADMIN) ? 'teacher' : 'teacher');
+    }
+    document.getElementById('jambDashModal')?.classList.remove('hidden');
+    renderDashModal();
+  }
+  function closeDashModal() {
+    document.getElementById('jambDashModal')?.classList.add('hidden');
+  }
+
+  function renderDashModal() {
+    document.querySelectorAll('#dashTabBar .dash-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === _dashTab);
+    });
+    const body = document.getElementById('dashTabBody');
+    if (_dashTab === 'teacher') renderDashTeacherTab(body);
+    else if (_dashTab === 'parent') renderDashParentTab(body);
+    else renderDashStudentTab(body);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#dashTabBar .dash-tab').forEach(btn => {
+      btn.addEventListener('click', () => { _dashTab = btn.dataset.tab; renderDashModal(); });
+    });
+    document.getElementById('jambDashBanner')?.addEventListener('click', () => openDashModal());
+    document.getElementById('jambDashClose')?.addEventListener('click', closeDashModal);
+    document.getElementById('jambGamesBanner')?.addEventListener('click', openGamesHub);
+    document.getElementById('jambGamesClose')?.addEventListener('click', closeGamesHub);
+    document.getElementById('jambRepeatBanner')?.addEventListener('click', openRepeatHub);
+    document.getElementById('jambRepeatClose')?.addEventListener('click', closeRepeatHub);
+    document.getElementById('jambTrickyBanner')?.addEventListener('click', openTrickyHub);
+    document.getElementById('jambTrickyClose')?.addEventListener('click', closeTrickyHub);
+    document.getElementById('jambKeyPointsBanner')?.addEventListener('click', openKeyPoints);
+    document.getElementById('jambTrapsBanner')?.addEventListener('click', openTraps);
+    document.getElementById('jambBookletBanner')?.addEventListener('click', openBooklet);
+    document.getElementById('jambBookletClose')?.addEventListener('click', closeBooklet);
+    document.getElementById('jambTrapsClose')?.addEventListener('click', closeTraps);
+    document.getElementById('jambKeyPointsClose')?.addEventListener('click', closeKeyPoints);
+    document.getElementById('gameHistoryClose')?.addEventListener('click', closeGameHistory);
+    document.getElementById('jambCommunityBanner')?.addEventListener('click', openCommunityScreen);
+    document.getElementById('communityClose')?.addEventListener('click', () => document.getElementById('communityModal')?.classList.add('hidden'));
+    document.getElementById('communitySubmitClose')?.addEventListener('click', () => { document.getElementById('communitySubmitModal')?.classList.add('hidden'); openCommunityScreen(); });
+    document.getElementById('communityPracticeClose')?.addEventListener('click', () => { document.getElementById('communityPracticeModal')?.classList.add('hidden'); openCommunityScreen(); });
+    document.getElementById('teacherDashClose')?.addEventListener('click', () => document.getElementById('teacherDashModal')?.classList.add('hidden'));
+    document.getElementById('parentDashClose')?.addEventListener('click', () => document.getElementById('parentDashModal')?.classList.add('hidden'));
+  });
+
+  /* ── Student tab: join a class, or manage membership + parent link ── */
+  function renderDashStudentTab(body) {
+    const m = getClassMembership();
+    if (m) {
+      body.innerHTML = `
+        <p class="jqc-sub" style="margin-bottom:.5rem;">You're in a class</p>
+        <p style="font-size:.85rem; margin-bottom:1rem;">Class code <b>${escHtml(m.classCode)}</b> · joined as <b>${escHtml(m.name)}</b><br>
+        <span class="jqc-sub" style="margin:0;">Your practice sessions and challenges are now shared with your teacher's class dashboard.</span></p>
+        <button class="jqc-btn jqc-primary" id="genParentLinkBtn" style="width:100%;">Generate Parent Link</button>
+        <div id="parentLinkOut" style="margin-top:.75rem;"></div>
+        <button class="jqc-btn jqc-ghost" id="leaveClassBtn" style="margin-top:1rem;">Leave Class</button>
+      `;
+      document.getElementById('genParentLinkBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('genParentLinkBtn');
+        btn.disabled = true; btn.textContent = 'Generating…';
+        try {
+          const { parentCode } = await dashApi('link_parent', { classCode: m.classCode, name: m.name, pin: m.pin });
+          document.getElementById('parentLinkOut').innerHTML = `
+            <input class="jqc-code-input" readonly value="${escHtml(parentCode)}" style="width:100%;margin-bottom:.5rem;">
+            <p class="jqc-sub" style="margin:0;">Share this code with your parent — they enter it under the Parent tab.</p>`;
+        } catch (e) {
+          showInfoToast(e.message || 'Could not generate link');
+        }
+        btn.disabled = false; btn.textContent = 'Generate Parent Link';
+      });
+      document.getElementById('leaveClassBtn').addEventListener('click', () => {
+        showConfirmModal('Leave this class? You can rejoin any time with the class code.', 'Leave', 'Cancel')
+          .then(ok => { if (ok) { clearClassMembership(); renderDashModal(); } });
+      });
+      return;
+    }
+
+    body.innerHTML = `
+      <p class="jqc-sub">Ask your teacher for the class code. Pick a 4-6 digit PIN — this keeps your results only yours.</p>
+      <div class="jqc-form">
+        <div class="jqc-field"><input class="jqc-code-input" id="joinClassCode" placeholder="Class code (e.g. C-XXXXXX)" style="text-transform:uppercase;"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="joinClassName" placeholder="Your name" style="text-transform:none;" value="${state.currentUser ? escHtml(state.currentUser) : ''}"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="joinClassPin" type="tel" placeholder="PIN (4-6 digits)" maxlength="6" style="text-transform:none;"></div>
+      </div>
+      <button class="jqc-btn jqc-primary" id="joinClassBtn" style="width:100%;margin-top:1rem;">Join Class</button>
+    `;
+    document.getElementById('joinClassBtn').addEventListener('click', async () => {
+      const classCode = document.getElementById('joinClassCode').value.trim().toUpperCase();
+      const name = document.getElementById('joinClassName').value.trim();
+      const pin = document.getElementById('joinClassPin').value.trim();
+      if (!classCode || !name || !/^\d{4,6}$/.test(pin)) { showInfoToast('Fill in class code, name, and a 4-6 digit PIN.'); return; }
+      const btn = document.getElementById('joinClassBtn');
+      btn.disabled = true; btn.textContent = 'Joining…';
+      try {
+        const result = await dashApi('join_class', { classCode, name, pin });
+        saveClassMembership({ classCode, name, pin });
+        if (result.entitlement) {
+          // Backend speaks My Exams App's tier vocabulary ('student'/'plus')
+          // since that's shared across both apps' bundle logic.
+          // Every school bundle gives students the full Student Pass.
+          grantAccess(result.entitlement.days, 'plus', null, result);
+        } else {
+          showInfoToast('Joined class!');
+        }
+        renderDashModal();
+      } catch (e) {
+        showInfoToast(e.message || 'Could not join class');
+        btn.disabled = false; btn.textContent = 'Join Class';
+      }
+    });
+  }
+
+  /* ── Teacher tab: create a class, or log in to an existing one ── */
+  function renderDashTeacherTab(body) {
+    const admin = loadPref(SK_CLASS_ADMIN);
+    if (admin) {
+      body.innerHTML = `
+        <p class="jqc-sub" style="margin-bottom:.5rem;">Logged in as admin</p>
+        <p style="font-size:.85rem; margin-bottom:1rem;">${escHtml(admin.schoolName || 'Class')} · code <b>${escHtml(admin.classCode)}</b></p>
+        <button class="jqc-btn jqc-primary" id="openTeacherDashBtn2" style="width:100%;margin-bottom:.5rem;">Open Teacher Dashboard</button>
+        <button class="jqc-btn jqc-ghost" id="teacherLogoutBtn">Log Out / Switch Class</button>
+      `;
+      document.getElementById('openTeacherDashBtn2').addEventListener('click', () => openTeacherDashboard(admin.classCode, admin.adminSecret));
+      document.getElementById('teacherLogoutBtn').addEventListener('click', () => {
+        try { localStorage.removeItem(SK_CLASS_ADMIN); } catch (e) {}
+        renderDashModal();
+      });
+      return;
+    }
+
+    body.innerHTML = `
+      <p class="jqc-sub" style="margin-bottom:.5rem;">Sign up your school — free to get started, no card required.</p>
+      <div class="jqc-form">
+        <div class="jqc-field"><input class="jqc-code-input" id="newSchoolName" placeholder="School / class name" style="text-transform:none;"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="newAdminPin" type="tel" placeholder="Set an admin PIN (4-6 digits)" maxlength="6" style="text-transform:none;"></div>
+      </div>
+      <button class="jqc-btn jqc-primary" id="createClassBtn" style="width:100%;margin-top:1rem;margin-bottom:1.25rem;">Create Class</button>
+      <div id="createClassForm"></div>
+      <p class="jqc-sub" style="margin-bottom:.5rem;">Already have an account?</p>
+      <div class="jqc-form">
+        <div class="jqc-field"><input class="jqc-code-input" id="loginClassCode" placeholder="Class code" style="text-transform:uppercase;"></div>
+        <div class="jqc-field"><input class="jqc-code-input" id="loginAdminPin" type="tel" placeholder="Admin PIN" maxlength="6" style="text-transform:none;"></div>
+      </div>
+      <button class="jqc-btn jqc-secondary" id="teacherLoginBtn" style="width:100%;margin-top:1rem;">Log In</button>
+    `;
+
+    document.getElementById('teacherLoginBtn').addEventListener('click', async () => {
+      const classCode = document.getElementById('loginClassCode').value.trim().toUpperCase();
+      const adminPin = document.getElementById('loginAdminPin').value.trim();
+      if (!classCode || !/^\d{4,6}$/.test(adminPin)) { showInfoToast('Enter your class code and admin PIN.'); return; }
+      const btn = document.getElementById('teacherLoginBtn');
+      btn.disabled = true; btn.textContent = 'Logging in…';
+      try {
+        const { adminSecret, schoolName } = await dashApi('admin_login', { classCode, adminPin });
+        savePref(SK_CLASS_ADMIN, { classCode, adminSecret, schoolName });
+        showInfoToast('Logged in!');
+        openTeacherDashboard(classCode, adminSecret);
+      } catch (e) {
+        showInfoToast(e.message || 'Could not log in — check your class code and PIN.');
+        btn.disabled = false; btn.textContent = 'Log In';
+      }
+    });
+
+    document.getElementById('createClassBtn').addEventListener('click', async () => {
+      const schoolName = document.getElementById('newSchoolName').value.trim();
+      const adminPin = document.getElementById('newAdminPin').value.trim();
+      if (!schoolName || !/^\d{4,6}$/.test(adminPin)) { showInfoToast('Enter a class name and a 4-6 digit PIN.'); return; }
+      const btn = document.getElementById('createClassBtn');
+      btn.disabled = true; btn.textContent = 'Creating…';
+      try {
+        const { classCode, adminSecret } = await dashApi('create_class', { schoolName, adminPin });
+        savePref(SK_CLASS_ADMIN, { classCode, adminSecret, schoolName });
+        document.getElementById('createClassForm').innerHTML = `
+          <p style="font-weight:700; margin-bottom:.5rem;">Class created! Share this code with your students:</p>
+          <p style="font-size:1.4rem; font-weight:700; letter-spacing:.05em; color:var(--amber,#f5a623);">${escHtml(classCode)}</p>
+          <button class="jqc-btn jqc-primary" style="width:100%; margin-top:1rem;" id="openTeacherDashBtn">Open Teacher Dashboard</button>`;
+        document.getElementById('openTeacherDashBtn').addEventListener('click', () => openTeacherDashboard(classCode, adminSecret));
+      } catch (e) {
+        showInfoToast(e.message || 'Could not create class');
+        btn.disabled = false; btn.textContent = 'Create Class';
+      }
+    });
+  }
+
+  /* ── Parent tab: log in with a parent code ───────────────────── */
+  function renderDashParentTab(body) {
+    body.innerHTML = `
+      <p class="jqc-sub">Enter the parent code your child shared with you.</p>
+      <div class="jqc-field"><input class="jqc-code-input" id="parentTabCode" placeholder="Parent code (e.g. P-XXXXXXXX)" style="width:100%;"></div>
+      <button class="jqc-btn jqc-primary" id="parentTabGoBtn" style="width:100%;margin-top:1rem;">View Progress</button>
+      <p id="parentTabErr" style="color:#e57373; font-size:.8rem; margin-top:.5rem;"></p>
+    `;
+    document.getElementById('parentTabGoBtn').addEventListener('click', async () => {
+      const code = document.getElementById('parentTabCode').value.trim().toUpperCase();
+      if (!code) return;
+      const btn = document.getElementById('parentTabGoBtn');
+      btn.disabled = true; btn.textContent = 'Loading…';
+      try {
+        const data = await dashApi('get_parent_dashboard', { parentCode: code });
+        closeDashModal();
+        renderParentDash(data);
+        document.getElementById('parentDashModal')?.classList.remove('hidden');
+      } catch (e) {
+        document.getElementById('parentTabErr').textContent = e.message || 'Could not load — check the code.';
+        btn.disabled = false; btn.textContent = 'View Progress';
+      }
+    });
+  }
+
+  /* ── Teacher dashboard (class-wide view) ─────────────────────── */
+  function openTeacherDashboard(classCode, adminSecret) {
+    closeDashModal();
+    document.getElementById('teacherDashBody').innerHTML = `<p class="jqc-sub">Loading class…</p>`;
+    document.getElementById('teacherDashModal')?.classList.remove('hidden');
+    dashApi('get_class_dashboard', { classCode, adminSecret }).then(renderTeacherDash).catch(e => {
+      document.getElementById('teacherDashBody').innerHTML = `<p style="color:#e57373;">${escHtml(e.message || 'Could not load dashboard')}</p>`;
+    });
+  }
+  function renderTeacherDash(data) {
+    const body = document.getElementById('teacherDashBody');
+    const admin = loadPref(SK_CLASS_ADMIN);
+    const bundleHtml = renderBundleSection(data.bundle);
+    if (!data.students.length) {
+      body.innerHTML = bundleHtml + `<p class="jqc-sub">No students have joined <b>${escHtml(data.classCode)}</b> yet. Share the class code to get started.</p>`;
+      wireBundleSection(data.classCode, admin?.adminSecret);
+      return;
+    }
+    const sorted = [...data.students].sort((a, b) => (b.avgPct || 0) - (a.avgPct || 0));
+    body.innerHTML = bundleHtml + `
+      <p class="jqc-sub">${escHtml(data.schoolName || 'Class')} · ${data.students.length} student${data.students.length === 1 ? '' : 's'}</p>
+      <div class="jqc-pending-list">
+        ${sorted.map(s => `
+          <div class="jqc-pending-row" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="jqc-score-name">${escHtml(s.name)}</span>
+              <span class="jqc-score-val">${s.avgPct == null ? '—' : s.avgPct + '%'}</span>
+            </div>
+            <p class="jqc-pending-sub">${s.sessionCount} session${s.sessionCount === 1 ? '' : 's'} · ${s.practiceCount || 0} practice · ${s.challengeCount || 0} challenge${(s.challengeCount || 0) === 1 ? '' : 's'}</p>
+            ${renderSubjectBreakdown(s.bySubject)}
+          </div>`).join('')}
+      </div>
+    `;
+    wireBundleSection(data.classCode, admin?.adminSecret);
+  }
+
+  /* ── School Bundle purchase/status — top of the teacher dashboard ── */
+  function renderBundleSection(bundle) {
+    if (bundle && bundle.active) {
+      const expDate = new Date(bundle.expiresAt).toLocaleDateString('en-NG');
+      const tierLabel = { standard: 'Standard', branded: 'Branded', premium: 'Premium' }[bundle.tier] || bundle.tier;
+      const nearExpiry = (bundle.expiresAt - Date.now()) < 30 * 24 * 60 * 60 * 1000;
+      return `
+        <div class="jqc-pending-row" style="flex-direction:column; align-items:stretch; border:1px solid rgba(245,166,35,.4); margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="jqc-score-name">${tierLabel} Bundle — Active</span>
+            <span class="jqc-pending-sub" style="margin:0;">Expires ${expDate}</span>
+          </div>
+          <p class="jqc-pending-sub">${bundle.seatsUsed} of ${bundle.tier === 'standard' ? bundle.seatLimit : 'unlimited'} seats used · students who join get full Student Pass access automatically</p>
+          ${nearExpiry ? `<button class="jqc-btn jqc-secondary" id="bundleRenewBtn" style="margin-top:.5rem;">Renew Bundle</button>` : ''}
+        </div>
+        <div id="bundlePickerOut"></div>
+      `;
+    }
+    return `
+      <div class="jqc-pending-row" style="flex-direction:column; align-items:stretch; margin-bottom:1rem;">
+        <span class="jqc-score-name">No active school bundle</span>
+        <p class="jqc-pending-sub">Activate a bundle so students who join this class get access automatically — no individual payment needed.</p>
+        <button class="jqc-btn jqc-primary" id="bundleActivateBtn" style="margin-top:.5rem;">Activate School Bundle</button>
+        <div id="bundlePickerOut"></div>
+      </div>
+    `;
+  }
+
+  function wireBundleSection(classCode, adminSecret) {
+    const openPicker = () => renderBundlePicker(classCode, adminSecret);
+    document.getElementById('bundleActivateBtn')?.addEventListener('click', openPicker);
+    document.getElementById('bundleRenewBtn')?.addEventListener('click', openPicker);
+  }
+
+  function renderBundlePicker(classCode, adminSecret) {
+    const out = document.getElementById('bundlePickerOut');
+    if (!out) return;
+    out.innerHTML = `
+      <div style="margin-top:.75rem;">
+        <div class="dash-tabs" id="bundleTierTabs">
+          <button class="dash-tab active" data-tier="standard">Standard</button>
+          <button class="dash-tab" data-tier="branded">Branded</button>
+          <button class="dash-tab" data-tier="premium">Premium</button>
+        </div>
+        <div id="bundleTierBody"></div>
+      </div>
+    `;
+    let tier = 'standard';
+    const renderTierBody = () => {
+      const tb = document.getElementById('bundleTierBody');
+      if (tier === 'standard') {
+        tb.innerHTML = `
+          <p class="jqc-sub">₦2,000 per student/year · minimum 50 seats</p>
+          <div class="jqc-field"><input class="jqc-code-input" id="bundleSeats" type="number" min="50" value="50" style="text-transform:none; width:100%;"></div>
+          <p style="font-weight:700; margin:.5rem 0 .75rem;" id="bundlePriceOut">Total: ₦100,000</p>
+        `;
+        document.getElementById('bundleSeats').addEventListener('input', (e) => {
+          const seats = Math.max(50, parseInt(e.target.value) || 50);
+          document.getElementById('bundlePriceOut').textContent = `Total: ₦${(seats * 2000).toLocaleString('en-NG')}`;
+        });
+      } else if (tier === 'branded') {
+        tb.innerHTML = `<p class="jqc-sub" style="margin-bottom:.75rem;">Unlimited seats, branded experience — ₦500,000/year flat.</p>`;
+      } else {
+        tb.innerHTML = `<p class="jqc-sub" style="margin-bottom:.75rem;">Unlimited seats, full premium tier — ₦1,000,000/year flat.</p>`;
+      }
+      tb.innerHTML += `<button class="jqc-btn jqc-primary" id="bundlePayBtn" style="width:100%;">Pay & Activate →</button>`;
+      document.getElementById('bundlePayBtn').addEventListener('click', () => payForBundle(tier, classCode, adminSecret));
+    };
+    renderTierBody();
+    document.querySelectorAll('#bundleTierTabs .dash-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tier = btn.dataset.tier;
+        document.querySelectorAll('#bundleTierTabs .dash-tab').forEach(b => b.classList.toggle('active', b === btn));
+        renderTierBody();
+      });
+    });
+  }
+
+  async function payForBundle(tier, classCode, adminSecret) {
+    const seats = tier === 'standard' ? Math.max(50, parseInt(document.getElementById('bundleSeats')?.value) || 50) : null;
+    const amount = tier === 'standard' ? seats * 200000 : (tier === 'branded' ? 50000000 : 100000000);
+    const email = await getEmailViaModal();
+    if (!email) return;
+    const PAYSTACK_KEY = 'pk_live_5d12ee2a90900116dc222107e059a06214c085ff';
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_KEY, email, amount, currency: 'NGN',
+      ref: 'JAMB-BUNDLE-' + Date.now(),
+      metadata: { custom_fields: [
+        { display_name: 'Bundle', variable_name: 'bundle_tier', value: tier },
+        { display_name: 'Class Code', variable_name: 'class_code', value: classCode },
+      ]},
+      onClose() {},
+      callback(response) {
+        (async () => {
+          const btn = document.getElementById('bundlePayBtn');
+          if (btn) { btn.disabled = true; btn.textContent = 'Activating…'; }
+          try {
+            const result = await dashApi('activate_bundle', {
+              classCode, adminSecret, tier, seats, reference: response.reference,
+            });
+            if (result.error) {
+              alert('Payment received but activation failed: ' + result.error + '\nContact support with reference: ' + response.reference);
+              return;
+            }
+            alert('✅ Bundle activated! Students who join this class now get automatic access.');
+            openTeacherDashboard(classCode, adminSecret);
+          } catch (e) {
+            alert('Could not confirm activation. If you were charged, contact support with reference: ' + response.reference);
+          }
+        })();
+      },
+    });
+    handler.openIframe();
+  }
+  function renderSubjectBreakdown(bySubject) {
+    const entries = Object.entries(bySubject || {});
+    if (!entries.length) return '';
+    return entries.sort((a, b) => a[1].avgPct - b[1].avgPct).map(([subj, d]) => `
+      <div style="display:flex; justify-content:space-between; font-size:.78rem; padding:.15rem 0; color:rgba(255,255,255,.6);">
+        <span>${escHtml(subj)} ${d.weakQuestions.length ? '⚠️' : ''}</span>
+        <span>${d.avgPct}% avg · ${d.sessions}x</span>
+      </div>`).join('');
+  }
+
+  /* ── Parent dashboard (single-child, read-only) ──────────────── */
+  function renderParentDash(data) {
+    const body = document.getElementById('parentDashBody');
+    body.innerHTML = `
+      <p style="font-weight:700; margin-bottom:.2rem;">${escHtml(data.name)}</p>
+      <p class="jqc-sub" style="margin-bottom:.5rem;">${escHtml(data.schoolName || '')}</p>
+      <div style="display:flex; gap:1.5rem; margin-bottom:1rem;">
+        <div><span style="font-weight:700; font-size:1.3rem;">${data.avgPct == null ? '—' : data.avgPct + '%'}</span><br><span class="jqc-pending-sub">Average</span></div>
+        <div><span style="font-weight:700; font-size:1.3rem;">${data.sessions.length}</span><br><span class="jqc-pending-sub">Sessions</span></div>
+      </div>
+      <p class="jqc-pending-title" style="margin-top:0;">By Subject</p>
+      ${renderSubjectBreakdown(data.bySubject) || '<p class="jqc-sub">No sessions yet.</p>'}
+      <p class="jqc-pending-title">Recent Sessions</p>
+      <div class="jqc-pending-list">
+        ${data.sessions.slice(0, 15).map(s => `
+          <div class="jqc-pending-row">
+            <div class="jqc-pending-info">
+              <span class="jqc-score-name" style="font-weight:600;">${escHtml(s.subject)} ${s.mode === 'challenge' ? '🏆' : ''}</span>
+              <p class="jqc-pending-sub">${new Date(s.at).toLocaleDateString()}</p>
+            </div>
+            <span class="jqc-score-val">${s.score}/${s.total}</span>
+          </div>`).join('') || '<p class="jqc-sub">No sessions yet.</p>'}
+      </div>
+    `;
+  }
+
+
+  /* ════════ GAMES ════════
+     Three lightweight game modes replaying the SAME existing question
+     bank through a faster-paced UI loop — no new content needed. Ported
+     from My Exams App's version, adapted to JAMB's modal-based UI (this
+     app has no full-screen navigation for auxiliary features, only
+     home/quiz/result) and its flat QUESTION_BANK[subject] array (no
+     .objective/.theory split, no per-question id — neither is needed
+     here). Deliberately NOT reported to class dashboards — same as the
+     My Exams App version, these are for-fun practice, kept separate from
+     tracked practice/exam/challenge sessions. */
+  let G = null;
+
+  function gameQuestionPool(subjectKey) {
+    const arr = QUESTION_BANK[subjectKey];
+    if (!Array.isArray(arr)) return [];
+    // Passage-bound questions ("According to the passage…") are meaningless
+    // in a fast game loop without the passage, so games skip them.
+    // Questions with several accepted answers or no correct option need
+    // the answer-key note to make sense, so games skip them too.
+    return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage
+      && !q.alsoAccept && q.keyVerdict !== 'none' && q.keyVerdict !== 'noanswer');
+  }
+
+  // Memory Match needs short text to fit on a card — a subject can pass
+  // the general question count but still come up short here, so both the
+  // picker's eligibility check and the actual game must use this exact
+  // same filter, not just gameQuestionPool.
+  function memoryEligiblePool(subjectKey) {
+    return gameQuestionPool(subjectKey).filter(q => q.question.length <= 70 && q.options[q.answer].length <= 22);
+  }
+
+  /* ── Most Repeated Questions hub ── */
+  function openRepeatHub() {
+    document.getElementById('jambRepeatModal')?.classList.remove('hidden');
+    const body = document.getElementById('jambRepeatBody');
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => JambContent.manifest.subjects[s].repeats);
+    body.innerHTML = subjects.map(s => `<div class="game-type-card repeat-subject" data-subject="${s}">
+      <span class="gtc-icon">🔁</span><div class="gtc-body"><div class="gtc-title">${fmt(s)}</div>
+      <div class="gtc-sub">${JambContent.manifest.subjects[s].repeats} repeated questions across this subject's papers</div></div></div>`).join('');
+    body.querySelectorAll('.repeat-subject').forEach(c => c.addEventListener('click', () => startRepeatPractice(c.dataset.subject)));
+  }
+  function closeRepeatHub() { document.getElementById('jambRepeatModal')?.classList.add('hidden'); }
+  async function startRepeatPractice(subject) {
+    if (!await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (!mostRepeatedPool(subject).length) { showInfoToast("No repeated questions found for this subject."); return; }
+    closeRepeatHub();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    el.yearSelect.value = 'repeated';
+    startSession();
+  }
+
+  /* ── JAMB's Tricky Questions ──
+     Two kinds of past question JAMB students rarely get explained:
+     'multi' = more than one option is correct (all are accepted);
+     'none'  = no option is fully correct (JAMB's answer is marked apart). */
+  const TRICKY = {
+    multi: { label: 'More Than One Right Answer', icon: '✌️', sub: 'Two or more options are correct; learn why each one works.' },
+    none:  { label: 'No Fully Correct Option', icon: '🚫', sub: "None of the options is fully right; see JAMB's answer and why it falls short." },
+  };
+  function trickyPool(subject, kind) {
+    const arr = QUESTION_BANK[subject];
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(q => Array.isArray(q.options) && (kind === 'none'
+      ? (q.keyVerdict === 'none' || q.keyVerdict === 'noanswer')
+      : Array.isArray(q.alsoAccept) && q.alsoAccept.length && q.keyVerdict !== 'none'));
+  }
+  async function openTrickyHub() {
+    const body = document.getElementById('jambTrickyBody');
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => Object.values(JambContent.manifest.subjects[s].tricky).some(Boolean));
+    body.innerHTML = subjects.length ? Object.keys(TRICKY).map(kind => {
+      const t = TRICKY[kind];
+      const cards = subjects.map(s => ({ s, n: JambContent.manifest.subjects[s].tricky[kind] })).filter(x => x.n).map(x =>
+        `<div class="game-type-card tricky-subject" data-subject="${x.s}" data-kind="${kind}">
+          <span class="gtc-icon">${t.icon}</span>
+          <div class="gtc-body"><div class="gtc-title">${fmt(x.s)}</div>
+          <div class="gtc-sub">${x.n} question${x.n === 1 ? '' : 's'}</div></div>
+        </div>`).join('');
+      return cards ? `<h3 class="tricky-h">${t.icon} ${t.label}</h3><p class="tricky-sub">${t.sub}</p>${cards}` : '';
+    }).join('') : '<p class="jqc-sub">No tricky questions yet.</p>';
+    body.querySelectorAll('.tricky-subject').forEach(c => c.addEventListener('click', () => startTrickyPractice(c.dataset.subject, c.dataset.kind)));
+    document.getElementById('jambTrickyModal')?.classList.remove('hidden');
+  }
+  function closeTrickyHub() { document.getElementById('jambTrickyModal')?.classList.add('hidden'); }
+  async function startTrickyPractice(subject, kind) {
+    if (!await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    closeTrickyHub();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    el.yearSelect.value = 'tricky-' + kind;
+    startSession();
+  }
+
+  /* ── Key Points: the topic lessons, browsable on their own ── */
+  const KP_FREE_TOPICS = 3; // free users can open this many topics per subject
+  async function openKeyPoints() {
+    const sel = document.getElementById('kpSubjectSelect');
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => JambContent.manifest.subjects[s].lessons);
+    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
+    if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
+    sel.onchange = renderKeyPoints;
+    renderKeyPoints();
+    document.getElementById('jambKeyPointsModal')?.classList.remove('hidden');
+  }
+  function closeKeyPoints() { document.getElementById('jambKeyPointsModal')?.classList.add('hidden'); }
+  async function renderKeyPoints() {
+    const subject = document.getElementById('kpSubjectSelect').value;
+    document.getElementById('jambKeyPointsBody').textContent = 'Choose a subject to prepare its saved study content.';
+    if (!subject || !await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (document.getElementById('kpSubjectSelect').value !== subject) return renderKeyPoints();
+    const t = window.TEACH_TOPICS?.[subject];
+    const body = document.getElementById('jambKeyPointsBody');
+    if (!t) { body.innerHTML = '<p class="jqc-sub">No lessons for this subject yet.</p>'; return; }
+    const counts = {};
+    Object.values(t.of || {}).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+    const ids = Object.keys(t.lessons || {}).sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+    const paid = checkAccess();
+    body.innerHTML = ids.map((id, i) => {
+      const L = t.lessons[id];
+      const n = counts[id] || 0;
+      const meta = n ? `<span class="kp-count">${n} past question${n === 1 ? '' : 's'}</span>` : '';
+      if (!paid && i >= KP_FREE_TOPICS) {
+        return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
+      }
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}</div></details>`;
+    }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
+    body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
+  }
+
+  /* ── Exam Traps: the genuinely tempting wrong options, by topic ──
+     Built from the "The trap:" sentence of each Teach Me (written only
+     where a wrong option is really close to the answer). The same trap from
+     a repeated question is shown once, with how often it was set. */
+  const TRAP_RE = /The trap:\s*([\s\S]*?)(?=\s*(?:Memory tip|Step \d+:|$))/;
+  const trapCache = {};
+  function trapIndex(subject) {
+    if (trapCache[subject]) return trapCache[subject];
+    const T = window.TEACH_ME?.[subject] || {};
+    const of = window.TEACH_TOPICS?.[subject]?.of || {};
+    const byTopic = {};
+    (QUESTION_BANK[subject] || []).forEach(q => {
+      if (!Array.isArray(q.options)) return;
+      const k = teachMeKey(q);
+      const m = (T[k] || '').match(TRAP_RE);
+      if (!m) return;
+      const topic = of[k] || 'other';
+      const list = byTopic[topic] = byTopic[topic] || new Map();
+      const g = list.get(m[1]) || { text: m[1], qs: [] };
+      g.qs.push(q); list.set(m[1], g);
+    });
+    return (trapCache[subject] = byTopic);
+  }
+  async function openTraps() {
+    const sel = document.getElementById('trapSubjectSelect');
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => JambContent.manifest.subjects[s].traps);
+    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
+    if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
+    sel.onchange = renderTraps;
+    renderTraps();
+    document.getElementById('jambTrapsModal')?.classList.remove('hidden');
+  }
+  function closeTraps() { document.getElementById('jambTrapsModal')?.classList.add('hidden'); }
+  async function renderTraps() {
+    const subject = document.getElementById('trapSubjectSelect').value;
+    document.getElementById('jambTrapsBody').textContent = 'Choose a subject to prepare its saved study content.';
+    if (!subject || !await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (document.getElementById('trapSubjectSelect').value !== subject) return renderTraps();
+    const body = document.getElementById('jambTrapsBody');
+    const idx = trapIndex(subject);
+    const lessons = window.TEACH_TOPICS?.[subject]?.lessons || {};
+    const ids = Object.keys(idx).sort((a, b) => idx[b].size - idx[a].size);
+    if (!ids.length) { body.innerHTML = '<p class="jqc-sub">No traps for this subject yet.</p>'; return; }
+    const paid = checkAccess();
+    body.innerHTML = ids.map((id, i) => {
+      const title = escHtml(lessons[id]?.title || 'Other');
+      const n = idx[id].size;
+      const meta = `<span class="kp-count">${n} trap${n === 1 ? '' : 's'}</span>`;
+      if (!paid && i >= KP_FREE_TOPICS) return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${title}</span>${meta}</div>`;
+      const items = [...idx[id].values()].map(g => {
+        const q = g.qs[0];
+        const years = [...new Set(g.qs.map(x => x.year).filter(Boolean))].sort();
+        return `<li class="trap-item"><div class="trap-q">${mathHtml(q.question.length > 140 ? q.question.slice(0, 140) + '…' : q.question)}</div>`
+          + `<div class="trap-opts">${q.options.map((o, j) => `<span${isCorrect(q, j) ? ' class="trap-right"' : ''}>${String.fromCharCode(65 + j)}. ${mathHtml(o)}</span>`).join('')}</div>`
+          + `<div class="trap-text">⚠️ ${mathHtml(g.text)}</div>`
+          + (years.length ? `<div class="trap-years">JAMB ${years.join(', ')}</div>` : '') + `</li>`;
+      }).join('');
+      return `<details class="kp-topic"><summary>${title} ${meta}</summary><div class="topic-body"><ul class="trap-list">${items}</ul>`
+        + `<button type="button" class="trap-practise" data-topic="${id}">Practise these ${n} question${n === 1 ? '' : 's'} →</button></div></details>`;
+    }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
+    body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeTraps(); showPaywall('premium'); }));
+    body.querySelectorAll('.trap-practise').forEach(b => b.addEventListener('click', () => startTrapPractice(subject, b.dataset.topic)));
+  }
+  function trapPool(subject, topic) {
+    return [...(trapIndex(subject)[topic]?.values() || [])].map(g => g.qs[g.qs.length - 1]);
+  }
+  function startTrapPractice(subject, topic) {
+    closeTraps();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    const title = window.TEACH_TOPICS?.[subject]?.lessons?.[topic]?.title || 'Exam Traps';
+    el.yearSelect.insertAdjacentHTML('beforeend', `<option value="traps-${topic}">⚠️ Exam Traps: ${escHtml(title)}</option>`);
+    el.yearSelect.value = 'traps-' + topic;
+    if (el.questionCountSelect) el.questionCountSelect.value = 'all';
+    startSession();
+  }
+
+  /* ── Wrong Answers in Circulation ──
+     Past questions whose answer, as printed in popular booklets and websites,
+     is wrong. Students who see the booklet answer may think we are wrong, so
+     this section shows both, with the reason. Sources: q.bookletKey/
+     q.bookletNote, debatable 'corrected' verdicts, and window.BOOKLET_ERRORS
+     (subject -> teachMeKey -> {k: booklet letter, note}). Free for everyone. */
+  function bookletEntry(q, subject) {
+    if (!Array.isArray(q.options)) return null;
+    const ext = window.BOOKLET_ERRORS?.[subject]?.[teachMeKey(q)];
+    if (ext) return { k: ext.k, note: ext.note || q.answerNote || '' };
+    if (q.bookletKey) return { k: q.bookletKey, note: q.bookletNote || '' };
+    if (q.keyVerdict === 'corrected' && q.keyAnswer) return { k: q.keyAnswer, note: q.answerNote || '' };
+    return null;
+  }
+  function bookletPool(subject) {
+    return (QUESTION_BANK[subject] || []).filter(q => bookletEntry(q, subject));
+  }
+  async function openBooklet() {
+    const sel = document.getElementById('bkSubjectSelect');
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => Object.keys(JambContent.manifest.subjects[s].years).length);
+    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
+    if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
+    sel.onchange = renderBooklet;
+    renderBooklet();
+    document.getElementById('jambBookletModal')?.classList.remove('hidden');
+  }
+  function closeBooklet() { document.getElementById('jambBookletModal')?.classList.add('hidden'); }
+  async function renderBooklet() {
+    const subject = document.getElementById('bkSubjectSelect').value;
+    document.getElementById('jambBookletBody').textContent = 'Choose a subject to prepare its saved study content.';
+    if (!subject || !await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (document.getElementById('bkSubjectSelect').value !== subject) return renderBooklet();
+    const body = document.getElementById('jambBookletBody');
+    const pool = bookletPool(subject);
+    if (!pool.length) { body.innerHTML = '<p class="jqc-sub">None found for this subject yet.</p>'; return; }
+    const byYear = {};
+    pool.forEach(q => { (byYear[q.year || 'Other'] = byYear[q.year || 'Other'] || []).push(q); });
+    const L = i => String.fromCharCode(65 + i);
+    body.innerHTML = Object.keys(byYear).sort().map(y => {
+      const items = byYear[y].map(q => {
+        const e = bookletEntry(q, subject);
+        const bi = e.k.charCodeAt(0) - 65;
+        const opts = q.options.map((o, j) => `<span class="${isCorrect(q, j) ? 'bk-right' : j === bi ? 'bk-wrong' : ''}">${L(j)}. ${mathHtml(o)}</span>`).join('');
+        return `<li class="trap-item"><div class="trap-q">${mathHtml(q.question.length > 160 ? q.question.slice(0, 160) + '…' : q.question)}</div>`
+          + `<div class="trap-opts">${opts}</div>`
+          + `<div class="bk-verdict">Booklet answer: <b class="bk-wrong">${escHtml(e.k)}</b> · Correct: <b class="bk-right">${[q.answer, ...(q.alsoAccept || [])].map(L).join(' or ')}</b></div>`
+          + (e.note ? `<div class="bk-note">${mathHtml(e.note)}</div>` : '') + `</li>`;
+      }).join('');
+      return `<details class="kp-topic"><summary>JAMB ${escHtml(String(y))} <span class="kp-count">${byYear[y].length} wrong in booklets</span></summary><div class="topic-body"><ul class="trap-list">${items}</ul></div></details>`;
+    }).join('') + `<button type="button" class="trap-practise bk-practise">Practise all ${pool.length} →</button>`;
+    body.querySelector('.bk-practise').addEventListener('click', () => startBookletPractice(subject));
+  }
+  function startBookletPractice(subject) {
+    closeBooklet();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    el.yearSelect.insertAdjacentHTML('beforeend', '<option value="booklet">❌ Wrong answers in circulation</option>');
+    el.yearSelect.value = 'booklet';
+    if (el.questionCountSelect) el.questionCountSelect.value = 'all';
+    startSession();
+  }
+
+  async function openGamesHub() {
+    document.getElementById('jambGamesModal')?.classList.remove('hidden');
+    renderGamesHub();
+  }
+  function closeGamesHub() {
+    document.getElementById('jambGamesModal')?.classList.add('hidden');
+  }
+
+  function renderGamesHub() {
+    const body = document.getElementById('jambGamesBody');
+    body.innerHTML = `
+      <div class="game-type-card" data-game="speed">
+        <span class="gtc-icon">⚡</span>
+        <div class="gtc-body"><div class="gtc-title">Speed Round</div><div class="gtc-sub">12 questions, 8 seconds each</div></div>
+      </div>
+      <div class="game-type-card" data-game="tf">
+        <span class="gtc-icon">✅</span>
+        <div class="gtc-body"><div class="gtc-title">True or False</div><div class="gtc-sub">Quick-fire judgment calls, 6 seconds each</div></div>
+      </div>
+      <div class="game-type-card" data-game="memory">
+        <span class="gtc-icon">🧠</span>
+        <div class="gtc-body"><div class="gtc-title">Memory Match</div><div class="gtc-sub">Match each question to its correct answer</div></div>
+      </div>
+      <div class="game-type-card" data-game="sequence">
+        <span class="gtc-icon">🔢</span>
+        <div class="gtc-body"><div class="gtc-title">Sequence</div><div class="gtc-sub">60 seconds — spot the pattern, pick what comes next</div></div>
+      </div>
+      <div class="game-type-card" data-game="equation">
+        <span class="gtc-icon">🧩</span>
+        <div class="gtc-body"><div class="gtc-title">Equation Builder</div><div class="gtc-sub">60 seconds — solve for x, watch for common-mistake decoys</div></div>
+      </div>
+      <div class="game-type-card" data-game="recent">
+        <span class="gtc-icon">🕹</span>
+        <div class="gtc-body"><div class="gtc-title">Recent Games</div><div class="gtc-sub">Your last 5 games on this device</div></div>
+      </div>
+      <div id="gamesSubjectPicker"></div>
+    `;
+    document.querySelectorAll('#jambGamesBody .game-type-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const g = card.dataset.game;
+        try {
+          if (g === 'sequence' || g === 'equation') startMathGame(g);
+          else if (g === 'recent') openGameHistory();
+          else renderGamesSubjectPicker(g);
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    });
+  }
+
+  function renderGamesSubjectPicker(gameType) {
+    const minNeeded = gameType === 'memory' ? 8 : 12;
+    const out = document.getElementById('gamesSubjectPicker');
+    const options = Object.keys(QUESTION_BANK)
+      .map(key => ({ key, count: JambContent.manifest.subjects[key][gameType === 'memory' ? 'memoryCount' : 'gameCount'] }))
+      .filter(s => s.count >= minNeeded);
+    if (!options.length) {
+      out.innerHTML = `<p class="jqc-sub" style="margin-top:1rem;">Not enough questions yet for this game.</p>`;
+      out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    out.innerHTML = `
+      <p style="font-weight:700; margin:1rem 0 .25rem; color:white;">Pick a subject</p>
+      <div class="game-subject-grid">
+        ${options.map(s => `
+          <button class="game-subject-btn" data-subject="${s.key}">
+            ${fmt(s.key)}
+            <span class="game-subject-count">${s.count} questions</span>
+          </button>`).join('')}
+      </div>
+    `;
+    document.querySelectorAll('#gamesSubjectPicker .game-subject-btn').forEach(btn => {
+      btn.addEventListener('click', () => startGame(gameType, btn.dataset.subject));
+    });
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function startGame(gameType, subjectKey) {
+    if (!await prepareContent([subjectKey], `Preparing ${fmt(subjectKey)}…`)) return;
+    closeGamesHub();
+    if (gameType === 'speed') startSpeedRound(subjectKey);
+    else if (gameType === 'tf') startTrueFalse(subjectKey);
+    else if (gameType === 'memory') startMemoryMatch(subjectKey);
+  }
+
+  function shuffleArr(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function exitGameConfirm(reopenHub) {
+    if (G && G.active && !confirm('Leave this game? Your progress will be lost.')) return;
+    if (G) G.active = false;
+    clearGameTimer();
+    ['speedRoundModal', 'trueFalseModal', 'memoryMatchModal', 'mathGameModal'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    if (reopenHub) openGamesHub();
+  }
+
+  function clearGameTimer() {
+    if (G && G.timerHandle) { clearInterval(G.timerHandle); G.timerHandle = null; }
+  }
+
+  function runGameTimer(seconds, fillEl, onExpire) {
+    clearGameTimer();
+    const start = Date.now();
+    const durationMs = seconds * 1000;
+    G.timerHandle = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.max(0, 100 - (elapsed / durationMs) * 100);
+      if (fillEl) {
+        fillEl.style.width = pct + '%';
+        fillEl.classList.toggle('urgent', pct < 30);
+      }
+      if (elapsed >= durationMs) {
+        clearGameTimer();
+        onExpire();
+      }
+    }, 100);
+  }
+
+  /* ── Speed Round ── */
+  function startSpeedRound(subjectKey) {
+    const pool = shuffleArr(gameQuestionPool(subjectKey)).slice(0, 12);
+    G = { type: 'speed', subject: subjectKey, questions: pool, idx: 0, score: 0, active: true, timerHandle: null };
+    document.getElementById('speedRoundModal')?.classList.remove('hidden');
+    renderSpeedRoundQ();
+  }
+
+  function renderSpeedRoundQ() {
+    const body = document.getElementById('speedRoundBody');
+    const q = G.questions[G.idx];
+    const total = G.questions.length;
+    body.innerHTML = `
+      <button class="jqc-ghost" id="speedExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="game-progress"><span>⚡ Speed Round · Q${G.idx + 1}/${total}</span><span class="game-score-live">Score: ${G.score}</span></div>
+      <div class="game-timer-bar"><div class="game-timer-fill" id="speedTimerFill" style="width:100%;"></div></div>
+      <p class="game-question">${escHtml(q.question)}</p>
+      <div id="speedOptions">
+        ${q.options.map((opt, i) => `<button class="game-option-btn" data-i="${i}">${escHtml(opt)}</button>`).join('')}
+      </div>
+    `;
+    document.getElementById('speedExitBtn').addEventListener('click', () => exitGameConfirm(true));
+    document.querySelectorAll('#speedOptions .game-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => answerSpeedRound(parseInt(btn.dataset.i)));
+    });
+    runGameTimer(8, document.getElementById('speedTimerFill'), () => answerSpeedRound(null));
+  }
+
+  function answerSpeedRound(choiceIdx) {
+    if (!G || !G.active) return;
+    clearGameTimer();
+    const q = G.questions[G.idx];
+    if (choiceIdx === q.answer) G.score++;
+    document.querySelectorAll('#speedOptions .game-option-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.answer) btn.classList.add('correct');
+      else if (i === choiceIdx) btn.classList.add('wrong');
+    });
+    setTimeout(() => {
+      G.idx++;
+      if (G.idx >= G.questions.length) finishGame('speedRoundModal');
+      else renderSpeedRoundQ();
+    }, 600);
+  }
+
+  /* ── True or False ── */
+  function startTrueFalse(subjectKey) {
+    const pool = shuffleArr(gameQuestionPool(subjectKey)).slice(0, 12);
+    const rounds = pool.map(q => {
+      const showCorrect = Math.random() < 0.5;
+      let statementIdx;
+      if (showCorrect) statementIdx = q.answer;
+      else {
+        const wrongIndices = q.options.map((_, i) => i).filter(i => i !== q.answer);
+        statementIdx = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+      }
+      return { q, statementIdx, isTrue: statementIdx === q.answer };
+    });
+    G = { type: 'tf', subject: subjectKey, rounds, idx: 0, score: 0, active: true, timerHandle: null };
+    document.getElementById('trueFalseModal')?.classList.remove('hidden');
+    renderTrueFalseQ();
+  }
+
+  function renderTrueFalseQ() {
+    const body = document.getElementById('trueFalseBody');
+    const r = G.rounds[G.idx];
+    const total = G.rounds.length;
+    body.innerHTML = `
+      <button class="jqc-ghost" id="tfExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="game-progress"><span>✅ True or False · Q${G.idx + 1}/${total}</span><span class="game-score-live">Score: ${G.score}</span></div>
+      <div class="game-timer-bar"><div class="game-timer-fill" id="tfTimerFill" style="width:100%;"></div></div>
+      <div class="tf-statement" id="tfStatement">${escHtml(r.q.question)} — <b>${escHtml(r.q.options[r.statementIdx])}</b></div>
+      <div class="tf-btn-row">
+        <button class="tf-btn true-btn" id="tfTrueBtn">TRUE</button>
+        <button class="tf-btn false-btn" id="tfFalseBtn">FALSE</button>
+      </div>
+    `;
+    document.getElementById('tfExitBtn').addEventListener('click', () => exitGameConfirm(true));
+    document.getElementById('tfTrueBtn').addEventListener('click', () => answerTrueFalse(true));
+    document.getElementById('tfFalseBtn').addEventListener('click', () => answerTrueFalse(false));
+    runGameTimer(6, document.getElementById('tfTimerFill'), () => answerTrueFalse(null));
+  }
+
+  function answerTrueFalse(choice) {
+    if (!G || !G.active) return;
+    clearGameTimer();
+    const r = G.rounds[G.idx];
+    if (choice === r.isTrue) G.score++;
+    document.getElementById('tfTrueBtn').disabled = true;
+    document.getElementById('tfFalseBtn').disabled = true;
+    document.getElementById('tfStatement').classList.add(r.isTrue ? 'correct' : 'wrong');
+    setTimeout(() => {
+      G.idx++;
+      if (G.idx >= G.rounds.length) finishGame('trueFalseModal');
+      else renderTrueFalseQ();
+    }, 600);
+  }
+
+  /* ── Memory Match ── */
+  function startMemoryMatch(subjectKey) {
+    const pool = memoryEligiblePool(subjectKey);
+    const shuffled = shuffleArr(pool).slice(0, 8);
+    const cards = [];
+    shuffled.forEach((q, pairIdx) => {
+      cards.push({ pairIdx, side: 'q', text: q.question, matched: false });
+      cards.push({ pairIdx, side: 'a', text: q.options[q.answer], matched: false });
+    });
+    G = {
+      type: 'memory', subject: subjectKey, cards: shuffleArr(cards),
+      flipped: [], moves: 0, matchedCount: 0, totalPairs: shuffled.length,
+      active: true, startTime: Date.now(),
+    };
+    document.getElementById('memoryMatchModal')?.classList.remove('hidden');
+    renderMemoryMatch();
+  }
+
+  function renderMemoryMatch() {
+    const body = document.getElementById('memoryMatchBody');
+    body.innerHTML = `
+      <button class="jqc-ghost" id="memoryExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="memory-stats"><span>🧠 Memory Match</span><span>Moves: ${G.moves} · Pairs: ${G.matchedCount}/${G.totalPairs}</span></div>
+      <div class="memory-grid" id="memoryGrid">
+        ${G.cards.map((c, i) => `<div class="memory-card hidden-face" data-i="${i}"><div class="memory-card-inner">?</div></div>`).join('')}
+      </div>
+    `;
+    document.getElementById('memoryExitBtn').addEventListener('click', () => exitGameConfirm(true));
+    document.querySelectorAll('#memoryGrid .memory-card').forEach(el => {
+      el.addEventListener('click', () => flipMemoryCard(parseInt(el.dataset.i)));
+    });
+  }
+
+  function flipMemoryCard(i) {
+    if (!G || !G.active) return;
+    const card = G.cards[i];
+    if (card.matched || G.flipped.includes(i) || G.flipped.length >= 2) return;
+    const el = document.querySelector(`#memoryGrid .memory-card[data-i="${i}"]`);
+    el.classList.remove('hidden-face');
+    el.classList.add('flipped');
+    el.querySelector('.memory-card-inner').textContent = card.text;
+    G.flipped.push(i);
+    if (G.flipped.length === 2) {
+      G.moves++;
+      const [i1, i2] = G.flipped;
+      const c1 = G.cards[i1], c2 = G.cards[i2];
+      if (c1.pairIdx === c2.pairIdx && c1.side !== c2.side) {
+        c1.matched = true; c2.matched = true;
+        G.matchedCount++;
+        [i1, i2].forEach(idx => {
+          const cel = document.querySelector(`#memoryGrid .memory-card[data-i="${idx}"]`);
+          cel.classList.remove('flipped');
+          cel.classList.add('matched');
+        });
+        G.flipped = [];
+        const statsEl = document.querySelector('.memory-stats span:last-child');
+        if (statsEl) statsEl.textContent = `Moves: ${G.moves} · Pairs: ${G.matchedCount}/${G.totalPairs}`;
+        if (G.matchedCount >= G.totalPairs) setTimeout(() => finishGame('memoryMatchModal'), 500);
+      } else {
+        setTimeout(() => {
+          [i1, i2].forEach(idx => {
+            const cel = document.querySelector(`#memoryGrid .memory-card[data-i="${idx}"]`);
+            if (cel) { cel.classList.remove('flipped'); cel.classList.add('hidden-face'); cel.querySelector('.memory-card-inner').textContent = '?'; }
+          });
+          G.flipped = [];
+          const statsEl = document.querySelector('.memory-stats span:last-child');
+          if (statsEl) statsEl.textContent = `Moves: ${G.moves} · Pairs: ${G.matchedCount}/${G.totalPairs}`;
+        }, 800);
+      }
+    }
+  }
+
+  /* ── Sequence & Equation Builder (procedural — no subject bank needed) ── */
+  function generateSequenceItem(usedQuestions) {
+    const types = ['arithmetic', 'geometric', 'squares', 'fibonacci'];
+    let seq, answer, questionText;
+    let attempts = 0;
+    do {
+      attempts++;
+      const type = types[Math.floor(Math.random() * types.length)];
+      if (type === 'arithmetic') {
+        const start = 1 + Math.floor(Math.random() * 20);
+        const step = 2 + Math.floor(Math.random() * 8);
+        seq = [0, 1, 2, 3, 4].map(i => start + i * step);
+      } else if (type === 'geometric') {
+        const start = 1 + Math.floor(Math.random() * 5);
+        const ratio = Math.random() < 0.5 ? 2 : 3;
+        seq = [0, 1, 2, 3, 4].map(i => start * Math.pow(ratio, i));
+      } else if (type === 'squares') {
+        const startN = 1 + Math.floor(Math.random() * 6);
+        seq = [0, 1, 2, 3, 4].map(i => Math.pow(startN + i, 2));
+      } else {
+        let a = 1 + Math.floor(Math.random() * 5), b = 1 + Math.floor(Math.random() * 5);
+        seq = [a, b];
+        for (let i = 2; i < 5; i++) seq.push(seq[i - 1] + seq[i - 2]);
+      }
+      answer = seq[4];
+      questionText = seq.slice(0, 4).join(', ') + ', ?';
+    } while (usedQuestions.has(questionText) && attempts < 10);
+    usedQuestions.add(questionText);
+
+    const distractors = new Set();
+    let guardCount = 0;
+    while (distractors.size < 3 && guardCount < 30) {
+      guardCount++;
+      const magnitude = Math.max(2, Math.round(Math.abs(answer) * 0.2)) || 3;
+      const delta = (Math.floor(Math.random() * magnitude * 2) - magnitude) || (Math.random() < 0.5 ? 1 : -1);
+      const wrong = answer + delta;
+      if (wrong !== answer && wrong > 0 && !distractors.has(wrong)) distractors.add(wrong);
+    }
+    let fallback = answer + 1;
+    while (distractors.size < 3) { if (fallback !== answer && !distractors.has(fallback)) distractors.add(fallback); fallback++; }
+
+    const options = shuffleArr([answer, ...Array.from(distractors)]);
+    return { id: 'seq-' + questionText, question: questionText, options: options.map(String), answer: options.indexOf(answer) };
+  }
+
+  function generateEquationItem(usedQuestions) {
+    let a, b, x, questionText, answer;
+    let attempts = 0;
+    do {
+      attempts++;
+      const form = Math.floor(Math.random() * 3);
+      x = 1 + Math.floor(Math.random() * 12);
+      if (form === 0) { // ax + b = c
+        a = 2 + Math.floor(Math.random() * 9);
+        b = Math.floor(Math.random() * 20) - 10;
+        const c = a * x + b;
+        questionText = `${a}x ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)} = ${c}`;
+      } else if (form === 1) { // ax - b = c
+        a = 2 + Math.floor(Math.random() * 9);
+        b = 1 + Math.floor(Math.random() * 15);
+        const c = a * x - b;
+        questionText = `${a}x - ${b} = ${c}`;
+      } else { // x/a + b = c
+        a = 2 + Math.floor(Math.random() * 6);
+        x = a * (1 + Math.floor(Math.random() * 10));
+        b = Math.floor(Math.random() * 10) - 5;
+        const c = x / a + b;
+        questionText = `x/${a} ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)} = ${c}`;
+      }
+      answer = x;
+    } while (usedQuestions.has(questionText) && attempts < 10);
+    usedQuestions.add(questionText);
+
+    const decoySet = new Set([answer + 1, answer - 1, -answer, answer + (a || 2)].filter(v => v !== answer && v > -50));
+    let fallback = answer + 2;
+    while (decoySet.size < 3) { if (fallback !== answer && !decoySet.has(fallback)) decoySet.add(fallback); fallback++; }
+    const options = shuffleArr([answer, ...Array.from(decoySet).slice(0, 3)]);
+    return { id: 'eq-' + questionText, question: `Solve: ${questionText}`, options: options.map(String), answer: options.indexOf(answer) };
+  }
+
+  function startMathGame(kind) {
+    closeGamesHub();
+    G = { type: kind, subject: null, usedQuestions: new Set(), queue: [], idx: 0, score: 0, streak: 0, bestStreak: 0, correct: 0, attempted: 0, active: true, timerHandle: null };
+    document.getElementById('mathGameModal')?.classList.remove('hidden');
+    renderMathGameShell();
+    renderMathGameQ();
+    runGameTimer(60, document.getElementById('mathGameTimerFill'), () => { if (G && G.active) finishGame('mathGameModal'); });
+  }
+
+  function renderMathGameShell() {
+    const body = document.getElementById('mathGameBody');
+    body.innerHTML = `
+      <button class="jqc-ghost" id="mathGameExitBtn" style="margin-bottom:.5rem;">✕ Exit</button>
+      <div class="game-progress"><span id="mathGameTitle"></span><span class="game-score-live" id="mathGameScoreLive">Score: 0</span></div>
+      <div class="game-timer-bar"><div class="game-timer-fill" id="mathGameTimerFill" style="width:100%;"></div></div>
+      <div id="mathGameQArea"></div>
+    `;
+    document.getElementById('mathGameExitBtn').addEventListener('click', () => exitGameConfirm(true));
+  }
+
+  function renderMathGameQ() {
+    if (G.idx >= G.queue.length) {
+      const gen = G.type === 'sequence' ? generateSequenceItem : generateEquationItem;
+      G.queue.push(gen(G.usedQuestions));
+    }
+    const q = G.queue[G.idx];
+    const titleBase = G.type === 'sequence' ? '🔢 Sequence' : '🧩 Equation Builder';
+    document.getElementById('mathGameTitle').textContent = titleBase + (G.streak >= 3 ? ` · 🔥 ${G.streak} streak` : '');
+    document.getElementById('mathGameScoreLive').textContent = `Score: ${G.score}`;
+    const area = document.getElementById('mathGameQArea');
+    area.innerHTML = `
+      <p class="game-question">${escHtml(q.question)}</p>
+      <div id="mathGameOptions">
+        ${q.options.map((opt, i) => `<button class="game-option-btn" data-i="${i}">${escHtml(opt)}</button>`).join('')}
+      </div>
+    `;
+    document.querySelectorAll('#mathGameOptions .game-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => answerMathGame(parseInt(btn.dataset.i)));
+    });
+  }
+
+  function answerMathGame(choiceIdx) {
+    if (!G || !G.active) return;
+    const q = G.queue[G.idx];
+    const correct = choiceIdx === q.answer;
+    G.attempted++;
+    if (correct) {
+      G.streak++;
+      G.bestStreak = Math.max(G.bestStreak, G.streak);
+      G.correct++;
+      const mult = G.streak >= 5 ? 3 : G.streak >= 3 ? 2 : 1;
+      G.score += 10 * mult;
+    } else {
+      G.streak = 0;
+    }
+    document.querySelectorAll('#mathGameOptions .game-option-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.answer) btn.classList.add('correct');
+      else if (i === choiceIdx) btn.classList.add('wrong');
+    });
+    setTimeout(() => {
+      if (!G || !G.active) return;
+      G.idx++;
+      renderMathGameQ();
+    }, 600);
+  }
+
+  /* ── Recent Games (local history — solo games only for now; multiplayer
+     rows will slot in here once Last Man Standing ships) ── */
+  const GAME_HISTORY_KEY = 'jambGameHistory';
+  const GAME_HISTORY_MAX = 5;
+  const GAME_NAMES = { speed: 'Speed Round', tf: 'True or False', memory: 'Memory Match', sequence: 'Sequence', equation: 'Equation Builder' };
+
+  function pushGameHistory(entry) {
+    let history = loadPref(GAME_HISTORY_KEY, []);
+    history.unshift(entry);
+    history = history.slice(0, GAME_HISTORY_MAX);
+    savePref(GAME_HISTORY_KEY, history);
+  }
+
+  function openGameHistory() {
+    closeGamesHub();
+    document.getElementById('gameHistoryModal')?.classList.remove('hidden');
+    renderGameHistory();
+  }
+
+  function closeGameHistory() {
+    document.getElementById('gameHistoryModal')?.classList.add('hidden');
+  }
+
+  function renderGameHistory() {
+    const body = document.getElementById('gameHistoryBody');
+    const history = loadPref(GAME_HISTORY_KEY, []);
+    body.innerHTML = history.length === 0
+      ? `<p style="color:var(--text-muted); font-size:.85rem; margin-top:1rem;">No games yet — jump into one from Games!</p>`
+      : history.map(h => {
+          const when = new Date(h.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          const subjLabel = h.subject ? fmt(h.subject) : 'Mixed';
+          return `
+            <div style="padding:.7rem .9rem; background:var(--cream-dark); border-radius:var(--radius); margin-bottom:.5rem;">
+              <div style="display:flex; justify-content:space-between; font-weight:700; font-size:.85rem;">
+                <span>${escHtml(GAME_NAMES[h.kind] || h.kind)}</span><span style="font-weight:400; color:var(--text-muted); font-size:.75rem;">${when}</span>
+              </div>
+              <div style="font-size:.78rem; color:var(--text-muted); margin-top:.15rem;">${escHtml(subjLabel)}</div>
+              <div style="font-size:.82rem; margin-top:.25rem;">${escHtml(h.summary)} · ${escHtml(h.detail)}</div>
+            </div>`;
+        }).join('');
+  }
+
+  /* ── Shared results — rendered inline into whichever modal was playing ── */
+  function finishGame(modalId) {
+    if (!G) return;
+    G.active = false;
+    clearGameTimer();
+    const bodyId = modalId === 'speedRoundModal' ? 'speedRoundBody' : modalId === 'trueFalseModal' ? 'trueFalseBody' : modalId === 'mathGameModal' ? 'mathGameBody' : 'memoryMatchBody';
+    const body = document.getElementById(bodyId);
+    const subjName = G.subject ? fmt(G.subject) : 'Mixed';
+    let scoreLine, labelLine, histEntry;
+    if (G.type === 'speed') {
+      scoreLine = `${G.score}/${G.questions.length}`;
+      labelLine = `Speed Round · ${escHtml(subjName)}`;
+      histEntry = { kind: 'speed', at: Date.now(), subject: G.subject, summary: scoreLine, detail: `${Math.round(G.score / G.questions.length * 100)}% accuracy` };
+    } else if (G.type === 'tf') {
+      scoreLine = `${G.score}/${G.rounds.length}`;
+      labelLine = `True or False · ${escHtml(subjName)}`;
+      histEntry = { kind: 'tf', at: Date.now(), subject: G.subject, summary: scoreLine, detail: `${Math.round(G.score / G.rounds.length * 100)}% accuracy` };
+    } else if (G.type === 'memory') {
+      const seconds = Math.round((Date.now() - G.startTime) / 1000);
+      scoreLine = `${G.moves} moves`;
+      labelLine = `Memory Match · ${escHtml(subjName)} · ${seconds}s`;
+      histEntry = { kind: 'memory', at: Date.now(), subject: G.subject, summary: scoreLine, detail: `${seconds}s` };
+    } else {
+      const gameLabel = G.type === 'sequence' ? 'Sequence' : 'Equation Builder';
+      scoreLine = `${G.score} pts`;
+      labelLine = `${gameLabel} · ${G.correct}/${G.attempted} correct${G.bestStreak >= 3 ? ' · best streak ' + G.bestStreak : ''}`;
+      histEntry = { kind: G.type, at: Date.now(), subject: null, summary: scoreLine, detail: `${G.correct}/${G.attempted} correct${G.bestStreak >= 3 ? ' · best streak ' + G.bestStreak : ''}` };
+    }
+    pushGameHistory(histEntry);
+    body.innerHTML = `
+      <div style="font-size:2.2rem; text-align:center;">🎮</div>
+      <div class="game-result-score">${scoreLine}</div>
+      <div class="game-result-label">${labelLine}</div>
+      <div class="game-result-actions">
+        <button class="jqc-btn jqc-primary" id="gamePlayAgainBtn">Play Again</button>
+        <button class="jqc-btn jqc-secondary" id="gameChangeBtn">Change Game</button>
+        <button class="jqc-ghost" id="gameCloseBtn" style="text-align:center;">Close</button>
+      </div>
+    `;
+    document.getElementById('gamePlayAgainBtn').addEventListener('click', () => G.subject ? startGame(G.type, G.subject) : startMathGame(G.type));
+    document.getElementById('gameChangeBtn').addEventListener('click', () => {
+      document.getElementById(modalId)?.classList.add('hidden');
+      openGamesHub();
+    });
+    document.getElementById('gameCloseBtn').addEventListener('click', () => {
+      document.getElementById(modalId)?.classList.add('hidden');
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     COMMUNITY QUESTIONS / CONTRIBUTOR PORTAL
+     Talks to /api/contribute on the same shared editoby-api backend
+     Challenge Mode and School & Class use. Community Questions are a
+     separate pool from the official past-question bank — contributor
+     content never touches QUESTION_BANK.
+     ════════════════════════════════════════════════════════════ */
+  const CONTRIBUTOR_KEY = 'jambContributor';
+  let CP = null; // Community Questions practice session state
+
+  async function contribApi(action, body) {
+    const res = await fetch(API_BASE + '/api/contribute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, ...body }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  function getContributor() { return loadPref(CONTRIBUTOR_KEY); }
+  function saveContributor(c) { savePref(CONTRIBUTOR_KEY, c); }
+
+  function openCommunityScreen() {
+    document.getElementById('communitySubmitModal')?.classList.add('hidden');
+    document.getElementById('communityPracticeModal')?.classList.add('hidden');
+    document.getElementById('communityModal')?.classList.remove('hidden');
+    renderCommunityHub();
+  }
+
+  async function renderCommunityHub() {
+    const body = document.getElementById('communityBody');
+    let c = getContributor();
+    body.innerHTML = `<p class="jqc-sub">Loading…</p>`;
+
+    if (c && c.id && c.contributorSecret) {
+      try {
+        const r = await contribApi('contributor_status', { id: c.id, contributorSecret: c.contributorSecret });
+        c = { ...c, status: r.status, acceptedCount: r.acceptedCount, flaggedCount: r.flaggedCount, rejectedCount: r.rejectedCount };
+        saveContributor(c);
+      } catch (e) { /* keep showing last-known status */ }
+    }
+
+    if (!c) { renderCommunityApplyForm(body); return; }
+    if (c.status === 'pending') {
+      body.innerHTML = `<div class="jqc-icon">✍️</div><h2 class="jqc-title">Community</h2><p class="jqc-sub">Your application to become a contributor is under review. Check back soon!</p>`;
+      return;
+    }
+    if (c.status === 'rejected') {
+      body.innerHTML = `<div class="jqc-icon">✍️</div><h2 class="jqc-title">Community</h2><p class="jqc-sub">Your contributor application wasn't approved this time.</p>`;
+      return;
+    }
+    body.innerHTML = `
+      <div class="jqc-icon">✍️</div>
+      <h2 class="jqc-title">Community</h2>
+      <p class="jqc-sub" style="margin-bottom:1rem;">You're an approved contributor. ${c.acceptedCount || 0} accepted${c.flaggedCount ? ` · ${c.flaggedCount} under review` : ''}${c.rejectedCount ? ` · ${c.rejectedCount} rejected` : ''}.</p>
+      <div class="game-type-card" id="communitySubmitCard">
+        <span class="gtc-icon">📝</span>
+        <div class="gtc-body"><div class="gtc-title">Submit a question or explanation</div><div class="gtc-sub">Add a new question, or explain one for other students.</div></div>
+      </div>
+      <div class="game-type-card" id="communityPracticeCard">
+        <span class="gtc-icon">🌍</span>
+        <div class="gtc-body"><div class="gtc-title">Practice Community Questions</div><div class="gtc-sub">Try questions other students have contributed.</div></div>
+      </div>
+    `;
+    document.getElementById('communitySubmitCard').addEventListener('click', openCommunitySubmit);
+    document.getElementById('communityPracticeCard').addEventListener('click', openCommunityPractice);
+  }
+
+  function renderCommunityApplyForm(body) {
+    body.innerHTML = `
+      <div class="jqc-icon">✍️</div>
+      <h2 class="jqc-title">Become a Contributor</h2>
+      <p class="jqc-sub" style="margin-bottom:1rem;">Submit past questions or explanations to help other students. Applications are reviewed before you can start.</p>
+      <input type="text" id="commApplyName" class="text-input" placeholder="Your full name" style="width:100%; margin-bottom:.6rem;">
+      <input type="text" id="commApplyContact" class="text-input" placeholder="Phone or email" style="width:100%; margin-bottom:.6rem;">
+      <button class="jqc-btn jqc-primary" id="commApplyBtn" style="width:100%;">Apply to Contribute</button>
+      <p style="margin-top:1rem; font-size:.8rem;"><a href="#" id="commRecoverLink">Already applied on another device?</a></p>
+      <div id="commApplyError" style="color:var(--red); font-size:.82rem; margin-top:.5rem;"></div>
+    `;
+    document.getElementById('commApplyBtn').addEventListener('click', async () => {
+      const name = document.getElementById('commApplyName').value.trim();
+      const contact = document.getElementById('commApplyContact').value.trim();
+      const errEl = document.getElementById('commApplyError');
+      errEl.textContent = '';
+      if (!name || !contact) { errEl.textContent = 'Please fill in both fields.'; return; }
+      try {
+        const r = await contribApi('apply_contributor', { name, contact, app: 'jamb' });
+        saveContributor({ id: r.id, contributorSecret: r.contributorSecret, status: r.status });
+        renderCommunityHub();
+      } catch (e) {
+        errEl.textContent = e.message || 'Something went wrong — please try again.';
+      }
+    });
+    document.getElementById('commRecoverLink').addEventListener('click', (ev) => {
+      ev.preventDefault();
+      renderCommunityRecoverForm(body);
+    });
+  }
+
+  function renderCommunityRecoverForm(body) {
+    body.innerHTML = `
+      <h2 class="jqc-title">Find Your Application</h2>
+      <p class="jqc-sub" style="margin-bottom:1rem;">Enter the phone or email you applied with, to restore your contributor account on this device.</p>
+      <input type="text" id="commRecoverContact" class="text-input" placeholder="Phone or email" style="width:100%; margin-bottom:.6rem;">
+      <button class="jqc-btn jqc-primary" id="commRecoverBtn" style="width:100%;">Find My Account</button>
+      <p style="margin-top:1rem; font-size:.8rem;"><a href="#" id="commBackToApplyLink">← Back to apply</a></p>
+      <div id="commRecoverError" style="color:var(--red); font-size:.82rem; margin-top:.5rem;"></div>
+    `;
+    document.getElementById('commRecoverBtn').addEventListener('click', async () => {
+      const contact = document.getElementById('commRecoverContact').value.trim();
+      const errEl = document.getElementById('commRecoverError');
+      errEl.textContent = '';
+      if (!contact) { errEl.textContent = 'Please enter a phone or email.'; return; }
+      try {
+        const r = await contribApi('contributor_recover', { contact });
+        saveContributor({ id: r.id, contributorSecret: r.contributorSecret, status: r.status });
+        renderCommunityHub();
+      } catch (e) {
+        errEl.textContent = e.message || 'No application found for that contact.';
+      }
+    });
+    document.getElementById('commBackToApplyLink').addEventListener('click', (ev) => {
+      ev.preventDefault();
+      renderCommunityApplyForm(body);
+    });
+  }
+
+  function openCommunitySubmit() {
+    document.getElementById('communityModal')?.classList.add('hidden');
+    document.getElementById('communitySubmitModal')?.classList.remove('hidden');
+    renderCommunitySubmitForm();
+  }
+
+  function renderCommunitySubmitForm() {
+    const body = document.getElementById('communitySubmitBody');
+    const subjectOptions = Object.keys(QUESTION_BANK).map(key => `<option value="${key}">${fmt(key)}</option>`).join('');
+    body.innerHTML = `
+      <h2 class="jqc-title" style="margin-bottom:1rem;">Submit to Community</h2>
+      <div style="display:flex; gap:.5rem; margin-bottom:1rem;">
+        <button class="exam-pill comm-type-btn active" data-type="question" style="flex:1;">New Question</button>
+        <button class="exam-pill comm-type-btn" data-type="explanation" style="flex:1;">Explain a Question</button>
+      </div>
+      <label style="font-size:.8rem; color:var(--text-muted);">Subject</label>
+      <select id="commSubject" class="select-input" style="width:100%; margin-bottom:.6rem;">${subjectOptions}</select>
+      <div id="commFormFields"></div>
+      <div id="commSubmitError" style="color:var(--red); font-size:.82rem; margin:.5rem 0;"></div>
+      <button class="jqc-btn jqc-primary" id="commSubmitBtn" style="width:100%; margin-top:.5rem;">Submit</button>
+      <div id="commSubmitResult" style="margin-top:1rem;"></div>
+    `;
+    let currentType = 'question';
+    function renderFields() {
+      const wrap = document.getElementById('commFormFields');
+      if (currentType === 'question') {
+        wrap.innerHTML = `
+          <textarea id="commQText" class="text-input" placeholder="Question text" rows="2" style="width:100%; margin-bottom:.6rem;"></textarea>
+          ${[0,1,2,3].map(i => `<input type="text" class="text-input comm-opt" data-i="${i}" placeholder="Option ${String.fromCharCode(65+i)}" style="width:100%; margin-bottom:.4rem;">`).join('')}
+          <label style="font-size:.8rem; color:var(--text-muted);">Correct answer</label>
+          <select id="commAnswerIdx" class="select-input" style="width:100%; margin-bottom:.6rem;">
+            <option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option>
+          </select>
+        `;
+      } else {
+        wrap.innerHTML = `
+          <textarea id="commQuestionText" class="text-input" placeholder="Paste or type the question you're explaining" rows="2" style="width:100%; margin-bottom:.6rem;"></textarea>
+          <textarea id="commExplanation" class="text-input" placeholder="Your explanation" rows="4" style="width:100%; margin-bottom:.6rem;"></textarea>
+        `;
+      }
+    }
+    renderFields();
+    document.querySelectorAll('.comm-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.comm-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentType = btn.dataset.type;
+        document.getElementById('commSubmitResult').innerHTML = '';
+        renderFields();
+      });
+    });
+    document.getElementById('commSubmitBtn').addEventListener('click', async () => {
+      const errEl = document.getElementById('commSubmitError');
+      const resultEl = document.getElementById('commSubmitResult');
+      errEl.textContent = '';
+      resultEl.innerHTML = '';
+      const c = getContributor();
+      if (!c || c.status !== 'approved') { errEl.textContent = 'You need to be an approved contributor to submit.'; return; }
+      const subject = document.getElementById('commSubject').value;
+      let payload, type = currentType;
+      if (type === 'question') {
+        const question = document.getElementById('commQText').value.trim();
+        const options = [...document.querySelectorAll('.comm-opt')].map(inp => inp.value.trim());
+        const answer = parseInt(document.getElementById('commAnswerIdx').value, 10);
+        if (!question) { errEl.textContent = 'Question text is required.'; return; }
+        if (options.some(o => !o)) { errEl.textContent = 'All 4 options are required.'; return; }
+        payload = { question, options, answer };
+      } else {
+        const questionText = document.getElementById('commQuestionText').value.trim();
+        const explanation = document.getElementById('commExplanation').value.trim();
+        if (!questionText || !explanation) { errEl.textContent = 'Both fields are required.'; return; }
+        payload = { questionText, explanation };
+      }
+      document.getElementById('commSubmitBtn').disabled = true;
+      document.getElementById('commSubmitBtn').textContent = 'Submitting…';
+      try {
+        const r = await contribApi('submit_content', { contributorId: c.id, contributorSecret: c.contributorSecret, app: 'jamb', type, subject, payload });
+        if (r.status === 'live') {
+          resultEl.innerHTML = `<p style="color:var(--green); font-weight:600;">✓ Published! Other students can now see this.</p>`;
+        } else {
+          resultEl.innerHTML = `<p style="color:var(--amber); font-weight:600;">Submitted — a human will take a quick look before it goes live${r.aiReason ? ` (${escHtml(r.aiReason)})` : ''}.</p>`;
+        }
+      } catch (e) {
+        errEl.textContent = e.message || 'Something went wrong — please try again.';
+      }
+      document.getElementById('commSubmitBtn').disabled = false;
+      document.getElementById('commSubmitBtn').textContent = 'Submit';
+    });
+  }
+
+  function openCommunityPractice() {
+    document.getElementById('communityModal')?.classList.add('hidden');
+    document.getElementById('communityPracticeModal')?.classList.remove('hidden');
+    renderCommunitySubjectPicker();
+  }
+
+  function renderCommunitySubjectPicker() {
+    const body = document.getElementById('communityPracticeBody');
+    const subjectOptions = Object.keys(QUESTION_BANK).map(key => `<button class="game-subject-btn" data-subject="${key}">${fmt(key)}</button>`).join('');
+    body.innerHTML = `
+      <h2 class="jqc-title" style="margin-bottom:1rem;">Practice Community Questions</h2>
+      <div class="game-subject-grid">${subjectOptions}</div>
+    `;
+    document.querySelectorAll('#communityPracticeBody .game-subject-btn').forEach(btn => {
+      btn.addEventListener('click', () => startCommunityPractice(btn.dataset.subject));
+    });
+  }
+
+  async function startCommunityPractice(subject) {
+    const body = document.getElementById('communityPracticeBody');
+    body.innerHTML = `<p class="jqc-sub">Loading…</p>`;
+    let items;
+    try {
+      const r = await contribApi('get_community_questions', { app: 'jamb', subject });
+      items = (r.items || []).filter(it => it.type === 'question');
+    } catch (e) {
+      body.innerHTML = `<p style="color:var(--red); font-size:.85rem;">Couldn't load — please try again.</p>`;
+      return;
+    }
+    if (!items.length) {
+      body.innerHTML = `<p class="jqc-sub">No community questions yet for ${fmt(subject)}. Be the first to contribute one!</p>`;
+      return;
+    }
+    CP = { subject, items: shuffleArr(items), idx: 0, score: 0 };
+    renderCommunityPracticeQ();
+  }
+
+  function renderCommunityPracticeQ() {
+    const body = document.getElementById('communityPracticeBody');
+    if (CP.idx >= CP.items.length) {
+      body.innerHTML = `
+        <h2 class="jqc-title">Done!</h2>
+        <p style="font-size:1.1rem; margin-bottom:1rem;">You got ${CP.score}/${CP.items.length} correct.</p>
+        <button class="jqc-btn jqc-primary" id="commPracticeAgainBtn">Practice Another Subject</button>
+      `;
+      document.getElementById('commPracticeAgainBtn').addEventListener('click', renderCommunitySubjectPicker);
+      return;
+    }
+    const q = CP.items[CP.idx];
+    body.innerHTML = `
+      <div class="game-progress"><span>Question ${CP.idx + 1}/${CP.items.length}</span><span class="game-score-live">Score: ${CP.score}</span></div>
+      <p class="game-question">${escHtml(q.payload.question)}</p>
+      <div id="commPracticeOptions">
+        ${q.payload.options.map((opt, i) => `<button class="game-option-btn" data-i="${i}">${escHtml(opt)}</button>`).join('')}
+      </div>
+    `;
+    document.querySelectorAll('#commPracticeOptions .game-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => answerCommunityPractice(parseInt(btn.dataset.i)));
+    });
+  }
+
+  function answerCommunityPractice(choiceIdx) {
+    const q = CP.items[CP.idx];
+    const correct = choiceIdx === q.payload.answer;
+    if (correct) CP.score++;
+    document.querySelectorAll('#commPracticeOptions .game-option-btn').forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.payload.answer) btn.classList.add('correct');
+      else if (i === choiceIdx) btn.classList.add('wrong');
+    });
+    setTimeout(() => { CP.idx++; renderCommunityPracticeQ(); }, 700);
+  }
+
+  async function submitJambChallengeScore(code, student, score, total, pct, answers) {
+    // Update the local copy too — this is what lets the creator's own
+    // device recognize "you've already completed this" without a network
+    // round trip, and keeps it correct even if the submit call below fails.
+    const challenges = loadPref(QC_STORE, {});
+    if (challenges[code]) {
+      challenges[code].scores = challenges[code].scores || {};
+      challenges[code].scores[student] = { score, total, pct, completedAt: Date.now() };
+      if (Array.isArray(answers)) challenges[code].answers = answers; // kept so a failed submit can be retried
+      savePref(QC_STORE, challenges);
+    }
+    refreshJambChallengeBadgeState();
+    try {
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // The server grades the picked options itself; it never trusts a sent score.
+        body: JSON.stringify({ action: 'submit', code, student, answers: answers || [] }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) renderJambLeaderboard(code, mergeScores(data.scores, code));
+    } catch (err) {
+      // Non-fatal — the student's own result screen already showed their
+      // score; the shared leaderboard just won't update this time.
+    }
+  }
+
+  // Server scores plus any this device recorded that the server lacks (e.g.
+  // a submit that failed offline), so a result never vanishes from the list.
+  function mergeScores(serverScores, code) {
+    const local = loadPref(QC_STORE, {})[code]?.scores || {};
+    return Object.assign({}, local, serverScores || {});
+  }
+
+  function renderJambLeaderboard(code, scores) {
+    const list = document.getElementById('jambLeaderboardList');
+    if (!list) return;
+    const entries = Object.entries(scores || {}).sort((a, b) => b[1].pct - a[1].pct);
+    list.innerHTML = entries.map(([name, s], i) => `
+      <div class="jqc-score-row ${name === state.currentUser ? 'jqc-score-me' : ''}">
+        <span class="jqc-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i+1)}</span>
+        <span class="jqc-score-name">${escHtml(name)}${name === state.currentUser ? ' (you)' : ''}</span>
+        <span class="jqc-score-val">${s.score}/${s.total} · ${s.pct}%</span>
+      </div>
+    `).join('') || '<p class="jqc-sub">No scores yet — share the code with a friend!</p>';
+    document.getElementById('jambCodeDisplay') && (document.getElementById('jambCodeDisplay').textContent = code);
+    showJQCPanel('jambQcLeaderboard');
+    document.getElementById('jambQuizModal')?.classList.remove('hidden');
+  }
+
+  function enterReviewMode() {
+    state.reviewMode = true;
+    state.currentIndex = 0;
+    state.showReviewExplanation = state.mode === 'practice';
+    showScreen('quiz');
+    renderQuestion();
+  }
+
+  /* ════════ CUSTOM CONFIRM MODAL (replaces native browser confirm()) ════════ */
+  function showConfirmModal(message, confirmLabel = 'Yes', cancelLabel = 'Cancel') {
+    return new Promise((resolve) => {
+      let overlay = document.getElementById('confirmModalOverlay');
+      if (overlay) overlay.remove();
+
+      overlay = document.createElement('div');
+      overlay.id = 'confirmModalOverlay';
+      overlay.style.cssText = `
+        position:fixed; inset:0; background:rgba(5,10,20,.72);
+        display:flex; align-items:center; justify-content:center;
+        z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);
+      `;
+      overlay.innerHTML = `
+        <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px;
+                    padding:1.75rem 1.5rem; max-width:340px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+          <p style="margin:0 0 1.1rem; color:#fff; font-size:.95rem; line-height:1.5;">${escHtml(message)}</p>
+          <div style="display:flex; gap:.6rem;">
+            <button id="confirmModalCancel" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a;
+                    background:transparent; color:#fff; font-weight:600; font-size:.85rem;">${escHtml(cancelLabel)}</button>
+            <button id="confirmModalOk" style="flex:1; padding:.65rem; border-radius:9px; border:none;
+                    background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">${escHtml(confirmLabel)}</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const cleanup = (val) => { overlay.remove(); resolve(val); };
+      document.getElementById('confirmModalCancel').addEventListener('click', () => cleanup(false));
+      document.getElementById('confirmModalOk').addEventListener('click', () => cleanup(true));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+    });
+  }
+
+  async function confirmExit() {
+    const leave = await showConfirmModal('Exit this session? Your progress will be lost.', 'Exit', 'Stay');
+    if (leave) {
+      if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+      showScreen('home');
+    }
+  }
+
+  async function switchUser() {
+    if (state.timerId) {
+      const ok = await showConfirmModal('Switch student? Current session will close.', 'Switch', 'Cancel');
+      if (!ok) return;
+      clearInterval(state.timerId); state.timerId = null;
+      showScreen('home');
+    }
+    state.currentUser = '';
+    saveCurrentUser('');
+    renderCurrentUser();
+    renderStats();
+    renderHistory();
+    el.studentName.value = '';
+    el.studentName.focus();
+  }
+
+  // ─── SCREEN + SYNC ────────────────────────────────
+  function showScreen(name) {
+    el.homeScreen.classList.toggle('active', name === 'home');
+    el.quizScreen.classList.toggle('active', name === 'quiz');
+    el.resultScreen.classList.toggle('active', name === 'result');
+    if (name !== 'quiz') hideAIButton();
+    if (name === 'home') refreshChallengeBtn();
+
+    // Hash-based back-button support — mirrors My Exams App's approach so
+    // the phone/browser back button doesn't just yank the student out of
+    // an in-progress session with no warning.
+    if (name === 'quiz' || name === 'result') {
+      history.pushState(null, '', window.location.pathname + '#' + name);
+    } else {
+      history.pushState(null, '', window.location.pathname);
+    }
+  }
+
+  // Double-back-to-exit — first back press shows a toast, second confirms exit.
+  let _backLastPress = 0;
+  let _backToastTimer = null;
+
+  function showBackWarningToast() {
+    let toast = document.getElementById('jambBackWarningToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'jambBackWarningToast';
+      toast.style.cssText = `
+        position:fixed; bottom:5rem; left:50%; transform:translateX(-50%);
+        background:#0a1628; color:white; border:1.5px solid var(--gold,#d4af37);
+        border-radius:10px; padding:.75rem 1.25rem;
+        font-family:var(--sans,sans-serif); font-size:.82rem; font-weight:500;
+        text-align:center; z-index:9999; max-width:320px; width:calc(100% - 2rem);
+        box-shadow:0 4px 20px rgba(0,0,0,.4); line-height:1.5;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = '⚠️ <strong>Press back again to exit session.</strong><br>Use the on-screen buttons to navigate questions.';
+    toast.style.display = 'block';
+    clearTimeout(_backToastTimer);
+    _backToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+
+  window.addEventListener('hashchange', () => {
+    // Back from the explainer: close it and stay on the question.
+    if (_aiPanelBackSkip) { _aiPanelBackSkip = false; return; }
+    const aiPanel = document.getElementById('aiPanel');
+    if (aiPanel && !aiPanel.classList.contains('hidden') && window.location.hash !== '#explain') {
+      aiPanel.classList.add('hidden');
+      return;
+    }
+    // Challenge modal open — back button navigates its panels instead of
+    // whatever the quiz-exit logic below would otherwise do.
+    const modalEl = document.getElementById('jambQuizModal');
+    if (modalEl && !modalEl.classList.contains('hidden')) {
+      if (_jambModalPanelHistory.length > 0) {
+        window.location.hash = 'jamb-challenge'; // stay armed for another back press
+        const prev = _jambModalPanelHistory.pop();
+        showJQCPanel(prev, true);
+      } else {
+        clearInterval(_waitingRoomTimer);
+        clearInterval(_waitingRoomCountdownTicker);
+        modalEl.classList.add('hidden');
+        history.replaceState(null, '', window.location.pathname);
+      }
+      return;
+    }
+
+    const quizActive   = el.quizScreen?.classList.contains('active');
+    const resultActive = el.resultScreen?.classList.contains('active');
+    if (!quizActive && !resultActive) return;
+
+    // Immediately restore the hash so the back button stays "armed"
+    if (quizActive)   window.location.hash = 'quiz';
+    if (resultActive) window.location.hash = 'result';
+
+    if (resultActive) {
+      showScreen('home');
+      return;
+    }
+
+    const now = Date.now();
+    if (now - _backLastPress < 3000) {
+      _backLastPress = 0;
+      const toast = document.getElementById('jambBackWarningToast');
+      if (toast) toast.style.display = 'none';
+      confirmExit();
+    } else {
+      _backLastPress = now;
+      showBackWarningToast();
+    }
+  });
+
+  function syncDurationUi() {
+    const mode = el.modeSelect.value;
+    el.durationSelect.disabled = mode !== 'exam';
+    // Show working mode — show subject restriction note
+    const swNote = document.getElementById('swSubjectsNote');
+    if (swNote) {
+      if (mode === 'showworking') {
+        swNote.textContent = '⚠️ Show Working is available for: Mathematics, Physics, Chemistry, Economics only.';
+        swNote.style.display = 'block';
+      } else {
+        swNote.style.display = 'none';
+      }
+    }
+  }
+
+  function syncStartButton() {
+    const mode    = document.getElementById('modeSelect')?.value || '';
+    const session = document.getElementById('sessionTypeSelect')?.value || '';
+    const subject = el.subjectSelect?.value || '';
+    const needsSubject = session === 'single' && !subject;
+
+    // Never disable — always clickable so popup can guide the user
+    el.startBtn.disabled = false;
+
+    if (!session && !mode) {
+      el.startBtn.textContent = 'Choose Session Type & Mode →';
+    } else if (!session) {
+      el.startBtn.textContent = 'Choose Session Type →';
+    } else if (!mode) {
+      el.startBtn.textContent = 'Choose a Mode →';
+    } else if (needsSubject) {
+      el.startBtn.textContent = 'Choose a Subject →';
+    } else {
+      el.startBtn.textContent = mode === 'exam' ? 'Start Exam' : mode === 'showworking' ? 'Start Show Working ✍️' : 'Start Practice';
+    }
+  }
+
+  function syncSessionTypeUi() {
+    const isCombo = el.sessionTypeSelect.value === 'combo';
+    el.singleSubjectWrap.classList.toggle('hidden', isCombo);
+    el.comboConfig.classList.toggle('hidden', !isCombo);
+    syncDurationUi();
+  }
+
+  // ─── RENDER UI ────────────────────────────────────
+  function renderCurrentUser() {
+    if (state.currentUser) {
+      el.currentStudentBox.textContent = `✓ Logged in as: ${state.currentUser}`;
+      el.currentStudentBox.className = 'student-pill logged-in';
+      el.studentName.value = state.currentUser;
+      el.historyTitle.textContent = state.currentUser;
+    } else {
+      el.currentStudentBox.textContent = 'No student logged in';
+      el.currentStudentBox.className = 'student-pill';
+      el.historyTitle.textContent = 'No student selected';
+    }
+    syncDurationUi();
+    refreshUpgradeBar();
+    refreshChallengeBtn();
+  }
+
+  function renderStats() {
+    const history = getCurrentHistory();
+    const sessions = history.length;
+    const avg = sessions ? Math.round(history.reduce((s, h) => s + h.percent, 0) / sessions) : null;
+    const best = sessions ? Math.max(...history.map(h => h.percent)) : null;
+    el.statSessions.textContent = String(sessions);
+    el.statAverage.textContent = avg !== null ? `${avg}%` : '—';
+    el.statBest.textContent = best !== null ? `${best}%` : '—';
+  }
+
+  function renderHistory() {
+    const history = getCurrentHistory();
+    if (!state.currentUser) {
+      el.historyList.className = 'history-list empty-state';
+      el.historyList.textContent = 'Login with a student name to view history.';
+      return;
+    }
+    if (!history.length) {
+      el.historyList.className = 'history-list empty-state';
+      el.historyList.textContent = 'No practice history yet. Start your first session!';
+      return;
+    }
+    el.historyList.className = 'history-list';
+    el.historyList.innerHTML = history.map(item => `
+      <div class="history-item">
+        <div>
+          <strong>${escHtml(item.subject)}</strong><br>
+          <span class="muted">${escHtml(item.date)}</span>
+        </div>
+        <div><strong>${item.percent}%</strong><br><span class="muted">Score</span></div>
+        <div><strong>${item.correct}/${item.total}</strong><br><span class="muted">Correct</span></div>
+        <div><strong>${item.mode === 'exam' ? 'Exam' : 'Practice'}</strong><br><span class="muted">Mode</span></div>
+        <div><strong>${item.mode === 'exam' ? (item.durationMinutes || '—') + ' min' : '—'}</strong><br><span class="muted">Time</span></div>
+      </div>
+    `).join('');
+  }
+
+  function getCurrentHistory() {
+    if (!state.currentUser || !state.users[state.currentUser]) return [];
+    return state.users[state.currentUser].history || [];
+  }
+
+  async function resetProgress() {
+    if (!state.currentUser) { alert('Login with a student name first.'); return; }
+    const ok = await showConfirmModal(`Erase all saved results for "${state.currentUser}" on this device?`, 'Erase', 'Cancel');
+    if (!ok) return;
+    if (!state.users[state.currentUser]) state.users[state.currentUser] = { history: [] };
+    state.users[state.currentUser].history = [];
+    saveUsers(state.users);
+    renderStats();
+    renderHistory();
+  }
+
+  // ─── STORAGE ─────────────────────────────────────
+  function loadUsers() {
+    try { return JSON.parse(localStorage.getItem(storageKeys.users) || '{}'); }
+    catch { return {}; }
+  }
+
+  function saveUsers(v) { localStorage.setItem(storageKeys.users, JSON.stringify(v)); }
+  function loadCurrentUser() { return localStorage.getItem(storageKeys.currentUser) || ''; }
+  function saveCurrentUser(v) { localStorage.setItem(storageKeys.currentUser, v); }
+
+  // ─── UTILS ───────────────────────────────────────
+  function statCard(label, value) {
+    return `<div class="stat-box"><span>${escHtml(label)}</span><strong>${escHtml(String(value))}</strong></div>`;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function fmt(val) {
+    return String(val).split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  function normalizeName(val) { return String(val).replace(/\s+/g, ' ').trim(); }
+
+  // Maths notation in question text: x^{2} → superscript, a_{n} → subscript.
+  // Escapes first, so it is safe for any text.
+  function mathHtml(s) {
+    return escHtml(s).replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>').replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>');
+  }
+  function escHtml(text) {
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  /* ════════════════════════════════════════════════════
+     PAYWALL + ACCESS CONTROL
+  ════════════════════════════════════════════════════ */
+
+  // snap: { snapToken, snapsLeft } from the server, when the pass has one.
+  function grantAccess(days, tier, reference, snap) {
+    const exp = new Date();
+    exp.setDate(exp.getDate() + days);
+    savePref(SK_ACCESS, { expires: exp.toISOString(), start: Date.now() });
+    if (snap?.snapToken) setSnapPass(snap.snapToken, snap.snapsLeft);
+    savePref(SK_TIER, tier || 'jamb');
+    document.getElementById('jambPaywall')?.classList.add('hidden');
+    refreshChallengeBtn();
+    const until = exp.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+    alert(`✅ Access granted until ${until}! Welcome to My JAMB App.` + (reference
+      ? `\n\nYour payment reference: ${reference}\nKeep it (it's also in your Paystack receipt email). With it you can restore your pass on another phone.`
+      : ''));
+  }
+
+
+  function showPaywall(reason) {
+    const badge = document.getElementById('jambPaywallBadge');
+    if (badge) badge.textContent = reason === 'trial' ? 'FREE TRIAL COMPLETE' : 'PREMIUM FEATURE';
+    document.getElementById('jambPaywall')?.classList.remove('hidden');
+    updateJambPriceUi();
+  }
+
+  // Asks the server how many of the first-100 ₦2,000 spots are taken (and
+  // whether this email holds one). null if the server can't be reached.
+  async function fetchJambEarlyStatus(email) {
+    try {
+      const res = await fetch(API_BASE + '/api/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ earlyAdopterStatus: true, app: 'jamb', email: email || '' })
+      });
+      const d = await res.json();
+      return res.ok && typeof d.sold === 'number' ? d : null;
+    } catch { return null; }
+  }
+
+  // Paywall price: ₦2,000 while early spots remain, else ₦2,499. If the
+  // server can't be reached the offer is hidden rather than guessed.
+  async function updateJambPriceUi() {
+    const ea = await fetchJambEarlyStatus();
+    const left = ea ? Math.max(0, ea.cap - ea.sold) : 0;
+    const amountEl = document.querySelector('#jambPaywall .jpw-amount');
+    const eaEl = document.getElementById('jambEaLine');
+    const btn = document.getElementById('jambPayBtn');
+    const periodEl = document.getElementById('jambPassPeriod');
+    if (periodEl) periodEl.textContent = `Full access till the exams (ends ${passUntilLabel()})`;
+    if (left > 0) {
+      if (amountEl) amountEl.innerHTML = '₦2,000 <s class="jpw-was">₦2,499</s>';
+      if (eaEl) { eaEl.textContent = `🔥 Early access: first 100 students pay ₦2,000 — ${left} spot${left === 1 ? '' : 's'} left`; eaEl.classList.remove('hidden'); }
+      if (btn) btn.textContent = 'Get Early Access — ₦2,000 →';
+    } else {
+      if (amountEl) amountEl.textContent = '₦2,499';
+      if (eaEl) eaEl.classList.add('hidden');
+      if (btn) btn.textContent = 'Get Access — ₦2,499 →';
+    }
+  }
+
+  function initPaywall() {
+    document.getElementById('jambPaywallClose')?.addEventListener('click', () => {
+      document.getElementById('jambPaywall')?.classList.add('hidden');
+    });
+    document.getElementById('jambPayBtn')?.addEventListener('click', handleJambPayment);
+    document.getElementById('jambRedeemBtn')?.addEventListener('click', redeemJambCode);
+    document.getElementById('jambRestoreBtn')?.addEventListener('click', openRestoreModal);
+    // Check for shared access from My Exams App
+    const examsAccess = loadPref('mea-access-v1');
+    if (examsAccess?.expires && new Date(examsAccess.expires) > new Date()) {
+      // Student Pass on Exams App grants JAMB access
+      grantJambFromExamsApp();
+    }
+    // Check URL for shared session
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('session')) checkForSharedSession();
+  }
+
+  function grantJambFromExamsApp() {
+    const examsAccess = loadPref('mea-access-v1');
+    if (!examsAccess?.expires) return;
+    const mine = loadPref(SK_ACCESS);
+    savePref(SK_ACCESS, { expires: examsAccess.expires, fromExamsApp: true,
+      start: examsAccess.start || (mine?.fromExamsApp ? mine.start : undefined) || Date.now() });
+    refreshChallengeBtn();
+  }
+
+  /* ════════ EMAIL MODAL (replaces native prompt() for payment email) ════════ */
+  function getEmailViaModal() {
+    return new Promise((resolve) => {
+      let overlay = document.getElementById('emailModalOverlay');
+      if (overlay) overlay.remove();
+
+      overlay = document.createElement('div');
+      overlay.id = 'emailModalOverlay';
+      overlay.style.cssText = `
+        position:fixed; inset:0; background:rgba(5,10,20,.72);
+        display:flex; align-items:center; justify-content:center;
+        z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);
+      `;
+      overlay.innerHTML = `
+        <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px;
+                    padding:1.75rem 1.5rem; max-width:340px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+          <h3 style="margin:0 0 .5rem; color:#fff; font-size:1.05rem; font-weight:700;">Enter your email</h3>
+          <p style="margin:0 0 1rem; color:var(--text-dim,#9aa5b1); font-size:.85rem; line-height:1.4;">
+            We'll send your payment receipt here.
+          </p>
+          <input id="emailModalInput" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"
+                 style="width:100%; box-sizing:border-box; padding:.7rem .85rem; border-radius:9px;
+                        border:1.5px solid #26344a; background:#0d1b2a; color:#fff; font-size:.95rem; outline:none;" />
+          <p id="emailModalError" style="display:none; color:var(--red,#e55); font-size:.78rem; margin:.4rem 0 0;">
+            Please enter a valid email address.
+          </p>
+          <div style="display:flex; gap:.6rem; margin-top:1.1rem;">
+            <button id="emailModalCancel" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a;
+                    background:transparent; color:#fff; font-weight:600; font-size:.85rem;">Cancel</button>
+            <button id="emailModalContinue" style="flex:1; padding:.65rem; border-radius:9px; border:none;
+                    background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">Continue</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const input = document.getElementById('emailModalInput');
+      const errEl = document.getElementById('emailModalError');
+      const cleanup = (val) => { overlay.remove(); resolve(val); };
+
+      input.focus();
+      document.getElementById('emailModalCancel').addEventListener('click', () => cleanup(null));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(null); });
+      const submit = () => {
+        const val = (input.value || '').trim();
+        if (!val.includes('@') || !val.includes('.')) { errEl.style.display = 'block'; return; }
+        cleanup(val);
+      };
+      document.getElementById('emailModalContinue').addEventListener('click', submit);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    });
+  }
+
+  // Restore a pass on another phone: the email it was paid with plus the
+  // reference from the Paystack receipt email (see verify-payment.js).
+  function openRestoreModal() {
+    document.getElementById('restoreModalOverlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'restoreModalOverlay';
+    overlay.style.cssText = `position:fixed; inset:0; background:rgba(5,10,20,.72); display:flex; align-items:center;
+      justify-content:center; z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);`;
+    const field = 'width:100%; box-sizing:border-box; padding:.7rem .85rem; border-radius:9px; border:1.5px solid #26344a; background:#0d1b2a; color:#fff; font-size:.95rem; outline:none; margin-top:.5rem;';
+    overlay.innerHTML = `
+      <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px; padding:1.75rem 1.5rem;
+                  max-width:360px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+        <h3 style="margin:0 0 .5rem; color:#fff; font-size:1.05rem; font-weight:700;">Restore your pass</h3>
+        <p style="margin:0 0 .4rem; color:var(--text-dim,#9aa5b1); font-size:.85rem; line-height:1.45;">
+          Paid on another phone, or a parent paid? Enter the email used to pay and the
+          <strong>reference</strong> from the Paystack receipt email.
+        </p>
+        <input id="restoreEmail" type="email" inputmode="email" autocomplete="email" placeholder="Email used to pay" style="${field}" />
+        <input id="restoreRef" type="text" autocomplete="off" placeholder="Reference, e.g. JAMB-1730000000000" style="${field}" />
+        <p id="restoreMsg" style="display:none; color:var(--red,#e55); font-size:.8rem; margin:.5rem 0 0; line-height:1.4;"></p>
+        <div style="display:flex; gap:.6rem; margin-top:1.1rem;">
+          <button id="restoreCancel" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a; background:transparent; color:#fff; font-weight:600; font-size:.85rem;">Cancel</button>
+          <button id="restoreGo" style="flex:1; padding:.65rem; border-radius:9px; border:none; background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">Restore</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const msg = overlay.querySelector('#restoreMsg');
+    const go = overlay.querySelector('#restoreGo');
+    const close = () => overlay.remove();
+    overlay.querySelector('#restoreCancel').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    go.addEventListener('click', async () => {
+      const email = overlay.querySelector('#restoreEmail').value.trim();
+      const reference = overlay.querySelector('#restoreRef').value.trim();
+      const fail = t => { msg.textContent = t; msg.style.display = 'block'; go.disabled = false; go.textContent = 'Restore'; };
+      if (!email.includes('@') || !reference) return fail('Enter both the email and the reference.');
+      go.disabled = true; go.textContent = 'Checking…';
+      try {
+        const res = await fetch(API_BASE + '/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restore: true, app: 'jamb', email, reference })
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!d.restored) return fail(d.error || 'Could not restore. Please try again.');
+        savePref(SK_ACCESS, { expires: d.expires, start: Date.parse(d.paidAt) || Date.now() });
+        if (d.snapToken) setSnapPass(d.snapToken, d.snapsLeft);
+        savePref(SK_TIER, d.tier || 'jamb');
+        close();
+        document.getElementById('jambPaywall')?.classList.add('hidden');
+        refreshChallengeBtn();
+        const until = new Date(d.expires).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+        alert(`✅ Pass restored on this phone. Access until ${until}.`);
+      } catch {
+        fail('No connection. Check your internet and try again.');
+      }
+    });
+  }
+
+  async function handleJambPayment() {
+    const email = await getEmailViaModal();
+    if (!email) return; // cancelled
+    // The server holds the first-100 count (by email), so an early-access
+    // student keeps ₦2,000 on any device.
+    const ea = await fetchJambEarlyStatus(email);
+    const isEA = !!ea && (ea.member || ea.sold < ea.cap);
+    const amount = isEA ? JAMB_EA_PRICE : JAMB_PRICE;
+
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_KEY,
+      email, amount,
+      currency: 'NGN',
+      ref: 'JAMB-' + Date.now(),
+      metadata: { custom_fields: [
+        { display_name: 'Plan', variable_name: 'plan', value: `My JAMB App — until ${passUntilLabel()}${isEA ? ' (early access)' : ''}` },
+        { display_name: 'App',  variable_name: 'app',  value: 'My JAMB App' },
+      ]},
+      onClose() {},
+      callback(response) {
+        (async () => {
+          const res = await fetch(API_BASE + '/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: response.reference })
+          }).catch(() => null);
+          const data = res ? await res.json().catch(() => ({})) : {};
+          if (!res || !res.ok || !data.verified) {
+            alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
+            return;
+          }
+          grantAccess(data.days || 90, data.tier || 'jamb', response.reference, data);
+        })();
+      }
+    });
+    handler.openIframe();
+  }
+
+  // Access codes for testers are checked on the server (they used to be
+  // listed here, readable by anyone who viewed the page source).
+  async function redeemJambCode() {
+    const input = document.getElementById('jambCodeInput');
+    const code = (input?.value || '').trim().toUpperCase();
+    if (!code) return;
+    const btn = document.getElementById('jambRedeemBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Checking…'; }
+    try {
+      const r = await fetch(API_BASE + '/api/verify-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ redeemCode: true, code }) });
+      const d = await r.json().catch(() => ({}));
+      if (d.ok) grantAccess(d.days, d.tier, null, d);
+      else alert(d.error || 'Invalid or expired code.');
+    } catch {
+      alert('No connection. Check your internet and try again.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Redeem'; }
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     AI EXPLANATIONS
+  ════════════════════════════════════════════════════ */
+
+  function updateAICreditsBadge() {
+    const badge = document.getElementById('aiCreditsBadge');
+    if (!badge) return;
+    if (isPlusUser()) { badge.textContent = 'Unlimited'; badge.style.color = '#27ae60'; return; }
+    const c = getAICredits();
+    badge.textContent = `${c} credit${c===1?'':'s'} left`;
+    badge.style.color = c < 10 ? '#e74c3c' : '#27ae60';
+  }
+
+  /* ════════ INFO TOAST (replaces native alert() for simple notices) ════════ */
+  function showInfoToast(message) {
+    let toast = document.getElementById('jambInfoToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'jambInfoToast';
+      toast.style.cssText = `
+        position:fixed; bottom:5rem; left:50%; transform:translateX(-50%);
+        background:#0a1628; color:white; border:1.5px solid var(--gold,#d4af37);
+        border-radius:10px; padding:.75rem 1.25rem;
+        font-family:var(--sans,sans-serif); font-size:.82rem; font-weight:500;
+        text-align:center; z-index:9999; max-width:320px; width:calc(100% - 2rem);
+        box-shadow:0 4px 20px rgba(0,0,0,.4); line-height:1.5;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.display = 'block';
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => { toast.style.display = 'none'; }, 3500);
+  }
+
+  function initAIExplain() {
+    document.getElementById('aiPanelClose')?.addEventListener('click', closeAIPanel);
+    document.getElementById('aiExplainBtn')?.addEventListener('click', triggerAIExplain);
+    document.getElementById('aiExplainTeaserBtn')?.addEventListener('click', () => {
+      showInfoToast('Explanations are only available in Practice Mode or when reviewing your results.');
+    });
+  }
+
+  function showAIButton() {
+    if (!checkAccess()) return;
+    document.getElementById('aiExplainBtn')?.classList.remove('hidden');
+    document.getElementById('aiExplainTeaserBtn')?.classList.add('hidden');
+  }
+
+  // Shown only during a live Exam Mode session — small and deliberately
+  // inert, just tells the student when the real explain feature becomes
+  // available rather than pretending the feature doesn't exist at all.
+  function showAITeaserButton() {
+    if (!checkAccess()) return;
+    document.getElementById('aiExplainBtn')?.classList.add('hidden');
+    document.getElementById('aiExplainTeaserBtn')?.classList.remove('hidden');
+  }
+
+  // The explainer gets its own history entry, so the phone's back button
+  // closes it and leaves the student on the question.
+  let _aiPanelBackSkip = false;
+  function openAIPanel() {
+    const p = document.getElementById('aiPanel');
+    if (!p || !p.classList.contains('hidden')) return;
+    p.classList.remove('hidden');
+    if (window.location.hash !== '#explain') history.pushState(null, '', window.location.pathname + '#explain');
+  }
+  function closeAIPanel() {
+    const p = document.getElementById('aiPanel');
+    if (!p || p.classList.contains('hidden')) return;
+    p.classList.add('hidden');
+    if (window.location.hash === '#explain') { _aiPanelBackSkip = true; history.back(); }
+  }
+  function hideAIButton() {
+    document.getElementById('aiExplainBtn')?.classList.add('hidden');
+    document.getElementById('aiExplainTeaserBtn')?.classList.add('hidden');
+  }
+
+  // Key for explanations written in advance (teach/<subject>.js). Options
+  // are part of it because some questions share the same wording.
+  function teachMeKey(q) {
+    return (q.passageId || '') + '|' + q.question + '|' + q.options.join('|');
+  }
+
+  async function triggerAIExplain() {
+    if (!checkAccess()) { showPaywall('feature'); return; }
+    if (!(state.mode === 'practice' || state.reviewMode)) {
+      showInfoToast('Explanations are only available in Practice Mode or when reviewing your results.');
+      return;
+    }
+    const q = state.currentQuestions[state.currentIndex];
+    if (!q) return;
+    // Already-fetched explanations stay viewable even at 0 credits.
+    const alreadyCached = !!getCachedTeach(teachCacheKey(q.sourceSubject || state.subject, q));
+    const credits = getAICredits();
+    if (credits <= 0 && !alreadyCached && !isPlusUser()) {
+      alert(`You've used all ${AI_QUARTERLY} AI explanation credits for this quarter.\n\nTop up: ₦500 = 50 more explanations.`);
+      return;
+    }
+
+    const loading = document.getElementById('aiLoading');
+    const response = document.getElementById('aiResponse');
+    openAIPanel();
+    loading?.classList.remove('hidden');
+    response?.classList.add('hidden');
+    updateAICreditsBadge();
+
+    const correctOpt = q.options[q.answer];
+    const studentAns = state.answers[state.currentIndex];
+    const studentOpt = studentAns !== null && studentAns !== undefined ? q.options[studentAns] : null;
+    const wasCorrect = isCorrect(q, studentAns);
+    const subject = q.sourceSubject || state.subject;
+    const L = i => String.fromCharCode(65 + i);
+    const right = [q.answer, ...(q.alsoAccept || [])].sort((a, b) => a - b).map(L).join(' or ');
+
+    // The student-specific line lives OUTSIDE the explanation, so one
+    // explanation per question can be reused for every student.
+    const keyOnly = q.keyVerdict === 'none';
+    const youLine = q.keyVerdict === 'noanswer'
+      ? `<div class="ai-you">${studentOpt === null ? "You didn't answer this one." : `You chose <strong>${L(studentAns)}</strong>.`} None of the options is correct, so this question has no answer.</div>`
+      : studentOpt === null
+      ? `<div class="ai-you">You didn't answer this one. ${keyOnly ? `JAMB's answer is <strong>${right}</strong> (no option is fully correct).` : `The answer is <strong>${right}</strong>.`}</div>`
+      : wasCorrect
+        ? `<div class="ai-you ai-you-right">You chose <strong>${L(studentAns)}</strong> — ${keyOnly ? "JAMB's answer ✓ (but no option is fully correct)" : 'correct ✓'}</div>`
+        : `<div class="ai-you ai-you-wrong">You chose <strong>${L(studentAns)}</strong>. ${keyOnly ? `JAMB's answer is <strong>${right}</strong>, though no option is fully correct.` : `The answer is <strong>${right}</strong>.`}</div>`;
+    const show = text => {
+      loading?.classList.add('hidden');
+      if (response) {
+        response.innerHTML = `<div class="ai-q-recap"><strong>${mathHtml(q.question.substring(0,80))}${q.question.length>80?'…':''}</strong></div>${youLine}<div class="ai-text">${mathHtml(text).replace(/\n/g,'<br/>')}</div>${keyCheckHtml(q, true)}${repeatHtml(q, subject)}${teachExtrasHtml(q, subject)}`;
+        response.classList.remove('hidden');
+        wireTeachExtras(response, q, subject);
+      }
+      updateAICreditsBadge();
+    };
+
+    // Layer 0: written in advance and shipped with the app (teach/<subject>.js)
+    // — instant, offline, free.
+    const written = window.TEACH_ME?.[subject]?.[teachMeKey(q)];
+    if (written) { show(written); return; }
+
+    // Layer 1: this device already fetched it — show instantly, no credit,
+    // no network. (Layer 2, shared across ALL students, is the server-side
+    // Redis cache in /api/teach keyed on the `teach` fields sent below.)
+    const cacheKey = teachCacheKey(subject, q);
+    const local = getCachedTeach(cacheKey);
+    if (local) { show(local); return; }
+
+    // Student-agnostic on purpose (see youLine above): explains the right
+    // answer AND every wrong option, so it serves whoever picked anything.
+    const prompt = `You are a JAMB/UTME exam tutor helping Nigerian students prepare.
+${q.passage ? `\nThis question is based on the following ${q.passageTitle || 'passage'}:\n---\n${q.passage}\n---\n` : ''}
+Question: ${q.question}
+Options: ${q.options.map((o,i)=>L(i)+'. '+o).join(' | ')}
+Correct answer: ${L(q.answer)}. ${correctOpt}
+
+Give a clear, concise explanation in 3-5 sentences:
+1. Why the correct answer is right${q.passage ? ' — point to what in the passage supports it' : ''}
+2. Briefly, why each other option is wrong (the trap in each)
+3. A memory tip or key principle to remember for JAMB
+
+Use plain English. Be encouraging. Keep it brief — students are studying under pressure.`;
+
+    try {
+      if (!useAICredit()) {
+        loading?.classList.add('hidden');
+        alert('No AI credits remaining this quarter.');
+        panel?.classList.add('hidden');
+        return;
+      }
+      const res = await fetch(API_BASE + '/api/teach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // `prompt` keeps today's /api/teach working unchanged. `teach` lets
+        // the updated backend build the prompt itself and cache by content.
+        body: JSON.stringify({
+          prompt,
+          teach: { app: 'jamb', v: 1, subject, question: q.question, options: q.options,
+                   answer: q.answer, passage: q.passage || null, passageTitle: q.passageTitle || null,
+                   alsoAccept: q.alsoAccept || null, note: q.keyVerdict ? (q.answerNote || null) : null }
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      const text = data.text || data.content?.map(c=>c.text||'').join('') || '';
+      if (!res.ok || !text) throw new Error('empty');
+      putCachedTeach(cacheKey, text);
+      show(text);
+    } catch(err) {
+      refundAICredit(); // the student got nothing — don't charge them
+      loading?.classList.add('hidden');
+      if (response) {
+        response.innerHTML = '<p style="color:#e74c3c">Could not reach AI. Check your connection and try again.</p>';
+        response.classList.remove('hidden');
+      }
+      updateAICreditsBadge();
+    }
+  }
+
+  /* ── Under Teach Me: the topic lesson and up to 3 follow-up questions ── */
+  // Where students go when 3 follow-ups weren't enough. Leave a field blank
+  // to hide that option.
+  const SUPPORT_CONTACT = { whatsapp: '', email: 'myexamsapp@gmail.com' }; // whatsapp: digits only, e.g. '2348012345678'
+  const FOLLOWUPS_PER_QUESTION = 3;
+  const SK_FOLLOWUPS = 'jamb-followups-v1';
+  const fuHistory = {}; // this visit's conversation per question
+
+  function topicLessonFor(q, subject) {
+    const t = window.TEACH_TOPICS?.[subject];
+    const id = t?.of?.[teachMeKey(q)];
+    return id && t.lessons?.[id] ? t.lessons[id] : null;
+  }
+  function followUpsLeft(key) {
+    const m = loadPref(SK_FOLLOWUPS, {}) || {};
+    return typeof m[key] === 'number' ? m[key] : FOLLOWUPS_PER_QUESTION;
+  }
+  function setFollowUpsLeft(key, n) {
+    const m = loadPref(SK_FOLLOWUPS, {}) || {};
+    m[key] = Math.max(0, n);
+    const keys = Object.keys(m);
+    if (keys.length > 300) keys.slice(0, keys.length - 300).forEach(k => delete m[k]);
+    savePref(SK_FOLLOWUPS, m);
+  }
+  function fuText(text) {
+    return mathHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
+  }
+
+  function teachExtrasHtml(q, subject) {
+    const lesson = topicLessonFor(q, subject);
+    const key = qHash(subject, teachMeKey(q));
+    const left = followUpsLeft(key);
+    const past = (fuHistory[key] || []).map(h =>
+      `<div class="fu-q">${escHtml(h.q)}</div><div class="fu-a">${fuText(h.a)}</div>`).join('');
+    return `${lesson ? `<details class="topic-lesson"><summary>📘 Click here to learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${fuText(lesson.body)}</div></details>` : ''}
+      <div class="fu-box" data-key="${key}">
+        <div class="fu-thread">${past}</div>
+        <div class="fu-ask ${left > 0 ? '' : 'hidden'}">
+          <div class="fu-label">Still confused? Ask a follow-up <span class="fu-left">(${left} left for this question)</span></div>
+          <div class="fu-row">
+            <input type="text" class="fu-input" maxlength="300" placeholder="e.g. Why is C wrong?" />
+            <button class="fu-send" type="button">Ask</button>
+          </div>
+          <div class="fu-status"></div>
+        </div>
+        <div class="fu-done ${left > 0 ? 'hidden' : ''}">${closeLoopHtml(q, !!lesson)}</div>
+      </div>`;
+  }
+
+  // After the 3 follow-ups: point the student somewhere useful instead of a dead end.
+  function closeLoopHtml(q, hasLesson) {
+    const msg = `Hi, I need help with this JAMB question: "${q.question.substring(0, 200)}"`;
+    const opts = [];
+    if (hasLesson) opts.push(`<button class="fu-opt fu-open-lesson" type="button">📘 Read the full topic lesson</button>`);
+    opts.push(`<button class="fu-opt fu-next" type="button">➡️ Try the next question and come back to this one later</button>`);
+    if (SUPPORT_CONTACT.whatsapp) opts.push(`<a class="fu-opt" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(SUPPORT_CONTACT.whatsapp)}?text=${encodeURIComponent(msg)}">💬 Ask a tutor on WhatsApp</a>`);
+    if (SUPPORT_CONTACT.email) opts.push(`<a class="fu-opt" href="mailto:${encodeURIComponent(SUPPORT_CONTACT.email)}?subject=${encodeURIComponent('Help with a JAMB question')}&body=${encodeURIComponent(msg)}">✉️ Email us privately</a>`);
+    return `<div class="fu-done-title">You've used your 3 follow-ups for this question.</div>
+      <div class="fu-done-sub">Here's what to do next. A teacher or study partner can help too.</div>${opts.join('')}`;
+  }
+
+  function wireTeachExtras(root, q, subject) {
+    const box = root.querySelector('.fu-box');
+    if (!box) return;
+    const key = box.dataset.key;
+    const input = box.querySelector('.fu-input');
+    const send = box.querySelector('.fu-send');
+    const status = box.querySelector('.fu-status');
+    const openLesson = () => {
+      const d = root.querySelector('.topic-lesson');
+      if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    };
+    box.querySelector('.fu-open-lesson')?.addEventListener('click', openLesson);
+    box.querySelector('.fu-next')?.addEventListener('click', () => {
+      closeAIPanel();
+      // On the last question "Next" would finish the session, so just close.
+      if (state.currentIndex < state.currentQuestions.length - 1) document.getElementById('nextBtn')?.click();
+    });
+    const finish = () => {
+      box.querySelector('.fu-ask')?.classList.add('hidden');
+      box.querySelector('.fu-done')?.classList.remove('hidden');
+    };
+    const ask = async () => {
+      const text = (input.value || '').trim();
+      if (!text) return;
+      const token = snapToken();
+      if (!token) { status.textContent = 'Follow-ups come with a paid pass. If you paid on another phone, use Restore access.'; return; }
+      if (!navigator.onLine) { status.textContent = "You're offline. Follow-ups need internet — the topic lesson above works offline."; return; }
+      send.disabled = true; input.disabled = true;
+      status.textContent = 'Thinking…';
+      const hist = fuHistory[key] || [];
+      try {
+        const res = await fetch(API_BASE + '/api/teach', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            followUp: true, snapToken: token, ask: text, history: hist.slice(-2),
+            teach: { app: 'jamb', v: 1, subject, question: q.question, options: q.options,
+                     answer: q.answer, passage: q.passage || null, passageTitle: q.passageTitle || null,
+                     alsoAccept: q.alsoAccept || null, note: q.keyVerdict ? (q.answerNote || null) : null }
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (typeof data.left === 'number') setFollowUpsLeft(key, data.left);
+        if (data.text) {
+          hist.push({ q: text, a: data.text });
+          fuHistory[key] = hist;
+          box.querySelector('.fu-thread').insertAdjacentHTML('beforeend',
+            `<div class="fu-q">${escHtml(text)}</div><div class="fu-a">${fuText(data.text)}</div>`);
+          input.value = '';
+          status.textContent = '';
+        } else if (data.code === 'FOLLOWUP_LIMIT') {
+          setFollowUpsLeft(key, 0);
+        } else {
+          status.textContent = data.code === 'NOT_READY'
+            ? 'Follow-up questions are switched on soon. For now, read the topic lesson above.'
+            : (data.error || 'Could not answer right now. Your follow-up was not used.');
+        }
+      } catch (e) {
+        status.textContent = 'Could not reach the tutor. Check your connection — your follow-up was not used.';
+      }
+      send.disabled = false; input.disabled = false;
+      const left = followUpsLeft(key);
+      box.querySelector('.fu-left').textContent = `(${left} left for this question)`;
+      if (left <= 0) finish();
+    };
+    send?.addEventListener('click', ask);
+    input?.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
+  }
+
+  const SK_TEACH_CACHE = 'jamb-teach-cache-v1';
+  const TEACH_CACHE_CAP = 200; // ~600 chars each → well under localStorage limits
+  function teachCacheKey(subject, q) {
+    return qHash(subject, JSON.stringify([q.passageId || '', q.question, q.options, q.answer]));
+  }
+  function getCachedTeach(key) {
+    const c = loadPref(SK_TEACH_CACHE, {});
+    return c && c[key] ? c[key].t : null;
+  }
+  function putCachedTeach(key, text) {
+    const c = loadPref(SK_TEACH_CACHE, {}) || {};
+    c[key] = { t: text, at: Date.now() };
+    const keys = Object.keys(c);
+    if (keys.length > TEACH_CACHE_CAP) {
+      keys.sort((a, b) => c[a].at - c[b].at).slice(0, keys.length - TEACH_CACHE_CAP).forEach(k => delete c[k]);
+    }
+    savePref(SK_TEACH_CACHE, c);
+  }
+
+  /* ════════════════════════════════════════════════════
+     COMMUNITY QUIZ
+  ════════════════════════════════════════════════════ */
+  const QC_STORE = 'jamb-challenges-v1';
+  let _currentChallengeCode = null;
+  let _pendingChallenge = null;   // challenge object waiting to start (sync-start mode)
+  let _waitingRoomTimer = null;   // poll interval handle
+  let _waitingRoomCountdownTicker = null; // 1s display-only countdown ticker
+  let _isWaitingRoomCreator = false;
+  const WAITING_ROOM_TIMEOUT_MS = 2 * 60 * 1000; // auto-start 2 min after first "ready"
+
+  function initCommunityQuiz() {
+    const modal = document.getElementById('jambQuizModal');
+    document.getElementById('jambQcClose')?.addEventListener('click', () => {
+      modal?.classList.add('hidden');
+      _jambModalPanelHistory = [];
+      if (window.location.hash === '#jamb-challenge') history.replaceState(null, '', window.location.pathname);
+    });
+    modal?.addEventListener('click', e => {
+      if (e.target !== modal) return;
+      modal?.classList.add('hidden');
+      _jambModalPanelHistory = [];
+      if (window.location.hash === '#jamb-challenge') history.replaceState(null, '', window.location.pathname);
+    });
+    document.getElementById('jambQcCreate')?.addEventListener('click', () => showJQCPanel('jambQcCreate2'));
+    document.getElementById('jambQcBack')?.addEventListener('click', () => showJQCPanel('jambQcHome'));
+    document.getElementById('jambShare2Back')?.addEventListener('click', () => { showJQCPanel('jambQcHome'); renderJambPendingChallenges(); });
+    document.getElementById('jambWaitingBack')?.addEventListener('click', () => {
+      clearInterval(_waitingRoomTimer);
+      clearInterval(_waitingRoomCountdownTicker);
+      showJQCPanel('jambQcHome');
+      renderJambPendingChallenges();
+      refreshJambChallengeBadgeState();
+    });
+    document.getElementById('jambQcJoin')?.addEventListener('click', () => {
+      document.getElementById('jambJoinRow')?.classList.toggle('hidden');
+    });
+    document.getElementById('jambJoinConfirm')?.addEventListener('click', joinJambChallenge);
+    document.getElementById('jambQcGenerate')?.addEventListener('click', generateJambChallenge);
+    document.getElementById('jambQcShareLink')?.addEventListener('click', shareJambChallengeLink);
+    document.getElementById('jambQcStartOwn')?.addEventListener('click', () => startJambChallengeAttempt());
+    document.getElementById('jambQcNew')?.addEventListener('click', () => showJQCPanel('jambQcCreate2'));
+    document.getElementById('jambQcDone')?.addEventListener('click', () => {
+      clearInterval(_waitingRoomTimer);
+      clearInterval(_waitingRoomCountdownTicker);
+      modal?.classList.add('hidden');
+      _jambModalPanelHistory = [];
+      if (window.location.hash === '#jamb-challenge') history.replaceState(null, '', window.location.pathname);
+    });
+    document.getElementById('jambReadyBtn')?.addEventListener('click', markJambReady);
+    document.getElementById('jambForceStartBtn')?.addEventListener('click', forceStartJambChallenge);
+    document.getElementById('jambEndChallengeBtn')?.addEventListener('click', endJambChallengeFromWaitingRoom);
+
+    // Toggle the scheduled-time picker when that start mode is chosen
+    document.querySelectorAll('input[name="jambSyncMode"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.getElementById('jambScheduledTimeWrap')?.classList.toggle('hidden', radio.value !== 'scheduled' || !radio.checked);
+      });
+    });
+    document.getElementById('jambConfirmScheduledTime')?.addEventListener('click', () => {
+      const input = document.getElementById('jambScheduledTime');
+      const confirmEl = document.getElementById('jambScheduledTimeConfirmed');
+      input?.blur(); // closes the native date/time picker on desktop browsers
+      if (input?.value && confirmEl) {
+        const d = new Date(input.value);
+        confirmEl.textContent = Number.isNaN(d.getTime())
+          ? ''
+          : `✅ Set for ${d.toLocaleDateString(undefined, { month:'short', day:'numeric' })} at ${d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })}`;
+        confirmEl.classList.toggle('hidden', !confirmEl.textContent);
+      }
+    });
+
+    // Populate subject checkboxes (multi-select)
+    const subjectsWrap = document.getElementById('jambQcSubjects');
+    if (subjectsWrap) Object.keys(QUESTION_BANK).forEach(s => {
+      const label = document.createElement('label');
+      label.className = 'jqc-subject-check';
+      label.innerHTML = `<input type="checkbox" value="${s}"/> <span>${fmt(s)}</span>`;
+      const input = label.querySelector('input');
+      input.addEventListener('change', () => label.classList.toggle('checked', input.checked));
+      subjectsWrap.appendChild(label);
+    });
+
+    // Check URL for challenge code
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('challenge');
+    if (code) {
+      history.replaceState(null,'',window.location.pathname);
+      openJambChallenge();
+      document.getElementById('jambJoinCode').value = code;
+      joinJambChallenge();
+    }
+  }
+
+  const _jambPanelOrder = ['jambQcHome','jambQcCreate2','jambQcShare2','jambQcLeaderboard','jambQcWaitingRoom'];
+  let _jambCurrentPanel = 'jambQcHome';
+  let _jambModalPanelHistory = [];
+
+  function showJQCPanel(id, fromBack = false) {
+    if (!fromBack && id !== _jambCurrentPanel) {
+      if (id === 'jambQcHome') {
+        _jambModalPanelHistory = []; // Home is the root — nothing further back
+      } else {
+        _jambModalPanelHistory.push(_jambCurrentPanel);
+      }
+    }
+    _jambCurrentPanel = id;
+    _jambPanelOrder.forEach(p => {
+      document.getElementById(p)?.classList.toggle('hidden', p !== id);
+    });
+  }
+
+  function refreshJambChallengeBadgeState() {
+    const all = loadPref(QC_STORE, {});
+    const needsAttention = Object.values(all).some(c => {
+      if (c.ended) return false;
+      if (!c.syncMode || c.syncMode === 'anytime') return false; // no "started" moment to alert about
+      const completed = c.scores && c.scores[state.currentUser];
+      return c.startedAt && !completed;
+    });
+    setJambChallengeBadge(needsAttention);
+  }
+
+  function openJambChallenge() {
+    if (!checkAccess()) { showPaywall('feature'); return; }
+    if (!state.currentUser) { alert('Please log in first.'); return; }
+    _jambModalPanelHistory = [];
+    showJQCPanel('jambQcHome');
+    document.getElementById('jambQuizModal')?.classList.remove('hidden');
+    // Push a hash entry so the hardware/gesture back button can be caught
+    // and used to navigate panels within the modal, instead of just
+    // falling through to whatever the browser's default back does.
+    history.pushState(null, '', window.location.pathname + '#jamb-challenge');
+    renderJambPendingChallenges();
+    checkForStartedJambChallenges().then(() => { renderJambPendingChallenges(); refreshJambChallengeBadgeState(); });
+  }
+
+  // Instead of yanking the student straight into the quiz the moment a
+  // scheduled/ready challenge starts (jarring if they're doing something
+  // else), show a small dismissible notice with the choice to join now or
+  // later. "Later" leaves a badge on the Challenge button as a reminder.
+  function showChallengeStartedNotice(code, challenge, startedAt) {
+    let card = document.getElementById('jambStartedNotice');
+    if (card) card.remove();
+    playChallengeBeep();
+
+    card = document.createElement('div');
+    card.id = 'jambStartedNotice';
+    card.style.cssText = `
+      position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%);
+      background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px;
+      padding:1.1rem 1.25rem; max-width:340px; width:calc(100% - 2rem);
+      box-shadow:0 10px 40px rgba(0,0,0,.5); z-index:10001; font-family:var(--sans,sans-serif);
+      text-align:center; position:fixed;
+    `;
+    card.innerHTML = `
+      <button id="jambStartedClose" style="position:absolute; top:.6rem; right:.7rem; background:none; border:none;
+              color:rgba(255,255,255,.5); font-size:1.1rem; cursor:pointer; line-height:1;">✕</button>
+      <p style="margin:0 0 .7rem; color:#fff; font-size:.9rem; font-weight:600;">🎉 Your challenge has started!</p>
+      <button id="jambStartedNow" style="width:100%; padding:.65rem; border-radius:9px; border:none; margin-bottom:.6rem;
+              background:var(--gold,#d4af37); color:#0a1628; font-weight:700; font-size:.85rem;">Join Now</button>
+      <p style="margin:0 0 .4rem; color:rgba(255,255,255,.5); font-size:.72rem;">Or remind me again in:</p>
+      <div style="display:flex; gap:.4rem; margin-bottom:.6rem;">
+        <button class="jamb-snooze-opt" data-min="5" style="flex:1; padding:.5rem; border-radius:8px; border:1px solid #26344a; background:transparent; color:#fff; font-size:.75rem;">5 min</button>
+        <button class="jamb-snooze-opt" data-min="15" style="flex:1; padding:.5rem; border-radius:8px; border:1px solid #26344a; background:transparent; color:#fff; font-size:.75rem;">15 min</button>
+        <button class="jamb-snooze-opt" data-min="30" style="flex:1; padding:.5rem; border-radius:8px; border:1px solid #26344a; background:transparent; color:#fff; font-size:.75rem;">30 min</button>
+      </div>
+      <button id="jambStartedDecline" style="width:100%; padding:.4rem; border-radius:8px; border:none;
+              background:transparent; color:rgba(255,255,255,.4); font-size:.72rem; text-decoration:underline; cursor:pointer;">Decline — I won't be joining this one</button>
+    `;
+    document.body.appendChild(card);
+
+    document.getElementById('jambStartedClose').addEventListener('click', () => {
+      card.remove();
+      const challenges = loadPref(QC_STORE, {});
+      if (challenges[code]) { challenges[code].startedAt = startedAt; savePref(QC_STORE, challenges); }
+      setJambChallengeBadge(true); // still findable via the badge + pending list, just not re-popped automatically
+    });
+    document.getElementById('jambStartedDecline').addEventListener('click', async () => {
+      card.remove();
+      try {
+        await fetch(API_BASE + '/api/challenge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_participant', code, student: state.currentUser }),
+        });
+      } catch (err) { /* still remove locally even if this fails */ }
+      const challenges = loadPref(QC_STORE, {});
+      delete challenges[code];
+      savePref(QC_STORE, challenges);
+      refreshJambChallengeBadgeState();
+      renderJambPendingChallenges();
+    });
+    document.getElementById('jambStartedNow').addEventListener('click', () => {
+      card.remove();
+      document.getElementById('jambQuizModal')?.classList.add('hidden');
+      startJambChallengeAttempt(challenge, startedAt);
+    });
+    card.querySelectorAll('.jamb-snooze-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const minutes = parseInt(btn.dataset.min, 10);
+        card.remove();
+        const challenges = loadPref(QC_STORE, {});
+        if (challenges[code]) { challenges[code].startedAt = startedAt; savePref(QC_STORE, challenges); }
+        setJambChallengeBadge(true);
+        setTimeout(() => {
+          const latest = loadPref(QC_STORE, {})[code];
+          if (latest && !latest.ended && !(latest.scores && latest.scores[state.currentUser])) {
+            showChallengeStartedNotice(code, challenge, startedAt);
+          }
+        }, minutes * 60000);
+      });
+    });
+  }
+
+  function playChallengeBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.start(); osc.stop(ctx.currentTime + 0.35);
+    } catch (err) { /* audio not available — badge/card still show visually */ }
+  }
+
+  function setJambChallengeBadge(show) {
+    document.getElementById('jambChallengeBadge')?.classList.toggle('hidden', !show);
+  }
+
+  // Checked on app load and whenever the Challenge modal opens — quietly
+  // (no interrupting popup) flags the button if something the student
+  // owns or joined has started without them actively watching for it.
+  // Shows a one-time-per-day reminder toast for a scheduled challenge
+  // that's coming up within the next 2 days — a gentle heads-up, not a
+  // repeat every single time the app opens.
+  const JAMB_REMINDED_STORE = 'jamb-challenge-reminded-v1';
+  function checkScheduledChallengeReminders() {
+    if (!state.currentUser) return;
+    const all = loadPref(QC_STORE, {});
+    const reminded = loadPref(JAMB_REMINDED_STORE, {});
+    const todayKey = new Date().toDateString();
+    const mine = Object.values(all).filter(c =>
+      c.creator === state.currentUser && c.syncMode === 'scheduled'
+      && c.scheduledStartAt && !c.startedAt && !c.ended
+    );
+    for (const c of mine) {
+      if (reminded[c.code] === todayKey) continue; // already reminded today
+      const daysUntil = Math.ceil((c.scheduledStartAt - Date.now()) / 86400000);
+      if (daysUntil < 0 || daysUntil > 2) continue;
+      const when = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'in 1 day' : 'in 2 days';
+      showInfoToast(`📅 You have a scheduled challenge (${c.code}) starting ${when}.`);
+      reminded[c.code] = todayKey;
+      savePref(JAMB_REMINDED_STORE, reminded);
+      break; // one toast at a time — don't stack multiple on top of each other
+    }
+  }
+
+  async function checkForStartedJambChallenges() {
+    if (!state.currentUser) return;
+    // Don't interrupt with a popup if the student is mid-quiz right now —
+    // the badge will still be set so it's not lost, just not popped over
+    // whatever they're actively doing.
+    const inQuiz = document.getElementById('quizScreen')?.classList.contains('active');
+
+    const all = loadPref(QC_STORE, {});
+    const candidates = Object.values(all).filter(c =>
+      c.syncMode && c.syncMode !== 'anytime' && !c.ended && !c.startedAt
+      && (c.creator === state.currentUser || c.joinedAsParticipant)
+    );
+    if (!candidates.length) return;
+
+    const justStarted = [];
+    for (const c of candidates) {
+      try {
+        const res = await fetch(API_BASE + '/api/challenge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'status', code: c.code }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok && data.startedAt) {
+          all[c.code].startedAt = data.startedAt;
+          justStarted.push({ code: c.code, challenge: all[c.code], startedAt: data.startedAt });
+        }
+      } catch (err) { /* skip — try again next time */ }
+    }
+    if (!justStarted.length) return;
+
+    savePref(QC_STORE, all);
+    setJambChallengeBadge(true);
+    playChallengeBeep();
+
+    if (inQuiz) return; // badge is set — they'll see it once they finish
+
+    if (justStarted.length === 1) {
+      showChallengeStartedNotice(justStarted[0].code, justStarted[0].challenge, justStarted[0].startedAt);
+    } else {
+      showMultipleChallengesStartedNotice(justStarted);
+    }
+  }
+
+  // When more than one challenge starts around the same time, a student
+  // can only actually take one right now — let them pick which, and leave
+  // the rest sitting in the pending list (still joinable, as long as
+  // they're still within their time window) rather than stacking popups.
+  function showMultipleChallengesStartedNotice(startedList) {
+    let card = document.getElementById('jambStartedNotice');
+    if (card) card.remove();
+    playChallengeBeep();
+
+    card = document.createElement('div');
+    card.id = 'jambStartedNotice';
+    card.style.cssText = `
+      position:fixed; bottom:1.25rem; left:50%; transform:translateX(-50%);
+      background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px;
+      padding:1.1rem 1.25rem; max-width:340px; width:calc(100% - 2rem);
+      box-shadow:0 10px 40px rgba(0,0,0,.5); z-index:10001; font-family:var(--sans,sans-serif);
+      text-align:center;
+    `;
+    const rows = startedList.map(({code, challenge}) => {
+      const endTxt = challenge.time > 0
+        ? ' · ends ' + new Date(challenge.startedAt + challenge.time * 60000).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })
+        : '';
+      return `
+        <div class="jqc-pending-row" style="text-align:left; margin-bottom:.5rem;">
+          <div class="jqc-pending-info">
+            <div class="jqc-pending-code">${escHtml(code)}</div>
+            <div class="jqc-pending-sub">${escHtml(challenge.subject||'')}${endTxt}</div>
+          </div>
+          <button class="jqc-pending-btn" data-code="${escHtml(code)}">Join</button>
+        </div>
+      `;
+    }).join('');
+    card.innerHTML = `
+      <button id="jambStartedClose" style="position:absolute; top:.6rem; right:.7rem; background:none; border:none;
+              color:rgba(255,255,255,.5); font-size:1.1rem; cursor:pointer; line-height:1;">✕</button>
+      <p style="margin:0 0 .7rem; color:#fff; font-size:.9rem; font-weight:600;">🎉 ${startedList.length} challenges have started!</p>
+      <p style="margin:0 0 .7rem; color:rgba(255,255,255,.55); font-size:.75rem;">Pick one to join now — the rest stay in your challenge list.</p>
+      ${rows}
+    `;
+    document.body.appendChild(card);
+
+    document.getElementById('jambStartedClose').addEventListener('click', () => card.remove());
+    card.querySelectorAll('.jqc-pending-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const code = btn.dataset.code;
+        const picked = startedList.find(s => s.code === code);
+        card.remove();
+        if (picked) startJambChallengeAttempt(picked.challenge, picked.startedAt);
+      });
+    });
+  }
+
+  function generateJambChallengeCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'JAMB-';
+    for (let i=0;i<5;i++) code += chars[Math.floor(Math.random()*chars.length)];
+    return code;
+  }
+
+  const MAX_PENDING_CHALLENGES = 5;
+
+  function getMyChallenges() {
+    const all = loadPref(QC_STORE, {});
+    return Object.values(all)
+      .filter(c => c.creator === state.currentUser)
+      .sort((a, b) => (b.createdAt||0) - (a.createdAt||0));
+  }
+
+  function getJoinedChallenges() {
+    const all = loadPref(QC_STORE, {});
+    return Object.values(all)
+      .filter(c => c.joinedAsParticipant && c.creator !== state.currentUser)
+      .sort((a, b) => (b.createdAt||0) - (a.createdAt||0));
+  }
+
+  function renderJambPendingChallenges() {
+    const wrap = document.getElementById('jambPendingWrap');
+    const list = document.getElementById('jambPendingList');
+    const countEl = document.getElementById('jambPendingCount');
+    if (!wrap || !list) return;
+
+    const mine   = getMyChallenges().slice(0, MAX_PENDING_CHALLENGES);
+    const joined = getJoinedChallenges().slice(0, MAX_PENDING_CHALLENGES);
+    countEl && (countEl.textContent = mine.length);
+    const maxEl = document.getElementById('jambPendingMax');
+    if (maxEl) maxEl.textContent = MAX_PENDING_CHALLENGES;
+    wrap.classList.toggle('hidden', mine.length === 0 && joined.length === 0);
+
+    const renderRow = (c, isOwner) => {
+      const completed = !!(c.scores && c.scores[state.currentUser]);
+      const isDone = c.ended || completed;
+      let statusLabel;
+      if (c.ended)      statusLabel = '⏹ Ended';
+      else if (completed) statusLabel = '✅ Completed';
+      else if (c.syncMode === 'scheduled' && !c.startedAt) {
+        const when = c.scheduledStartAt
+          ? new Date(c.scheduledStartAt).toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })
+          : '';
+        statusLabel = '📅 Scheduled' + (when ? ' for ' + when : '');
+      }
+      else if (c.syncMode === 'ready' && !c.startedAt)     statusLabel = '⏱ Waiting room';
+      else if (c.startedAt && c.syncMode && c.syncMode !== 'anytime') {
+        const endTxt = c.time > 0
+          ? ' · ends ' + new Date(c.startedAt + c.time * 60000).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })
+          : '';
+        statusLabel = '▶ Ongoing' + endTxt;
+      } else statusLabel = '▶ Not yet taken';
+
+      const actionBtn = isDone
+        ? `<button class="jqc-pending-btn" data-code="${escHtml(c.code)}" data-action="results">View Results</button>`
+        : `<button class="jqc-pending-btn" data-code="${escHtml(c.code)}" data-action="continue">Continue</button>`;
+      const deleteBtn = isOwner
+        ? `<button class="jqc-pending-delete" data-code="${escHtml(c.code)}" data-action="delete">Delete</button>`
+        : '';
+
+      return `
+        <div class="jqc-pending-row">
+          <div class="jqc-pending-info">
+            <div class="jqc-pending-code">${escHtml(c.code)}${isOwner ? '' : ' <span class="jqc-pending-tag">Joined</span>'}</div>
+            <div class="jqc-pending-sub">${escHtml(c.subject||'')} · ${statusLabel}</div>
+          </div>
+          ${actionBtn}
+          ${deleteBtn}
+        </div>
+      `;
+    };
+
+    list.innerHTML = mine.map(c => renderRow(c, true)).join('')
+      + joined.map(c => renderRow(c, false)).join('');
+
+    list.querySelectorAll('[data-action="continue"]').forEach(btn => {
+      btn.addEventListener('click', () => continueJambChallenge(btn.dataset.code));
+    });
+    list.querySelectorAll('[data-action="results"]').forEach(btn => {
+      btn.addEventListener('click', () => viewJambChallengeResults(btn.dataset.code));
+    });
+    list.querySelectorAll('[data-action="delete"]').forEach(btn => {
+      btn.addEventListener('click', () => deleteJambChallenge(btn.dataset.code));
+    });
+  }
+
+  async function viewJambChallengeResults(code) {
+    const local = loadPref(QC_STORE, {})[code];
+    if (local && local.scores) renderJambLeaderboard(code, local.scores);
+    try {
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'leaderboard', code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        renderJambLeaderboard(code, mergeScores(data.scores, code));
+        // This device's own result never reached the server: send it again.
+        const mine = local?.scores?.[state.currentUser];
+        if (mine && !(data.scores || {})[state.currentUser] && Array.isArray(local.answers)) {
+          submitJambChallengeScore(code, state.currentUser, mine.score, mine.total, mine.pct, local.answers);
+        }
+      }
+    } catch (err) { /* local scores already shown as a fallback */ }
+  }
+
+  function continueJambChallenge(code) {
+    const challenges = loadPref(QC_STORE, {});
+    const challenge = challenges[code];
+    if (!challenge) return;
+    _currentChallengeCode = code;
+    const isOwner = challenge.creator === state.currentUser;
+    if (challenge.syncMode && challenge.syncMode !== 'anytime' && !challenge.startedAt) {
+      _pendingChallenge = challenge;
+      openJambWaitingRoom(code, isOwner);
+    } else if (challenge.syncMode && challenge.syncMode !== 'anytime' && challenge.startedAt) {
+      showChallengeStartedNotice(code, challenge, challenge.startedAt);
+    } else {
+      document.getElementById('jambCodeDisplay').textContent = code;
+      showJQCPanel('jambQcShare2');
+    }
+  }
+
+  async function deleteJambChallenge(code, silent = false) {
+    if (!silent) {
+      const ok = await showConfirmModal(`Delete challenge ${code}? Anyone with the code will no longer be able to join.`, 'Delete', 'Cancel');
+      if (!ok) return;
+    }
+    try {
+      await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'end_challenge', code }),
+      });
+    } catch (err) { /* still remove locally even if the network call fails */ }
+    const challenges = loadPref(QC_STORE, {});
+    if (challenges[code]) { challenges[code].ended = true; savePref(QC_STORE, challenges); }
+    renderJambPendingChallenges();
+    refreshJambChallengeBadgeState();
+  }
+
+  const RECENT_QS_STORE = 'jamb-challenge-recent-qs-v1';
+  const RECENT_QS_CAP = 80;
+
+  // Picks `count` questions from `pool` (a QUESTION_BANK[subject] array),
+  // preferring ones this student hasn't used in their recent challenges —
+  // so repeated challenges with the same friends don't keep surfacing the
+  // same questions. Uses "subject:index" as a stable ID since these
+  // questions don't carry a real id field.
+  function pickJambQuestions(subject, pool, count) {
+    if (!pool.length) return [];
+    const tagged = pool.map((q, i) => ({ ...q, _qid: `${subject}:${i}` }));
+    const recentIds = loadPref(RECENT_QS_STORE, []);
+    const recentSet = new Set(recentIds);
+    // Passage questions travel as one unit — a unit counts as "recent" if
+    // any of its questions was used recently.
+    const units = toUnits(tagged);
+    const isStale = u => u.some(q => recentSet.has(q._qid));
+    const fresh = shuffle(units.filter(u => !isStale(u)));
+    const stale = units.filter(isStale)
+      .sort((a, b) => recentIds.indexOf(a[0]._qid) - recentIds.indexOf(b[0]._qid));
+
+    const selected = fillFromUnits([...fresh, ...stale], count);
+
+    const usedIds = selected.map(q => q._qid);
+    const updated = [...recentIds.filter(id => !usedIds.includes(id)), ...usedIds].slice(-RECENT_QS_CAP);
+    savePref(RECENT_QS_STORE, updated);
+
+    return selected;
+  }
+
+  async function generateJambChallenge() {
+    // Keep at most MAX_PENDING_CHALLENGES total — auto-retire the oldest
+    // one rather than blocking creation.
+    const mine = getMyChallenges();
+    if (mine.length >= MAX_PENDING_CHALLENGES) {
+      const oldest = mine[mine.length - 1];
+      await deleteJambChallenge(oldest.code, true);
+    }
+
+    const subjectBoxes = [...document.querySelectorAll('#jambQcSubjects input:checked')].map(i => i.value);
+    if (!subjectBoxes.length) { showInfoToast('Pick at least one subject.'); return; }
+    if (!await prepareContent(subjectBoxes, "Preparing challenge subjects…")) return;
+    const count      = parseInt(document.getElementById('jambQcCount')?.value || '10');
+    const duration   = parseInt(document.getElementById('jambQcDuration')?.value || '0');
+    const syncMode   = document.querySelector('input[name="jambSyncMode"]:checked')?.value || 'anytime';
+    let scheduledStartAt = null;
+    if (syncMode === 'scheduled') {
+      const raw = document.getElementById('jambScheduledTime')?.value;
+      if (!raw) { showInfoToast('Pick a date and time for the challenge to start.'); return; }
+      scheduledStartAt = new Date(raw).getTime();
+      if (!Number.isFinite(scheduledStartAt) || scheduledStartAt <= Date.now()) {
+        showInfoToast('Pick a start time in the future.');
+        return;
+      }
+    }
+
+    // Split the requested count evenly across subjects, but keep each
+    // subject's questions grouped together (not interleaved) so students can
+    // switch between subjects the same way they do in a normal exam.
+    const perSubject = Math.max(1, Math.floor(count / subjectBoxes.length));
+    let selected = [];
+    const subjectRanges = {};
+    let offset = 0;
+    subjectBoxes.forEach(subject => {
+      const pool = QUESTION_BANK[subject] || [];
+      const qs = pickJambQuestions(subject, pool, perSubject).map(q => ({ ...q, sourceSubject: subject }));
+      subjectRanges[subject] = { start: offset, end: offset + qs.length - 1 };
+      offset += qs.length;
+      selected = selected.concat(qs);
+    });
+    if (!selected.length) { showInfoToast('No questions available for the selected subjects.'); return; }
+
+    const subjectLabel = subjectBoxes.map(fmt).join(' + ');
+    const code = generateJambChallengeCode();
+
+    const btn = document.getElementById('jambQcGenerate');
+    if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+
+    try {
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create', code, subject: subjectLabel, subjects: subjectBoxes, subjectRanges,
+          count: selected.length, questions: selected, creator: state.currentUser,
+          time: duration, syncMode, scheduledStartAt,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Could not create challenge');
+
+      // Also keep a local copy so the creator's own attempt works instantly
+      // without waiting on a second network round trip.
+      const challenges = loadPref(QC_STORE, {});
+      const challengeObj = {
+        code, subject: subjectLabel, subjects: subjectBoxes, subjectRanges,
+        count: selected.length, questions: selected, creator: state.currentUser,
+        time: duration, syncMode, scheduledStartAt,
+        startedAt: syncMode === 'anytime' ? Date.now() : null,
+        createdAt: Date.now(), ended: false, scores: {},
+      };
+      challenges[code] = challengeObj;
+      savePref(QC_STORE, challenges);
+
+      _currentChallengeCode = code;
+      document.getElementById('jambCodeDisplay').textContent = code;
+
+      if (syncMode !== 'anytime') {
+        _pendingChallenge = challengeObj;
+        openJambWaitingRoom(code, true);
+      } else {
+        showJQCPanel('jambQcShare2');
+      }
+    } catch (err) {
+      showInfoToast('Could not create challenge — check your connection and try again.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Generate Code →'; }
+    }
+  }
+
+  function shareJambChallengeLink() {
+    if (!_currentChallengeCode) return;
+    const url  = window.location.origin + window.location.pathname + '?challenge=' + _currentChallengeCode;
+    const challenges = loadPref(QC_STORE, {});
+    const subj = challenges[_currentChallengeCode]?.subject || '';
+    const text = `🏆 JAMB Challenge! Beat my score in ${fmt(subj)}.\n\nCode: ${_currentChallengeCode}\nLink: ${url}`;
+    if (navigator.share) navigator.share({ title:'JAMB Challenge', text, url }).catch(()=>{});
+    else navigator.clipboard?.writeText(text).then(()=>alert('Link copied!')).catch(()=>prompt('Copy:',url));
+  }
+
+  async function joinJambChallenge() {
+    const code = (document.getElementById('jambJoinCode')?.value||'').trim().toUpperCase();
+    if (!code) return;
+
+    const btn = document.getElementById('jambJoinConfirm');
+    if (btn) { btn.disabled = true; btn.textContent = 'Joining…'; }
+
+    try {
+      // Check locally first (covers the creator's own device, no network
+      // needed), then fall back to the shared backend for anyone else.
+      const local = loadPref(QC_STORE, {})[code];
+      if (local) {
+        if (local.ended) { showInfoToast('This challenge has ended.'); return; }
+        _currentChallengeCode = code;
+        if (local.syncMode && local.syncMode !== 'anytime' && !local.startedAt) {
+          _pendingChallenge = local;
+          openJambWaitingRoom(code, local.creator === state.currentUser);
+        } else if (local.syncMode && local.syncMode !== 'anytime' && local.startedAt) {
+          // Already running with a shared clock — show the same Join Now /
+          // snooze notice a watching participant would have gotten, rather
+          // than dropping straight into the quiz.
+          showChallengeStartedNotice(code, local, local.startedAt);
+        } else {
+          startJambChallengeAttempt(local);
+        }
+        return;
+      }
+
+      const res = await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'join', code, student: state.currentUser }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        if (res.status === 409 && data.alreadyCompleted) {
+          showInfoToast("You've already completed this challenge — check the leaderboard for your result.");
+          // We don't have the full scores list from this response alone —
+          // fetch it fresh so the leaderboard shown is complete and current.
+          const lbRes = await fetch(API_BASE + '/api/challenge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'leaderboard', code }),
+          });
+          const lbData = await lbRes.json().catch(() => ({}));
+          if (lbRes.ok && lbData.ok) renderJambLeaderboard(code, lbData.scores);
+          return;
+        }
+        showInfoToast(res.status === 410 ? 'This challenge has ended.'
+          : data.error === 'Challenge not found or expired'
+          ? 'Challenge not found — check the code and try again.'
+          : 'Could not join challenge — check your connection and try again.');
+        return;
+      }
+      _currentChallengeCode = code;
+      // Persist locally so this device has its own record of challenges it
+      // joined, not just ones it created — without this, a joiner had no
+      // way to find their way back except re-entering the code each time.
+      {
+        const challenges = loadPref(QC_STORE, {});
+        challenges[code] = { ...data.challenge, joinedAsParticipant: true };
+        savePref(QC_STORE, challenges);
+      }
+      if (data.challenge.syncMode && data.challenge.syncMode !== 'anytime' && !data.challenge.startedAt) {
+        _pendingChallenge = data.challenge;
+        openJambWaitingRoom(code, data.challenge.creator === state.currentUser);
+      } else if (data.challenge.syncMode && data.challenge.syncMode !== 'anytime' && data.challenge.startedAt) {
+        // Already started (including a scheduled challenge whose time has
+        // passed) — show the Join Now / snooze notice instead of dropping
+        // straight in, same as a watching participant would see.
+        showChallengeStartedNotice(code, data.challenge, data.challenge.startedAt);
+      } else {
+        startJambChallengeAttempt(data.challenge);
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Join →'; }
+    }
+  }
+
+  function openJambWaitingRoom(code, isCreator) {
+    _isWaitingRoomCreator = isCreator;
+    document.getElementById('jambWaitingCodeDisplay').textContent = code;
+    document.getElementById('jambForceStartBtn')?.classList.toggle('hidden', !isCreator);
+    document.getElementById('jambEndChallengeBtn')?.classList.toggle('hidden', !isCreator);
+    const readyBtn = document.getElementById('jambReadyBtn');
+    if (readyBtn) { readyBtn.disabled = false; readyBtn.textContent = "✅ I'm Ready"; }
+    showJQCPanel('jambQcWaitingRoom');
+    document.getElementById('jambQuizModal')?.classList.remove('hidden');
+    pollJambWaitingRoom(code);
+  }
+
+  function renderJambWaitingList(participants) {
+    const list = document.getElementById('jambWaitingList');
+    if (!list) return;
+    const entries = Object.entries(participants || {});
+    list.innerHTML = entries.map(([name, p]) => `
+      <div class="jqc-score-row">
+        <span class="jqc-rank">${p.ready ? '✅' : '⏳'}</span>
+        <span class="jqc-score-name">${escHtml(name)}${name === state.currentUser ? ' (you)' : ''}</span>
+        <span class="jqc-score-val">${p.ready ? 'Ready' : 'Waiting'}</span>
+        ${_isWaitingRoomCreator && name !== state.currentUser
+          ? `<button class="jqc-pending-delete" data-name="${escHtml(name)}" style="margin-left:.4rem">Remove</button>` : ''}
+      </div>
+    `).join('') || '<p class="jqc-sub">Waiting for people to join…</p>';
+
+    list.querySelectorAll('button[data-name]').forEach(btn => {
+      btn.addEventListener('click', () => removeJambParticipant(btn.dataset.name));
+    });
+  }
+
+  function updateJambCountdownDisplay(msRemaining) {
+    const el2 = document.getElementById('jambWaitingCountdown');
+    if (!el2) return;
+    if (msRemaining == null || msRemaining <= 0) { el2.classList.add('hidden'); return; }
+    const totalSec = Math.ceil(msRemaining / 1000);
+    const m = Math.floor(totalSec / 60), s = totalSec % 60;
+    el2.textContent = `Auto-starts in ${m}:${String(s).padStart(2,'0')}`;
+    el2.classList.remove('hidden');
+  }
+
+  async function pollJambWaitingRoom(code) {
+    clearInterval(_waitingRoomTimer);
+    clearInterval(_waitingRoomCountdownTicker);
+    let localFirstReadyAt = null;
+    let localScheduledAt = null;
+
+    // Smooth per-second countdown between the (slower) network polls.
+    _waitingRoomCountdownTicker = setInterval(() => {
+      if (localScheduledAt) updateJambCountdownDisplay(localScheduledAt - Date.now());
+      else if (localFirstReadyAt) updateJambCountdownDisplay((localFirstReadyAt + WAITING_ROOM_TIMEOUT_MS) - Date.now());
+    }, 1000);
+
+    const tick = async () => {
+      try {
+        const res = await fetch(API_BASE + '/api/challenge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'status', code }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) return; // transient network hiccup — just try again next tick
+
+        if (data.ended) {
+          clearInterval(_waitingRoomTimer);
+          clearInterval(_waitingRoomCountdownTicker);
+          document.getElementById('jambWaitingStatus').textContent = 'This challenge has ended.';
+          document.getElementById('jambReadyBtn')?.classList.add('hidden');
+          document.getElementById('jambForceStartBtn')?.classList.add('hidden');
+          return;
+        }
+
+        renderJambWaitingList(data.participants);
+        localFirstReadyAt = data.firstReadyAt || null;
+        localScheduledAt  = data.scheduledStartAt || null;
+        if (localScheduledAt) {
+          document.getElementById('jambWaitingStatus').textContent = 'Challenge starts automatically at the scheduled time.';
+        }
+
+        if (data.startedAt) {
+          clearInterval(_waitingRoomTimer);
+          clearInterval(_waitingRoomCountdownTicker);
+          showChallengeStartedNotice(code, _pendingChallenge, data.startedAt);
+          return;
+        }
+
+        // Auto-start safety net: if someone's been ready a while and not
+        // everyone else has joined in, start anyway rather than wait forever.
+        if (data.firstReadyAt && (Date.now() - data.firstReadyAt) > WAITING_ROOM_TIMEOUT_MS) {
+          await fetch(API_BASE + '/api/challenge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'force_start', code }),
+          });
+        }
+      } catch (err) { /* try again next tick */ }
+    };
+
+    tick();
+    _waitingRoomTimer = setInterval(tick, 3000);
+  }
+
+  async function removeJambParticipant(name) {
+    if (!_currentChallengeCode) return;
+    try {
+      await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'remove_participant', code: _currentChallengeCode, student: name }),
+      });
+    } catch (err) {
+      showInfoToast('Could not remove participant — check your connection.');
+    }
+  }
+
+  async function endJambChallengeFromWaitingRoom() {
+    if (!_currentChallengeCode) return;
+    const ok = await showConfirmModal('End this challenge for everyone? Nobody will be able to join or continue it.', 'End Challenge', 'Cancel');
+    if (!ok) return;
+    await deleteJambChallenge(_currentChallengeCode);
+    clearInterval(_waitingRoomTimer);
+    clearInterval(_waitingRoomCountdownTicker);
+    document.getElementById('jambQuizModal')?.classList.add('hidden');
+  }
+
+  async function markJambReady() {
+    if (!_currentChallengeCode) return;
+    const btn = document.getElementById('jambReadyBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '✅ Waiting for others…'; }
+    try {
+      await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_ready', code: _currentChallengeCode, student: state.currentUser }),
+      });
+    } catch (err) {
+      showInfoToast('Could not mark ready — check your connection.');
+      if (btn) { btn.disabled = false; btn.textContent = "✅ I'm Ready"; }
+    }
+  }
+
+  async function forceStartJambChallenge() {
+    if (!_currentChallengeCode) return;
+    try {
+      await fetch(API_BASE + '/api/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'force_start', code: _currentChallengeCode }),
+      });
+    } catch (err) {
+      showInfoToast('Could not start — check your connection.');
+    }
+  }
+
+  function startJambChallengeAttempt(challengeArg, startedAtOverride) {
+    clearInterval(_waitingRoomTimer);
+    clearInterval(_waitingRoomCountdownTicker);
+    const challenges = loadPref(QC_STORE, {});
+    const challenge  = challengeArg || challenges[_currentChallengeCode];
+    if (!challenge) return;
+
+    // A challenge is a one-shot comparison, not a retakeable practice set —
+    // if this student already has a recorded score, show results instead.
+    if (challenge.scores && challenge.scores[state.currentUser]) {
+      showInfoToast("You've already completed this challenge — check the leaderboard for your result.");
+      renderJambLeaderboard(challenge.code, challenge.scores);
+      return;
+    }
+
+    document.getElementById('jambQuizModal')?.classList.add('hidden');
+
+    state.sessionType = 'single';
+    state.mode = 'exam';
+    state.subject = challenge.subject;
+    state.subjects = challenge.subjects || [challenge.subject];
+    state.subjectRanges = challenge.subjectRanges || {};
+    state.currentQuestions = challenge.questions;
+    state.answers = new Array(challenge.questions.length).fill(null);
+    state.currentIndex = 0;
+    state.reviewMode = false;
+    state.student = state.currentUser;
+    state._challengeCode = challenge.code;
+
+    // Timer: honour whatever duration the creator set (0 = no limit). For a
+    // challenge with a shared clock (ready/scheduled modes), a late joiner
+    // resumes the already-ticking timer rather than getting a fresh one.
+    const startedAt = startedAtOverride || challenge.startedAt || Date.now();
+    state.chosenDurationMinutes = challenge.time || 0;
+    if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+    if (state.chosenDurationMinutes > 0) {
+      const elapsedSec = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+      state.timeLeft = Math.max(0, state.chosenDurationMinutes * 60 - elapsedSec);
+      startTimer();
+    } else {
+      state.timeLeft = 0;
+    }
+
+    el.sidebarStudent.textContent = state.currentUser;
+    el.sidebarMode.textContent = state.chosenDurationMinutes > 0
+      ? `Challenge · ${state.chosenDurationMinutes} min`
+      : 'Challenge';
+
+    // Subject switcher — same UI as a normal multi-subject exam.
+    const isMulti = state.subjects.length > 1;
+    el.subjectSwitcher.classList.toggle('hidden', !isMulti);
+    if (isMulti) buildSubjectSwitcher();
+
+    buildQuestionPills();
+    renderQuestion();
+    showScreen('quiz');
+  }
+
+  /* ════════════════════════════════════════════════════
+     SESSION SHARING
+  ════════════════════════════════════════════════════ */
+  function shareJambResult() {
+    const r  = window._jambLastResult;
+    const qs = window._jambLastQuestions || [];
+    const as = window._jambLastAnswers  || [];
+    if (!r) return;
+    const payload = {
+      r,
+      q: qs.slice(0,10).map((q,i)=>({
+        q: q.question,
+        o: q.options,
+        a: q.answer,
+        ua: as[i],
+      }))
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    const url  = window.location.origin + window.location.pathname + '?session=' + encoded;
+    const text = `🎯 ${r.student} scored ${r.percent}% in ${fmt(r.subject)} JAMB\n\nSee my full session:\n${url}\n\nThink you can beat it? 💪`;
+    if (navigator.share) navigator.share({ title:'JAMB Result', text, url }).catch(()=>{});
+    else navigator.clipboard?.writeText(text).then(()=>alert('Result link copied!')).catch(()=>prompt('Copy:',url));
+  }
+
+  function checkForSharedSession() {
+    const params = new URLSearchParams(window.location.search);
+    const data   = params.get('session');
+    if (!data) return;
+    history.replaceState(null,'',window.location.pathname);
+    try {
+      const payload = JSON.parse(decodeURIComponent(escape(atob(data))));
+      showJambSharedSession(payload);
+    } catch(e) { console.warn('Could not parse session:', e); }
+  }
+
+  function showJambSharedSession(payload) {
+    const r   = payload.r;
+    const modal = document.getElementById('jambSharedModal');
+    if (!modal) return;
+    const pct   = r.percent || 0;
+    const emoji = pct>=70?'🏆':pct>=50?'🎯':'💪';
+    const color = pct>=50?'#27ae60':'#e74c3c';
+    document.getElementById('jambSsEmoji').textContent = emoji;
+    document.getElementById('jambSsScore').textContent = pct + '%';
+    document.getElementById('jambSsScore').style.color = color;
+    document.getElementById('jambSsMeta').innerHTML = `<strong>${escHtml(r.student)}</strong> · ${escHtml(fmt(r.subject||'JAMB'))} · ${escHtml(r.mode||'')}`;
+    document.getElementById('jambSsStats').innerHTML = `<span style="color:#27ae60">✓ ${r.correct} correct</span> · <span style="color:#e74c3c">✗ ${r.wrong} wrong</span> · <span>⊘ ${r.skipped} skipped</span>`;
+    document.getElementById('jambSsClose')?.addEventListener('click', ()=>modal.classList.add('hidden'));
+    modal.addEventListener('click', e=>{ if(e.target===modal) modal.classList.add('hidden'); });
+    document.getElementById('jambSsTry')?.addEventListener('click', ()=>{
+      modal.classList.add('hidden');
+      showScreen('home');
+    });
+    modal.classList.remove('hidden');
+  }
+
+  /* ════════════════════════════════════════════════════
+     UPGRADE BAR + CROSS-SELL
+  ════════════════════════════════════════════════════ */
+  const CROSSSELL_MSGS = [
+    { title: 'Writing WAEC this year?',      sub: 'My Exams App is coming: 15 subjects across WAEC, NECO, GCE and NABTEB, with the same AI explanations.' },
+    { title: 'NECO coming up next?',          sub: 'My Exams App is coming, with NECO past questions and full marking schemes.' },
+    { title: 'Done with JAMB prep?',          sub: 'My Exams App is coming, with past questions from WAEC, NECO, GCE and NABTEB. We will let you know when it opens.' },
+    { title: 'Score high in JAMB. Ace WAEC too.', sub: 'My Exams App is coming for WAEC and NECO, built the same way as this app.' },
+    { title: 'Theory giving you trouble?',    sub: 'My Exams App is coming with snap-and-mark: write your theory answer, snap it, get marked against the official scheme.' },
+  ];
+
+  function initUpgradeBar() {
+    const btn = document.getElementById('jambUpgradeBarBtn');
+    if (btn) btn.addEventListener('click', () => showPaywall('upgrade'));
+    const cardBtn = document.getElementById('jambUpgradeCardBtn');
+    if (cardBtn) cardBtn.addEventListener('click', () => showPaywall('upgrade'));
+    refreshUpgradeBar();
+    setInterval(refreshUpgradeBar, 30000);
+    rotateCrosssell();
+    setInterval(rotateCrosssell, 45000);
+  }
+
+  function rotateCrosssell() {
+    const card  = document.getElementById('jambCrosssell');
+    if (!card) return;
+    const idx   = Math.floor(Date.now() / 45000) % CROSSSELL_MSGS.length;
+    const msg   = CROSSSELL_MSGS[idx];
+    const title = document.getElementById('jcsTitleText');
+    const sub   = card.querySelector('.jcs-sub');
+    if (title) title.textContent = msg.title;
+    if (sub)   sub.textContent   = msg.sub;
+  }
+
+  /* ════════════════════════════════
+     SHOW WORKING MODE
+  ════════════════════════════════ */
+
+  /* ════════════════════════════════
+     GENTLE VALIDATION POPUPS
+  ════════════════════════════════ */
+  function showGentlePopup(msg, anchorEl) {
+    // Remove any existing popup
+    document.querySelectorAll('.gentle-popup').forEach(p => p.remove());
+
+    const popup = document.createElement('div');
+    popup.className = 'gentle-popup';
+    popup.textContent = msg;
+    popup.style.cssText = [
+      'display:block',
+      'background:rgba(11,31,58,0.97)',
+      'color:white',
+      'border:1.5px solid rgba(245,166,35,.7)',
+      'border-radius:10px',
+      'padding:.6rem 1rem',
+      'font-size:.82rem','font-weight:600',
+      'text-align:center',
+      'line-height:1.45',
+      'margin-bottom:.5rem',
+      'box-shadow:0 4px 16px rgba(0,0,0,.35)',
+      'animation:gentlePopIn .18s ease',
+    ].join(';');
+
+    if (anchorEl) {
+      // Insert directly before the anchor element
+      anchorEl.parentNode.insertBefore(popup, anchorEl);
+      anchorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      document.body.appendChild(popup);
+      popup.style.cssText += ';position:fixed;top:80px;left:50%;transform:translateX(-50%);max-width:300px;z-index:9999';
+    }
+
+    setTimeout(() => {
+      popup.style.opacity = '0';
+      popup.style.transition = 'opacity .3s';
+      setTimeout(() => popup.remove(), 300);
+    }, 3000);
+  }
+
+  function showSWSnapWarning() {
+    showGentlePopup('✍️ Snap your working first to unlock answers');
+    const panel = document.getElementById('showWorkingPanel');
+    if (panel) panel.classList.remove('hidden');
+  }
+
+  function showSWIntroBanner() {
+    // One-time banner when entering Show Working mode
+    let banner = document.getElementById('swIntroBanner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'swIntroBanner';
+      banner.style.cssText = [
+        'position:fixed','top:70px','left:50%','transform:translateX(-50%)',
+        'background:#0d1f38','color:white',
+        'border:2px solid var(--amber,#f5a623)',
+        'border-radius:14px','padding:1rem 1.25rem',
+        'font-size:.85rem','line-height:1.6',
+        'text-align:center','z-index:9999',
+        'max-width:420px','width:calc(100% - 2rem)',
+        'box-shadow:0 8px 32px rgba(0,0,0,.5)',
+      ].join(';');
+      banner.innerHTML = [
+        '<div style="font-size:1.5rem;margin-bottom:.35rem">✍️</div>',
+        '<strong style="font-size:.95rem;color:var(--amber,#f5a623)">Show Working Mode</strong><br/>',
+        'Write your solution on paper before selecting an answer.<br/>',
+        'Snap your working — AI checks your method, then options unlock.<br/>',
+        '<button id="swIntroBannerClose" style="margin-top:.65rem;background:var(--amber,#f5a623);color:#0b1f3a;border:none;border-radius:99px;padding:.4rem 1.1rem;font-weight:700;font-size:.82rem;cursor:pointer">Got it →</button>',
+      ].join('');
+      document.body.appendChild(banner);
+      document.getElementById('swIntroBannerClose')?.addEventListener('click', () => { banner.style.display = 'none'; });
+    }
+    banner.style.display = 'block';
+    clearTimeout(banner._timer);
+    banner._timer = setTimeout(() => { banner.style.display = 'none'; }, 5000);
+  }
+
+  function lockOptionsUntilWorking(unlock) {
+    const opts = document.querySelectorAll('.option-btn');
+    opts.forEach(btn => {
+      // Don't grey out — just block via click handler
+      // Visual greyout confuses students into thinking app is broken
+      btn.style.opacity    = '';
+      btn.style.pointerEvents = '';
+      btn.style.cursor     = '';
+    });
+    const lockBar = document.getElementById('swLockBar');
+    if (lockBar) lockBar.classList.toggle('hidden', unlock);
+  }
+
+  async function triggerSWSnap() {
+    if (!checkAccess()) { showPaywall('feature'); return; }
+    if (!snapToken()) {
+      alert('Snaps are linked to your pass. If you paid on another phone, tap "Restore access" on the payment screen to use your snaps here.');
+      return;
+    }
+    // Open the camera straight away (browsers only allow it from the tap
+    // itself); the server makes the final check when the photo is sent.
+    if (getSWCredits() > 0) { document.getElementById('swFileInput')?.click(); syncSWCredits(); return; }
+    const left = await syncSWCredits();
+    if (left > 0) { alert(`You have ${left} snaps — tap Snap again.`); return; }
+    showSWTopUp();
+  }
+
+  // Out of snaps: offer the ₦500 top-up. (It used to reuse an
+  // 'exitConfirmModal' that this page doesn't have, so nothing appeared.)
+  function showSWTopUp() {
+    document.getElementById('swTopUpOverlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'swTopUpOverlay';
+    overlay.style.cssText = `position:fixed; inset:0; background:rgba(5,10,20,.72); display:flex; align-items:center;
+      justify-content:center; z-index:10000; padding:1rem; font-family:var(--sans,sans-serif);`;
+    overlay.innerHTML = `
+      <div style="background:#0a1628; border:1.5px solid var(--gold,#d4af37); border-radius:14px; padding:1.6rem 1.4rem;
+                  max-width:340px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.5);">
+        <div style="font-size:2rem;">📸</div>
+        <h3 style="margin:.4rem 0; color:#fff; font-size:1.05rem;">You've used all your snaps</h3>
+        <p style="margin:0 0 1.1rem; color:var(--text-dim,#9aa5b1); font-size:.88rem; line-height:1.45;">
+          Get 10 more Show Working snaps for ₦500. They're added to your pass, on every phone it's on.</p>
+        <div style="display:flex; gap:.6rem;">
+          <button id="swTopUpNo" style="flex:1; padding:.65rem; border-radius:9px; border:1.5px solid #26344a; background:transparent; color:#fff; font-weight:600;">Not now</button>
+          <button id="swTopUpYes" style="flex:1; padding:.65rem; border-radius:9px; border:none; background:var(--gold,#d4af37); color:#0a1628; font-weight:700;">Top up — ₦500</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#swTopUpNo').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    overlay.querySelector('#swTopUpYes').addEventListener('click', () => { overlay.remove(); handleSWTopUpPayment(); });
+  }
+
+  async function handleSWTopUpPayment() {
+    const email = await getEmailViaModal();
+    if (!email) return; // cancelled
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_KEY,
+      email,
+      amount: 50000, // ₦500 in kobo
+      currency: 'NGN',
+      ref: 'SW-TOPUP-' + Date.now(),
+      metadata: { custom_fields: [
+        { display_name: 'Product', variable_name: 'product', value: 'Show Working Top-up 10 snaps' },
+        // The server tells this ₦500 apart from Holiday Hub's ₦500 by app.
+        { display_name: 'App', variable_name: 'app', value: 'My JAMB App' },
+      ]},
+      onClose() {},
+      callback(response) {
+        (async () => {
+          const res = await fetch(API_BASE + '/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: response.reference, snapToken: snapToken() })
+          }).catch(() => null);
+          const data = res ? await res.json().catch(() => ({})) : {};
+          if (!res || !res.ok || !data.verified) {
+            alert('We could not confirm this payment yet. If you were charged, please contact support with reference: ' + response.reference);
+            return;
+          }
+          const addCredits = data.credits || 10;
+          if (data.snapToken && !loadPref(SK_SNAP_TOKEN) && data.snapToken !== snapToken()) savePref(SK_SNAP_TOKEN, data.snapToken);
+          if (typeof data.snapsLeft === 'number') setSWLeft(data.snapsLeft);
+          alert(`✅ ${addCredits} snaps added! You now have ${getSWCredits()} snaps for your pass.`);
+        })();
+      }
+    });
+    handler.openIframe();
+  }
+
+  function handleSWFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    compressForSW(file).then(sendWorkingToMark).catch(err => {
+      console.error(err);
+      alert('Could not process image. Please try again.');
+    });
+  }
+
+  function compressForSW(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = ev => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          if (w > 900) { h = Math.round(h * 900/w); w = 900; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve({ base64: canvas.toDataURL('image/jpeg', 0.8).split(',')[1], mediaType: 'image/jpeg' });
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function sendWorkingToMark({ base64, mediaType }) {
+    const q = state.currentQuestions[state.currentIndex];
+    if (!q) return;
+
+    const proc = document.getElementById('swProcessing');
+    if (proc) proc.classList.remove('hidden');
+
+
+    const subjectKey  = (el.subjectSelect?.value||state.subject||'').toLowerCase();
+    const subjectName = SW_SUBJECTS_LBL[subjectKey] || state.subject;
+
+    try {
+      // The server builds the examiner prompt from these fields and takes
+      // one snap from the pass's shared balance (refunded if marking fails).
+      const res = await fetch(SNAP_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          snapToken: snapToken(),
+          mode: 'working',
+          image: base64, mediaType,
+          question: q.question,
+          options: q.options,
+          answer: q.answer,
+          subject: subjectName,
+        }),
+      });
+
+      if (proc) proc.classList.add('hidden');
+      const data = await res.json().catch(() => ({}));
+      if (typeof data.snapsLeft === 'number') setSWLeft(data.snapsLeft);
+
+      if (data.code === 'NO_SNAPS') { showSWTopUp(); return; }
+      if (data.code === 'NO_PASS') { alert(data.error || 'Snaps are linked to your pass. Tap "Restore access" on the payment screen.'); return; }
+      if (!res.ok || !data.working) { alert(data.error || 'Could not mark your working. Your snap was not used — please try again.'); return; }
+
+      showSWResult(data.working, data);
+
+    } catch(err) {
+      if (proc) proc.classList.add('hidden');
+      alert('Could not reach marking server. Check your connection.');
+    }
+  }
+
+  function showSWResult(parsed, rawData) {
+    const swResult = document.getElementById('swResult');
+    const swResultHead = document.getElementById('swResultHead');
+    const swResultFeedback = document.getElementById('swResultFeedback');
+    const swResultSteps = document.getElementById('swResultSteps');
+    if (!swResult) return;
+
+    const correct = parsed?.workingCorrect ?? (rawData?.percent >= 50);
+    const feedback = parsed?.feedback || rawData?.feedback || 'Working reviewed.';
+    const hint     = parsed?.hint || '';
+    const steps    = parsed?.steps || rawData?.breakdown || [];
+
+    swResultHead.innerHTML = correct
+      ? '<span class="sw-correct">✓ Good working method!</span>'
+      : '<span class="sw-wrong">✗ Check your working — see feedback below</span>';
+
+    swResultFeedback.textContent = feedback;
+
+    if (steps.length) {
+      swResultSteps.innerHTML = steps.map(s => `
+        <div class="sw-step ${s.correct||s.awarded>0 ? 'sw-step-ok' : 'sw-step-err'}">
+          <span class="sw-step-icon">${s.correct||s.awarded>0 ? '✓' : '✗'}</span>
+          <div class="sw-step-body">
+            <div class="sw-step-desc">${escHtml(s.step||s.point||'')}</div>
+            ${s.comment ? `<div class="sw-step-comment">${escHtml(s.comment)}</div>` : ''}
+          </div>
+        </div>`).join('');
+    }
+
+    if (hint) {
+      swResultFeedback.innerHTML += `<div class="sw-hint">💡 ${escHtml(hint)}</div>`;
+    }
+
+    state.swDone = true;
+    swResult.classList.remove('hidden');
+    lockOptionsUntilWorking(true);
+    const lockBar = document.getElementById('swLockBar');
+    if (lockBar) lockBar.classList.add('hidden');
+
+    // Update credits badge
+    const swCredits = document.getElementById('swCredits');
+    if (swCredits) swCredits.textContent = getSWCredits() + ' snaps left';
+  }
+
+  function swProceed() {
+    // Hide the panel and let student select answer
+    const swPanel = document.getElementById('showWorkingPanel');
+    if (swPanel) swPanel.classList.add('hidden');
+    lockOptionsUntilWorking(true);
+  }
+
+  // Inline onclick="..." attributes (in index.html) can only see truly
+  // global functions — anything defined inside this closure is invisible to
+  // them. Exposing defensively here since My Exams App had this exact bug.
+  window.showPaywall       = showPaywall;
+  window.handleJambPayment = handleJambPayment;
+
+  // Called here, at the very end, so every const declared anywhere in this
+  // file (like CROSSSELL_MSGS) has already been initialized by the time
+  // init() and anything it calls actually runs. Calling init() earlier in
+  // the file caused "Cannot access 'CROSSSELL_MSGS' before initialization".
+  async function prepareContent(subjects, label) {
+    return JambContent.run(label, () => JambContent.ensure(subjects));
+  }
+  window.addEventListener('jamb-content-loaded', () => {
+    normalizePassageBank(QUESTION_BANK);
+    repeatIndex = null;
+    for (const subject of Object.keys(trapCache)) delete trapCache[subject];
+  });
+  JambContent.run('Opening My JAMB App…', () => JambContent.ready()).then(ok => {
+    if (ok) init();
+    else {
+      // Keep startup recoverable even if the first manifest request failed.
+      const button = document.createElement('button');
+      button.textContent = 'Try opening the app again';
+      button.className = 'primary-btn';
+      button.onclick = () => location.reload();
+      document.querySelector('main')?.prepend(button) || document.body.prepend(button);
+    }
+  });
+
+  // Offline support (see sw.js). Only over http(s): service workers don't
+  // run from file:// and need a secure origin, which GitHub Pages is.
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+
+})();

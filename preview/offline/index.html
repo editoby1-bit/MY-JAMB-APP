@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My JAMB App — Test Version</title>
+  <meta name="description" content="The only JAMB app where AI explains every answer. Real JAMB past questions across 11 subjects, answers checked against the official papers. Full combo simulation."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="preview-mode.js"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-brand">
+        <span class="brand-icon">◈</span>
+        <div>
+          <h1>My <span class="brand-accent">JAMB</span></h1>
+          <p class="brand-sub">UTME Practice Platform</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="switchUserBtn" class="ghost-btn">⇄ Switch Student</button>
+        <button id="resetProgressBtn" class="ghost-btn danger-ghost">↺ Reset History</button>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- ─── HOME SCREEN ─── -->
+      <section id="homeScreen" class="screen active">
+
+        <div class="hero-banner">
+          <div class="hero-text">
+            <span class="chip">UTME CBT Simulator</span>
+            <h2>Prepare smarter.<br>Score higher.</h2>
+            <p>Practice with authentic JAMB-style past questions across all major UTME subjects. Single-subject drills or full 4-subject exam simulations.</p>
+          </div>
+          <div class="hero-stats-col">
+            <div class="hero-stats">
+              <div class="hs-item">
+                <strong id="statSessions">0</strong>
+                <span>Sessions</span>
+              </div>
+              <div class="hs-divider"></div>
+              <div class="hs-item">
+                <strong id="statAverage">—</strong>
+                <span>Average</span>
+              </div>
+              <div class="hs-divider"></div>
+              <div class="hs-item">
+                <strong id="statBest">—</strong>
+                <span>Best Score</span>
+              </div>
+              <div class="hs-divider"></div>
+              <div class="hs-item">
+                <strong id="statQuestions">0</strong>
+                <span>Q Bank</span>
+              </div>
+            </div>
+
+            <!-- School & Class — directly under the stats, same width, still inside the hero -->
+            <div class="jamb-dash-banner" id="jambDashBanner">
+              <span class="jdb-icon">🏫</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">School & Class</span>
+                <span class="jdb-sub">Student · Parent · Teacher Dashboards</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- Games — same treatment, stacked below -->
+            <div class="jamb-dash-banner jamb-games-banner" id="jambGamesBanner">
+              <span class="jdb-icon">🎮</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Games</span>
+                <span class="jdb-sub">Speed Round · True/False · Memory Match</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- Community — contribute questions/explanations, practice community picks -->
+            <div class="jamb-dash-banner jamb-community-banner" id="jambCommunityBanner">
+              <span class="jdb-icon">✍️</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Community</span>
+                <span class="jdb-sub">Contribute questions · Practice community picks</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- Most repeated questions — JAMB re-sets past questions -->
+            <div class="jamb-dash-banner jamb-repeat-banner" id="jambRepeatBanner">
+              <span class="jdb-icon">🔁</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Most Repeated Questions</span>
+                <span class="jdb-sub">The questions JAMB sets again and again</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- JAMB's Tricky Questions — several right answers, or none fully right -->
+            <div class="jamb-dash-banner jamb-tricky-banner" id="jambTrickyBanner">
+              <span class="jdb-icon">🧩</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">JAMB's Tricky Questions</span>
+                <span class="jdb-sub">More than one right answer · No fully correct option</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- Wrong answers in circulation — booklet answer keys that are wrong -->
+            <div class="jamb-dash-banner jamb-booklet-banner" id="jambBookletBanner">
+              <span class="jdb-icon">❌</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Wrong Answers in Circulation</span>
+                <span class="jdb-sub">Booklet and online answers that are wrong, and the right ones</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- Exam Traps — the tempting wrong options, by topic -->
+            <div class="jamb-dash-banner jamb-traps-banner" id="jambTrapsBanner">
+              <span class="jdb-icon">⚠️</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Exam Traps</span>
+                <span class="jdb-sub">The wrong options that catch students, topic by topic</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+
+            <!-- Key Points — every topic lesson behind the past questions -->
+            <div class="jamb-dash-banner jamb-keypoints-banner" id="jambKeyPointsBanner">
+              <span class="jdb-icon">📘</span>
+              <div class="jdb-text-wrap">
+                <span class="jdb-text">Key Points</span>
+                <span class="jdb-sub">Every topic in brief · learn before you practise</span>
+              </div>
+              <span class="jdb-arrow">→</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-grid">
+
+          <!-- LOGIN + SESSION CONFIG -->
+          <div class="card setup-card">
+
+            <!-- Upgrade bar — visible to free users inside login card -->
+            <div class="jamb-upgrade-bar hidden" id="jambUpgradeBar">
+              <div class="jub-left">
+                <span class="jub-icon">⚡</span>
+                <span id="jambUpgradeText">Unlock everything till the exams — from ₦2,000.</span>
+              </div>
+              <button class="jub-btn" id="jambUpgradeBarBtn">Upgrade →</button>
+            </div>
+
+            <div class="card-section">
+              <h3 class="section-label">Student Login</h3>
+              <div class="login-row">
+                <input id="studentName" type="text" placeholder="Enter your full name" maxlength="60" class="text-input" />
+                <button id="loginBtn" class="primary-btn">Login</button>
+              </div>
+              <div id="currentStudentBox" class="student-pill">No student logged in</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="card-section">
+              <h3 class="section-label">Configure Session</h3>
+
+              <!-- Hidden inputs for JS compatibility -->
+              <input type="hidden" id="sessionTypeSelect" value=""/>
+              <input type="hidden" id="modeSelect" value=""/>
+
+              <div class="config-btn-group">
+                <div class="config-group-label">Session Type</div>
+                <div class="config-btns" id="sessionTypeBtns">
+                  <button class="config-btn" data-group="session" data-value="single">
+                    <span class="cb-icon">📖</span>
+                    <span class="cb-label">Single Subject</span>
+                    <span class="cb-sub">Drill one subject</span>
+                  </button>
+                  <button class="config-btn" data-group="session" data-value="combo">
+                    <span class="cb-icon">🎯</span>
+                    <span class="cb-label">Full JAMB Combo</span>
+                    <span class="cb-sub">4 subjects · real format</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="config-btn-group">
+                <div class="config-group-label">Mode</div>
+                <div class="config-btns" id="modeBtns">
+                  <button class="config-btn" data-group="mode" data-value="practice">
+                    <span class="cb-icon">📝</span>
+                    <span class="cb-label">Practice</span>
+                    <span class="cb-sub">Instant feedback</span>
+                  </button>
+                  <button class="config-btn" data-group="mode" data-value="exam">
+                    <span class="cb-icon">⏱</span>
+                    <span class="cb-label">Exam</span>
+                    <span class="cb-sub">Timed · no hints</span>
+                  </button>
+                  <button class="config-btn" data-group="mode" data-value="showworking">
+                    <span class="cb-icon">✍️</span>
+                    <span class="cb-label">Show Working</span>
+                    <span class="cb-sub">Snap before answering</span>
+                  </button>
+                </div>
+              </div>
+
+              <div id="singleSubjectWrap">
+                <div class="form-grid mt-sm">
+                  <label class="field-label">
+                    Subject
+                    <select id="subjectSelect" class="select-input"></select>
+                  </label>
+                  <label class="field-label">
+                    No. of Questions
+                    <select id="questionCountSelect" class="select-input">
+                      <option value="10">10 Questions</option>
+                      <option value="20">20 Questions</option>
+                      <option value="30">30 Questions</option>
+                      <option value="40">40 Questions</option>
+                      <option value="all">All Available</option>
+                    </select>
+                  </label>
+                  <label class="field-label year-field hidden" id="yearField">
+                    Past Paper Year
+                    <select id="yearSelect" class="select-input"></select>
+                  </label>
+                </div>
+              </div>
+
+              <div id="comboConfig" class="hidden">
+                <div class="info-box mt-sm">
+                  <strong>English is compulsory.</strong> Choose 3 additional subjects. Standard JAMB format: 60 English + 40 per subject.
+                </div>
+                <div class="form-grid mt-sm">
+                  <label class="field-label">Subject 2 <select id="comboSubject1" class="select-input"></select></label>
+                  <label class="field-label">Subject 3 <select id="comboSubject2" class="select-input"></select></label>
+                  <label class="field-label">Subject 4 <select id="comboSubject3" class="select-input"></select></label>
+                  <label class="field-label">
+                    Questions per Subject
+                    <select id="comboQCountSelect" class="select-input">
+                      <option value="standard">Standard (60 Eng + 40×3)</option>
+                      <option value="10">Quick — 10 per subject</option>
+                      <option value="20">Short — 20 per subject</option>
+                      <option value="30">Medium — 30 per subject</option>
+                      <option value="40">Full — 40 per subject</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-grid mt-sm">
+                <label class="field-label">
+                  Exam Duration
+                  <select id="durationSelect" class="select-input">
+                    <option value="auto">Auto (1 min / question)</option>
+                    <option value="10">10 Minutes</option>
+                    <option value="20">20 Minutes</option>
+                    <option value="30">30 Minutes</option>
+                    <option value="40">40 Minutes</option>
+                    <option value="60">60 Minutes</option>
+                    <option value="90">90 Minutes</option>
+                    <option value="120">120 Minutes</option>
+                    <option value="150">150 Minutes</option>
+                    <option value="180">180 Minutes (Full JAMB)</option>
+                  </select>
+                </label>
+              </div>
+
+              <button id="startBtn" class="start-btn">Start Practice</button>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="card history-card">
+            <div class="card-section">
+              <div class="section-head">
+                <h3 class="section-label">Session History</h3>
+                <span id="historyTitle" class="muted-tag">No student selected</span>
+              </div>
+              <div id="historyList" class="history-list empty-state">Login with a student name to view history.</div>
+            </div>
+          </div>
+
+          <!-- Cross-sell — My Exams App -->
+          <!-- Upgrade card — free users only -->
+          <div class="jamb-upgrade-card hidden" id="jambUpgradeCard">
+            <div class="juc-badge">LIMITED EARLY ACCESS</div>
+            <div class="juc-body">
+              <div class="juc-icon">🧠</div>
+              <div class="juc-text">
+                <div class="juc-title">The only JAMB app with AI explanations.</div>
+                <div class="juc-sub">Unlimited sessions · AI explains every answer · Challenge friends · Access till the exams</div>
+              </div>
+            </div>
+            <button class="juc-btn" id="jambUpgradeCardBtn">Get Full Access — from ₦2,000 →</button>
+            <div class="juc-suite">Also writing WAEC/NECO? <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" target="_blank">My Exams App is coming for WAEC &amp; NECO</a></div>
+          </div>
+
+          <div class="jamb-crosssell-card" id="jambCrosssell">
+            <div class="jcs-inner">
+              <span class="jcs-icon">📚</span>
+              <div class="jcs-body">
+                <div class="jcs-title" id="jcsTitleText">Writing WAEC or NECO this year?</div>
+                <div class="jcs-sub">My Exams App covers 15 subjects across WAEC, NECO, GCE and NABTEB — with snap-and-mark theory. Coming soon.</div>
+              </div>
+              <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" class="jcs-btn" target="_blank">Try It Free →</a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ─── QUIZ SCREEN ─── -->
+      <section id="quizScreen" class="screen">
+        <div class="quiz-shell">
+
+          <!-- SIDEBAR -->
+          <aside class="quiz-sidebar card">
+            <div class="sidebar-top">
+              <div class="sidebar-meta">
+                <span class="meta-label">Student</span>
+                <strong id="sidebarStudent">—</strong>
+              </div>
+              <div class="sidebar-meta">
+                <span class="meta-label">Mode</span>
+                <strong id="sidebarMode">—</strong>
+              </div>
+              <div class="timer-block" id="timerBlock">
+                <span class="timer-label">Time Left</span>
+                <div class="timer-digits" id="timerDisplay">--:--</div>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-label">
+                  <span>Answered</span>
+                  <span id="progressText">0/0</span>
+                </div>
+                <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+              </div>
+            </div>
+
+            <!-- Subject switcher (shown in combo mode) -->
+            <div id="subjectSwitcher" class="subject-switcher hidden">
+              <span class="meta-label">Jump to Subject</span>
+              <div id="subjectTabs" class="subject-tabs"></div>
+            </div>
+
+            <div class="sidebar-pills-label">
+              <span class="meta-label" id="pillsLabel">Questions</span>
+            </div>
+            <div id="questionPills" class="question-pills"></div>
+
+            <button id="submitBtn" class="submit-btn">Submit Test</button>
+          </aside>
+
+          <!-- MAIN QUESTION AREA -->
+          <section class="quiz-main card">
+            <div class="question-head">
+              <div class="qhead-left">
+                <span class="q-badge" id="questionNumberBadge">Question 1</span>
+                <span class="q-subject-tag" id="questionSubjectMeta"></span>
+                <span class="q-subject-pos hidden" id="subjectPositionTag"></span>
+              </div>
+              <button id="backHomeBtn" class="exit-btn">✕ Exit</button>
+            </div>
+
+            <div class="question-body">
+              <h2 id="questionText" class="question-text">Question text</h2>
+              <div id="diagramBox" class="diagram-box hidden"></div>
+
+              <!-- Show Working panel — inline above options -->
+              <div id="showWorkingPanel" class="sw-panel hidden">
+                <div class="sw-head">
+                  <span class="sw-title">✍️ Show Your Working</span>
+                  <span class="sw-credits" id="swCredits"></span>
+                  <button class="sw-close-btn" id="swCloseBtn">✕</button>
+                </div>
+                <p class="sw-instruction">📌 <strong>Write your solution on paper, then tap Snap.</strong> Answer options unlock after AI checks your method.</p>
+                <div class="sw-subjects-note" id="swSubjectsNote"></div>
+                <button class="sw-snap-btn" id="swSnapBtn">📸 Snap My Working</button>
+                <input type="file" id="swFileInput" accept="image/*" capture="environment" style="display:none"/>
+                <div class="sw-result hidden" id="swResult">
+                  <div class="sw-result-head" id="swResultHead"></div>
+                  <div class="sw-result-feedback" id="swResultFeedback"></div>
+                  <div class="sw-result-steps" id="swResultSteps"></div>
+                  <button class="sw-proceed-btn" id="swProceedBtn">✓ Select Your Answer Now →</button>
+                </div>
+              </div>
+
+              <!-- Lock bar — shows when options are locked -->
+              <div class="sw-lock-bar hidden" id="swLockBar">
+                <span>🔒</span>
+                <span class="sw-lock-text">Snap your working to unlock answer options</span>
+                <button class="sw-lock-snap-btn" id="swLockSnapBtn">📸 Snap</button>
+              </div>
+
+              <div id="optionsList" class="options-list"></div>
+            </div>
+
+            <div class="explanation-wrap">
+              <button id="toggleExplanationBtn" class="toggle-explain hidden">💡 Show Explanation</button>
+              <div id="explanationBox" class="explanation-box hidden"></div>
+              <button id="aiExplainBtn" class="ai-explain-btn hidden">🧠 Explain This <span class="ai-explain-sub">tap to explain this answer</span></button>
+            </div>
+
+            <div class="nav-row">
+              <button id="prevBtn" class="nav-btn ghost-btn">← Previous</button>
+              <button id="nextBtn" class="nav-btn primary-btn">Next →</button>
+            </div>
+
+            <button id="aiExplainTeaserBtn" class="ai-explain-teaser-btn hidden">🧠 Explain This</button>
+          </section>
+
+        </div>
+      </section>
+
+      <!-- ─── RESULT SCREEN ─── -->
+      <section id="resultScreen" class="screen">
+        <div class="result-wrapper">
+          <div class="card result-card">
+            <span class="chip">Session Complete</span>
+            <div id="resultScore" class="result-score">0%</div>
+            <p id="resultSummary" class="result-summary">Summary</p>
+            <div id="resultBreakdown" class="result-breakdown"></div>
+            <div class="nav-row center mt-md">
+              <button id="reviewBtn" class="ghost-btn">Review Answers</button>
+              <button id="shareResultBtn" class="primary-btn">📊 Share Result</button>
+              <button id="restartBtn" class="start-btn">Back to Home</button>
+            </div>
+          </div>
+
+          <div id="subjectBreakdown" class="subject-breakdown-card card hidden">
+            <h3 class="section-label">Subject Breakdown</h3>
+            <div id="subjectBreakdownList"></div>
+          </div>
+        </div>
+
+        <footer class="attribution">
+          Questions sourced from JAMB past examinations and publicly available UTME materials.
+          <span class="attr-logo">◈ My JAMB App</span>
+        </footer>
+      </section>
+
+    </main>
+
+    <!-- CROSS-APP LINK -->
+    <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" class="cross-app-link" target="_blank" title="My Exams App — WAEC, NECO, GCE, NABTEB">
+      📚 My Exams App →
+    </a>
+
+    <!-- CHALLENGE BUTTON -->
+    <button id="jambChallengeBtn" class="jamb-challenge-btn hidden">🏆 Challenge a Friend<span id="jambChallengeBadge" class="jamb-challenge-badge hidden"></span></button>
+
+    <!-- PAYWALL -->
+    <div id="jambPaywall" class="jpw-overlay hidden">
+      <div class="jpw-card">
+        <button class="jpw-close" id="jambPaywallClose">✕</button>
+        <div class="jpw-badge" id="jambPaywallBadge">FREE TRIAL COMPLETE</div>
+        <h2 class="jpw-title">Unlock My JAMB App</h2>
+        <p class="jpw-sub">The only JAMB app where AI explains every answer. Challenge friends. Full combo simulation. One payment, access till the exams.</p>
+
+        <div class="jpw-hero-price">
+          <span class="jpw-amount">₦2,499</span>
+          <span class="jpw-period" id="jambPassPeriod">Full access till the exams</span>
+        </div>
+        <p class="jpw-ea hidden" id="jambEaLine"></p>
+        <p class="jpw-positioning">Most JAMB apps give you questions and nothing else. We give you questions, AI that explains every answer, and answers checked against the official papers, with errors in the usual answer keys flagged.</p>
+
+        <ul class="jpw-perks">
+          <li>✓ <span data-qcount>760+</span> questions across 11 subjects</li>
+          <li>✓ Full JAMB combo simulation (60 Eng + 40×3)</li>
+          <li>✓ <strong>Unlimited AI explanations</strong> — unique to us</li>
+          <li>✓ Show Working — 20 snaps of your maths working marked, till the exams</li>
+          <li>✓ Challenge friends — community quiz</li>
+          <li>✓ Share your results with friends</li>
+          <li>✓ Practice and Exam modes — works offline once opened</li>
+        </ul>
+
+        <button class="jpw-pay-btn" id="jambPayBtn">Get Access — ₦2,499 →</button>
+        <p class="jpw-note">Paid on another phone, or a parent paid? <button type="button" class="jpw-restore-link" id="jambRestoreBtn">Restore access</button></p>
+
+        <div class="jpw-code-row">
+          <input id="jambCodeInput" class="jpw-code-input" placeholder="Have an access code?" autocomplete="off"/>
+          <button id="jambRedeemBtn" class="jpw-redeem-btn">Redeem</button>
+        </div>
+
+        <div class="jpw-suite-nudge">
+          <span class="jpw-suite-text">Writing WAEC, NECO, GCE or NABTEB too?</span>
+          <a href="https://editoby1-bit.github.io/MY-EXAMS-APP/" class="jpw-suite-link" target="_blank">My Exams App is coming →</a>
+          <span class="jpw-suite-note">One Student Pass will cover both apps, JAMB included</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI EXPLANATION PANEL -->
+    <div id="aiPanel" class="ai-panel hidden">
+      <div class="ai-panel-inner">
+        <div class="ai-panel-head">
+          <span class="ai-panel-title">🧠 AI Explanation</span>
+          <div class="ai-credits-badge" id="aiCreditsBadge">Unlimited</div>
+          <button class="ai-panel-close" id="aiPanelClose">✕</button>
+        </div>
+        <div id="aiPanelContent" class="ai-panel-content">
+          <div class="ai-loading" id="aiLoading">
+            <div class="ai-spinner"></div>
+            <span>Thinking...</span>
+          </div>
+          <div id="aiResponse" class="ai-response hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY QUIZ MODAL -->
+    <div id="jambQuizModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambQcClose">✕</button>
+        <div id="jambQcHome">
+          <div class="jqc-icon">🏆</div>
+          <h2 class="jqc-title">JAMB Challenge</h2>
+          <p class="jqc-sub">Same questions. You vs your friends. Who scores higher?</p>
+          <div class="jqc-actions">
+            <button class="jqc-btn jqc-primary" id="jambQcCreate">Create Challenge →</button>
+            <button class="jqc-btn jqc-secondary" id="jambQcJoin">Join with Code</button>
+          </div>
+          <div class="jqc-join-row hidden" id="jambJoinRow">
+            <input id="jambJoinCode" class="jqc-code-input" placeholder="Enter code" maxlength="10"/>
+            <button class="jqc-btn jqc-primary" id="jambJoinConfirm">Join →</button>
+          </div>
+          <div id="jambPendingWrap" class="hidden">
+            <h4 class="jqc-pending-title">Your Challenges (<span id="jambPendingCount">0</span>/<span id="jambPendingMax">5</span>)</h4>
+            <div id="jambPendingList" class="jqc-pending-list"></div>
+          </div>
+        </div>
+        <div id="jambQcCreate2" class="hidden">
+          <h3 class="jqc-section">Set Up Challenge</h3>
+          <div class="jqc-form">
+            <div class="jqc-field">
+              <label class="jqc-label">Subjects (pick one or more)</label>
+              <div id="jambQcSubjects" class="jqc-subject-checks"></div>
+            </div>
+            <div class="jqc-field"><label class="jqc-label">Questions (total, split across subjects)</label>
+              <select id="jambQcCount" class="jqc-select">
+                <option value="5">5 Questions</option>
+                <option value="10" selected>10 Questions</option>
+                <option value="20">20 Questions</option>
+              </select>
+            </div>
+            <div class="jqc-field"><label class="jqc-label">Time Limit</label>
+              <select id="jambQcDuration" class="jqc-select">
+                <option value="0">No time limit</option>
+                <option value="10">10 minutes</option>
+                <option value="20" selected>20 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </div>
+            <div class="jqc-field">
+              <label class="jqc-label">Start mode</label>
+              <div class="jqc-radio-group">
+                <label class="jqc-radio"><input type="radio" name="jambSyncMode" value="anytime" checked/> <span>Anytime — everyone takes it at their own pace</span></label>
+                <label class="jqc-radio"><input type="radio" name="jambSyncMode" value="ready"/> <span>Wait until everyone's ready, then start together</span></label>
+                <label class="jqc-radio"><input type="radio" name="jambSyncMode" value="scheduled"/> <span>Start at a specific time — late joiners jump into the already-running timer</span></label>
+              </div>
+              <div id="jambScheduledTimeWrap" class="hidden" style="margin-top:.5rem">
+                <input type="datetime-local" id="jambScheduledTime" class="jqc-select" style="width:100%"/>
+                <button type="button" id="jambConfirmScheduledTime" class="jqc-btn jqc-secondary" style="width:100%;margin-top:.4rem">Confirm Time</button>
+                <p id="jambScheduledTimeConfirmed" class="jqc-sub hidden" style="margin-top:.4rem"></p>
+              </div>
+            </div>
+          </div>
+          <p class="jqc-sub" style="text-align:left;margin:0 0 .75rem">💡 By default each challenge avoids questions you've used in your last few challenges, so repeated matches with the same friends stay fresh.</p>
+          <button class="jqc-btn jqc-primary" id="jambQcGenerate" style="width:100%">Generate Code →</button>
+          <button class="jqc-btn jqc-ghost" id="jambQcBack">← Back</button>
+        </div>
+        <div id="jambQcWaitingRoom" class="hidden">
+          <div class="jqc-icon">⏱️</div>
+          <h3 class="jqc-section">Waiting Room</h3>
+          <div class="jqc-code-display" id="jambWaitingCodeDisplay">JAMB-000</div>
+          <p class="jqc-sub" id="jambWaitingStatus">Waiting for everyone to be ready…</p>
+          <p class="jqc-countdown hidden" id="jambWaitingCountdown"></p>
+          <div id="jambWaitingList" class="jqc-leaderboard" style="margin-bottom:1rem"></div>
+          <button class="jqc-btn jqc-primary" id="jambReadyBtn" style="width:100%;margin-bottom:.5rem">✅ I'm Ready</button>
+          <button class="jqc-btn jqc-secondary hidden" id="jambForceStartBtn" style="width:100%;margin-bottom:.5rem">▶ Start Now (everyone else joins mid-way)</button>
+          <button class="jqc-btn jqc-ghost hidden" id="jambEndChallengeBtn" style="width:100%">🗑 End This Challenge</button>
+          <button class="jqc-btn jqc-ghost" id="jambWaitingBack" style="margin-top:.4rem">← Back</button>
+        </div>
+        <div id="jambQcShare2" class="hidden">
+          <div class="jqc-icon">🎯</div>
+          <h3 class="jqc-section">Challenge Created!</h3>
+          <div class="jqc-code-display" id="jambCodeDisplay">MEA-000</div>
+          <button class="jqc-btn jqc-primary" id="jambQcShareLink" style="width:100%;margin-bottom:.5rem">📤 Share Link</button>
+          <button class="jqc-btn jqc-primary" id="jambQcStartOwn" style="width:100%;margin-bottom:.5rem">Start My Attempt →</button>
+          <button class="jqc-btn jqc-ghost" id="jambShare2Back">← Back</button>
+        </div>
+        <div id="jambQcLeaderboard" class="hidden">
+          <div class="jqc-icon">📊</div>
+          <h3 class="jqc-section">Challenge Results</h3>
+          <div id="jambLeaderboardList" class="jqc-leaderboard"></div>
+          <button class="jqc-btn jqc-primary" id="jambQcNew" style="width:100%;margin-top:.75rem">New Challenge →</button>
+          <button class="jqc-btn jqc-ghost" id="jambQcDone">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHOOL / PARENT DASHBOARDS MODAL -->
+    <div id="jambDashModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambDashClose">✕</button>
+        <div class="jqc-icon">🏫</div>
+        <h2 class="jqc-title">School & Class</h2>
+        <div class="dash-tabs" id="dashTabBar">
+          <button class="dash-tab" data-tab="student">Student</button>
+          <button class="dash-tab" data-tab="teacher">Teacher</button>
+          <button class="dash-tab" data-tab="parent">Parent</button>
+        </div>
+        <div id="dashTabBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <!-- TEACHER DASHBOARD MODAL (class-wide) -->
+    <div id="teacherDashModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:480px;">
+        <button class="jqc-close" id="teacherDashClose">✕</button>
+        <div class="jqc-icon">📊</div>
+        <h2 class="jqc-title">Class Dashboard</h2>
+        <div id="teacherDashBody" style="text-align:left; max-height:60vh; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- PARENT DASHBOARD MODAL (single child) -->
+    <div id="parentDashModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:480px;">
+        <button class="jqc-close" id="parentDashClose">✕</button>
+        <div class="jqc-icon">👨‍👩‍👧</div>
+        <h2 class="jqc-title">Your Child's Progress</h2>
+        <div id="parentDashBody" style="text-align:left; max-height:60vh; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- GAMES HUB -->
+    <div id="jambRepeatModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambRepeatClose">✕</button>
+        <div class="jqc-icon">🔁</div>
+        <h2 class="jqc-title">Most Repeated Questions</h2>
+        <p class="jqc-sub">JAMB rarely sets a brand-new question: most can be traced to earlier papers. These are the questions set more than once, most-repeated first, each shown from the year it was first set. Master them.</p>
+        <div id="jambRepeatBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambTrickyModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambTrickyClose">✕</button>
+        <div class="jqc-icon">🧩</div>
+        <h2 class="jqc-title">JAMB's Tricky Questions</h2>
+        <p class="jqc-sub">Real JAMB questions where more than one option is right, or where no option is fully right. Most apps just repeat the answer key; here you learn what is really going on.</p>
+        <div id="jambTrickyBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambBookletModal" class="jqc-overlay hidden">
+      <div class="jqc-card kp-card">
+        <button class="jqc-close" id="jambBookletClose">✕</button>
+        <div class="jqc-icon">❌</div>
+        <h2 class="jqc-title">Wrong Answers in Circulation</h2>
+        <p class="jqc-sub">Many past-question booklets and websites print wrong answers for some questions. If you have seen a different answer elsewhere, check here: we show the booklet answer, the correct one, and why. Don't lose marks to a bad answer key.</p>
+        <select id="bkSubjectSelect" class="select-input kp-subject"></select>
+        <div id="jambBookletBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambTrapsModal" class="jqc-overlay hidden">
+      <div class="jqc-card kp-card">
+        <button class="jqc-close" id="jambTrapsClose">✕</button>
+        <div class="jqc-icon">⚠️</div>
+        <h2 class="jqc-title">Exam Traps</h2>
+        <p class="jqc-sub">The wrong options that sit closest to the right answer, and why students fall for them. Read a topic, then practise its questions.</p>
+        <select id="trapSubjectSelect" class="select-input kp-subject"></select>
+        <div id="jambTrapsBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambKeyPointsModal" class="jqc-overlay hidden">
+      <div class="jqc-card kp-card">
+        <button class="jqc-close" id="jambKeyPointsClose">✕</button>
+        <div class="jqc-icon">📘</div>
+        <h2 class="jqc-title">Key Points</h2>
+        <p class="jqc-sub">The lessons behind every past question, topic by topic. Topics that come up most are listed first.</p>
+        <select id="kpSubjectSelect" class="select-input kp-subject"></select>
+        <div id="jambKeyPointsBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <div id="jambGamesModal" class="jqc-overlay hidden">
+      <div class="jqc-card">
+        <button class="jqc-close" id="jambGamesClose">✕</button>
+        <div class="jqc-icon">🎮</div>
+        <h2 class="jqc-title">Games</h2>
+        <div id="jambGamesBody" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <!-- SPEED ROUND -->
+    <div id="speedRoundModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:440px; text-align:left;">
+        <div id="speedRoundBody"></div>
+      </div>
+    </div>
+
+    <!-- TRUE OR FALSE -->
+    <div id="trueFalseModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:440px; text-align:left;">
+        <div id="trueFalseBody"></div>
+      </div>
+    </div>
+
+    <!-- MEMORY MATCH -->
+    <div id="memoryMatchModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:520px; text-align:left;">
+        <div id="memoryMatchBody"></div>
+      </div>
+    </div>
+
+    <!-- SEQUENCE / EQUATION BUILDER -->
+    <div id="mathGameModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:440px; text-align:left;">
+        <div id="mathGameBody"></div>
+      </div>
+    </div>
+
+    <!-- RECENT GAMES -->
+    <div id="gameHistoryModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:440px; text-align:left;">
+        <button class="jqc-close" id="gameHistoryClose">✕</button>
+        <div class="jqc-icon">🕹</div>
+        <h2 class="jqc-title">Recent Games</h2>
+        <div id="gameHistoryBody"></div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY HUB -->
+    <div id="communityModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:480px; text-align:left;">
+        <button class="jqc-close" id="communityClose">✕</button>
+        <div id="communityBody"></div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY SUBMIT -->
+    <div id="communitySubmitModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:480px; text-align:left;">
+        <button class="jqc-close" id="communitySubmitClose">✕</button>
+        <div id="communitySubmitBody"></div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY PRACTICE -->
+    <div id="communityPracticeModal" class="jqc-overlay hidden">
+      <div class="jqc-card" style="max-width:480px; text-align:left;">
+        <button class="jqc-close" id="communityPracticeClose">✕</button>
+        <div id="communityPracticeBody"></div>
+      </div>
+    </div>
+
+    <!-- SHOW WORKING PROCESSING -->
+    <div id="swProcessing" class="sw-processing hidden">
+      <div class="sw-processing-inner">
+        <div class="sw-spinner"></div>
+        <div class="sw-processing-title">Checking your working...</div>
+        <div class="sw-processing-sub">AI is reviewing your method</div>
+      </div>
+    </div>
+
+    <!-- SHARED SESSION VIEW -->
+    <div id="jambSharedModal" class="jss-overlay hidden">
+      <div class="jss-card">
+        <div class="jss-header">
+          <span class="jss-logo">◈ My<em>JAMB</em>App</span>
+          <button class="jss-close" id="jambSsClose">✕</button>
+        </div>
+        <div id="jambSsContent" class="jss-content">
+          <div class="jss-emoji" id="jambSsEmoji">🎯</div>
+          <div class="jss-score" id="jambSsScore">0%</div>
+          <div class="jss-meta" id="jambSsMeta"></div>
+          <div class="jss-stats" id="jambSsStats"></div>
+        </div>
+        <div class="jss-footer">
+          <p class="jss-cta">Think you can beat it?</p>
+          <button class="jss-try" id="jambSsTry">Start Same Subject →</button>
+          <p class="jss-note">My JAMB App — the only JAMB app where AI explains every answer.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- #app -->
+
+  <script src="questions.js"></script>
+  <script src="content-loader.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
