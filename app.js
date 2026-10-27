@@ -26,7 +26,7 @@
      selection (keep a passage's questions together and in order), rendering
      (show the passage), Teach Me (send the passage) and qHash need to know.
      Existing flat questions are untouched. */
-  (function normalizePassageBank(bank) {
+  function normalizePassageBank(bank) {
     Object.keys(bank).forEach(subject => {
       const arr = bank[subject];
       if (!Array.isArray(arr) || !arr.some(e => e && Array.isArray(e.questions))) return;
@@ -47,7 +47,8 @@
       });
       bank[subject] = flat;
     });
-  })(QUESTION_BANK);
+  }
+  normalizePassageBank(QUESTION_BANK);
 
   // Splits a flat pool into selection units: a standalone question is a unit
   // of 1; all questions sharing a passageId form one unit, in passage order.
@@ -407,7 +408,7 @@
     if (QUESTION_BANK['physics'])     el.comboSubject2.value = 'physics';
     if (QUESTION_BANK['chemistry'])   el.comboSubject3.value = 'chemistry';
 
-    const total = subjects.reduce((sum, s) => sum + QUESTION_BANK[s].length, 0);
+    const total = subjects.reduce((sum, s) => sum + (JambContent.manifest.subjects[s]?.count || QUESTION_BANK[s].length), 0);
     el.statQuestions.textContent = String(total);
     // Plan cards quote the live bank size, so it never goes stale.
     document.querySelectorAll('[data-qcount]').forEach(n => { n.textContent = String(total); });
@@ -420,13 +421,13 @@
   function populateYears() {
     if (!el.yearSelect) return;
     const pool = QUESTION_BANK[el.subjectSelect.value] || [];
-    const counts = {};
-    pool.forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
+    const counts = JambContent.isLoaded(el.subjectSelect.value) ? {} : { ...(JambContent.manifest.subjects[el.subjectSelect.value]?.years || {}) };
+    if (JambContent.isLoaded(el.subjectSelect.value)) pool.forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
     const years = Object.keys(counts).map(Number).sort((a, b) => b - a);
-    const nRep = years.length ? mostRepeatedPool(el.subjectSelect.value).length : 0;
+    const nRep = JambContent.isLoaded(el.subjectSelect.value) ? mostRepeatedPool(el.subjectSelect.value).length : (JambContent.manifest.subjects[el.subjectSelect.value]?.repeats || 0);
     el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
       (nRep ? `<option value="repeated">🔁 Most repeated questions · ${nRep}</option>` : '') +
-      Object.keys(TRICKY).map(k => { const n = years.length ? trickyPool(el.subjectSelect.value, k).length : 0;
+      Object.keys(TRICKY).map(k => { const n = JambContent.isLoaded(el.subjectSelect.value) ? trickyPool(el.subjectSelect.value, k).length : (JambContent.manifest.subjects[el.subjectSelect.value]?.tricky[k] || 0);
         return n ? `<option value="tricky-${k}">${TRICKY[k].icon} ${TRICKY[k].label} · ${n}</option>` : ''; }).join('') +
       years.map(y => `<option value="${y}">JAMB ${y} · ${counts[y]} questions</option>`).join('');
     el.yearSelect.value = 'all';
@@ -508,82 +509,92 @@
     checkScheduledChallengeReminders();
   }
 
-  function startSession() {
-    if (!state.currentUser) {
-      loginStudent();
-      if (!state.currentUser) return;
-    }
+  let sessionStarting = false;
+  async function startSession() {
+    if (sessionStarting) return;
+    sessionStarting = true;
+    try {
+      if (!state.currentUser) {
+        loginStudent();
+        if (!state.currentUser) return;
+      }
 
-    // Validate all selections with gentle popups
-    const sessionType = document.getElementById('sessionTypeSelect')?.value || '';
-    const mode        = document.getElementById('modeSelect')?.value || '';
-    const subject     = el.subjectSelect?.value || '';
+      // Validate all selections with gentle popups
+      const sessionType = document.getElementById('sessionTypeSelect')?.value || '';
+      const mode        = document.getElementById('modeSelect')?.value || '';
+      const subject     = el.subjectSelect?.value || '';
 
-    if (!sessionType) {
-      showGentlePopup('👇 Please select a Session Type first', document.getElementById('sessionTypeBtns'));
-      return;
-    }
-    if (!mode) {
-      showGentlePopup('👇 Please select a Mode first', document.getElementById('modeBtns'));
-      return;
-    }
-    if (sessionType === 'single' && !subject) {
-      showGentlePopup('👇 Please select a Subject first', el.subjectSelect);
-      return;
-    }
-
-    // Paywall check
-    if (!checkAccess()) {
-      const used = getFreeUsed();
-      if (used >= JAMB_FREE_LIMIT) {
-        showPaywall('trial');
+      if (!sessionType) {
+        showGentlePopup('👇 Please select a Session Type first', document.getElementById('sessionTypeBtns'));
         return;
       }
-      // Increment free usage
-      savePref(SK_FREE, { n: used + 1 });
-    }
+      if (!mode) {
+        showGentlePopup('👇 Please select a Mode first', document.getElementById('modeBtns'));
+        return;
+      }
+      if (sessionType === 'single' && !subject) {
+        showGentlePopup('👇 Please select a Subject first', el.subjectSelect);
+        return;
+      }
 
-    state.sessionType = el.sessionTypeSelect.value;
-    state.mode = el.modeSelect.value;
-    state.reviewMode = false;
-    state.showReviewExplanation = false;
-    state.currentIndex = 0;
-    state.student = state.currentUser;
+      // Paywall check
+      if (!checkAccess()) {
+        const used = getFreeUsed();
+        if (used >= JAMB_FREE_LIMIT) {
+          showPaywall('trial');
+          return;
+        }
 
-    const selection = state.sessionType === 'combo'
-      ? buildComboSession()
-      : buildSingleSession();
+      }
 
-    if (!selection || !selection.questions.length) {
-      alert('No questions available for the selected setup.');
-      return;
-    }
+      const subjects = sessionType === 'combo'
+        ? ['english', el.comboSubject1.value, el.comboSubject2.value, el.comboSubject3.value]
+        : [subject];
+      if (!await prepareContent(subjects, `Preparing ${sessionType === 'combo' ? 'your subjects' : fmt(subject)}…`)) return;
 
-    state.currentQuestions = selection.questions;
-    state.answers = new Array(state.currentQuestions.length).fill(null);
-    state.subject = selection.sessionLabel;
-    state.subjects = selection.subjects;
-    state.subjectRanges = selection.subjectRanges || {};
-    state.chosenDurationMinutes = getChosenDurationMinutes(state.currentQuestions.length, state.mode);
-    state.timeLeft = state.mode === 'exam' ? state.chosenDurationMinutes * 60 : 0;
+      state.sessionType = el.sessionTypeSelect.value;
+      state.mode = el.modeSelect.value;
+      state.reviewMode = false;
+      state.showReviewExplanation = false;
+      state.currentIndex = 0;
+      state.student = state.currentUser;
 
-    if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
-    if (state.mode === 'exam') startTimer();
-    if (state.mode === 'showworking') { showSWIntroBanner(); syncSWCredits(); }
+      const selection = state.sessionType === 'combo'
+        ? buildComboSession()
+        : buildSingleSession();
 
-    el.sidebarStudent.textContent = state.student;
-    el.sidebarMode.textContent = state.mode === 'exam'
-      ? `Exam · ${state.chosenDurationMinutes} min`
-      : 'Practice Mode';
+      if (!selection || !selection.questions.length) {
+        alert('No questions available for the selected setup.');
+        return;
+      }
 
-    // Show/hide subject switcher
-    const isCombo = state.sessionType === 'combo' && state.subjects.length > 1;
-    el.subjectSwitcher.classList.toggle('hidden', !isCombo);
-    if (isCombo) buildSubjectSwitcher();
+      if (!checkAccess()) savePref(SK_FREE, { n: getFreeUsed() + 1 });
+      state.currentQuestions = selection.questions;
+      state.answers = new Array(state.currentQuestions.length).fill(null);
+      state.subject = selection.sessionLabel;
+      state.subjects = selection.subjects;
+      state.subjectRanges = selection.subjectRanges || {};
+      state.chosenDurationMinutes = getChosenDurationMinutes(state.currentQuestions.length, state.mode);
+      state.timeLeft = state.mode === 'exam' ? state.chosenDurationMinutes * 60 : 0;
 
-    buildQuestionPills();
-    renderQuestion();
-    showScreen('quiz');
+      if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+      if (state.mode === 'exam') startTimer();
+      if (state.mode === 'showworking') { showSWIntroBanner(); syncSWCredits(); }
+
+      el.sidebarStudent.textContent = state.student;
+      el.sidebarMode.textContent = state.mode === 'exam'
+        ? `Exam · ${state.chosenDurationMinutes} min`
+        : 'Practice Mode';
+
+      // Show/hide subject switcher
+      const isCombo = state.sessionType === 'combo' && state.subjects.length > 1;
+      el.subjectSwitcher.classList.toggle('hidden', !isCombo);
+      if (isCombo) buildSubjectSwitcher();
+
+      buildQuestionPills();
+      renderQuestion();
+      showScreen('quiz');
+    } finally { sessionStarting = false; }
   }
 
   function buildSingleSession() {
@@ -1573,20 +1584,16 @@
   function openRepeatHub() {
     document.getElementById('jambRepeatModal')?.classList.remove('hidden');
     const body = document.getElementById('jambRepeatBody');
-    const subjects = Object.keys(QUESTION_BANK).filter(s => mostRepeatedPool(s).length);
-    body.innerHTML = subjects.length ? subjects.map(s => {
-      const pool = mostRepeatedPool(s);
-      const top = repeatGroup(pool[0], s);
-      return `<div class="game-type-card repeat-subject" data-subject="${s}">
-        <span class="gtc-icon">🔁</span>
-        <div class="gtc-body"><div class="gtc-title">${fmt(s)}</div>
-        <div class="gtc-sub">${pool.length} repeated questions · the most repeated was set ${top ? top.qs.length : 2} times${top && repeatYears(top).length > 1 ? ` between ${repeatYears(top)[0]} and ${repeatYears(top).slice(-1)[0]}` : ''}</div></div>
-      </div>`;
-    }).join('') : '<p class="jqc-sub">No repeated questions yet.</p>';
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => JambContent.manifest.subjects[s].repeats);
+    body.innerHTML = subjects.map(s => `<div class="game-type-card repeat-subject" data-subject="${s}">
+      <span class="gtc-icon">🔁</span><div class="gtc-body"><div class="gtc-title">${fmt(s)}</div>
+      <div class="gtc-sub">${JambContent.manifest.subjects[s].repeats} repeated questions across this subject's papers</div></div></div>`).join('');
     body.querySelectorAll('.repeat-subject').forEach(c => c.addEventListener('click', () => startRepeatPractice(c.dataset.subject)));
   }
   function closeRepeatHub() { document.getElementById('jambRepeatModal')?.classList.add('hidden'); }
-  function startRepeatPractice(subject) {
+  async function startRepeatPractice(subject) {
+    if (!await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (!mostRepeatedPool(subject).length) { showInfoToast("No repeated questions found for this subject."); return; }
     closeRepeatHub();
     document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
     if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
@@ -1611,12 +1618,12 @@
       ? (q.keyVerdict === 'none' || q.keyVerdict === 'noanswer')
       : Array.isArray(q.alsoAccept) && q.alsoAccept.length && q.keyVerdict !== 'none'));
   }
-  function openTrickyHub() {
+  async function openTrickyHub() {
     const body = document.getElementById('jambTrickyBody');
-    const subjects = Object.keys(QUESTION_BANK).filter(s => trickyPool(s, 'multi').length || trickyPool(s, 'none').length);
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => Object.values(JambContent.manifest.subjects[s].tricky).some(Boolean));
     body.innerHTML = subjects.length ? Object.keys(TRICKY).map(kind => {
       const t = TRICKY[kind];
-      const cards = subjects.map(s => ({ s, n: trickyPool(s, kind).length })).filter(x => x.n).map(x =>
+      const cards = subjects.map(s => ({ s, n: JambContent.manifest.subjects[s].tricky[kind] })).filter(x => x.n).map(x =>
         `<div class="game-type-card tricky-subject" data-subject="${x.s}" data-kind="${kind}">
           <span class="gtc-icon">${t.icon}</span>
           <div class="gtc-body"><div class="gtc-title">${fmt(x.s)}</div>
@@ -1628,7 +1635,8 @@
     document.getElementById('jambTrickyModal')?.classList.remove('hidden');
   }
   function closeTrickyHub() { document.getElementById('jambTrickyModal')?.classList.add('hidden'); }
-  function startTrickyPractice(subject, kind) {
+  async function startTrickyPractice(subject, kind) {
+    if (!await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
     closeTrickyHub();
     document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
     if (!document.getElementById('modeSelect')?.value) document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
@@ -1640,9 +1648,9 @@
 
   /* ── Key Points: the topic lessons, browsable on their own ── */
   const KP_FREE_TOPICS = 3; // free users can open this many topics per subject
-  function openKeyPoints() {
+  async function openKeyPoints() {
     const sel = document.getElementById('kpSubjectSelect');
-    const subjects = Object.keys(window.TEACH_TOPICS || {}).filter(s => QUESTION_BANK[s]);
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => JambContent.manifest.subjects[s].lessons);
     sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
     if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
     sel.onchange = renderKeyPoints;
@@ -1650,8 +1658,11 @@
     document.getElementById('jambKeyPointsModal')?.classList.remove('hidden');
   }
   function closeKeyPoints() { document.getElementById('jambKeyPointsModal')?.classList.add('hidden'); }
-  function renderKeyPoints() {
+  async function renderKeyPoints() {
     const subject = document.getElementById('kpSubjectSelect').value;
+    document.getElementById('jambKeyPointsBody').textContent = 'Choose a subject to prepare its saved study content.';
+    if (!subject || !await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (document.getElementById('kpSubjectSelect').value !== subject) return renderKeyPoints();
     const t = window.TEACH_TOPICS?.[subject];
     const body = document.getElementById('jambKeyPointsBody');
     if (!t) { body.innerHTML = '<p class="jqc-sub">No lessons for this subject yet.</p>'; return; }
@@ -1694,9 +1705,9 @@
     });
     return (trapCache[subject] = byTopic);
   }
-  function openTraps() {
+  async function openTraps() {
     const sel = document.getElementById('trapSubjectSelect');
-    const subjects = Object.keys(QUESTION_BANK).filter(s => Object.keys(trapIndex(s)).length);
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => JambContent.manifest.subjects[s].traps);
     sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
     if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
     sel.onchange = renderTraps;
@@ -1704,8 +1715,11 @@
     document.getElementById('jambTrapsModal')?.classList.remove('hidden');
   }
   function closeTraps() { document.getElementById('jambTrapsModal')?.classList.add('hidden'); }
-  function renderTraps() {
+  async function renderTraps() {
     const subject = document.getElementById('trapSubjectSelect').value;
+    document.getElementById('jambTrapsBody').textContent = 'Choose a subject to prepare its saved study content.';
+    if (!subject || !await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (document.getElementById('trapSubjectSelect').value !== subject) return renderTraps();
     const body = document.getElementById('jambTrapsBody');
     const idx = trapIndex(subject);
     const lessons = window.TEACH_TOPICS?.[subject]?.lessons || {};
@@ -1764,18 +1778,21 @@
   function bookletPool(subject) {
     return (QUESTION_BANK[subject] || []).filter(q => bookletEntry(q, subject));
   }
-  function openBooklet() {
+  async function openBooklet() {
     const sel = document.getElementById('bkSubjectSelect');
-    const subjects = Object.keys(QUESTION_BANK).filter(s => bookletPool(s).length);
-    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)} · ${bookletPool(s).length}</option>`).join('');
+    const subjects = Object.keys(JambContent.manifest.subjects).filter(s => Object.keys(JambContent.manifest.subjects[s].years).length);
+    sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
     if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
     sel.onchange = renderBooklet;
     renderBooklet();
     document.getElementById('jambBookletModal')?.classList.remove('hidden');
   }
   function closeBooklet() { document.getElementById('jambBookletModal')?.classList.add('hidden'); }
-  function renderBooklet() {
+  async function renderBooklet() {
     const subject = document.getElementById('bkSubjectSelect').value;
+    document.getElementById('jambBookletBody').textContent = 'Choose a subject to prepare its saved study content.';
+    if (!subject || !await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
+    if (document.getElementById('bkSubjectSelect').value !== subject) return renderBooklet();
     const body = document.getElementById('jambBookletBody');
     const pool = bookletPool(subject);
     if (!pool.length) { body.innerHTML = '<p class="jqc-sub">None found for this subject yet.</p>'; return; }
@@ -1808,7 +1825,7 @@
     startSession();
   }
 
-  function openGamesHub() {
+  async function openGamesHub() {
     document.getElementById('jambGamesModal')?.classList.remove('hidden');
     renderGamesHub();
   }
@@ -1863,7 +1880,7 @@
     const minNeeded = gameType === 'memory' ? 8 : 12;
     const out = document.getElementById('gamesSubjectPicker');
     const options = Object.keys(QUESTION_BANK)
-      .map(key => ({ key, count: (gameType === 'memory' ? memoryEligiblePool(key) : gameQuestionPool(key)).length }))
+      .map(key => ({ key, count: JambContent.manifest.subjects[key][gameType === 'memory' ? 'memoryCount' : 'gameCount'] }))
       .filter(s => s.count >= minNeeded);
     if (!options.length) {
       out.innerHTML = `<p class="jqc-sub" style="margin-top:1rem;">Not enough questions yet for this game.</p>`;
@@ -1886,7 +1903,8 @@
     out.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function startGame(gameType, subjectKey) {
+  async function startGame(gameType, subjectKey) {
+    if (!await prepareContent([subjectKey], `Preparing ${fmt(subjectKey)}…`)) return;
     closeGamesHub();
     if (gameType === 'speed') startSpeedRound(subjectKey);
     else if (gameType === 'tf') startTrueFalse(subjectKey);
@@ -4146,6 +4164,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
 
     const subjectBoxes = [...document.querySelectorAll('#jambQcSubjects input:checked')].map(i => i.value);
     if (!subjectBoxes.length) { showInfoToast('Pick at least one subject.'); return; }
+    if (!await prepareContent(subjectBoxes, "Preparing challenge subjects…")) return;
     const count      = parseInt(document.getElementById('jambQcCount')?.value || '10');
     const duration   = parseInt(document.getElementById('jambQcDuration')?.value || '0');
     const syncMode   = document.querySelector('input[name="jambSyncMode"]:checked')?.value || 'anytime';
@@ -4925,7 +4944,25 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   // file (like CROSSSELL_MSGS) has already been initialized by the time
   // init() and anything it calls actually runs. Calling init() earlier in
   // the file caused "Cannot access 'CROSSSELL_MSGS' before initialization".
-  init();
+  async function prepareContent(subjects, label) {
+    return JambContent.run(label, () => JambContent.ensure(subjects));
+  }
+  window.addEventListener('jamb-content-loaded', () => {
+    normalizePassageBank(QUESTION_BANK);
+    repeatIndex = null;
+    for (const subject of Object.keys(trapCache)) delete trapCache[subject];
+  });
+  JambContent.run('Opening My JAMB App…', () => JambContent.ready()).then(ok => {
+    if (ok) init();
+    else {
+      // Keep startup recoverable even if the first manifest request failed.
+      const button = document.createElement('button');
+      button.textContent = 'Try opening the app again';
+      button.className = 'primary-btn';
+      button.onclick = () => location.reload();
+      document.querySelector('main')?.prepend(button) || document.body.prepend(button);
+    }
+  });
 
   // Offline support (see sw.js). Only over http(s): service workers don't
   // run from file:// and need a secure origin, which GitHub Pages is.
