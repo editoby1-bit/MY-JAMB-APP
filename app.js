@@ -105,7 +105,8 @@
       multiple:  `More than one option is correct here, so <strong>${both}</strong> marked right. (The answer key in circulation gives <strong>${escHtml(q.keyAnswer)}</strong>.)`,
       noanswer:  `<strong>No correct answer.</strong> None of the four options is correct, so whatever you chose, this question is not counted against you. Here is why, and what the right answer is:`,
       none:      `None of the options is fully correct. JAMB's answer is <strong>${escHtml(q.keyAnswer)}</strong>, so that is what scores in the exam and here, but it is not fully correct. Here is why:`,
-      misprint:  `The question paper has a printing error here, so we mark the answer to the question as JAMB intended it: <strong>${right}</strong>.`,
+      misprint:  `The printed question has a wording or printing problem. We mark the corrected reading: <strong>${right}</strong>.`,
+      debatable: `This question needs careful reading. The marked answer is <strong>${right}</strong>; the note below explains its wording and context.`,
     }[q.keyVerdict];
     if (!head) return '';
     return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`

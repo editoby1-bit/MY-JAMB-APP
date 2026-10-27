@@ -377,20 +377,31 @@
     },
     "crs": {
       "scripts": [
+        "past-questions/crs-2001.js",
+        "past-questions/crs-2002.js",
+        "past-questions/crs-2003.js",
+        "past-questions/crs-2004.js",
+        "teach/crs.js",
+        "teach/crs-topics.js",
         "booklet/errors.js"
       ],
       "images": [],
-      "years": {},
-      "count": 50,
+      "years": {
+        "2001": 50,
+        "2002": 50,
+        "2003": 50,
+        "2004": 50
+      },
+      "count": 250,
       "repeats": 0,
-      "lessons": 0,
-      "traps": false,
+      "lessons": 19,
+      "traps": true,
       "tricky": {
-        "multi": 0,
+        "multi": 19,
         "none": 0
       },
-      "gameCount": 50,
-      "memoryCount": 7
+      "gameCount": 231,
+      "memoryCount": 46
     },
     "economics": {
       "scripts": [
@@ -1437,6 +1448,30 @@
       "sha256": "71706ca8eb734637bfa14b29c1d6419f7e90644bee95b6bb786f10b7d2d64fa1",
       "bytes": 226428
     },
+    "past-questions/crs-2001.js": {
+      "sha256": "64a5ff37b835181bae95c29284deb7274674c82bb43248e44e4ee6b11d4876a1",
+      "bytes": 38703
+    },
+    "past-questions/crs-2002.js": {
+      "sha256": "6cfaf6c3bd6534f3dbb33cf4f8d5481ffc97863fcf69291cd5dccd2f623f28ed",
+      "bytes": 38098
+    },
+    "past-questions/crs-2003.js": {
+      "sha256": "83bcab4f3382df7127b2173c53f07825aa275118b48b60dda44f26031868e3e9",
+      "bytes": 40496
+    },
+    "past-questions/crs-2004.js": {
+      "sha256": "ae15222b2c18d9e7b20742d19629d60362646364db49c61195fc6b45824341d7",
+      "bytes": 45876
+    },
+    "teach/crs.js": {
+      "sha256": "757b295b18c6daec5c9eafd9bd4ea62bbcee93360c4a58dd5bc260da85e3ecac",
+      "bytes": 124815
+    },
+    "teach/crs-topics.js": {
+      "sha256": "3095d361698189b41140520b21c95d8a7148f18de55d4dee8f434b738b62233a",
+      "bytes": 94202
+    },
     "past-questions/economics-2001.js": {
       "sha256": "83ab7b609bd6108a2556797f7b843f2ad571b970137780c7c228f12f7ca0dbf0",
       "bytes": 20785
@@ -1818,5 +1853,5 @@
       "bytes": 320884
     }
   },
-  "version": "51be5098d437d346"
+  "version": "aed0155ae1fddae5"
 }

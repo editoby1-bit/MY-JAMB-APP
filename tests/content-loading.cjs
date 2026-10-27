@@ -44,7 +44,7 @@ const passed = name => console.log('PASS ' + name);
     const requests = []; page.on('request', req => requests.push(req.url()));
     await ready(page);
     assert(!requests.some(url => /\/(past-questions|teach|booklet)\//.test(url)));
-    assert.equal(await page.locator('#statQuestions').textContent().catch(() => ''), '6899');
+    assert.equal(await page.locator('#statQuestions').textContent(), String(Object.values(expected.bank).reduce((total, qs) => total + qs.length, 0)));
     passed('cold start fetches no subject content and retains full bank total');
     await choose(page, 'mathematics');
     const originalYearOptions = await page.locator('#yearSelect option').allTextContents();
