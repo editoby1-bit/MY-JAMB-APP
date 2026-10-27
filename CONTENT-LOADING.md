@@ -33,6 +33,18 @@ The initial page references three local scripts (`questions.js`,
 - Live AI, payments, cloud dashboards and challenges still use the existing
   backend and require internet/access as before. This change adds no credentials.
 
+## Saved-offline indicators
+
+Subject pickers mark complete packages with “Saved offline”. The selected subject
+also has an explanatory status line. Status is derived from the cached files for
+the current manifest hashes, including diagrams, plus the cached app shell; a
+partial package, missing file, outdated version or unavailable storage is not
+marked saved. Status is checked at startup, after preparation, when returning
+to the app and when connectivity changes. Cache metadata is checked without
+redownloading content. Browser cleanup can still remove saved files later.
+
+Run the focused indicator checks with `node tests/offline-status.cjs`.
+
 ## Editing content
 
 After changing papers, images, Teach Me, lessons or booklet annotations, run:
