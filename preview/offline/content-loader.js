@@ -5,6 +5,7 @@
   let manifest;
   let active = false;
   const loaded = new Set();
+  let savedSubjects = new Set();
   const executed = new Set();
   const base = new URL('./', document.baseURI);
   const urlFor = file => new URL(file, base).href;
@@ -94,6 +95,27 @@
       if (previousFocus?.isConnected) previousFocus.focus();
     }
   }
+  async function refreshSaved() {
+    const next = new Set();
+    if (manifest) {
+      try {
+        const storage = await cache();
+        const urls = new Set(storage ? (await storage.keys()).map(req => req.url) : []);
+        const shell = await caches.open('jamb-app-v2');
+        const shellUrls = new Set((await shell.keys()).map(req => req.url));
+        const shellFiles = ['index.html', 'content-manifest.json', 'styles.css', ...[...document.scripts]
+          .map(script => script.getAttribute('src')).filter(src => src && new URL(src, base).origin === base.origin && !src.startsWith('blob:'))];
+        const shellReady = shellFiles.every(file => shellUrls.has(urlFor(file)));
+        for (const [subject, pkg] of Object.entries(manifest.subjects)) {
+          if (shellReady && [...pkg.scripts, ...pkg.images].every(file => urls.has(urlFor(file) + '?content=' + manifest.files[file].sha256))
+            && pkg.images.every(file => urls.has(urlFor(file)))) next.add(subject);
+        }
+      } catch (_) { /* Missing or inaccessible storage cannot prove offline readiness. */ }
+    }
+    savedSubjects = next;
+    window.dispatchEvent(new Event('jamb-offline-status'));
+    return [...next];
+  }
   async function ready() {
     if (manifest) return manifest;
     const storage = await cache();
@@ -109,6 +131,7 @@
     }
     try { await storage?.put(urlFor('content-manifest.json'), response); } catch (_) { /* Online use still works. */ }
     manifest = data;
+    await refreshSaved();
     return data;
   }
   async function verified(response, expected) {
@@ -199,11 +222,18 @@
     }
     pending.forEach(s => loaded.add(s));
     window.dispatchEvent(new CustomEvent('jamb-content-loaded', { detail: { subjects: pending, saved } }));
+    await refreshSaved();
     if (!saved) {
       let note = document.getElementById('contentStorageNotice');
       if (!note) { note = document.createElement('p'); note.id = 'contentStorageNotice'; note.setAttribute('role', 'status'); document.body.append(note); }
       note.textContent = 'Ready for this visit. Your browser could not save all of this content for offline use.';
     }
   }
-  window.JambContent = { ready, ensure, run, get manifest() { return manifest; }, isLoaded: subject => loaded.has(subject) };
+  for (const event of ['focus', 'online', 'offline']) window.addEventListener(event, () => { void refreshSaved(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) void refreshSaved(); });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(() => refreshSaved()).catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', () => { void refreshSaved(); });
+  }
+  window.JambContent = { ready, ensure, run, refreshSaved, isSaved: subject => savedSubjects.has(subject), get manifest() { return manifest; }, isLoaded: subject => loaded.has(subject) };
 })();

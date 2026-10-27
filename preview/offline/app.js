@@ -413,6 +413,32 @@
     // Plan cards quote the live bank size, so it never goes stale.
     document.querySelectorAll('[data-qcount]').forEach(n => { n.textContent = String(total); });
     populateYears();
+    refreshSavedSubjectLabels();
+  }
+
+  function refreshSavedSubjectLabels() {
+    const selectors = [el.subjectSelect, el.comboSubject1, el.comboSubject2, el.comboSubject3,
+      ...['kpSubjectSelect', 'trapSubjectSelect', 'bkSubjectSelect'].map(id => document.getElementById(id))];
+    for (const select of selectors) for (const option of select?.options || []) {
+      if (JambContent.manifest?.subjects[option.value]) {
+        option.textContent = fmt(option.value) + (JambContent.isSaved(option.value) ? ' · Saved offline' : '');
+      }
+    }
+    let note = document.getElementById('subjectOfflineStatus');
+    if (!note) {
+      note = document.createElement('p');
+      note.id = 'subjectOfflineStatus';
+      note.className = 'subject-offline-status';
+      note.setAttribute('role', 'status');
+      el.subjectSelect.insertAdjacentElement('afterend', note);
+    }
+    const subject = el.subjectSelect.value;
+    note.hidden = !subject;
+    const saved = subject && JambContent.isSaved(subject);
+    note.classList.toggle('is-saved', !!saved);
+    note.textContent = !subject ? '' : saved
+      ? '✓ Saved offline — all available years, diagrams and study notes.'
+      : 'Not saved offline yet. Connect to the internet to prepare this subject.';
   }
 
   // Year picker for single-subject sessions. Lists only the years that have
@@ -484,7 +510,7 @@
     });
 
     el.modeSelect.addEventListener('change', () => { syncDurationUi(); syncStartButton(); });
-    el.subjectSelect.addEventListener('change', () => { populateYears(); syncStartButton(); });
+    el.subjectSelect.addEventListener('change', () => { populateYears(); syncStartButton(); refreshSavedSubjectLabels(); });
     el.sessionTypeSelect.addEventListener('change', syncSessionTypeUi);
     el.toggleExplanationBtn.addEventListener('click', toggleReviewExplanation);
     // New features
@@ -1654,6 +1680,7 @@
     sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
     if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
     sel.onchange = renderKeyPoints;
+    refreshSavedSubjectLabels();
     renderKeyPoints();
     document.getElementById('jambKeyPointsModal')?.classList.remove('hidden');
   }
@@ -1711,6 +1738,7 @@
     sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
     if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
     sel.onchange = renderTraps;
+    refreshSavedSubjectLabels();
     renderTraps();
     document.getElementById('jambTrapsModal')?.classList.remove('hidden');
   }
@@ -1784,6 +1812,7 @@
     sel.innerHTML = subjects.map(s => `<option value="${s}">${fmt(s)}</option>`).join('');
     if (subjects.includes(el.subjectSelect?.value)) sel.value = el.subjectSelect.value;
     sel.onchange = renderBooklet;
+    refreshSavedSubjectLabels();
     renderBooklet();
     document.getElementById('jambBookletModal')?.classList.remove('hidden');
   }
@@ -4947,6 +4976,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   async function prepareContent(subjects, label) {
     return JambContent.run(label, () => JambContent.ensure(subjects));
   }
+  window.addEventListener('jamb-offline-status', refreshSavedSubjectLabels);
   window.addEventListener('jamb-content-loaded', () => {
     normalizePassageBank(QUESTION_BANK);
     repeatIndex = null;

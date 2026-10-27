@@ -1877,3 +1877,8 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .content-loading button { border: 1px solid #167c70; border-radius: 8px; padding: 12px; background: #167c70; color: white; cursor: pointer; font: 600 .95rem system-ui,sans-serif; }
 .content-loading button[data-close] { background: white; color: #17233b; }
 #contentStorageNotice { position: fixed; bottom: 12px; left: 12px; right: 12px; z-index: 19999; background: #fff4d5; color: #382b12; padding: 14px; border: 1px solid #c89f40; border-radius: 8px; font: 400 .95rem/1.5 system-ui,sans-serif; }
+
+.subject-offline-status { margin: 8px 0 0; color: #605c52; font: 400 .85rem/1.5 system-ui,sans-serif; }
+.subject-offline-status.is-saved { color: #146347; }
+.subject-offline-status[hidden] { display: none; }
+.subject-offline-status { text-transform: none; letter-spacing: normal; }
