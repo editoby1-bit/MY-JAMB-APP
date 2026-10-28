@@ -53,18 +53,12 @@
       "becoming God's exact picture"
     ],
     "answer": 2,
-    "explanation": "The image language expresses a likeness to God and the human calling to represent him in exercising responsibility over creation. It does not make humans divine or give a physical portrait of God. The option about representation is also a defensible account of the image's meaning.",
+    "explanation": "Genesis 1:26 pairs “in our image” with “after our likeness”. C, “being like God”, directly expresses that likeness. B describes a broader interpretation of human responsibility, but “representatives to fellow humans” is not the meaning asked for here. Humans do not become God or a physical picture of God.",
     "year": 2003,
     "source": "JAMB UTME 2003",
     "paperQuestion": 3,
     "printedKey": "C",
     "reference": "Genesis 1:26–28",
-    "alsoAccept": [
-      1
-    ],
-    "keyVerdict": "multiple",
-    "keyAnswer": "C",
-    "answerNote": "The image of God expresses likeness and representation, not human divinity or a physical photograph. B and C are both defensible formulations.",
     "sourceFile": "C.R.S 2003.pdf",
     "sourcePages": [
       1

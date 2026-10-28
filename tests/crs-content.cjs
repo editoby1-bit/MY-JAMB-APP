@@ -56,7 +56,12 @@ for (let year = 2001; year <= 2016; year++) {
   assert.deepEqual(qs.map(q => q.paperQuestion), Array.from({ length: 50 }, (_, i) => i + 1));
 }
 assert.equal(bank.filter(q => q.bookletKey).length, 36);
-assert.equal(bank.filter(q => q.alsoAccept).length, 54);
+const imageQuestion = bank.find(q => q.id === 'crs-2003-q3');
+assert.equal(imageQuestion.answer, 2);
+assert.equal(imageQuestion.alsoAccept, undefined);
+assert.equal(imageQuestion.keyVerdict, undefined);
+assert(!/B and C|both defensible/.test(teach[key(imageQuestion)]));
+assert.equal(bank.filter(q => q.alsoAccept).length, 53);
 assert.equal(bank.filter(q => q.keyVerdict === 'noanswer').length, 9);
 assert.equal(Object.keys(topics.lessons).length, 32);
 for (const id of ['crs-2005-q44', 'crs-2006-q42', 'crs-2007-q20', 'crs-2008-q17', 'crs-2008-q38']) assert.equal(topics.of[key(bank.find(q => q.id === id))], 'joshua-judges');
@@ -97,7 +102,7 @@ console.log('PASS all 800 source items, printed-key provenance, 50 starter expla
     await page.locator('.config-btn[data-group="session"][data-value="single"]').click();
     await page.locator('.config-btn[data-group="mode"][data-value="practice"]').click();
     await page.locator('#subjectSelect').selectOption('crs');
-    for (let year = Number(process.env.JAMB_BROWSER_FROM || 2001); year <= 2016; year++) {
+    for (let year = Number(process.env.JAMB_BROWSER_FROM || 2001); year <= Number(process.env.JAMB_BROWSER_TO || 2016); year++) {
       // Each paper is a fresh trial in this isolated browser fixture.
       // Keep the production ten-session limit and payment logic unchanged.
       await page.evaluate(() => localStorage.removeItem('jamb-free-v1'));
@@ -109,6 +114,11 @@ console.log('PASS all 800 source items, printed-key provenance, 50 starter expla
       for (let i = 0; i < qs.length; i++) {
         const q = qs[i];
         assert.equal(await page.locator('#questionText').innerText(), q.question);
+        if (q.id === 'crs-2003-q3') {
+          await page.locator('#optionsList .option-btn').nth(1).click();
+          assert(await page.locator('#optionsList .option-btn').nth(1).evaluate(n => n.classList.contains('wrong') && !n.classList.contains('correct')));
+          assert.equal(await page.locator('#explanationBox .key-check').count(), 0);
+        }
         const answer = q.keyVerdict === 'noanswer' ? (q.answer + 1) % 4 : q.alsoAccept?.[0] ?? q.answer;
         await page.locator('#optionsList .option-btn').nth(answer).click();
         assert(await page.locator('#optionsList .option-btn').nth(answer).evaluate((n, noAnswer) => n.classList.contains(noAnswer ? 'no-answer' : 'correct') && n.classList.contains('selected'), q.keyVerdict === 'noanswer'));

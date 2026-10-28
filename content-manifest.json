@@ -421,10 +421,10 @@
       "lessons": 32,
       "traps": true,
       "tricky": {
-        "multi": 54,
+        "multi": 53,
         "none": 6
       },
-      "gameCount": 787,
+      "gameCount": 788,
       "memoryCount": 157
     },
     "economics": {
@@ -1481,8 +1481,8 @@
       "bytes": 38098
     },
     "past-questions/crs-2003.js": {
-      "sha256": "bbb4b648ed9788c2554a1539b8f8874c2288b9740039857a505fc3dd5b1ee4f0",
-      "bytes": 40528
+      "sha256": "46a0a00239ed7b8558b9b8b43cb561cb846e385eab55ccf8c7f66a8c9b5bfc1e",
+      "bytes": 40318
     },
     "past-questions/crs-2004.js": {
       "sha256": "f430278685bb4c30be81c50b54bf679330864413aa79e1ccdf8c861bd954656a",
@@ -1537,8 +1537,8 @@
       "bytes": 38495
     },
     "teach/crs.js": {
-      "sha256": "18418f7d55fdf18f98239bbca2c42e49262ff418c75a08ff75f4cfea0a5433bf",
-      "bytes": 478385
+      "sha256": "7a539f9f7a6aa2db8f09f45556404372cae6a7aee673da933fa6cbd6d6af9f8a",
+      "bytes": 478865
     },
     "teach/crs-topics.js": {
       "sha256": "ecd56ed6af0ddb995cbaff8d2201bef72d4ff6b7cdffb72c78ce33c5bd3d884e",
@@ -1925,5 +1925,5 @@
       "bytes": 320884
     }
   },
-  "version": "a5638e2360714734"
+  "version": "0ae31335247c21a1"
 }
