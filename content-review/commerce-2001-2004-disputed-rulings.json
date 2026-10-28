@@ -1,0 +1,31 @@
+{
+  "scope": "Commerce 2001–2004",
+  "status": "review-in-progress; not published",
+  "rulings": [
+    {
+      "year": 2001,
+      "questionNumber": 21,
+      "printedKey": "B",
+      "mathematicallyExact": "₦2,764.50",
+      "bestListedOption": "A (₦2,760)",
+      "classification": "No fully correct option; nearest answer A",
+      "working": "1500 × ₦100 = ₦150,000; less 5% trade discount = ₦142,500; less 3% quantity discount = ₦138,225; 2% cash discount = ₦2,764.50.",
+      "note": "Printed key B (₦3,000) ignores the discounts; A is nearest, but not exact."
+    },
+    {
+      "year": 2003,
+      "questionNumber": 7,
+      "mathematicallyExact": "₦363,375",
+      "bestListedOption": "C",
+      "working": "200×₦1000 + 150×₦500 + 50×₦3000 = ₦425,000; 10% trade discount = ₦42,500; 5% cash discount on ₦382,500 = ₦19,125; payable = ₦363,375.",
+      "note": "Discounts are sequential, not additive."
+    },
+    {
+      "year": 2003,
+      "questionNumber": 8,
+      "mathematicallyExact": "₦42,500",
+      "bestListedOption": "A",
+      "working": "10% of ₦425,000 = ₦42,500 trade discount."
+    }
+  ]
+}
