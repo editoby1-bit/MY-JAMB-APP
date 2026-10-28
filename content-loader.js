@@ -13,7 +13,8 @@
   const cache = () => cachePromise ||= ('caches' in window ? caches.open(CACHE).catch(() => null) : Promise.resolve(null));
   async function request(url) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    // Allow slow mobile networks up to 45 seconds per content file, including body download.
+    const timer = setTimeout(() => controller.abort(), 45000);
     try {
       const response = await fetch(url, { signal: controller.signal, cache: 'no-cache' });
       if (!response.ok) throw new Error('Content unavailable');
