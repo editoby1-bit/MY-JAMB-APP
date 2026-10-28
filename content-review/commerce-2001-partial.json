@@ -1,0 +1,138 @@
+{
+  "subject": "commerce",
+  "year": 2001,
+  "status": "PARTIAL_REVIEW_NOT_FOR_PUBLICATION",
+  "source": "Commerce 2001.pdf, page 1",
+  "questions": [
+    {
+      "number": 1,
+      "question": "The pivot on which the wheel of commerce rotates is",
+      "options": [
+        "tariff",
+        "trade",
+        "taxation",
+        "price"
+      ],
+      "answer": 1,
+      "explanation": "Trade is the exchange of goods and services and is central to commerce.",
+      "topic": "Introduction to Commerce"
+    },
+    {
+      "number": 2,
+      "question": "A distinguishing characteristic of labour is that it is",
+      "options": [
+        "constant",
+        "expensive",
+        "mobile",
+        "cheap"
+      ],
+      "answer": 2,
+      "explanation": "Labour is geographically and occupationally mobile, unlike land.",
+      "topic": "Factors of Production"
+    },
+    {
+      "number": 3,
+      "question": "Land as a factor of production does not vary in",
+      "options": [
+        "quantity",
+        "nature",
+        "quality",
+        "cost"
+      ],
+      "answer": 0,
+      "explanation": "The total natural supply of land is fixed, although its quality and uses vary.",
+      "topic": "Factors of Production"
+    },
+    {
+      "number": 4,
+      "question": "Which of the following services does a lawyer render?",
+      "options": [
+        "industrial services",
+        "direct services",
+        "indirect services",
+        "commercial services"
+      ],
+      "answer": 1,
+      "explanation": "A lawyer provides a professional service directly to clients.",
+      "topic": "Occupations"
+    },
+    {
+      "number": 5,
+      "question": "The partner that only contributes part of the capital used in the formation and running of a business is known as",
+      "options": [
+        "a passive partner",
+        "an active partner",
+        "a dormant partner",
+        "a nominal partner"
+      ],
+      "answer": 2,
+      "explanation": "A dormant or sleeping partner contributes capital but does not participate actively in management.",
+      "topic": "Partnership"
+    },
+    {
+      "number": 6,
+      "question": "One major advantage of a credit and thrift cooperative is that",
+      "options": [
+        "it can approach government for a loan",
+        "it encourages saving habits",
+        "there are no legal restrictions",
+        "each member has a vote during meetings"
+      ],
+      "answer": 1,
+      "explanation": "Credit and thrift cooperatives mobilise members' savings and provide credit.",
+      "topic": "Cooperative Societies"
+    },
+    {
+      "number": 7,
+      "question": "A form of ownership which exploits the strengths of one partner to remedy the weaknesses of the other is a",
+      "options": [
+        "joint partnership",
+        "cooperative",
+        "corporation",
+        "joint venture"
+      ],
+      "answer": 3,
+      "explanation": "A joint venture combines the complementary capabilities of parties undertaking a common business project.",
+      "topic": "Forms of Business Organisation"
+    },
+    {
+      "number": 8,
+      "question": "At the collapse of a business enterprise, the person appointed to dispose of the assets is called",
+      "options": [
+        "a broker",
+        "an auctioneer",
+        "a liquidator",
+        "an auditor"
+      ],
+      "answer": 2,
+      "explanation": "A liquidator realises the company's assets and settles claims during winding up.",
+      "topic": "Business Liquidation"
+    },
+    {
+      "number": 9,
+      "question": "Entrusting the management of a company to the courts to enable the settlement of the company's obligations is an indication of",
+      "options": [
+        "distress",
+        "closure",
+        "bankruptcy",
+        "liquidation"
+      ],
+      "answer": 3,
+      "explanation": "Court-supervised winding up of a company to discharge its obligations is liquidation.",
+      "topic": "Business Liquidation"
+    },
+    {
+      "number": 10,
+      "question": "The financial instrument for borrowing in which collateral is usually more than the amount borrowed is",
+      "options": [
+        "trust certificate",
+        "detachable warrant",
+        "mortgage bond",
+        "convertible securities"
+      ],
+      "answer": 2,
+      "explanation": "A mortgage bond is secured by pledged property, whose value ordinarily exceeds the debt it secures.",
+      "topic": "Capital Market"
+    }
+  ]
+}
