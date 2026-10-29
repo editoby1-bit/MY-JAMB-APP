@@ -24,7 +24,7 @@ for (const subject of subjects) {
   for (const q of flat) if (q.year) years[q.year] = (years[q.year] || 0) + 1;
   const images = [...new Set([...JSON.stringify(raw).matchAll(/past-questions\/img\/[A-Za-z0-9_.-]+/g)].map(m => m[0]))].sort();
   const study = JSON.parse(vm.runInContext(`JSON.stringify({lessons: window.TEACH_TOPICS?.[${JSON.stringify(subject)}]?.lessons || {}, repeats: window.TEACH_TOPICS?.[${JSON.stringify(subject)}]?.repeats || {}, teach: window.TEACH_ME?.[${JSON.stringify(subject)}] || {}})`, context));
-  const games = flat.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage && !q.passageId && !q.alsoAccept && q.keyVerdict !== 'none' && q.keyVerdict !== 'noanswer');
+  const games = flat.filter(q => !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && !q.passage && !q.passageId && !q.alsoAccept && q.keyVerdict !== 'none' && q.keyVerdict !== 'noanswer');
   const norm = text => String(text || '').toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]/g, '');
   const byText = new Map();
   for (const q of flat) {

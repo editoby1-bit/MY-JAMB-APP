@@ -649,6 +649,36 @@
       },
       "gameCount": 41,
       "memoryCount": 5
+    },
+    "commerce": {
+      "scripts": [
+        "past-questions/commerce-2001.js",
+        "past-questions/commerce-2002.js",
+        "past-questions/commerce-2003.js",
+        "past-questions/commerce-2004.js",
+        "teach/commerce.js",
+        "teach/commerce-topics.js",
+        "booklet/errors.js"
+      ],
+      "images": [
+        "past-questions/img/commerce-2004-q34-35.png"
+      ],
+      "years": {
+        "2001": 50,
+        "2002": 50,
+        "2003": 50,
+        "2004": 50
+      },
+      "count": 200,
+      "repeats": 6,
+      "lessons": 24,
+      "traps": true,
+      "tricky": {
+        "multi": 0,
+        "none": 0
+      },
+      "gameCount": 178,
+      "memoryCount": 44
     }
   },
   "files": {
@@ -1923,7 +1953,35 @@
     "teach/accounting-topics.js": {
       "sha256": "20e8f22160d570482c00c883fa7381517dff33ee9f2575ccaa1f71324ce3b60b",
       "bytes": 320884
+    },
+    "past-questions/commerce-2001.js": {
+      "sha256": "b520cfd16bf7dadf58fe49dfac32f0563bd51e55b3739b0d79e61391850c58f8",
+      "bytes": 39156
+    },
+    "past-questions/commerce-2002.js": {
+      "sha256": "c7eb67fcd3faeb1ec28475811c2e6b5c270b7b7f8d3d1ff8715eb5be669f61b1",
+      "bytes": 36571
+    },
+    "past-questions/commerce-2003.js": {
+      "sha256": "20101cef8d3003741af3400c0b68bd1dffba681b41d95a426996883bdaa23d89",
+      "bytes": 40817
+    },
+    "past-questions/commerce-2004.js": {
+      "sha256": "58476cd6117620c8a5e5239cf20c5ef2ac75be643ee0f98fb9da3022acbb1f41",
+      "bytes": 42590
+    },
+    "teach/commerce.js": {
+      "sha256": "d35e8de58d1b4e6e041bf3c011f027b2dbcc5d0e74672cc745940098bd4db63b",
+      "bytes": 175694
+    },
+    "teach/commerce-topics.js": {
+      "sha256": "11f67ec8137111c459c1f772ed994c963bdeceb3ba8299e55d38c09150c7cf1b",
+      "bytes": 79971
+    },
+    "past-questions/img/commerce-2004-q34-35.png": {
+      "sha256": "acc70265de5a8a3627e57536e9abd406d714aa0599dd58b41dc4741b5b42e68d",
+      "bytes": 68956
     }
   },
-  "version": "0ae31335247c21a1"
+  "version": "136f1da4ed9caca5"
 }

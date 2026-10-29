@@ -15,7 +15,7 @@ The initial page references three local scripts (`questions.js`,
   and referenced diagrams. Downloading a subject together keeps repeat counts
   consistent across years; this version does not download one year at a time.
 - A delayed preparation dialog shows real completed-file progress. Network
-  requests time out after 15 seconds (8 seconds for service-worker shell
+  requests time out after 45 seconds (8 seconds for service-worker shell
   requests). Failure offers retry or a return to choosing other content.
 - All required files must download and pass SHA-256 verification before any
   package script runs. Partial downloads remain reusable, but partial question
@@ -104,3 +104,23 @@ from Tricky Questions. Any attempted choice receives credit in practice.
 `node tests/crs-content.cjs` checks the current CRS source/key provenance,
 prepared teaching, reviewed repeats, traps, lesson lengths, question scoring,
 study hubs and offline access. Browser tests block external service requests.
+
+## Commerce imports and provisional answers
+
+Commerce 2001–2004 supplies 200 dated questions, prepared explanations and topic
+lessons as an on-demand package. Run `node tests/commerce-content.cjs` with the
+app served locally to validate source keys, coverage, all four papers, study hubs
+and saved offline content. `COMMERCE_HUBS_ONLY=1` runs the supplementary hub and
+offline checks without replaying every paper.
+
+New questions may set `teachKey` to their stable source ID. Use that same key in
+`TEACH_ME` and `TEACH_TOPICS.of`; older questions retain the wording/options key.
+This prevents a later repeated occurrence from overwriting an earlier prepared
+explanation. Reviewed repeats are linked separately by source ID.
+
+An unresolved question keeps its supplied key provisionally with
+`reviewPending: true`, `keyVerdict: 'pending'`, `keyAnswer` and a clear
+`answerNote`. Practice shows neutral supplied-key styling rather than confident
+right/wrong colours. These records are excluded from fast games and Exam Traps;
+uncertainty alone does not establish multiple-answer or wrong-key eligibility.
+The 45-second timeout includes downloading each response body.

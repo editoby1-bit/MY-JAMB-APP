@@ -8,6 +8,9 @@
 
 const QUESTION_BANK = {
 
+  // Authentic Commerce papers are loaded on demand from past-questions/commerce-*.js.
+  commerce: [],
+
   /* ═══════════════════════════════════════════════════════════
      USE OF ENGLISH  (JAMB UTME past questions)
   ═══════════════════════════════════════════════════════════ */

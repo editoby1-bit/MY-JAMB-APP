@@ -107,6 +107,7 @@
       none:      `None of the options is fully correct. JAMB's answer is <strong>${escHtml(q.keyAnswer)}</strong>, so that is what scores in the exam and here, but it is not fully correct. Here is why:`,
       misprint:  `The printed question has a wording or printing problem. We mark the corrected reading: <strong>${right}</strong>.`,
       debatable: `This question needs careful reading. The marked answer is <strong>${right}</strong>; the note below explains its wording and context.`,
+      pending: ` <strong>Answer review pending.</strong> The supplied key gives <strong>${escHtml(q.keyAnswer)}</strong>. It is used provisionally for scoring while this question is reviewed; the explanation below identifies the uncertainty.`,
     }[q.keyVerdict];
     if (!head) return '';
     return `<div class="key-check"><div class="key-check-title">⚖️ Answer check</div>`
@@ -915,7 +916,12 @@
 
       if (selectedAnswer === idx) btn.classList.add('selected');
 
-      if ((state.reviewMode || state.mode === 'practice') && q.keyVerdict === 'noanswer') {
+      if ((state.reviewMode || state.mode === 'practice') && q.reviewPending) {
+        if (selectedAnswer !== null && idx === q.answer) {
+          btn.classList.add('key-only');
+          btn.insertAdjacentHTML('beforeend', '<span class="key-only-tag">Supplied key · review pending</span>');
+        }
+      } else if ((state.reviewMode || state.mode === 'practice') && q.keyVerdict === 'noanswer') {
         // No option is right: mark nothing green or red, just say so.
         if (selectedAnswer !== null && idx === selectedAnswer) {
           btn.classList.add('no-answer');
@@ -1600,7 +1606,7 @@
     // in a fast game loop without the passage, so games skip them.
     // Questions with several accepted answers or no correct option need
     // the answer-key note to make sense, so games skip them too.
-    return arr.filter(q => Array.isArray(q.options) && q.options.length >= 2 && !q.passage
+    return arr.filter(q => !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && !q.passage
       && !q.alsoAccept && q.keyVerdict !== 'none' && q.keyVerdict !== 'noanswer');
   }
 
@@ -1727,6 +1733,7 @@
     const of = window.TEACH_TOPICS?.[subject]?.of || {};
     const byTopic = {};
     (QUESTION_BANK[subject] || []).forEach(q => {
+      if (q.reviewPending) return;
       if (!Array.isArray(q.options)) return;
       const k = teachMeKey(q);
       const m = (T[k] || '').match(TRAP_RE);
@@ -3392,7 +3399,7 @@
   // Key for explanations written in advance (teach/<subject>.js). Options
   // are part of it because some questions share the same wording.
   function teachMeKey(q) {
-    return (q.passageId || '') + '|' + q.question + '|' + q.options.join('|');
+    return q.teachKey || (q.passageId || '') + '|' + q.question + '|' + q.options.join('|');
   }
 
   async function triggerAIExplain() {
