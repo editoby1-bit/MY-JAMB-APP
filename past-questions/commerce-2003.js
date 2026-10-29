@@ -680,7 +680,7 @@
       0
     ],
     "keyVerdict": "multiple",
-    "keyAnswer": "C / A",
+    "keyAnswer": "A",
     "teachKey": "commerce-2003-q28"
   },
   {
@@ -740,7 +740,7 @@
       0
     ],
     "keyVerdict": "multiple",
-    "keyAnswer": "B / A",
+    "keyAnswer": "A",
     "teachKey": "commerce-2003-q30"
   },
   {
@@ -1044,7 +1044,7 @@
       }
     ],
     "keyVerdict": "corrected",
-    "keyAnswer": "D",
+    "keyAnswer": "C",
     "answerNote": "D is accepted as the intended short-term source when “corporate tax” means accrued tax payable before its lawful payment date. Cash temporarily remains available until settlement; this is not tax income or permission to pay late. Share capital, ordinary debentures and retained earnings are normally long-term/permanent sources. The printed C confuses using retained earnings for current expenses with the maturity classification of the source. The wording should have specified accrued corporate tax.",
     "bookletKey": "C",
     "bookletNote": "D is accepted as the intended short-term source when “corporate tax” means accrued tax payable before its lawful payment date. Cash temporarily remains available until settlement; this is not tax income or permission to pay late. Share capital, ordinary debentures and retained earnings are normally long-term/permanent sources. The printed C confuses using retained earnings for current expenses with the maturity classification of the source. The wording should have specified accrued corporate tax.",

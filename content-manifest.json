@@ -656,29 +656,38 @@
         "past-questions/commerce-2002.js",
         "past-questions/commerce-2003.js",
         "past-questions/commerce-2004.js",
+        "past-questions/commerce-2005.js",
+        "past-questions/commerce-2006.js",
+        "past-questions/commerce-2007.js",
+        "past-questions/commerce-2008.js",
         "teach/commerce.js",
         "teach/commerce-topics.js",
         "booklet/errors.js"
       ],
       "images": [
-        "past-questions/img/commerce-2004-q34-35.png"
+        "past-questions/img/commerce-2004-q34-35.png",
+        "past-questions/img/commerce-2006-communication.png"
       ],
       "years": {
         "2001": 50,
         "2002": 50,
         "2003": 50,
-        "2004": 50
+        "2004": 50,
+        "2005": 50,
+        "2006": 50,
+        "2007": 50,
+        "2008": 50
       },
-      "count": 200,
-      "repeats": 6,
-      "lessons": 24,
+      "count": 400,
+      "repeats": 22,
+      "lessons": 33,
       "traps": true,
       "tricky": {
-        "multi": 7,
-        "none": 2
+        "multi": 22,
+        "none": 6
       },
-      "gameCount": 191,
-      "memoryCount": 46
+      "gameCount": 372,
+      "memoryCount": 106
     }
   },
   "files": {
@@ -1963,25 +1972,45 @@
       "bytes": 39801
     },
     "past-questions/commerce-2003.js": {
-      "sha256": "08baa8a4cbe8d02cfc8ce0d69f9677d8041c9da78e64bd45a9a66a9e0c20b7c8",
-      "bytes": 47299
+      "sha256": "ddc0c056a9fb92e37dc10139f0f1a327b8538340c87a912c32f3d072fd88c3c7",
+      "bytes": 47291
     },
     "past-questions/commerce-2004.js": {
       "sha256": "bba689264393a37f3d15ec5a8e9b89abeade5b84e54907a5ef5ff993fd6a43e4",
       "bytes": 43597
     },
     "teach/commerce.js": {
-      "sha256": "fc323f26598ec77e0641acd6b3cc49edd0117440b8578b6616fc4b911eda6de8",
-      "bytes": 174743
+      "sha256": "13e597a77f1f25f33ecaa765cfa1662969334bf73206a133849681d0cea93b33",
+      "bytes": 361337
     },
     "teach/commerce-topics.js": {
-      "sha256": "4214f4b35d80f38a6e7325428ba419aed449d3533e7823230886ac6406531498",
-      "bytes": 80524
+      "sha256": "cf261939ebd22a26838ad801c7111153ae0f7da595b68b1b21f42d1f5971c095",
+      "bytes": 124213
     },
     "past-questions/img/commerce-2004-q34-35.png": {
       "sha256": "acc70265de5a8a3627e57536e9abd406d714aa0599dd58b41dc4741b5b42e68d",
       "bytes": 68956
+    },
+    "past-questions/commerce-2005.js": {
+      "sha256": "1861b60b5f80adef986d734388ca320c2c38ce21f8f50c5fac994929ae1e57e9",
+      "bytes": 49183
+    },
+    "past-questions/commerce-2006.js": {
+      "sha256": "8efd8dc1fa034ae7a7400e54c6c597f3de65b15b6de9503c053ff386e2011cb0",
+      "bytes": 49017
+    },
+    "past-questions/commerce-2007.js": {
+      "sha256": "6c5e315e0177fad96e5ca319de83ddddb3ab5f67cd9e37b57a7530f555639916",
+      "bytes": 54340
+    },
+    "past-questions/commerce-2008.js": {
+      "sha256": "0650c5d2cc95d056e7b479952163d3f448af9069059b76c7159d9f887dbcf2ce",
+      "bytes": 67221
+    },
+    "past-questions/img/commerce-2006-communication.png": {
+      "sha256": "986628d0e4b0bcf88beb66e9f43b211ec895fee7c00a2473433058b7de8fcecb",
+      "bytes": 53208
     }
   },
-  "version": "684fadec08ffad2f"
+  "version": "fdd07dc133a717e0"
 }
