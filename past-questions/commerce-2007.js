@@ -1052,7 +1052,7 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "Management incompetence is the supplied intended criticism: elected member-managers may lack specialist managerial skills. This is a possible weakness, not a claim that every cooperative is poorly managed.",
+    "explanation": "Management incompetence and limited capital are both recognized possible weaknesses of cooperatives. Elected managers may lack specialist skills, while reliance on members’ subscriptions can constrain available capital. The stem asks for a major criticism without specifying management or finance. Retain supplied B and also accept C; neither weakness applies to every cooperative.",
     "sourceFile": "Commerce 2007.pdf",
     "sourcePages": [
       2
@@ -1065,6 +1065,12 @@
         "title": "Independent portal occurrence; reordered options compared by meaning, not letter"
       }
     ],
+    "alsoAccept": [
+      2
+    ],
+    "keyVerdict": "multiple",
+    "keyAnswer": "B",
+    "answerNote": "Management incompetence and limited capital are both recognized possible weaknesses of cooperatives. Elected managers may lack specialist skills, while reliance on members’ subscriptions can constrain available capital. The stem asks for a major criticism without specifying management or finance. Retain supplied B and also accept C; neither weakness applies to every cooperative.",
     "teachKey": "commerce-2007-q35"
   },
   {
