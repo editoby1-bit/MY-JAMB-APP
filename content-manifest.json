@@ -674,10 +674,10 @@
       "lessons": 24,
       "traps": true,
       "tricky": {
-        "multi": 5,
-        "none": 3
+        "multi": 7,
+        "none": 2
       },
-      "gameCount": 192,
+      "gameCount": 191,
       "memoryCount": 46
     }
   },
@@ -1955,33 +1955,33 @@
       "bytes": 320884
     },
     "past-questions/commerce-2001.js": {
-      "sha256": "d86a7f4c5a03f1404f9aa09e213708a00d8d6613c37eb378ec73a6be61903b43",
-      "bytes": 45801
+      "sha256": "1c1d3269b46f1c63d6d05975b91a9bbbe039d78e615d4aceb1e0993dee16aec3",
+      "bytes": 46262
     },
     "past-questions/commerce-2002.js": {
       "sha256": "b54b93f97e39f54df76bcd44bd63f8fd909989d8576b6067706b9fa2875d6052",
       "bytes": 39801
     },
     "past-questions/commerce-2003.js": {
-      "sha256": "ea6dc85b27bd8fad5e92a45012714d8a152ad44c7ba61fada73da96b0f7bf01b",
-      "bytes": 46089
+      "sha256": "08baa8a4cbe8d02cfc8ce0d69f9677d8041c9da78e64bd45a9a66a9e0c20b7c8",
+      "bytes": 47299
     },
     "past-questions/commerce-2004.js": {
       "sha256": "bba689264393a37f3d15ec5a8e9b89abeade5b84e54907a5ef5ff993fd6a43e4",
       "bytes": 43597
     },
     "teach/commerce.js": {
-      "sha256": "97600971193858ee2e636207e59f7eb643770f2db9c358fa403db26206471526",
-      "bytes": 174745
+      "sha256": "fc323f26598ec77e0641acd6b3cc49edd0117440b8578b6616fc4b911eda6de8",
+      "bytes": 174743
     },
     "teach/commerce-topics.js": {
-      "sha256": "3241152056406273a492b1be2d3ff43c6c5ff7fd6082c06e4966cfc3717ec8a1",
-      "bytes": 80185
+      "sha256": "4214f4b35d80f38a6e7325428ba419aed449d3533e7823230886ac6406531498",
+      "bytes": 80524
     },
     "past-questions/img/commerce-2004-q34-35.png": {
       "sha256": "acc70265de5a8a3627e57536e9abd406d714aa0599dd58b41dc4741b5b42e68d",
       "bytes": 68956
     }
   },
-  "version": "3806d08b3d4ebb2e"
+  "version": "684fadec08ffad2f"
 }

@@ -62,16 +62,18 @@ for (const [id, group] of Object.entries(topics.repeats || {})) {
 for (const rows of groupRows.values()) assert(new Set(rows.map(q => q.year)).size >= 2);
 assert.equal(manifest.subjects.commerce.count, 200);
 assert.equal(bank.filter(q => q.reviewPending).length, 0);
-assert.equal(bank.filter(q => q.keyVerdict === 'corrected').length, 20);
-assert.equal(bank.filter(q => q.keyVerdict === 'multiple').length, 5);
-assert.equal(bank.filter(q => q.keyVerdict === 'noanswer').length, 3);
+assert.equal(bank.filter(q => q.keyVerdict === 'corrected').length, 21);
+assert.equal(bank.filter(q => q.keyVerdict === 'multiple').length, 7);
+assert.equal(bank.filter(q => q.keyVerdict === 'noanswer').length, 2);
 assert.deepEqual(bank.find(q => q.id === 'commerce-2001-q46').alsoAccept, [0, 3]);
 assert.equal(bank.find(q => q.id === 'commerce-2004-q31').answer, 3);
 assert.equal(bank.find(q => q.id === 'commerce-2002-q48').answer, 1);
+assert.equal(bank.find(q => q.id === 'commerce-2003-q43').answer, 3);
+for (const [id, primary] of [['commerce-2003-q28', 2], ['commerce-2003-q30', 1]]) { const q = bank.find(q => q.id === id); assert.equal(q.answer, primary); assert.deepEqual(q.alsoAccept, [0]); }
 assert(bank.find(q => q.id === 'commerce-2001-q13').answerNote.includes('570'));
 assert(bank.find(q => q.id === 'commerce-2001-q21').answerNote.includes('2,764.50'));
-assert.equal(manifest.subjects.commerce.tricky.multi, 5);
-assert.equal(manifest.subjects.commerce.tricky.none, 3);
+assert.equal(manifest.subjects.commerce.tricky.multi, 7);
+assert.equal(manifest.subjects.commerce.tricky.none, 2);
 assert.equal(manifest.subjects.commerce.gameCount, bank.filter(q => !q.reviewPending && !q.alsoAccept && !['none', 'noanswer'].includes(q.keyVerdict)).length);
 console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${Object.keys(topics.lessons).length} lessons and reviewed repeat groups`);
 
@@ -136,7 +138,7 @@ console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${
     await page.locator('#jambBookletBanner').click();
     await page.locator('#bkSubjectSelect').selectOption('commerce');
     await page.waitForFunction(count => document.querySelectorAll('#jambBookletBody .trap-item').length === count, bank.filter(q => q.bookletKey).length);
-    assert.equal(await page.locator('#jambBookletBody .bk-verdict').filter({ hasText: 'No fully correct option' }).count(), 3);
+    assert.equal(await page.locator('#jambBookletBody .bk-verdict').filter({ hasText: 'No fully correct option' }).count(), 2);
     for (const item of await page.locator('#jambBookletBody .trap-item').all()) {
       if ((await item.locator('.bk-verdict').innerText()).includes('No fully correct option')) {
         assert.equal(await item.locator('.bk-right').count(), 0);
@@ -144,8 +146,8 @@ console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${
     }
     await page.locator('#jambBookletClose').click();
     await page.locator('#jambTrickyBanner').click();
-    assert.equal((await page.locator('.tricky-subject[data-subject="commerce"][data-kind="multi"] .gtc-sub').innerText()).trim(), '5 questions');
-    assert.equal((await page.locator('.tricky-subject[data-subject="commerce"][data-kind="none"] .gtc-sub').innerText()).trim(), '3 questions');
+    assert.equal((await page.locator('.tricky-subject[data-subject="commerce"][data-kind="multi"] .gtc-sub').innerText()).trim(), '7 questions');
+    assert.equal((await page.locator('.tricky-subject[data-subject="commerce"][data-kind="none"] .gtc-sub').innerText()).trim(), '2 questions');
     await page.locator('#jambTrickyClose').click();
     await page.locator('#jambKeyPointsBanner').click();
     await page.locator('#kpSubjectSelect').selectOption('commerce');

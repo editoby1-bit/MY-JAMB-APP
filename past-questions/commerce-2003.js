@@ -656,15 +656,15 @@
       "Development of human civilization and the desire to meet their needs",
       "Primitive stage of existence of human beings"
     ],
-    "answer": 0,
+    "answer": 2,
     "printedKey": "A",
-    "explanation": "A identifies the early barter-economy stage taught in the historical development of commerce. Satisfying needs through others explains why exchange developed, but the intended historical-stage answer is barter before monetary exchange.",
+    "explanation": "C expresses the broad development of commerce through civilization, specialization and meeting needs. A identifies barter as the early exchange stage emphasized in Nigerian classroom histories. The phrase “traceable to” does not clearly distinguish the broad origin from that stage. Accept C and A for this wording; the supplied key is A. This does not establish a universal historical sequence for every society.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
     "reviewCompleted": "2026-10-29",
-    "reviewConfidence": "medium-high under historical-stage/booklet rule",
+    "reviewConfidence": "owner review integrated; wording qualifications explicit",
     "reviewSources": [
       {
         "url": "https://classnotes.com.ng/lesson/118/history-of-commerce-in-nigeria",
@@ -675,6 +675,12 @@
         "title": "History of Commerce — SS1 Commerce, Federal Ministry of Education Inspire"
       }
     ],
+    "answerNote": "C expresses the broad development of commerce through civilization, specialization and meeting needs. A identifies barter as the early exchange stage emphasized in Nigerian classroom histories. The phrase “traceable to” does not clearly distinguish the broad origin from that stage. Accept C and A for this wording; the supplied key is A. This does not establish a universal historical sequence for every society.",
+    "alsoAccept": [
+      0
+    ],
+    "keyVerdict": "multiple",
+    "keyAnswer": "C / A",
     "teachKey": "commerce-2003-q28"
   },
   {
@@ -710,15 +716,15 @@
       "Formation",
       "Creation"
     ],
-    "answer": 0,
+    "answer": 1,
     "printedKey": "A",
-    "explanation": "A, construction, is the intended classroom category: assembling manufactured materials into a usable whole, such as using bricks, doors and roofing sheets to build a house. Manufacturing instead processes raw materials into products. Factory assembly can be manufacturing in other contexts, so the short stem should be explained with the classroom distinction.",
+    "explanation": "B, manufacturing, can include assembling components into finished usable products. A, construction, is also defensible under the Nigerian Commerce definition of assembling manufactured materials into usable works such as buildings. The stem names no factory, building or raw-material transformation to distinguish them. Accept B and A; the supplied key is A. Teach the contextual distinction rather than saying construction never involves assembly.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
     "reviewCompleted": "2026-10-29",
-    "reviewConfidence": "medium-high under curriculum/booklet rule",
+    "reviewConfidence": "owner review integrated; wording qualifications explicit",
     "reviewSources": [
       {
         "url": "https://www.acadlly.com/manufacturing-and-construction-industries/",
@@ -729,6 +735,12 @@
         "title": "The assembling of Manufactured products into forms usable by humans — SchoolNGR"
       }
     ],
+    "answerNote": "B, manufacturing, can include assembling components into finished usable products. A, construction, is also defensible under the Nigerian Commerce definition of assembling manufactured materials into usable works such as buildings. The stem names no factory, building or raw-material transformation to distinguish them. Accept B and A; the supplied key is A. Teach the contextual distinction rather than saying construction never involves assembly.",
+    "alsoAccept": [
+      0
+    ],
+    "keyVerdict": "multiple",
+    "keyAnswer": "B / A",
     "teachKey": "commerce-2003-q30"
   },
   {
@@ -1008,15 +1020,15 @@
       "Retained earnings",
       "Corporate tax"
     ],
-    "answer": 2,
+    "answer": 3,
     "printedKey": "C",
-    "explanation": "None of the offered answers is a conventional short-term source by maturity. Retained earnings are generally permanent/internal equity, even when spent on current operations. Any attempted answer receives credit; printed C is shown only as source-key provenance.",
+    "explanation": "D is accepted as the intended short-term source when “corporate tax” means accrued tax payable before its lawful payment date. Cash temporarily remains available until settlement; this is not tax income or permission to pay late. Share capital, ordinary debentures and retained earnings are normally long-term/permanent sources. The printed C confuses using retained earnings for current expenses with the maturity classification of the source. The wording should have specified accrued corporate tax.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       2
     ],
     "reviewCompleted": "2026-10-29",
-    "reviewConfidence": "high for maturity-classification defect; medium for intended-answer treatment",
+    "reviewConfidence": "owner review integrated; wording qualifications explicit",
     "reviewSources": [
       {
         "url": "https://nou.edu.ng/coursewarecontent/BFN303.pdf",
@@ -1031,11 +1043,11 @@
         "title": "A source of short-term finance to companies is?...-Commerce - Myschool"
       }
     ],
-    "keyVerdict": "noanswer",
-    "keyAnswer": "C",
-    "answerNote": "The question has no fully correct offered short-term source under standard maturity classification. NOUN Financial Management expressly places retained earnings among long-term/permanent sources and defines short-term finance as repayable within one year. Share capital and debentures are also normally long-term; corporate tax is a liability paid to government. Retained profit may pay this month’s wages, but the use does not change its permanent-equity source classification. Close the pending flag, identify the missing conventional answer (for example overdraft or trade credit), and credit any attempt under the app’s established no-correct-option policy. The printed C remains provenance only.",
+    "keyVerdict": "corrected",
+    "keyAnswer": "D",
+    "answerNote": "D is accepted as the intended short-term source when “corporate tax” means accrued tax payable before its lawful payment date. Cash temporarily remains available until settlement; this is not tax income or permission to pay late. Share capital, ordinary debentures and retained earnings are normally long-term/permanent sources. The printed C confuses using retained earnings for current expenses with the maturity classification of the source. The wording should have specified accrued corporate tax.",
     "bookletKey": "C",
-    "bookletNote": "The question has no fully correct offered short-term source under standard maturity classification. NOUN Financial Management expressly places retained earnings among long-term/permanent sources and defines short-term finance as repayable within one year. Share capital and debentures are also normally long-term; corporate tax is a liability paid to government. Retained profit may pay this month’s wages, but the use does not change its permanent-equity source classification. Close the pending flag, identify the missing conventional answer (for example overdraft or trade credit), and credit any attempt under the app’s established no-correct-option policy. The printed C remains provenance only.",
+    "bookletNote": "D is accepted as the intended short-term source when “corporate tax” means accrued tax payable before its lawful payment date. Cash temporarily remains available until settlement; this is not tax income or permission to pay late. Share capital, ordinary debentures and retained earnings are normally long-term/permanent sources. The printed C confuses using retained earnings for current expenses with the maturity classification of the source. The wording should have specified accrued corporate tax.",
     "teachKey": "commerce-2003-q43"
   },
   {

@@ -291,13 +291,13 @@
     ],
     "answer": 3,
     "printedKey": "D",
-    "explanation": "Capital employed is ₦570: total assets ₦1,370 less current liabilities ₦800. None of the four offered options is correct. Any attempted answer receives credit.",
+    "explanation": "Both asset and financing methods give ₦570: ₦1,370 minus ₦800, or ₦140 plus ₦350 plus ₦80. No offered option matches. C labels only one component of capital, not total capital employed. This remains a defective-option question; any attempt receives credit.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
     "reviewCompleted": "2026-10-29",
-    "reviewConfidence": "high",
+    "reviewConfidence": "owner review integrated; wording qualifications explicit",
     "reviewSources": [
       {
         "url": "../COMMERCE-2001-2004-answer-review.md",
@@ -306,9 +306,9 @@
     ],
     "keyVerdict": "noanswer",
     "keyAnswer": "D",
-    "answerNote": "Capital employed = total assets − current liabilities = ₦1,370 − ₦800 = ₦570. None of A ₦1,000, B ₦1,370, C ₦140 or D ₦50 equals ₦570. Do not invent a missing loan or relabel the scanned table. This is a defective-option question, not a provisional D answer.",
+    "answerNote": "Both asset and financing methods give ₦570: ₦1,370 minus ₦800, or ₦140 plus ₦350 plus ₦80. No offered option matches. C labels only one component of capital, not total capital employed. This remains a defective-option question; any attempt receives credit.",
     "bookletKey": "D",
-    "bookletNote": "Capital employed = total assets − current liabilities = ₦1,370 − ₦800 = ₦570. None of A ₦1,000, B ₦1,370, C ₦140 or D ₦50 equals ₦570. Do not invent a missing loan or relabel the scanned table. This is a defective-option question, not a provisional D answer.",
+    "bookletNote": "Both asset and financing methods give ₦570: ₦1,370 minus ₦800, or ₦140 plus ₦350 plus ₦80. No offered option matches. C labels only one component of capital, not total capital employed. This remains a defective-option question; any attempt receives credit.",
     "teachKey": "commerce-2001-q13"
   },
   {
@@ -482,13 +482,13 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "The cash discount is ₦2,764.50: 1,500 × ₦100 × 95% × 97% × 2%. No option gives that result. A, ₦2,760, is nearest but uses an additive shortcut; B, ₦3,000, ignores the earlier discounts. Any attempted answer receives credit.",
+    "explanation": "The exact successive-discount result is ₦2,764.50: 150,000 × 0.95 × 0.97 × 0.02. A, ₦2,760, is the likely intended answer if the examiner added 5% and 3% before applying the cash discount. The stem does not specify that method or rounding. No exact option is offered, so any attempt receives credit. Do not teach the additive shortcut as equivalent to successive discounts.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
     "reviewCompleted": "2026-10-29",
-    "reviewConfidence": "high",
+    "reviewConfidence": "owner review integrated; wording qualifications explicit",
     "reviewSources": [
       {
         "url": "https://ecampusontario.pressbooks.pub/introbusinessmath/chapter/4-1-figuring-out-the-cost-discounts/",
@@ -505,9 +505,9 @@
     ],
     "keyVerdict": "noanswer",
     "keyAnswer": "B",
-    "answerNote": "Use successive discounts and apply the cash discount to the net invoice amount: 1,500×₦100×0.95×0.97×0.02 = ₦2,764.50. That amount is absent. A ₦2,760 results from adding the earlier percentages; B ₦3,000 ignores them. No correct listed option; credit any attempt rather than forcing the nearest answer.",
+    "answerNote": "The exact successive-discount result is ₦2,764.50: 150,000 × 0.95 × 0.97 × 0.02. A, ₦2,760, is the likely intended answer if the examiner added 5% and 3% before applying the cash discount. The stem does not specify that method or rounding. No exact option is offered, so any attempt receives credit. Do not teach the additive shortcut as equivalent to successive discounts.",
     "bookletKey": "B",
-    "bookletNote": "Use successive discounts and apply the cash discount to the net invoice amount: 1,500×₦100×0.95×0.97×0.02 = ₦2,764.50. That amount is absent. A ₦2,760 results from adding the earlier percentages; B ₦3,000 ignores them. No correct listed option; credit any attempt rather than forcing the nearest answer.",
+    "bookletNote": "The exact successive-discount result is ₦2,764.50: 150,000 × 0.95 × 0.97 × 0.02. A, ₦2,760, is the likely intended answer if the examiner added 5% and 3% before applying the cash discount. The stem does not specify that method or rounding. No exact option is offered, so any attempt receives credit. Do not teach the additive shortcut as equivalent to successive discounts.",
     "teachKey": "commerce-2001-q21"
   },
   {
