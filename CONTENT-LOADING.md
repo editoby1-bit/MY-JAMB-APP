@@ -124,3 +124,10 @@ An unresolved question keeps its supplied key provisionally with
 right/wrong colours. These records are excluded from fast games and Exam Traps;
 uncertainty alone does not establish multiple-answer or wrong-key eligibility.
 The 45-second timeout includes downloading each response body.
+
+
+The initial22 Commerce review flags have completed adjudication. The package now
+uses `alsoAccept` for five genuinely multiple-answer questions and `noanswer`
+for three defective-option questions. The latter credits an attempt without
+presenting any offered answer as factually correct, including in the circulation
+hub. Stable source IDs and supplied key letters remain unchanged.

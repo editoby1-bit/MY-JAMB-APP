@@ -898,17 +898,34 @@
       "banking services, foreign exchange operations and open market operations",
       "service, monetary policy and developmental functions"
     ],
-    "answer": 0,
+    "answer": 3,
     "printedKey": "A",
-    "explanation": "The supplied key A is retained provisionally. It lists familiar central-bank functions, while D is the broader functional classification suggested by the wording. This distinction needs review.",
+    "explanation": "D gives the requested broad classification: service, monetary-policy and developmental functions. A lists individual functions rather than the overall categories.",
     "sourceFile": "Commerce 2002.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high",
+    "reviewSources": [
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN104.pdf",
+        "title": "BFN104 — Elements of Banking"
+      },
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN304.pdf",
+        "title": "BFN304 — Financial Systems"
+      },
+      {
+        "url": "https://myschool.ng/classroom/commerce/2279",
+        "title": "The principal objectives of the Central Bank of Ni...-Commerce - Myschool"
+      }
+    ],
+    "keyVerdict": "corrected",
     "keyAnswer": "A",
-    "answerNote": "The supplied key A is retained provisionally. It lists familiar central-bank functions, while D is the broader functional classification suggested by the wording. This distinction needs review.",
+    "answerNote": "The exact stem asks for broad classification, not an example list. D supplies service, monetary-policy and developmental headings. A lists three individual activities largely within central-banking services; it does not supply the broader functional taxonomy. NOUN material independently documents service/banker activity, monetary-policy/stability activity and developmental activity. Correct A to D, keeping the distinction visible. Do not misrepresent these three textbook headings as a verbatim statutory list of the CBN Act’s principal objects. Direct CBN pages returned 403; this is a reasoned classification decision supported by Nigerian university material, not a falsely claimed direct CBN quotation.",
+    "bookletKey": "A",
+    "bookletNote": "The exact stem asks for broad classification, not an example list. D supplies service, monetary-policy and developmental headings. A lists three individual activities largely within central-banking services; it does not supply the broader functional taxonomy. NOUN material independently documents service/banker activity, monetary-policy/stability activity and developmental activity. Correct A to D, keeping the distinction visible. Do not misrepresent these three textbook headings as a verbatim statutory list of the CBN Act’s principal objects. Direct CBN pages returned 403; this is a reasoned classification decision supported by Nigerian university material, not a falsely claimed direct CBN quotation.",
     "teachKey": "commerce-2002-q43"
   },
   {
@@ -1010,17 +1027,30 @@
       "the regulations regarding sales in the area",
       "the location of his shop"
     ],
-    "answer": 2,
+    "answer": 1,
     "printedKey": "C",
-    "explanation": "The supplied key C is retained provisionally. B points directly to the producer’s quality standards, while C can concern regulatory quality requirements. The intended meaning of “determines” needs review.",
+    "explanation": "B is the best answer: the manufacturer's materials, production methods and quality control directly determine the quality of goods supplied to the retailer. Local regulations set requirements or minimum standards, but compliance requirements alone do not determine actual manufacturing quality.",
     "sourceFile": "Commerce 2002.pdf",
     "sourcePages": [
       3
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium",
+    "reviewSources": [
+      {
+        "url": "https://myschool.ng/classroom/commerce/2284",
+        "title": "which of the following is an determines the qualit...-Commerce - Myschool"
+      },
+      {
+        "url": "https://www.iso.org/quality-management",
+        "title": "ISO — Quality management: The path to continual improvement"
+      }
+    ],
+    "keyVerdict": "corrected",
     "keyAnswer": "C",
-    "answerNote": "The supplied key C is retained provisionally. B points directly to the producer’s quality standards, while C can concern regulatory quality requirements. The intended meaning of “determines” needs review.",
+    "answerNote": "Close B under the single-best-answer policy. The stem asks what determines the quality of goods the retailer sells, not what minimum quality local law permits. The manufacturer and its production/quality-management processes directly determine the goods' inherent quality. Sales regulations stipulate requirements but are not sufficient to determine actual workmanship, materials or consistency. C is not meaningless; it answers a regulatory-compliance interpretation that is not specified. Do not add C as equally correct solely because regulations influence requirements.",
+    "bookletKey": "C",
+    "bookletNote": "Close B under the single-best-answer policy. The stem asks what determines the quality of goods the retailer sells, not what minimum quality local law permits. The manufacturer and its production/quality-management processes directly determine the goods' inherent quality. Sales regulations stipulate requirements but are not sufficient to determine actual workmanship, materials or consistency. C is not meaningless; it answers a regulatory-compliance interpretation that is not specified. Do not add C as equally correct solely because regulations influence requirements.",
     "teachKey": "commerce-2002-q48"
   },
   {

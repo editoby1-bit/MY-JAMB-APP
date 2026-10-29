@@ -42,8 +42,11 @@ for (let year = 2001; year <= 2004; year++) {
       assert.equal(q.alsoAccept, undefined);
     }
     if (q.bookletKey) {
-      assert.notEqual('ABCD'[q.answer], q.bookletKey);
-      assert.equal(q.keyVerdict, 'corrected'); assert(q.bookletNote);
+      if (q.keyVerdict !== 'noanswer') {
+        assert.notEqual('ABCD'[q.answer], q.bookletKey);
+        assert.equal(q.keyVerdict, 'corrected');
+      }
+      assert(q.bookletNote);
     }
   }
 }
@@ -58,6 +61,17 @@ for (const [id, group] of Object.entries(topics.repeats || {})) {
 }
 for (const rows of groupRows.values()) assert(new Set(rows.map(q => q.year)).size >= 2);
 assert.equal(manifest.subjects.commerce.count, 200);
+assert.equal(bank.filter(q => q.reviewPending).length, 0);
+assert.equal(bank.filter(q => q.keyVerdict === 'corrected').length, 20);
+assert.equal(bank.filter(q => q.keyVerdict === 'multiple').length, 5);
+assert.equal(bank.filter(q => q.keyVerdict === 'noanswer').length, 3);
+assert.deepEqual(bank.find(q => q.id === 'commerce-2001-q46').alsoAccept, [0, 3]);
+assert.equal(bank.find(q => q.id === 'commerce-2004-q31').answer, 3);
+assert.equal(bank.find(q => q.id === 'commerce-2002-q48').answer, 1);
+assert(bank.find(q => q.id === 'commerce-2001-q13').answerNote.includes('570'));
+assert(bank.find(q => q.id === 'commerce-2001-q21').answerNote.includes('2,764.50'));
+assert.equal(manifest.subjects.commerce.tricky.multi, 5);
+assert.equal(manifest.subjects.commerce.tricky.none, 3);
 assert.equal(manifest.subjects.commerce.gameCount, bank.filter(q => !q.reviewPending && !q.alsoAccept && !['none', 'noanswer'].includes(q.keyVerdict)).length);
 console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${Object.keys(topics.lessons).length} lessons and reviewed repeat groups`);
 
@@ -74,7 +88,7 @@ console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${
     await page.locator('.config-btn[data-group="session"][data-value="single"]').click();
     await page.locator('.config-btn[data-group="mode"][data-value="practice"]').click();
     await page.locator('#subjectSelect').selectOption('commerce');
-    for (let year = 2001; !process.env.COMMERCE_HUBS_ONLY && year <= 2004; year++) {
+    for (let year = Number(process.env.COMMERCE_BROWSER_FROM || 2001); !process.env.COMMERCE_HUBS_ONLY && year <= 2004; year++) {
       await page.evaluate(() => localStorage.removeItem('jamb-free-v1'));
       await page.locator('#yearSelect').selectOption(String(year));
       await page.locator('#questionCountSelect').selectOption('all');
@@ -87,6 +101,10 @@ console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${
         assert.equal(await page.locator('#optionsList .option-btn').count(), 4);
         if (q.diagram) {
           assert(await page.locator('#diagramBox').isVisible());
+          await page.waitForFunction(() => {
+            const img = document.querySelector('#diagramBox img');
+            return img?.complete && img.naturalWidth > 0;
+          });
           assert(await page.locator('#diagramBox img').evaluate(img => img.complete && img.naturalWidth > 0));
         }
         if (q.reviewPending) {
@@ -95,8 +113,15 @@ console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${
           assert(await page.locator('#optionsList .option-btn').nth(other).evaluate(n => !n.classList.contains('correct') && !n.classList.contains('wrong')));
           assert((await page.locator('#explanationBox').innerText()).includes('Answer review pending'));
         }
-        await page.locator('#optionsList .option-btn').nth(q.answer).click();
-        assert(await page.locator('#optionsList .option-btn').nth(q.answer).evaluate((n, pending) => n.classList.contains(pending ? 'key-only' : 'correct'), !!q.reviewPending));
+        const accepted = q.keyVerdict === 'noanswer' ? [0, 1, 2, 3] : [q.answer, ...(q.alsoAccept || [])];
+        for (const answer of accepted) {
+          await page.locator('#optionsList .option-btn').nth(answer).click();
+          assert(await page.locator('#optionsList .option-btn').nth(answer).evaluate((n, mode) => n.classList.contains(mode === 'noanswer' ? 'no-answer' : mode === 'pending' ? 'key-only' : 'correct'), q.keyVerdict));
+        }
+        if (q.keyVerdict === 'noanswer') {
+          assert.equal(await page.locator('#optionsList .option-btn.correct, #optionsList .option-btn.wrong').count(), 0);
+          assert((await page.locator('#explanationBox').innerText()).includes('None of the four options is correct'));
+        }
         if (i < qs.length - 1) await page.locator('#nextBtn').click();
       }
       await page.locator('#submitBtn').click();
@@ -111,7 +136,17 @@ console.log(`PASS Commerce data: 200 source records, keys, prepared teaching, ${
     await page.locator('#jambBookletBanner').click();
     await page.locator('#bkSubjectSelect').selectOption('commerce');
     await page.waitForFunction(count => document.querySelectorAll('#jambBookletBody .trap-item').length === count, bank.filter(q => q.bookletKey).length);
+    assert.equal(await page.locator('#jambBookletBody .bk-verdict').filter({ hasText: 'No fully correct option' }).count(), 3);
+    for (const item of await page.locator('#jambBookletBody .trap-item').all()) {
+      if ((await item.locator('.bk-verdict').innerText()).includes('No fully correct option')) {
+        assert.equal(await item.locator('.bk-right').count(), 0);
+      }
+    }
     await page.locator('#jambBookletClose').click();
+    await page.locator('#jambTrickyBanner').click();
+    assert.equal((await page.locator('.tricky-subject[data-subject="commerce"][data-kind="multi"] .gtc-sub').innerText()).trim(), '5 questions');
+    assert.equal((await page.locator('.tricky-subject[data-subject="commerce"][data-kind="none"] .gtc-sub').innerText()).trim(), '3 questions');
+    await page.locator('#jambTrickyClose').click();
     await page.locator('#jambKeyPointsBanner').click();
     await page.locator('#kpSubjectSelect').selectOption('commerce');
     await page.locator('#jambKeyPointsBody details, #jambKeyPointsBody [data-locked]').first().waitFor();

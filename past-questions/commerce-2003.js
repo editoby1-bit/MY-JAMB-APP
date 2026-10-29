@@ -304,15 +304,29 @@
     ],
     "answer": 3,
     "printedKey": "D",
-    "explanation": "The supplied key selects D, mail delivery. Postal delivery is NIPOST’s basic service, but the offered courier answer also requires review because postal operators can provide express/courier services.",
+    "explanation": "B and D are correct examples: NIPOST delivers ordinary mail and operates express/courier services through EMS/Speed Post. The question does not ask exclusively for its principal service.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://nipost.gov.ng/ems-parcels/",
+        "title": "EMS-Parcels — Nigerian Postal Service"
+      },
+      {
+        "url": "https://nipost.gov.ng/company-information/",
+        "title": "Company Information — Nigerian Postal Service"
+      }
+    ],
+    "alsoAccept": [
+      1
+    ],
+    "keyVerdict": "multiple",
     "keyAnswer": "D",
-    "answerNote": "The supplied key D is used provisionally while this question is reviewed. Postal mail delivery and courier/express delivery can both be services; the example-style stem may not have an exclusive offered answer.",
+    "answerNote": "The stem asks for an example, not the principal service. Mail delivery and courier/express parcel delivery are both real services of NIPOST. It is inappropriate to reject B simply because D is the best-known core service. No evidence makes telephone or generic electronic mail equally intended historical postal examples.",
     "teachKey": "commerce-2003-q14"
   },
   {
@@ -398,15 +412,35 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "B, loading and offloading facilities, is the supplied key. However, berthing facilities and cargo warehouses are also real seaport facilities, so the broad stem is under review.",
+    "explanation": "All four options describe genuine seaport facilities: berthing, loading/offloading, radio/control communication and cargo storage. B is the supplied key, but the broad question does not make the other facilities incorrect.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://nigerianports.gov.ng/harbour-services/",
+        "title": "Harbour Services — Nigerian Ports Authority"
+      },
+      {
+        "url": "https://nigerianports.gov.ng/history/our-mandate/",
+        "title": "Our Mandate — Nigerian Ports Authority"
+      },
+      {
+        "url": "https://placng.org/lawsofnigeria/laws/N126.pdf",
+        "title": "Nigerian Ports Authority Act, section 8(w) and storage tariff provisions"
+      }
+    ],
+    "alsoAccept": [
+      0,
+      2,
+      3
+    ],
+    "keyVerdict": "multiple",
     "keyAnswer": "B",
-    "answerNote": "The supplied key B is used provisionally while this question is reviewed. Berthing, cargo handling and cargo warehousing are all genuine port services; supplied B is not clearly exclusive.",
+    "answerNote": "All four are actual seaport facilities. Primary NPA harbour guidance explicitly establishes berthing and radio/control operations, while its mandate and statutory text establish cargo handling and warehousing. The broad stem does not isolate loading/offloading or limit itself to the authority’s present direct operations.",
     "teachKey": "commerce-2003-q18"
   },
   {
@@ -465,15 +499,23 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "The booklet gives B, sales promotion, but the checked MySchool page gives C, advertising. Both can stimulate demand; the broad wording does not securely identify one technique.",
+    "explanation": "B, sales promotion, is the intended single-best answer: it uses promotional efforts and incentives to stimulate buying. Advertising and personal selling can also increase demand, but their fuller definitions differ; this question does not establish that only sales promotion can affect demand.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "B",
-    "answerNote": "The supplied key B is used provisionally while this question is reviewed. Booklet B (sales promotion) conflicts with MySchool C (advertising); both stimulate demand, and the stem lacks a distinguishing description.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high under single-best/booklet rule",
+    "reviewSources": [
+      {
+        "url": "https://openstax.org/books/principles-marketing/pages/15-5-sales-promotion-and-its-role-in-the-promotion-mix",
+        "title": "15.5 Sales Promotion and Its Role in the Promotion Mix — OpenStax"
+      },
+      {
+        "url": "https://openstax.org/books/principles-marketing/pages/13-1-the-promotion-mix-and-its-elements",
+        "title": "13.1 The Promotion Mix and Its Elements — OpenStax"
+      }
+    ],
     "teachKey": "commerce-2003-q21"
   },
   {
@@ -616,15 +658,23 @@
     ],
     "answer": 0,
     "printedKey": "A",
-    "explanation": "The compilation gives A, the barter-economy period; MySchool gives B, the underlying desire to meet needs through others. The historical-period and underlying-cause readings require review.",
+    "explanation": "A identifies the early barter-economy stage taught in the historical development of commerce. Satisfying needs through others explains why exchange developed, but the intended historical-stage answer is barter before monetary exchange.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "A",
-    "answerNote": "The supplied key A is used provisionally while this question is reviewed. The source key selects an early historical barter stage, while MySchool selects the underlying need for exchange. The broad origin wording does not clearly distinguish them.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high under historical-stage/booklet rule",
+    "reviewSources": [
+      {
+        "url": "https://classnotes.com.ng/lesson/118/history-of-commerce-in-nigeria",
+        "title": "History of Commerce in Nigeria — ClassNotes SS1"
+      },
+      {
+        "url": "https://inspire.education.gov.ng/lessons/856/preview",
+        "title": "History of Commerce — SS1 Commerce, Federal Ministry of Education Inspire"
+      }
+    ],
     "teachKey": "commerce-2003-q28"
   },
   {
@@ -662,15 +712,23 @@
     ],
     "answer": 0,
     "printedKey": "A",
-    "explanation": "The supplied key A uses construction for assembling products into a usable whole. MySchool selects B, manufacturing; because both activities can involve assembly, the short stem needs review rather than an automatic key correction.",
+    "explanation": "A, construction, is the intended classroom category: assembling manufactured materials into a usable whole, such as using bricks, doors and roofing sheets to build a house. Manufacturing instead processes raw materials into products. Factory assembly can be manufacturing in other contexts, so the short stem should be explained with the classroom distinction.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
-    "keyVerdict": "pending",
-    "keyAnswer": "A",
-    "answerNote": "The supplied key A is used provisionally while this question is reviewed. The supplied key A treats assembling products into a usable whole as construction; MySchool gives B, manufacturing. Both can involve assembly, and the stem does not identify buildings/infrastructure or factory-made products sufficiently to settle the classification.",
-    "reviewPending": true,
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high under curriculum/booklet rule",
+    "reviewSources": [
+      {
+        "url": "https://www.acadlly.com/manufacturing-and-construction-industries/",
+        "title": "Manufacturing and Construction Industries — Acadlly Learning"
+      },
+      {
+        "url": "https://www.schoolngr.com/classroom/commerce/521",
+        "title": "The assembling of Manufactured products into forms usable by humans — SchoolNGR"
+      }
+    ],
     "teachKey": "commerce-2003-q30"
   },
   {
@@ -750,16 +808,24 @@
     ],
     "answer": 2,
     "printedKey": "C",
-    "explanation": "The supplied key C presents Ecobank as a West African regional initiative. Its precise founding ownership and the reference to states rather than regional private business require confirmation.",
+    "explanation": "C is the best offered regional answer. Ecobank’s own annual reports trace its incorporation to a private-sector initiative led by the Federation of West African Chambers of Commerce and Industry and ECOWAS; it was not solely a Nigerian federal or Lagos State bank.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "C",
-    "answerNote": "The supplied key C is used provisionally while this question is reviewed. Regional Ecobank origin does not alone establish an initiative by West African states; the role of regional private business versus governments requires reliable founding-history confirmation.",
     "sourceNote": "The source’s “well-meeting Nigerian shareholders” is normalized to “well-meaning Nigerian shareholders”; the historical origin claim remains under review.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://www.ecobank.com/upload/publication/20160617020147865FAUN9WFV66/Ecobank%202015%20Annual%20Report_v14_Final.pdf",
+        "title": "Ecobank Group Annual Report 2015, printed page 21/PDF page 23"
+      },
+      {
+        "url": "https://ecobank.com/upload/publication/20240520041518794WRA2QCW9MM/20240530114004486M.pdf",
+        "title": "Ecobank Group Annual Report 2023, printed page 64/PDF page 65"
+      }
+    ],
     "teachKey": "commerce-2003-q34"
   },
   {
@@ -944,15 +1010,32 @@
     ],
     "answer": 2,
     "printedKey": "C",
-    "explanation": "C, retained earnings, is the supplied answer and can fund current operations. However, retained earnings are usually classified as internal, long-term finance, so the short-term label requires review.",
+    "explanation": "None of the offered answers is a conventional short-term source by maturity. Retained earnings are generally permanent/internal equity, even when spent on current operations. Any attempted answer receives credit; printed C is shown only as source-key provenance.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high for maturity-classification defect; medium for intended-answer treatment",
+    "reviewSources": [
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN303.pdf",
+        "title": "BFN303 — Financial Management"
+      },
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN209.pdf",
+        "title": "BFN209 — Introduction to Finance"
+      },
+      {
+        "url": "https://myschool.ng/classroom/commerce/6932",
+        "title": "A source of short-term finance to companies is?...-Commerce - Myschool"
+      }
+    ],
+    "keyVerdict": "noanswer",
     "keyAnswer": "C",
-    "answerNote": "The supplied key C is used provisionally while this question is reviewed. Retained earnings can fund short-term operations but are normally classified as internal long-term finance; no conventional short-term borrowing source is offered.",
+    "answerNote": "The question has no fully correct offered short-term source under standard maturity classification. NOUN Financial Management expressly places retained earnings among long-term/permanent sources and defines short-term finance as repayable within one year. Share capital and debentures are also normally long-term; corporate tax is a liability paid to government. Retained profit may pay this month’s wages, but the use does not change its permanent-equity source classification. Close the pending flag, identify the missing conventional answer (for example overdraft or trade credit), and credit any attempt under the app’s established no-correct-option policy. The printed C remains provenance only.",
+    "bookletKey": "C",
+    "bookletNote": "The question has no fully correct offered short-term source under standard maturity classification. NOUN Financial Management expressly places retained earnings among long-term/permanent sources and defines short-term finance as repayable within one year. Share capital and debentures are also normally long-term; corporate tax is a liability paid to government. Retained profit may pay this month’s wages, but the use does not change its permanent-equity source classification. Close the pending flag, identify the missing conventional answer (for example overdraft or trade credit), and credit any attempt under the app’s established no-correct-option policy. The printed C remains provenance only.",
     "teachKey": "commerce-2003-q43"
   },
   {
@@ -990,15 +1073,33 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "The supplied key B selects ownership structure; cost and repayment burden in D is also directly relevant to comparing funding sources. The broad stem remains under review.",
+    "explanation": "B and D are both essential financing-choice factors: ownership determines legal access and control consequences, while cost and repayment determine affordability and financial risk.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN303.pdf",
+        "title": "BFN303 — Financial Management"
+      },
+      {
+        "url": "https://www.accaglobal.com/gb/en/student/exam-support-resources/fundamentals-exams-study-resources/f9/technical-articles/business-finance.html",
+        "title": "Business finance and the SME sector | ACCA Global"
+      },
+      {
+        "url": "https://myschool.ng/classroom/commerce/6933",
+        "title": "An essential factor for evaluating the different s...-Commerce - Myschool"
+      }
+    ],
+    "alsoAccept": [
+      3
+    ],
+    "keyVerdict": "multiple",
     "keyAnswer": "B",
-    "answerNote": "The supplied key B is used provisionally while this question is reviewed. Ownership structure and cost/repayment burden are both relevant to evaluating finance; supplied B cannot be rejected as factually wrong solely because D is more directly financial.",
+    "answerNote": "The stem asks for an essential factor, not the cheapest source or one particular legal financing entitlement. Ownership/legal structure determines the sources a business may access and the control implications (B); cost and repayment commitments determine affordability and risk (D). These are directly standard financing-choice criteria, not an unrelated truth imported from another topic. The cited university text covers legal restrictions and cost of capital; ACCA explicitly identifies interest, term, security and repayment in finance contracts. Keep B primary as supplied and accept D. A decree establishing a business is not a general criterion for all businesses; bank size/type is not a general adequate evaluation of all sources.",
     "teachKey": "commerce-2003-q45"
   },
   {

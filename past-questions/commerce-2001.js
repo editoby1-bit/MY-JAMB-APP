@@ -183,15 +183,19 @@
     ],
     "answer": 2,
     "printedKey": "C",
-    "explanation": "The supplied key intends bankruptcy or financial inability to meet obligations; company insolvency terminology is more precise in modern legal usage.",
+    "explanation": "C, bankruptcy, is the intended examination answer: debts require formal administration for settlement. In precise legal terminology, company insolvency, administration and liquidation are different procedures; liquidation specifically involves winding up.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "C",
-    "answerNote": "The booklet and MySchool intend C, but the stem mixes company insolvency, court management and bankruptcy terminology. Keep C provisionally; do not teach the wording as a precise legal definition.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high",
+    "reviewSources": [
+      {
+        "url": "https://www.gov.uk/becoming-bankrupt/applying-to-become-bankrupt",
+        "title": "Becoming bankrupt: Applying to become bankrupt — GOV.UK"
+      }
+    ],
     "teachKey": "commerce-2001-q9"
   },
   {
@@ -229,15 +233,27 @@
     ],
     "answer": 2,
     "printedKey": "C",
-    "explanation": "Retained earnings arise within the company; unpaid accrued taxes can temporarily supply spontaneous finance. Personal savings belong to individuals, so the classification needs care.",
+    "explanation": "C, II and III, is retained as the company-specific intended answer: retained corporate profit and operating accruals supply funds within the business, while an owner introducing personal savings is a separate capital contribution. Tax owed must still be paid when due.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "C",
-    "answerNote": "The booklet gives C (II and III), whereas the matching MySchool item gives A (I and II). Personal savings versus company-generated funds and the treatment of accrued taxes make the classification context-dependent. Retain C provisionally.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high",
+    "reviewSources": [
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN209.pdf",
+        "title": "BFN209 — Introduction to Finance"
+      },
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN303.pdf",
+        "title": "BFN303 — Financial Management"
+      },
+      {
+        "url": "https://myschool.ng/classroom/commerce/2045",
+        "title": "(i) Personal Savings\r\n(ii)Retained Earnings\r\n(iii)...-Commerce - Myschool"
+      }
+    ],
     "teachKey": "commerce-2001-q11"
   },
   {
@@ -275,15 +291,24 @@
     ],
     "answer": 3,
     "printedKey": "D",
-    "explanation": "Using total assets less current liabilities gives ₦1,370 − ₦800 = ₦570, which is absent from the options. The printed key D is not the calculated capital employed.",
+    "explanation": "Capital employed is ₦570: total assets ₦1,370 less current liabilities ₦800. None of the four offered options is correct. Any attempted answer receives credit.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "../COMMERCE-2001-2004-answer-review.md",
+        "title": "Supplied Commerce 2001 scan, page 1, independently reread balance sheet"
+      }
+    ],
+    "keyVerdict": "noanswer",
     "keyAnswer": "D",
-    "answerNote": "The printed table gives capital employed ₦570 under total assets less current liabilities, but ₦570 is absent. Booklet D is ₦50; MySchool gives A, ₦1,000. Keep the source key provisionally and flag the missing computed option.",
+    "answerNote": "Capital employed = total assets − current liabilities = ₦1,370 − ₦800 = ₦570. None of A ₦1,000, B ₦1,370, C ₦140 or D ₦50 equals ₦570. Do not invent a missing loan or relabel the scanned table. This is a defective-option question, not a provisional D answer.",
+    "bookletKey": "D",
+    "bookletNote": "Capital employed = total assets − current liabilities = ₦1,370 − ₦800 = ₦570. None of A ₦1,000, B ₦1,370, C ₦140 or D ₦50 equals ₦570. Do not invent a missing loan or relabel the scanned table. This is a defective-option question, not a provisional D answer.",
     "teachKey": "commerce-2001-q13"
   },
   {
@@ -457,15 +482,32 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "The source key gives ₦3,000, which is 2% of the undiscounted list total. Cash discount normally applies to the net invoice amount, so this requires review.",
+    "explanation": "The cash discount is ₦2,764.50: 1,500 × ₦100 × 95% × 97% × 2%. No option gives that result. A, ₦2,760, is nearest but uses an additive shortcut; B, ₦3,000, ignores the earlier discounts. Any attempted answer receives credit.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://ecampusontario.pressbooks.pub/introbusinessmath/chapter/4-1-figuring-out-the-cost-discounts/",
+        "title": "Introduction to Business Math: 4.1 Figuring Out the Cost—Discounts"
+      },
+      {
+        "url": "https://ecampusontario.pressbooks.pub/introbusinessmath/chapter/4-2-invoicing-terms-of-payment-and-cash-discounts/",
+        "title": "Introduction to Business Math: 4.2 Invoicing—Terms of Payment and Cash Discounts"
+      },
+      {
+        "url": "https://github.com/editoby1-bit/MY-JAMB-APP/blob/main/content-review/commerce-2001-2004-disputed-rulings.json",
+        "title": "Previously independently checked Commerce discount rulings"
+      }
+    ],
+    "keyVerdict": "noanswer",
     "keyAnswer": "B",
-    "answerNote": "Booklet and MySchool mark B, ₦3,000, applying 2% to the list total. Applying cash discount to net invoice value gives ₦2,760 under additive list-base reductions, or ₦2,764.50 if successive. Review the discount basis before final scoring.",
+    "answerNote": "Use successive discounts and apply the cash discount to the net invoice amount: 1,500×₦100×0.95×0.97×0.02 = ₦2,764.50. That amount is absent. A ₦2,760 results from adding the earlier percentages; B ₦3,000 ignores them. No correct listed option; credit any attempt rather than forcing the nearest answer.",
+    "bookletKey": "B",
+    "bookletNote": "Use successive discounts and apply the cash discount to the net invoice amount: 1,500×₦100×0.95×0.97×0.02 = ₦2,764.50. That amount is absent. A ₦2,760 results from adding the earlier percentages; B ₦3,000 ignores them. No correct listed option; credit any attempt rather than forcing the nearest answer.",
     "teachKey": "commerce-2001-q21"
   },
   {
@@ -590,17 +632,26 @@
       "hinges on probabilities, assurance is based on possibilities",
       "is about indemnity, assurance is about life in the future"
     ],
-    "answer": 2,
+    "answer": 3,
     "printedKey": "C",
-    "explanation": "The conventional distinction is uncertain-loss insurance versus assurance of a certain event such as death, with uncertain timing. “Possibilities” is not the same as certainty.",
+    "explanation": "D is the best offered traditional distinction: non-life indemnity insurance compensates insured loss, while life assurance provides an agreed life-related benefit. C’s probability/possibility contrast does not express that distinction.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high",
+    "reviewSources": [
+      {
+        "url": "https://www.abi.org.uk/policy-and-guidance/insurance/health-protection-insurance/protection-insurance/whole-of-life-cover",
+        "title": "Whole of life cover — Association of British Insurers"
+      }
+    ],
+    "keyVerdict": "corrected",
     "keyAnswer": "C",
-    "answerNote": "The booklet and MySchool mark C, but assurance is traditionally distinguished by certainty of the event, not merely possibility. D is a plausible broad description, not a complete universal definition. Retain C provisionally; explain the correct distinction.",
+    "answerNote": "C falsely contrasts probabilities with possibilities; a possibility is not the certainty of death used in the traditional life-assurance distinction. D is the strongest offered school-level answer: indemnity for insured non-life loss versus life assurance paying an agreed benefit. Its scope must be qualified, rather than teaching that every modern product called insurance is indemnity.",
+    "bookletKey": "C",
+    "bookletNote": "C falsely contrasts probabilities with possibilities; a possibility is not the certainty of death used in the traditional life-assurance distinction. D is the strongest offered school-level answer: indemnity for insured non-life loss versus life assurance paying an agreed benefit. Its scope must be qualified, rather than teaching that every modern product called insurance is indemnity.",
     "teachKey": "commerce-2001-q27"
   },
   {
@@ -615,17 +666,34 @@
       "bill of lading, consular invoice and insurance certificate",
       "consular invoice, FOB certificate and bill of lading"
     ],
-    "answer": 2,
+    "answer": 0,
     "printedKey": "C",
-    "explanation": "A documentary bill is supported by documents relating to the goods, normally including an invoice, transport document and insurance evidence.",
+    "explanation": "A is the standard documentary-bill set: the sales/commercial invoice, bill of lading and insurance certificate. A consular invoice may additionally be required for particular destinations, but it is not the normal generic invoice named in this classroom set.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high for single-best normal set",
+    "reviewSources": [
+      {
+        "url": "https://www.merriam-webster.com/dictionary/documentary%20bill",
+        "title": "Documentary bill — Merriam-Webster"
+      },
+      {
+        "url": "https://www.trade.gov/common-export-documents",
+        "title": "Common Export Documents — International Trade Administration"
+      },
+      {
+        "url": "https://www.trade.gov/documentary-collections",
+        "title": "Documentary Collections — International Trade Administration"
+      }
+    ],
+    "keyVerdict": "corrected",
     "keyAnswer": "C",
-    "answerNote": "A is the ordinary documentary-bill set, but a consular invoice in C can genuinely be required for some export markets. The booklet gives C; MySchool gives D. Retain C pending review rather than label the consular-invoice set unconditionally false.",
+    "answerNote": "The qualifier normally selects the ordinary commercial/sales invoice, transport/title document and insurance set. A is that conventional set. A consular invoice can be a legitimate additional or specially certified document in particular markets; that does not make C the better generic NORMAL set. Do not teach that consular invoices are always invalid. Correct the supplied C to A as a best-answer correction, not an assertion that C can never accompany a bill.",
+    "bookletKey": "C",
+    "bookletNote": "The qualifier normally selects the ordinary commercial/sales invoice, transport/title document and insurance set. A is that conventional set. A consular invoice can be a legitimate additional or specially certified document in particular markets; that does not make C the better generic NORMAL set. Do not teach that consular invoices are always invalid. Correct the supplied C to A as a best-answer correction, not an assertion that C can never accompany a bill.",
     "teachKey": "commerce-2001-q28"
   },
   {
@@ -747,15 +815,27 @@
     ],
     "answer": 2,
     "printedKey": "C",
-    "explanation": "Investors consider expected dividends and changes in share value, but the offered “capital gain” and “capital appreciation” are closely related and market sentiment also affects price.",
+    "explanation": "C, capital appreciation, is the intended paired return with dividends. Appreciation is an increase in share value; a capital gain is normally the profit realized on sale. Market sentiment also affects price, but that broader fact does not make every option equally intended here.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "C",
-    "answerNote": "Booklet and MySchool select C. B (capital gain) is closely related to capital appreciation, while market psychology affects market price. Review the wording and near-synonymous options before finalising accepted answers.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high for intended exam answer; medium for broad valuation wording",
+    "reviewSources": [
+      {
+        "url": "https://www.investor.gov/introduction-investing/investing-basics/investment-products/stocks",
+        "title": "Stocks — FAQs | Investor.gov"
+      },
+      {
+        "url": "https://www.investor.gov/introduction-investing/investing-basics/glossary/capital-gain",
+        "title": "Capital Gain | Investor.gov"
+      },
+      {
+        "url": "https://myschool.ng/classroom/commerce/2161",
+        "title": "The main factors that determine the value of a sto...-Commerce - Myschool"
+      }
+    ],
     "teachKey": "commerce-2001-q34"
   },
   {
@@ -772,15 +852,29 @@
     ],
     "answer": 3,
     "printedKey": "D",
-    "explanation": "The Second-tier Securities Market was intended to widen access to capital-market finance; assisting companies to raise capital is the direct mechanism.",
+    "explanation": "C and D both answer the unqualified objective question: the securities market channels investment into companies and helps them raise capital. A and B confuse securities-market finance with foreign-exchange policy.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://nou.edu.ng/coursewarecontent/BFN304.pdf",
+        "title": "BFN304 — Financial Systems"
+      },
+      {
+        "url": "https://myschool.ng/classroom/commerce/2162",
+        "title": "One of the main objectives of the Second-tier Secu...-Commerce - Myschool"
+      }
+    ],
+    "alsoAccept": [
+      2
+    ],
+    "keyVerdict": "multiple",
     "keyAnswer": "D",
-    "answerNote": "The booklet and MySchool select D (attract investment flow), but C directly states the company-financing objective of the Second-tier Securities Market. Retain D provisionally; do not confuse this market with the Second-tier Foreign Exchange Market.",
+    "answerNote": "The unqualified stem asks for one of the objectives of a securities market. Assisting companies to raise capital (C) and attracting investment flow (D) are both direct sides of that market’s financing function, not answers to different unrelated topics. A/B concern foreign exchange and are wrong for the securities market. Keep D primary as the supplied answer and accept C as a genuine additional objective. The retrieved university source documents capital-market intermediation generally; it is not represented as a newly found original SSM founding instrument. The original exam portal supplies direct corroboration that D was intended.",
     "teachKey": "commerce-2001-q35"
   },
   {
@@ -1007,15 +1101,26 @@
     ],
     "answer": 2,
     "printedKey": "C",
-    "explanation": "Functional organization groups work by function, such as finance, marketing and production. Several options describe that idea in overlapping words.",
+    "explanation": "Functional organization groups related activities and the staff performing them into functions such as production, marketing and finance. A, C and D express that same grouping principle, so all three are accepted. B’s grouping of departments is less precise than the formation of functional departments from related work.",
     "sourceFile": "Commerce 2001.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://openstax.org/books/introduction-business/pages/7-1-building-organizational-structures",
+        "title": "7.1 Building Organizational Structures — OpenStax"
+      }
+    ],
+    "alsoAccept": [
+      0,
+      3
+    ],
+    "keyVerdict": "multiple",
     "keyAnswer": "C",
-    "answerNote": "The booklet marks C; MySchool marks D. A and D are near-identical descriptions, and C states the same grouping principle by activities. This needs a multiple/overlapping-options decision; retain C provisionally.",
+    "answerNote": "A and D are equivalent statements about grouping staff doing the same/similar functions; C states the same principle by grouping activities. These directly answer the definition, rather than merely naming related benefits. B groups already formed departments and is a less precise description of functional departmentalization; do not add it merely by broad inference. Preserve C as primary and additionally accept A/D.",
     "teachKey": "commerce-2001-q46"
   },
   {

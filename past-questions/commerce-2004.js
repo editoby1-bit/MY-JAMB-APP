@@ -188,15 +188,19 @@
     ],
     "answer": 0,
     "printedKey": "A",
-    "explanation": "The supplied key gives persuasion. Promotion can inform, persuade and remind customers; the wording does not identify the market situation that would make one purpose universally the most important. This answer is retained provisionally for review.",
+    "explanation": "A, persuasion, is the intended single-best examination answer: promotion aims to influence customers to respond, commonly by buying. Informing, educating and reminding customers are also real promotional objectives; their relative importance varies by campaign.",
     "sourceFile": "Commerce 2004.pdf",
     "sourcePages": [
       1
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "A",
-    "answerNote": "The supplied key is retained provisionally. Promotion has informing and persuasive functions; the stem does not establish a universal most-important objective. MySchool gives C; supplied key A is held for joint review.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium under single-best/booklet rule",
+    "reviewSources": [
+      {
+        "url": "https://openstax.org/books/introduction-business/pages/12-5-promotion-strategy",
+        "title": "12.5 Promotion Strategy — OpenStax"
+      }
+    ],
     "teachKey": "commerce-2004-q9"
   },
   {
@@ -672,17 +676,30 @@
       "diversification",
       "consolidation"
     ],
-    "answer": 2,
+    "answer": 3,
     "printedKey": "C",
-    "explanation": "The supplied key gives diversification, but closing inactive locations normally suggests consolidation or retrenchment, whereas diversification expands the range of business activities. The supplied answer is retained provisionally pending a decision on the intended strategy term.",
+    "explanation": "D, consolidation, is the best offered answer. Closing inactive locations concentrates operations and resources into the remaining business. Diversification means moving into additional activities or markets, rather than withdrawing from inactive locations.",
     "sourceFile": "Commerce 2004.pdf",
     "sourcePages": [
       2
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "high",
+    "reviewSources": [
+      {
+        "url": "https://myschool.ng/classroom/commerce/62241",
+        "title": "The strategy adopted by a firm that ceases to operate — MySchool 2020 repeated item"
+      },
+      {
+        "url": "https://www.buske.com/blog/warehouse-consolidation",
+        "title": "Warehouse Consolidation: Benefits, Challenges & Best Practices — Buske Logistics"
+      }
+    ],
+    "keyVerdict": "corrected",
     "keyAnswer": "C",
-    "answerNote": "The supplied key is retained provisionally. Closing inactive locations suggests consolidation/retrenchment rather than diversification. Both supplied and portal keys give C, but the intended strategic term needs joint review.",
+    "answerNote": "Closing inactive locations concentrates the remaining operation; of the offered terms this is consolidation, D. Diversification adds new product or market activities and does not describe shutting locations. The newer MySchool occurrence actually marks consolidation, with reordered A mapping to our D. Both the earlier portal C and booklet C therefore should not block a clear conceptual correction. Distinguish retrenchment/rationalization as related textbook labels; neither is offered.",
+    "bookletKey": "C",
+    "bookletNote": "Closing inactive locations concentrates the remaining operation; of the offered terms this is consolidation, D. Diversification adds new product or market activities and does not describe shutting locations. The newer MySchool occurrence actually marks consolidation, with reordered A mapping to our D. Both the earlier portal C and booklet C therefore should not block a clear conceptual correction. Distinguish retrenchment/rationalization as related textbook labels; neither is offered.",
     "teachKey": "commerce-2004-q31"
   },
   {
@@ -1095,15 +1112,19 @@
     ],
     "answer": 3,
     "printedKey": "D",
-    "explanation": "The supplied key gives conformity to buyers' purpose, while the online portal gives conformity to description. Merchantable quality concerns saleable, reasonably acceptable goods fit for ordinary use; matching description and fitness for a particular purpose are related but legally distinct conditions. The supplied answer is retained provisionally.",
+    "explanation": "D is the best offered answer when buyers’ purpose means the ordinary use for which that kind of goods is bought. Merely matching a description, as in A, does not establish merchantable quality.",
     "sourceFile": "Commerce 2004.pdf",
     "sourcePages": [
       3
     ],
-    "reviewPending": true,
-    "keyVerdict": "pending",
-    "keyAnswer": "D",
-    "answerNote": "The supplied key is retained provisionally. Merchantable quality, conformity to description and fitness for a particular purpose are related but distinct. Booklet D and MySchool A differ; no automatic alternative acceptance.",
+    "reviewCompleted": "2026-10-29",
+    "reviewConfidence": "medium-high",
+    "reviewSources": [
+      {
+        "url": "https://www.legislation.gov.uk/ukpga/1979/54/section/14/enacted",
+        "title": "Sale of Goods Act 1979, original section 14(6)"
+      }
+    ],
     "teachKey": "commerce-2004-q50"
   }
 ]);

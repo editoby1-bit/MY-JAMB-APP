@@ -78,17 +78,16 @@
     return out;
   }
 
-  // A few past questions officially accept more than one option (the key
-  // lists e.g. "A/D"); those carry `alsoAccept`. Always score through this.
+  // Reviewed questions with several accepted options carry `alsoAccept`.
+  // Always score through this, including the app's defective-question policy.
   function isCorrect(q, a) {
-    // No option is right and the key gives none: any attempt is credited,
-    // as JAMB normally does for a faulty question.
+    // App policy: when no offered option is correct, credit any attempt.
     if (q.keyVerdict === 'noanswer') return a !== null && a !== undefined;
     return a !== null && a !== undefined &&
       (a === q.answer || (Array.isArray(q.alsoAccept) && q.alsoAccept.includes(a)));
   }
 
-  // Past questions whose official answer key we checked and found wanting
+  // Past questions whose supplied answer key we checked and found wanting
   // carry keyVerdict ('corrected' | 'multiple' | 'none'), keyAnswer (the
   // key's letter) and answerNote (why). Shown under the explanation.
   // inTeach: already inside the Teach Me panel, so no pointer back to it.
@@ -1845,10 +1844,13 @@
       const items = byYear[y].map(q => {
         const e = bookletEntry(q, subject);
         const bi = e.k.charCodeAt(0) - 65;
-        const opts = q.options.map((o, j) => `<span class="${isCorrect(q, j) ? 'bk-right' : j === bi ? 'bk-wrong' : ''}">${L(j)}. ${mathHtml(o)}</span>`).join('');
+        const noCorrect = q.keyVerdict === 'none' || q.keyVerdict === 'noanswer';
+        // Credit for attempting a defective item is not factual correctness.
+        const opts = q.options.map((o, j) => `<span class="${!noCorrect && isCorrect(q, j) ? 'bk-right' : j === bi ? 'bk-wrong' : ''}">${L(j)}. ${mathHtml(o)}</span>`).join('');
+        const reviewed = noCorrect ? '<strong>No fully correct option</strong>' : `Correct: <b class="bk-right">${[q.answer, ...(q.alsoAccept || [])].map(L).join(' or ')}</b>`;
         return `<li class="trap-item"><div class="trap-q">${mathHtml(q.question.length > 160 ? q.question.slice(0, 160) + '…' : q.question)}</div>`
           + `<div class="trap-opts">${opts}</div>`
-          + `<div class="bk-verdict">Booklet answer: <b class="bk-wrong">${escHtml(e.k)}</b> · Correct: <b class="bk-right">${[q.answer, ...(q.alsoAccept || [])].map(L).join(' or ')}</b></div>`
+          + `<div class="bk-verdict">Booklet answer: <b class="bk-wrong">${escHtml(e.k)}</b> · ${reviewed}</div>`
           + (e.note ? `<div class="bk-note">${mathHtml(e.note)}</div>` : '') + `</li>`;
       }).join('');
       return `<details class="kp-topic"><summary>JAMB ${escHtml(String(y))} <span class="kp-count">${byYear[y].length} wrong in booklets</span></summary><div class="topic-body"><ul class="trap-list">${items}</ul></div></details>`;
