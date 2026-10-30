@@ -133,7 +133,7 @@
       const groupOf = new Map();
       const reviewed = window.TEACH_TOPICS?.[subject]?.repeats || {};
       arr.forEach(q => {
-        if (!q || !q.question || !q.year) return;
+        if (!q || q.administrative || !q.question || !q.year) return;
         const variant = reviewed[q.id];
         const t = variant ? 'reviewed:' + variant : repNorm(q.question) + '|' + (q.passage ? repNorm(q.passage).slice(0, 80) : '');
         const opts = new Set((q.options || []).map(repNorm));

@@ -1,4 +1,4 @@
-// Import and phone-browser check for the supplied Commerce 2001–2012 papers.
+// Import and phone-browser check for the supplied Commerce 2001–2016 papers.
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..');
 const context = vm.createContext({ window: {} });
 const load = file => vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
 load('questions.js');
-for (let year = 2001; year <= 2012; year++) load(`past-questions/commerce-${year}.js`);
+for (let year = 2001; year <= 2016; year++) load(`past-questions/commerce-${year}.js`);
 load('teach/commerce.js'); load('teach/commerce-topics.js');
 const bank = JSON.parse(vm.runInContext('JSON.stringify(QUESTION_BANK.commerce)', context));
 const teach = context.window.TEACH_ME.commerce;
@@ -22,9 +22,10 @@ const printed = {
 };
 Object.assign(printed, {"2005": ["A", "D", "C", "D", "D", "A", "D", "A", "B", "C", "C", "B", "C", "A", "C", "B", "B", "A", "C", "B", "B", "B", "D", "A", "C", "C", "B", "C", "D", "C", "B", "C", "B", "A", "B", "A", "D", "B", "C/D", "D", "B", "A", "A", "B", "A", "B", "A", "A", "C", "D"], "2006": ["D", "B", "C", "C", "A", "A", "B", "A", "C", "D", "C", "D", "C", "A", "A", "D", "D", "D", "A", "B", "A", "D", "C", "B", "D", "A", "C", "D", "A", "C", "A", "B", "B", "C", "D", "A", "D", "B", "C", "D", "D", "D", "A", "C", "D", "B", "B", "D", "C", "C"], "2007": ["D", "D", "C", "D", "A", "C", "A", "C", "D", "D", "B", "D", "C", "A", "B", "D", "B", "C", "B", "C", "A", "C", "A", "B", "C", "A", "C", "B", "A", "B", "A", "B", "A", "D", "B", "D", "C", "B", "A", "B", "C", "A", "D", "D", "A", "D", "B", "A", "C", "B"], "2008": ["A", "D", "B", "B", "D", "B", "A", "C", "A", "A", "A", "B", "B", "C", "B", "C", "C", "C", "A", "A", "B", "B", "C", "B", "B", "C", "B", "B", "C", "C", "C", "C", "C", "D", "D", "A", "B", "A", "B", "B", "B", "C", "C", "D", "C", "C", "A", "C", "B", "C"]});
 Object.assign(printed, {"2009": ["C", "B", "C", "A", "C", "D", "A", "C", "D", "A", "D", "B", "A", "C", "B", "C", "C", "B", "A", "B", "B", "B", "A", "B", "D", "B", "B", "C", "A", "A", "A", "D", "C", "B", "B", "A", "D", "D", "D", "A", "D", "B", "C", "C", "D", "C", "A", "D", "C", "D"], "2010": ["*", "B", "A", "B", "C", "C", "A", "C", "D", "A", "C", "B", "C", "C", "C", "D", "C", "A", "C", "C", "B", "D", "D", "B", "C", "B", "C", "A", "A", "D", "D", "C", "B", "D", "C", "A", "B", "D", "A", "A", "C", "D", "C", "A", "D", "A", "C", "C", "D", "D"], "2011": ["*", "C", "D", "C", "B", "C", "D", "A", "A", "B", "*", "C", "B", "A", "A", "B", "B", "A", "A", "A", "B", "C", "D", "A", "D", "A", "B", "D", "A", "C", "C", "D", "D", "C", "C", "A", "D", "C", "B", "B", "C", "A", "C", "B", "D", "A", "D", "C", "C", "A"], "2012": ["*", "B", "B", "C", "C", "B", "A", "D", "D", "D", "B", "D", "B", "C", "D", "A", "A", "B", "D", "B", "C", "D", "C", "D", "C", "D", "A", "B", "B", "D", "B", "C", "D", "D", "A", "B", "D", "B", "C", "D", "A", "B", "B", "A", "C", "A", "B", "C", "A", "C"]});
-assert.equal(bank.length, 600);
-assert.equal(new Set(bank.map(q => q.id)).size, 600);
-for (let year = 2001; year <= 2012; year++) {
+Object.assign(printed, {"2013": ["*", "A", "C", "C", "D", "A", "C", "C", "B", "C", "B", "B", "D", "B", "B", "C", "D", "A", "D", "D", "B", "A", "C", "B", "D", "D", "A", "B", "A", "C", "B", "A", "B", "D", "D", "C", "B", "C", "C", "D", "C", "D", "B", "A", "B", "D", "C", "C", "A", "C"], "2014": ["*", "B", "B", "D", "C", "A", "D", "B", "D", "A", "A", "A", "C", "D", "A", "D", "A", "C", "D", "A", "B", "D", "B", "C", "C", "A", "C", "A", "D", "A", "C", "D", "D", "A", "D", "B", "A", "A", "C", "B", "B", "D", "B", "B", "B", "A", "A", "A", "D", "A"], "2015": ["*", "D", "C", "A", "D", "D", "A", "C", "A", "C", "D", "C", "A", "D", "B", "A", "D", "C", "C", "C", "D", "D", "C", "A", "C", "B", "D", "B", "B", "C", "D", "A", "A", "A", "C", "D", "B", "B", "B", "D", "A", "D", "A", "C", "B", "C", "C", "B", "C", "D"], "2016": ["*", "B", "A", "C", "D", "C", "D", "A", "B", "C", "C", "A", "B", "D", "C", "A", "A", "B", "C", "A", "D", "B", "A", "C", "B", "C", "A", "A", "D", "C", "B", "D", "A", "D", "B", "A", "B", "C", "B/D", "D", "A", "A", "D", "D", "C", "C", "B", "D", "C", "C"]});
+assert.equal(bank.length, 800);
+assert.equal(new Set(bank.map(q => q.id)).size, 800);
+for (let year = 2001; year <= 2016; year++) {
   const qs = bank.filter(q => q.year === year);
   assert.equal(printed[year].length, 50);
   assert.equal(qs.length, 50);
@@ -64,7 +65,7 @@ for (const [id, group] of Object.entries(topics.repeats || {})) {
   const rows = groupRows.get(group) || []; rows.push(q); groupRows.set(group, rows);
 }
 for (const rows of groupRows.values()) assert(new Set(rows.map(q => q.year)).size >= 2);
-assert.equal(manifest.subjects.commerce.count, 600);
+assert.equal(manifest.subjects.commerce.count, 800);
 assert.equal(bank.filter(q => q.reviewPending).length, 0);
 assert.equal(bank.filter(q => q.year <= 2004 && q.keyVerdict === 'corrected').length, 21);
 assert.equal(bank.filter(q => q.year <= 2004 && q.keyVerdict === 'multiple').length, 7);
@@ -79,7 +80,7 @@ assert(bank.find(q => q.id === 'commerce-2001-q21').answerNote.includes('2,764.5
 assert.equal(manifest.subjects.commerce.tricky.multi, bank.filter(q => q.alsoAccept?.length).length);
 assert.equal(manifest.subjects.commerce.tricky.none, bank.filter(q => !q.administrative && ['none', 'noanswer'].includes(q.keyVerdict)).length);
 assert.equal(manifest.subjects.commerce.gameCount, bank.filter(q => !q.reviewPending && !q.alsoAccept && !['none', 'noanswer'].includes(q.keyVerdict)).length);
-console.log(`PASS Commerce data: 600 source records, keys, prepared teaching, ${Object.keys(topics.lessons).length} lessons and reviewed repeat groups`);
+console.log(`PASS Commerce data: 800 source records, keys, prepared teaching, ${Object.keys(topics.lessons).length} lessons and reviewed repeat groups`);
 
 (async () => {
   const browser = await chromium.launch({ executablePath: '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
@@ -94,7 +95,7 @@ console.log(`PASS Commerce data: 600 source records, keys, prepared teaching, ${
     await page.locator('.config-btn[data-group="session"][data-value="single"]').click();
     await page.locator('.config-btn[data-group="mode"][data-value="practice"]').click();
     await page.locator('#subjectSelect').selectOption('commerce');
-    for (let year = Number(process.env.COMMERCE_BROWSER_FROM || 2001); !process.env.COMMERCE_HUBS_ONLY && year <= Number(process.env.COMMERCE_BROWSER_TO || 2012); year++) {
+    for (let year = Number(process.env.COMMERCE_BROWSER_FROM || 2001); !process.env.COMMERCE_HUBS_ONLY && year <= Number(process.env.COMMERCE_BROWSER_TO || 2016); year++) {
       await page.evaluate(() => localStorage.removeItem('jamb-free-v1'));
       await page.locator('#yearSelect').selectOption(String(year));
       await page.locator('#questionCountSelect').selectOption('all');
@@ -105,6 +106,7 @@ console.log(`PASS Commerce data: 600 source records, keys, prepared teaching, ${
         const q = qs[i];
         assert.equal((await page.locator('#questionText').innerText()).replace(/\s+/g, ' ').trim(), q.question.replace(/\s+/g, ' ').trim());
         assert.equal(await page.locator('#optionsList .option-btn').count(), q.options.length);
+        if (q.administrative) assert.equal(await page.locator('.repeat-note:visible').count(), 0, 'Booklet instructions are not repeated Commerce knowledge');
         if (q.diagram) {
           assert(await page.locator('#diagramBox').isVisible());
           await page.waitForFunction(() => {
@@ -165,8 +167,8 @@ console.log(`PASS Commerce data: 600 source records, keys, prepared teaching, ${
     await ctx.setOffline(true); await page.reload();
     await page.waitForFunction(() => window.JambContent?.manifest);
     assert(await page.evaluate(() => JambContent.run('Offline Commerce', () => JambContent.ensure(['commerce']))));
-    assert.equal(await page.evaluate(() => QUESTION_BANK.commerce.length), 600);
-    assert.equal(await page.evaluate(() => Object.keys(window.TEACH_ME.commerce).length), 600);
+    assert.equal(await page.evaluate(() => QUESTION_BANK.commerce.length), 800);
+    assert.equal(await page.evaluate(() => Object.keys(window.TEACH_ME.commerce).length), 800);
     assert.equal(await page.evaluate(() => Object.keys(window.TEACH_TOPICS.commerce.lessons).length), Object.keys(topics.lessons).length);
     assert.deepEqual(errors, []);
     console.log('PASS Commerce study hubs and offline content preservation');

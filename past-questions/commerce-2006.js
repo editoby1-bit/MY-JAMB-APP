@@ -575,7 +575,7 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "Digital computers run numerical weather-prediction models, which is the intended answer B. A mainframe is also a digital computer and can run forecasting computations, so C is not an exclusive alternative category. The question mixes classification schemes.",
+    "explanation": "B digital and C mainframe computers are documented weather-prediction configurations. A hybrid analog-digital system is also a defensible meteorological-computing example: the AMS-published 1967 abstract describes atmospheric-model simulation. Accept A, B and C under the broad can-be-used wording, retaining this paper’s printed B. This does not claim hybrid machines are the standard operational forecasting platform today or that the categories are mutually exclusive.",
     "sourceFile": "Commerce 2006.pdf",
     "sourcePages": [
       2
@@ -583,10 +583,11 @@
     "reviewCompleted": "2026-10-29",
     "keyVerdict": "multiple",
     "alsoAccept": [
+      0,
       2
     ],
     "keyAnswer": "B",
-    "answerNote": "Digital computers run numerical weather-prediction models, which is the intended answer B. A mainframe is also a digital computer and can run forecasting computations, so C is not an exclusive alternative category. The question mixes classification schemes.",
+    "answerNote": "B digital and C mainframe computers are documented weather-prediction configurations. A hybrid analog-digital system is also a defensible meteorological-computing example: the AMS-published 1967 abstract describes atmospheric-model simulation. Accept A, B and C under the broad can-be-used wording, retaining this paper’s printed B. This does not claim hybrid machines are the standard operational forecasting platform today or that the categories are mutually exclusive.",
     "reviewSources": [
       {
         "url": "https://www.metoffice.gov.uk/research/approach/modelling-systems/unified-model/weather-forecasting",
@@ -675,12 +676,18 @@
     ],
     "answer": 3,
     "printedKey": "D",
-    "explanation": "Hire purchase spreads payments and makes goods accessible to customers unable to pay the entire price immediately, which can increase the seller's turnover. Instalments describe the mechanism rather than the commercial benefit sought.",
+    "explanation": "Hire purchase can increase the seller’s turnover and attract customer patronage by allowing buyers to spread payments. Both D and B directly explain the benefit in this unrestricted wording. The seller still faces collection costs and default risk; increased sales do not guarantee higher net profit.",
     "sourceFile": "Commerce 2006.pdf",
     "sourcePages": [
       2
     ],
     "reviewCompleted": "2026-10-29",
+    "alsoAccept": [
+      1
+    ],
+    "keyVerdict": "multiple",
+    "keyAnswer": "D",
+    "answerNote": "Hire purchase can increase the seller’s turnover and attract customer patronage by allowing buyers to spread payments. Both D and B directly explain the benefit in this unrestricted wording. The seller still faces collection costs and default risk; increased sales do not guarantee higher net profit.",
     "teachKey": "commerce-2006-q28"
   },
   {

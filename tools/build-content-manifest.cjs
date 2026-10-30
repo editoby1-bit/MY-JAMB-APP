@@ -28,7 +28,7 @@ for (const subject of subjects) {
   const norm = text => String(text || '').toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]/g, '');
   const byText = new Map();
   for (const q of flat) {
-    if (!q.question || !q.year) continue;
+    if (q.administrative || !q.question || !q.year) continue;
     const variant = study.repeats[q.id];
     const key = variant ? 'reviewed:' + variant : norm(q.question) + '|' + (q.passage ? norm(q.passage).slice(0, 80) : '');
     const options = new Set((q.options || []).map(norm));

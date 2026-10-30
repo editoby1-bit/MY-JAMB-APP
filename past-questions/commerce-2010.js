@@ -792,13 +792,18 @@
     ],
     "answer": 1,
     "printedKey": "B",
-    "explanation": "A minimum shareholder spread is part of the historical admission framework, making B the supplied answer. A maximum of 100 shareholders states the opposite. Historical public-float percentages require the precise market rules and date rather than importing current listing requirements.",
+    "explanation": "B, a minimum of 100 shareholders, and D, making 10% of equity available for public subscription, are both recognized historical Second-tier Securities Market admission requirements in this school framework. The same question’s later compiled key explicitly lists B/D. Retain this paper’s original printed B as provenance and accept D as well. Do not treat these historical listing rules as unchanged present-day exchange requirements.",
     "sourceFile": "Commerce 2010.pdf",
     "sourcePages": [
       1
     ],
     "reviewCompleted": "2026-10-29",
-    "answerNote": "A minimum shareholder spread is part of the historical admission framework, making B the supplied answer. A maximum of 100 shareholders states the opposite. Historical public-float percentages require the precise market rules and date rather than importing current listing requirements.",
+    "answerNote": "B, a minimum of 100 shareholders, and D, making 10% of equity available for public subscription, are both recognized historical Second-tier Securities Market admission requirements in this school framework. The same question’s later compiled key explicitly lists B/D. Retain this paper’s original printed B as provenance and accept D as well. Do not treat these historical listing rules as unchanged present-day exchange requirements.",
+    "alsoAccept": [
+      3
+    ],
+    "keyVerdict": "multiple",
+    "keyAnswer": "B",
     "teachKey": "commerce-2010-q33"
   },
   {
