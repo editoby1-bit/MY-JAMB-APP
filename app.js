@@ -633,6 +633,13 @@
     const subject = el.subjectSelect.value;
     const yearVal = el.yearSelect ? el.yearSelect.value : 'all';
     const countValue = el.questionCountSelect.value;
+    if (yearVal && yearVal.startsWith('keypoint-')) {
+      const topic = yearVal.slice(9);
+      const pool = keyPointPool(subject, topic);
+      const n = countValue === 'all' ? pool.length : Math.min(Number(countValue), pool.length);
+      const questions = groupAwarePick(pool, n).map(q => ({ ...q, sourceSubject: subject }));
+      return { questions, subjects: [subject], sessionLabel: `${fmt(subject)} · Topic practice`, subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } } };
+    }
     if (yearVal === 'repeated') {
       // Most-repeated first, in that order: the questions JAMB sets most often.
       const rep = mostRepeatedPool(subject);
@@ -1715,9 +1722,29 @@
       if (!paid && i >= KP_FREE_TOPICS) {
         return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
       }
-      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}</div></details>`;
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}${n ? `<div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice ${n} JAMB past question${n === 1 ? "" : "s"} on this topic →</button></div>` : ""}</div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
+    body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
+  }
+
+  // Reuse the existing practice session and its answer/explanation flow.
+  function keyPointPool(subject, topic) {
+    const mapping = window.TEACH_TOPICS?.[subject]?.of || {};
+    return (QUESTION_BANK[subject] || []).filter(q => !q.reviewPending && Array.isArray(q.options) && mapping[teachMeKey(q)] === topic);
+  }
+  function startKeyPointPractice(subject, topic) {
+    if (!keyPointPool(subject, topic).length) { showInfoToast('No mapped past questions are available for this lesson yet.'); return; }
+    closeKeyPoints();
+    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
+    document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
+    el.subjectSelect.value = subject;
+    populateYears();
+    const title = window.TEACH_TOPICS?.[subject]?.lessons?.[topic]?.title || 'This topic';
+    el.yearSelect.insertAdjacentHTML('beforeend', `<option value="keypoint-${escHtml(topic)}">📝 Topic practice: ${escHtml(title)}</option>`);
+    el.yearSelect.value = 'keypoint-' + topic;
+    if (el.questionCountSelect) el.questionCountSelect.value = 'all';
+    startSession();
   }
 
   /* ── Exam Traps: the genuinely tempting wrong options, by topic ──
