@@ -1746,7 +1746,9 @@
     el.subjectSelect.value = subject;
     populateYears();
     const title = window.TEACH_TOPICS?.[subject]?.lessons?.[topic]?.title || 'This topic';
-    el.yearSelect.insertAdjacentHTML('beforeend', `<option value="keypoint-${escHtml(topic)}">📝 Topic practice: ${escHtml(title)}</option>`);
+    // Use DOM APIs for option values: topic identifiers must not be HTML-encoded.
+    const topicOption = new Option('📝 Topic practice: ' + title, 'keypoint-' + topic);
+    el.yearSelect.add(topicOption);
     el.yearSelect.value = 'keypoint-' + topic;
     // Some subjects have no dated questions: make the topic selector visible anyway.
     el.yearField?.classList.remove('hidden');
