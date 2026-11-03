@@ -1711,8 +1711,13 @@
     const t = window.TEACH_TOPICS?.[subject];
     const body = document.getElementById('jambKeyPointsBody');
     if (!t) { body.innerHTML = '<p class="jqc-sub">No lessons for this subject yet.</p>'; return; }
+    // Count only usable, loaded past questions; mapping keys alone can include unavailable items.
     const counts = {};
-    Object.values(t.of || {}).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+    (QUESTION_BANK[subject] || []).forEach(q => {
+      if (q.reviewPending || !Array.isArray(q.options) || q.options.length < 2) return;
+      const id = t.of?.[teachMeKey(q)];
+      if (id && t.lessons[id]) counts[id] = (counts[id] || 0) + 1;
+    });
     const ids = Object.keys(t.lessons || {}).sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
     const paid = checkAccess();
     body.innerHTML = ids.map((id, i) => {
@@ -1731,7 +1736,7 @@
   // Reuse the existing practice session and its answer/explanation flow.
   function keyPointPool(subject, topic) {
     const mapping = window.TEACH_TOPICS?.[subject]?.of || {};
-    return (QUESTION_BANK[subject] || []).filter(q => !q.reviewPending && Array.isArray(q.options) && mapping[teachMeKey(q)] === topic);
+    return (QUESTION_BANK[subject] || []).filter(q => !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && mapping[teachMeKey(q)] === topic);
   }
   function startKeyPointPractice(subject, topic) {
     if (!keyPointPool(subject, topic).length) { showInfoToast('No mapped past questions are available for this lesson yet.'); return; }
@@ -1743,6 +1748,8 @@
     const title = window.TEACH_TOPICS?.[subject]?.lessons?.[topic]?.title || 'This topic';
     el.yearSelect.insertAdjacentHTML('beforeend', `<option value="keypoint-${escHtml(topic)}">📝 Topic practice: ${escHtml(title)}</option>`);
     el.yearSelect.value = 'keypoint-' + topic;
+    // Some subjects have no dated questions: make the topic selector visible anyway.
+    el.yearField?.classList.remove('hidden');
     if (el.questionCountSelect) el.questionCountSelect.value = 'all';
     startSession();
   }
