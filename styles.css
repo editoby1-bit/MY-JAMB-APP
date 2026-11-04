@@ -1959,3 +1959,5 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .kp-inline-diagram{max-width:100%;margin:12px 0 18px;padding:10px;border:1px solid #dce5ee;border-radius:12px;background:#fff;overflow-x:auto;text-align:center}
 .kp-inline-diagram img,.kp-inline-diagram svg{display:block;max-width:100%;height:auto;margin:0 auto;object-fit:contain}
 .kp-inline-diagram table{max-width:100%;margin:0 auto}
+
+.kp-inline-table{overflow-x:auto;text-align:left}.kp-inline-table table{width:100%;border-collapse:collapse;font-size:15px}.kp-inline-table th,.kp-inline-table td{border:1px solid #ccd6e1;padding:9px 12px;text-align:left}.kp-inline-table th{background:#eaf1fa;font-weight:700}.kp-inline-question .kp-inline-table{margin:14px 0}
