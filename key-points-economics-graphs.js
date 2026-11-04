@@ -18,7 +18,7 @@ const line=(arr,color)=>'<polyline fill="none" stroke="'+color+'" stroke-width="
 const text=(x,y,value,color="#263e5d")=>'<text x="'+x+'" y="'+y+'" font-size="12" font-weight="700" fill="'+color+'">'+value+'</text>';
 const dot=(x,y,label,dx=9,dy=-9)=>{const [px,py]=xy([x,y]);return '<circle cx="'+px+'" cy="'+py+'" r="4.5" fill="white" stroke="#1a416c" stroke-width="2"/>'+text(px+dx,py+dy,label);};
 const guide=(x,y)=>{const [px,py]=xy([x,y]);return '<path d="M'+px+' '+py+' V216 M'+px+' '+py+' H44" stroke="#7489a2" stroke-width="1.3" stroke-dasharray="5 4" fill="none"/>';};
-let extraNote="";if(title==="Production possibility frontier")extraNote=" A: efficient (on PPC). B: underutilised resources (inside). C: unattainable with current resources and technology (outside).";if(title==="Elastic and inelastic demand")extraNote=" At their common price–quantity point, D₁ (blue, flatter) is relatively more elastic and D₂ (orange, steeper) is relatively less elastic. Slope alone does not establish elasticity at different points; elasticity uses percentage changes.";const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anchor="middle" font-size="10" fill="#66748b">'+n+'</text><text x="35" y="'+(220-n*1.75)+'" text-anchor="end" font-size="10" fill="#66748b">'+n+'</text>').join('');
+let extraNote="";if(title==="Production possibility frontier")extraNote="  A — ON THE CURVE: efficient production. B — INSIDE THE CURVE: underutilised resources. C — OUTSIDE THE CURVE: currently unattainable production.";if(title==="Elastic and inelastic demand")extraNote=" At their common price–quantity point, D₁ (blue, flatter) is relatively more elastic and D₂ (orange, steeper) is relatively less elastic. Slope alone does not establish elasticity at different points; elasticity uses percentage changes.";const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anchor="middle" font-size="10" fill="#66748b">'+n+'</text><text x="35" y="'+(220-n*1.75)+'" text-anchor="end" font-size="10" fill="#66748b">'+n+'</text>').join('');
 let annotations="";
 if(title==="Production possibility frontier"){
 annotations+=dot(40,84,"A",-17,-12)+dot(35,38,"B",9,18)+dot(77,85,"C",9,-10);
@@ -60,7 +60,7 @@ annotations+=text(224,109,"P = AR = MR");
 if(title==="Monopoly: AR and MR"){
 annotations+=text(265,166,"AR")+text(165,183,"MR","#b26b17");
 }
-return '<figure class="econ-figure"><figcaption>'+title+'</figcaption><svg viewBox="0 0 320 260" role="img" aria-label="'+title+'. '+note+'"><path d="M44 30 V216 H300" fill="none" stroke="#58677d" stroke-width="1.7"/>'+ticks+line(first,"#1763a6")+(second?line(second,"#d28a36"):"")+annotations+'<text x="170" y="250" text-anchor="middle" font-size="12" fill="#253e60">'+xlab+'</text><text x="6" y="16" font-size="12" fill="#253e60">'+ylab+'</text></svg><p>'+note+'</p></figure>';
+return '<figure class="econ-figure"><figcaption>'+title+'</figcaption><svg viewBox="0 0 320 260" role="img" aria-label="'+title+'. '+note+'"><path d="M44 30 V216 H300" fill="none" stroke="#58677d" stroke-width="1.7"/>'+ticks+line(first,"#1763a6")+(second?line(second,"#d28a36"):"")+annotations+'<text x="170" y="250" text-anchor="middle" font-size="12" fill="#253e60">'+xlab+'</text><text x="6" y="16" font-size="12" fill="#253e60">'+ylab+'</text></svg><p>'+note+extraNote+'</p></figure>';
 }
 window.renderEconomicsGraphs=function(id){
 const host=document.getElementById("economics-visuals"),lesson=document.getElementById("newText");
