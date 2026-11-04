@@ -75,6 +75,12 @@ host.replaceChildren();
 if(!C[id])return;
 const figures=C[id].map(spec=>{const el=document.createElement("div");el.className="econ-inline-visual";el.innerHTML=graph(spec);return el;});
 const visuals=[];
+if(id==="production"){
+const t=document.createElement("div");t.className="econ-inline-visual econ-data-tables";
+const rows=[[0,0,"—","—"],[1,8,8,"8.0"],[2,20,12,"10.0"],[3,33,13,"11.0"],[4,42,9,"10.5"],[5,48,6,"9.6"],[6,48,0,"8.0"]];
+t.innerHTML='<h4>Worked production schedule — fixed farm</h4><div style="overflow-x:auto"><table style="min-width:460px"><thead><tr><th>Workers (L)</th><th>Total product (TP), bags</th><th>Marginal product (MP), extra bags</th><th>Average product (AP), bags/worker</th></tr></thead><tbody>'+rows.map((r,i)=>'<tr'+(i===3?' style="background:#edf5ff"':i===4?' style="background:#fff4e6"':i===6?' style="background:#f0f6f2"':'')+'>'+r.map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><p><strong>How to calculate:</strong> MP = current TP − previous TP (because labour rises by one worker). AP = TP ÷ workers. For worker 4, MP = 42 − 33 = <strong>9 bags</strong>, while AP = 42 ÷ 4 = <strong>10.5 bags per worker</strong>.</p><p><strong>Key rows:</strong> Worker 3 has the highest MP (13) and AP (11). At worker 4, MP falls to 9: diminishing marginal returns begin. At worker 6, MP = 0, so TP stays at 48 bags.</p>';
+visuals.push({section:"WORKED EXAMPLE — WORKERS ON A FIXED FARM",element:t});
+}
 if(id==="tools-analysis"){
 const table=document.createElement("div");table.className="econ-inline-visual econ-data-tables";
 table.innerHTML='<h4>Demand schedule</h4><table><thead><tr><th>Price (₦)</th><th>Quantity demanded</th></tr></thead><tbody><tr><td>100</td><td>30</td></tr><tr><td>200</td><td>20</td></tr><tr><td>300</td><td>10</td></tr></tbody></table>';
