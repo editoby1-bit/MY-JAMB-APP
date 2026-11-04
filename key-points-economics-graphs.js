@@ -73,8 +73,8 @@ annotations+=text(265,166,"AR")+text(165,183,"MR","#b26b17");
 }
 return '<figure class="econ-figure"><figcaption>'+title+'</figcaption><svg viewBox="0 0 320 260" role="img" aria-label="'+title+'. '+note+'"><path d="M44 30 V216 H300" fill="none" stroke="#58677d" stroke-width="1.7"/>'+ticks+line(first,"#1763a6")+(second?line(second,"#d28a36"):"")+annotations+'<text x="170" y="250" text-anchor="middle" font-size="12" fill="#253e60">'+xlab+'</text><text x="6" y="16" font-size="12" fill="#253e60">'+ylab+'</text></svg><p>'+note+extraNote+'</p></figure>';
 }
-window.renderEconomicsGraphs=function(id){
-const host=document.getElementById("economics-visuals"),lesson=document.getElementById("newText");
+window.renderEconomicsGraphs=function(id, options){
+const host=options?.host||document.getElementById("economics-visuals"),lesson=options?.lesson||document.getElementById("newText");
 if(!host||!lesson)return;
 host.replaceChildren();
 if(!C[id])return;
@@ -138,6 +138,7 @@ const sections={
 const terms=sections[id]||[];
 figures.forEach((el,i)=>visuals.push({section:terms[i]||"",element:el}));
 }
+if(options?.gallery){visuals.forEach(item=>host.appendChild(item.element));return;}
 const raw=lesson.textContent;
 const lines=raw.split("\n");
 const placements=new Map();
