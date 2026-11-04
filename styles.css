@@ -1978,3 +1978,12 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 #jambKeyPointsModal .kp-selection-dock button{border:0;border-radius:9px;padding:10px 12px;background:#f4bf4f;color:#172844;font-weight:800;white-space:nowrap;cursor:pointer}
 #jambKeyPointsModal #kpSelectionDismiss{background:rgba(255,255,255,.14);color:#fff;padding:10px}
 @media(max-width:640px){#jambKeyPointsModal{padding:0}#jambKeyPointsModal .kp-card{height:100dvh;max-height:100dvh;width:100%;border-radius:0;border:0}#jambKeyPointsBody{padding:12px 13px 38px}#jambKeyPointsModal .kp-panel-header{padding-top:calc(10px + env(safe-area-inset-top,0px))}#jambKeyPointsModal .kp-panel-close{top:calc(9px + env(safe-area-inset-top,0px))}}
+
+
+/* Keep selection actions above Android gesture navigation and browser toolbars. */
+#jambKeyPointsModal .kp-selection-dock{bottom:calc(84px + env(safe-area-inset-bottom,0px));padding:10px 12px;box-shadow:0 12px 32px rgba(4,14,33,.45)}
+#jambKeyPointsModal .kp-highlight-onboarding{position:absolute;top:116px;left:50%;transform:translateX(-50%);z-index:35;width:min(370px,calc(100% - 28px));background:#fffbea;border:1px solid #e9bc58;border-radius:16px;padding:15px 42px 15px 16px;box-shadow:0 14px 35px rgba(9,24,46,.23);color:#263852;text-align:left;pointer-events:auto}
+#jambKeyPointsModal .kp-highlight-onboarding strong{display:block;color:#152e52;font-size:15px;margin-bottom:6px}
+#jambKeyPointsModal .kp-highlight-onboarding span{display:block;font-size:13px;line-height:1.55}
+#jambKeyPointsModal .kp-highlight-onboarding>button{position:absolute;right:10px;top:8px;border:0;background:transparent;color:#34445c;font-size:24px;cursor:pointer}
+@media(max-width:640px){#jambKeyPointsModal .kp-selection-dock{bottom:calc(96px + env(safe-area-inset-bottom,0px))}#jambKeyPointsModal .kp-highlight-onboarding{top:calc(106px + env(safe-area-inset-top,0px))}}
