@@ -1961,3 +1961,20 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .kp-inline-diagram table{max-width:100%;margin:0 auto}
 
 .kp-inline-table{overflow-x:auto;text-align:left}.kp-inline-table table{width:100%;border-collapse:collapse;font-size:15px}.kp-inline-table th,.kp-inline-table td{border:1px solid #ccd6e1;padding:9px 12px;text-align:left}.kp-inline-table th{background:#eaf1fa;font-weight:700}.kp-inline-question .kp-inline-table{margin:14px 0}
+
+
+/* Key Points reader: compact, scroll-independent controls. */
+#jambKeyPointsModal{padding:0;background:rgba(4,13,29,.84)}
+#jambKeyPointsModal .kp-card{width:min(100%,760px);max-width:760px;height:min(94dvh,950px);max-height:94dvh;display:flex;flex-direction:column;overflow:hidden;padding:0;background:#f8fafc;border:1px solid #d8e1ed;border-radius:18px;text-align:left;position:relative}
+#jambKeyPointsModal .kp-panel-header{flex:none;z-index:12;background:#fff;border-bottom:1px solid #e0e7ef;padding:12px 16px 10px;box-shadow:0 2px 10px rgba(15,31,61,.08)}
+#jambKeyPointsModal .kp-panel-heading{display:flex;align-items:center;gap:9px;padding-right:48px}
+#jambKeyPointsModal .kp-panel-heading .jqc-title{color:#142a49;font-family:inherit;font-size:19px;font-weight:800;margin:0}
+#jambKeyPointsModal .kp-panel-close{position:absolute;right:13px;top:10px;z-index:14;display:grid;place-items:center;width:38px;height:38px;border:1px solid #d9e2ee;border-radius:12px;background:#f1f5fa;color:#193457;font-size:19px;cursor:pointer}
+#jambKeyPointsModal .kp-subject{margin:9px 0 0;min-height:40px}
+#jambKeyPointsBody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px 32px;scrollbar-gutter:stable}
+#jambKeyPointsBody .kp-highlight-toolbar{position:relative;top:auto;z-index:2;padding:10px;margin-bottom:12px}
+#jambKeyPointsModal .kp-selection-dock{position:absolute;left:50%;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:9px;width:max-content;max-width:calc(100% - 24px);padding:8px 10px;background:#142a49;color:#fff;border-radius:15px;box-shadow:0 8px 30px rgba(4,14,33,.35);font-size:12px}
+#jambKeyPointsModal .kp-selection-dock[hidden]{display:none}
+#jambKeyPointsModal .kp-selection-dock button{border:0;border-radius:9px;padding:10px 12px;background:#f4bf4f;color:#172844;font-weight:800;white-space:nowrap;cursor:pointer}
+#jambKeyPointsModal #kpSelectionDismiss{background:rgba(255,255,255,.14);color:#fff;padding:10px}
+@media(max-width:640px){#jambKeyPointsModal{padding:0}#jambKeyPointsModal .kp-card{height:100dvh;max-height:100dvh;width:100%;border-radius:0;border:0}#jambKeyPointsBody{padding:12px 13px 38px}#jambKeyPointsModal .kp-panel-header{padding-top:calc(10px + env(safe-area-inset-top,0px))}#jambKeyPointsModal .kp-panel-close{top:calc(9px + env(safe-area-inset-top,0px))}}
