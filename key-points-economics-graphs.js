@@ -143,8 +143,8 @@ if(options?.inline){
   // newlines. Match the original lesson lines and attach diagrams after the
   // corresponding line break without replacing its formatted text.
   const breaks=[...lesson.querySelectorAll('br')];
-  const rawLines=lesson.dataset.originalLessonText?.split('\\n')||[];
-  const lines=rawLines.length?rawLines:lesson.innerText.split('\\n');
+  const rawLines=lesson.dataset.originalLessonText?.split('\n')||[];
+  const lines=rawLines.length?rawLines:lesson.innerText.split('\n');
   const placements=new Map();
   for(const item of visuals){
     const index=lines.findIndex(line=>line.toUpperCase().includes(item.section.toUpperCase()));
