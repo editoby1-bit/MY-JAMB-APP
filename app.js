@@ -893,7 +893,19 @@
     }
 
     el.questionNumberBadge.textContent = `Question ${state.currentIndex + 1} of ${state.currentQuestions.length}`;
-    el.questionSubjectMeta.textContent = fmt(q.sourceSubject || state.subject) + (q.year ? ` · JAMB ${q.year}` : '');
+    // In lesson-specific practice, list all independently recorded years for
+    // an identical question. Similar wording with different options is not a repeat.
+    let yearsLabel = q.year ? String(q.year) : '';
+    if (el.yearSelect?.value?.startsWith('keypoint-')) {
+      const subject = q.sourceSubject || state.subject;
+      const signature = item => JSON.stringify([String(item.question || '').trim(), ...(item.options || []).map(v => String(v).trim())]);
+      const key = signature(q);
+      const years = [...new Set((QUESTION_BANK[subject] || [])
+        .filter(item => !item.reviewPending && Array.isArray(item.options) && signature(item) === key && /^(19|20)\\d{2}$/.test(String(item.year)))
+        .map(item => Number(item.year)))].sort((a, b) => a - b);
+      yearsLabel = years.join(' · ');
+    }
+    el.questionSubjectMeta.textContent = fmt(q.sourceSubject || state.subject) + (yearsLabel ? ' · JAMB ' + yearsLabel : '');
 
     // Subject position indicator (e.g. "Q6 of 40 in Physics")
     const range = state.subjectRanges[q.sourceSubject];
