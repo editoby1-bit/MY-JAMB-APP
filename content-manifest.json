@@ -1693,8 +1693,8 @@
       "bytes": 783199
     },
     "teach/economics-topics.js": {
-      "sha256": "ce080dffbb6622da7c1c4f74cbdba1a05f63613c3da6491d14898620afb36623",
-      "bytes": 360893
+      "sha256": "2c7e6ae8d1f48ce08e7333c9a8f9ed6497a99973ff20aaf47eaa27c1dc85c40c",
+      "bytes": 367150
     },
     "past-questions/img/economics-2001-q7.png": {
       "sha256": "36853ddefe3bd5d7282f380c44b8e6fd7c51779aeb95e9f3f362bf18c068e6c9",
@@ -2089,5 +2089,5 @@
       "bytes": 52854
     }
   },
-  "version": "ce080dffbb6622da"
+  "version": "e94cc4c97ebec433"
 }
