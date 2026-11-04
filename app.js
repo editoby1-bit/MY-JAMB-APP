@@ -1735,7 +1735,7 @@
       if (!paid && i >= KP_FREE_TOPICS) {
         return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
       }
-      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}${n ? `<div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice ${n} JAMB past question${n === 1 ? "" : "s"} on this topic →</button></div>` : ""}</div></details>`;
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}<div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
