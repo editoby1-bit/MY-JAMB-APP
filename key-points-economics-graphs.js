@@ -81,6 +81,23 @@ const rows=[[0,0,"—","—"],[1,8,8,"8.0"],[2,20,12,"10.0"],[3,33,13,"11.0"],[4
 t.innerHTML='<h4>Production table: each row shows the result of adding one worker</h4><p>Fixed farmland; output measured in bags. Compare each row with the previous one to find marginal product.</p><div style="overflow-x:auto"><table style="min-width:460px"><thead><tr><th>Workers employed (L)</th><th>Total output (TP), bags</th><th>Extra output from LAST worker (MP), bags</th><th>Output per worker (AP), bags</th></tr></thead><tbody>'+rows.map((r,i)=>'<tr'+(i===3?' style="background:#edf5ff"':i===4?' style="background:#fff4e6"':i===6?' style="background:#f0f6f2"':'')+'>'+r.map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><p><strong>How to calculate:</strong> MP = current TP − previous TP (because labour rises by one worker). AP = TP ÷ workers. For worker 4, MP = 42 − 33 = <strong>9 bags</strong>, while AP = 42 ÷ 4 = <strong>10.5 bags per worker</strong>.</p><p><strong>Follow the rows:</strong> With 3 workers, TP = 33, MP = 33 − 20 = 13, and AP = 33 ÷ 3 = 11. With 4 workers, TP = 42, MP = 42 − 33 = 9, and AP = 42 ÷ 4 = 10.5. Worker 3 has the highest MP (13) and AP (11). At worker 4, MP falls to 9: diminishing marginal returns begin. At worker 6, MP = 0, so TP stays at 48 bags.</p><p><strong>Match to the diagrams:</strong> The total-product curve rises to 48 bags and becomes flat between workers 5 and 6. The marginal-product curve peaks at worker 3 and reaches zero at worker 6. The horizontal graph scale represents 0–6 workers, not 0–100 actual workers.</p>';
 visuals.push({section:"WORKED EXAMPLE — WORKERS ON A FIXED FARM",element:t});
 }
+
+function addSchedule(heading,columns,rows,section,notes,highlightRows=[]){
+const el=document.createElement("div");el.className="econ-inline-visual econ-data-tables";
+el.innerHTML='<h4>'+heading+'</h4><div style="overflow-x:auto"><table style="min-width:440px;width:100%;border-collapse:collapse"><thead><tr>'+columns.map(c=>'<th scope="col">'+c+'</th>').join('')+'</tr></thead><tbody>'+rows.map((r,i)=>'<tr'+(highlightRows.includes(i)?' style="background:#edf5ff"':'')+'>'+r.map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><p>'+notes+'</p>';
+visuals.push({section,element:el});
+}
+if(id==="demand-supply"){
+addSchedule("Rice demand schedule",["Price per bag (₦)","Quantity demanded (bags)"],[["50,000","100"],["60,000","80"],["70,000","60"]],"EXAMPLE — RICE DEMAND SCHEDULE","At ₦60,000, quantity demanded is 80 bags. All three price–quantity pairs together make up the demand schedule.",[1]);
+addSchedule("Tomato supply schedule",["Price per basket (₦)","Quantity supplied (baskets)"],[["5,000","20"],["7,000","35"],["9,000","50"]],"EXAMPLE — TOMATO SUPPLY SCHEDULE","At ₦7,000, quantity supplied is 35 baskets. Rising price is associated with greater quantity supplied, other factors unchanged.",[1]);
+addSchedule("Market equilibrium: compare demand and supply at each price",["Price (₦)","Quantity demanded (units)","Quantity supplied (units)","Market situation"],[["10","90","30","Shortage: 60"],["20","70","50","Shortage: 20"],["30","50","50","Equilibrium"],["40","30","70","Surplus: 40"]],"10. DERIVING EQUILIBRIUM FROM A TABLE","Equilibrium is at ₦30 and 50 units because quantity demanded equals quantity supplied. Shortage = Qd − Qs; surplus = Qs − Qd.",[2]);
+}
+if(id==="consumer-behaviour"){
+addSchedule("Total and marginal utility — cups of juice",["Cups consumed","Total utility (TU)","Marginal utility (MU)"],[[0,0,"—"],[1,18,18],[2,32,14],[3,42,10],[4,48,6],[5,50,2],[6,49,"−1"]],"10. A FULL MARGINAL-UTILITY TABLE","MU = change in TU for each additional cup. At cup 5, TU is highest (50); the sixth cup has MU = −1, so TU falls to 49.",[5,6]);
+}
+if(id==="costs-revenue"){
+addSchedule("Cost schedule — fixed cost is ₦300 at every output level",["Output (units)","Fixed cost FC (₦)","Variable cost VC (₦)","Total cost TC (₦)","Marginal cost MC (₦)"],[[0,300,0,300,"—"],[1,300,120,420,120],[2,300,210,510,90],[3,300,270,570,60],[4,300,360,660,90],[5,300,480,780,120]],"WORKED TABLE — FIXED COST ₦300","TC = FC + VC. MC = change in TC when output increases by one unit. At output 4: TC = 300 + 360 = ₦660, MC = 660 − 570 = ₦90; AFC = ₦75, AVC = ₦90, ATC = ₦165.",[4]);
+}
 if(id==="tools-analysis"){
 const table=document.createElement("div");table.className="econ-inline-visual econ-data-tables";
 table.innerHTML='<h4>Demand schedule</h4><table><thead><tr><th>Price (₦)</th><th>Quantity demanded</th></tr></thead><tbody><tr><td>100</td><td>30</td></tr><tr><td>200</td><td>20</td></tr><tr><td>300</td><td>10</td></tr></tbody></table>';
