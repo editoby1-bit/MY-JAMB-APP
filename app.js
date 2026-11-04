@@ -1884,6 +1884,7 @@
       kpSelectedRange = range.cloneRange();
       dock.hidden = false;
     } else if (!kpSelectedRange) dock.hidden = true;
+    if (!dock.hidden) document.querySelector('#jambKeyPointsModal .kp-highlight-onboarding')?.remove();
   }
   document.addEventListener('selectionchange', kpUpdateSelectionDock);
   document.getElementById('kpSelectionSave')?.addEventListener('pointerdown', event => event.preventDefault());
@@ -1911,28 +1912,29 @@
     body.prepend(toolbar);
     const lessonRoots = [...body.querySelectorAll('.kp-lesson-content')];
     // Show the walkthrough beside the actual controls, only when a lesson is opened.
-    const hintKey = 'myjamb-highlight-bubble-seen-v3';
+    const hintKey = 'myjamb-highlight-selection-tip-v1';
     let hintShown = false;
     try { hintShown = !!localStorage.getItem(hintKey); } catch (_) {}
     // Introduce highlighting as soon as a lesson is expanded, not only when
     // the bottom-of-lesson controls happen to intersect the viewport.
     function showHighlightBubble(controls, replay = false) {
-      if ((!replay && hintShown) || controls.querySelector('.kp-highlight-bubble')) return;
+      if ((!replay && hintShown) || document.querySelector('#jambKeyPointsModal .kp-highlight-bubble')) return;
+      const card = document.querySelector('#jambKeyPointsModal .kp-card');
+      if (!card) return;
       const bubble = document.createElement('div');
-      bubble.className = 'kp-highlight-bubble';
+      bubble.className = 'kp-highlight-bubble kp-highlight-onboarding';
       bubble.setAttribute('role', 'status');
-      bubble.innerHTML = '<strong>✨ Highlight important passages</strong>' +
-        '<span>Select a sentence in this lesson, then tap <b>Highlight selection</b>. ' +
-        'Find saved passages in <b>My Highlights</b>.</span>' +
+      bubble.innerHTML = '<strong>✨ Save important passages</strong>' +
+        '<span>Press and hold text in a lesson to select it, then tap <b>Highlight</b>. ' +
+        'Your highlights are saved for later revision in <b>My Highlights</b> on this device.</span>' +
         '<button type="button" aria-label="Dismiss highlighting tip">×</button>';
-      controls.prepend(bubble);
-      // Only record a completed display, never an attempted off-screen display.
+      card.appendChild(bubble);
       hintShown = true;
       try { localStorage.setItem(hintKey, '1'); } catch (_) {}
-      let timer = null;
-      function dismiss() { if (timer) clearTimeout(timer); bubble.remove(); }
+      let timer;
+      const dismiss = () => { window.clearTimeout(timer); bubble.remove(); };
       bubble.querySelector('button').addEventListener('click', dismiss);
-      timer = window.setTimeout(dismiss, 8500);
+      timer = window.setTimeout(dismiss, 7000);
     }
     function watchHighlightControls(controls, details) {
       const onOpen = () => {
@@ -1956,7 +1958,7 @@
       replay.type = 'button';
       replay.className = 'kp-highlight-help';
       replay.textContent = 'ⓘ How to highlight';
-      replay.addEventListener('click', () => { showHighlightBubble(toolbar, true); toolbar.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      replay.addEventListener('click', () => { showHighlightBubble(toolbar, true); });
       controls.append(replay);
       const details = root.closest('details');
       if (details) watchHighlightControls(controls, details);
