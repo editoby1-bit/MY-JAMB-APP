@@ -1726,7 +1726,8 @@
       const id = t.of?.[teachMeKey(q)];
       if (id && t.lessons[id]) counts[id] = (counts[id] || 0) + 1;
     });
-    const ids = Object.keys(t.lessons || {}).sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+    // Preserve the syllabus / author-defined teaching sequence.
+    const ids = Object.keys(t.lessons || {});
     const paid = checkAccess();
     body.innerHTML = ids.map((id, i) => {
       const L = t.lessons[id];
@@ -1746,22 +1747,79 @@
     const mapping = window.TEACH_TOPICS?.[subject]?.of || {};
     return (QUESTION_BANK[subject] || []).filter(q => !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && mapping[teachMeKey(q)] === topic);
   }
+  // Keep topic practice inside the lesson modal, like the approved review UI.
+  let kpPractice = null;
   function startKeyPointPractice(subject, topic) {
-    if (!keyPointPool(subject, topic).length) { showInfoToast('No mapped past questions are available for this lesson yet.'); return; }
-    closeKeyPoints();
-    document.querySelector('.config-btn[data-group="session"][data-value="single"]')?.click();
-    document.querySelector('.config-btn[data-group="mode"][data-value="practice"]')?.click();
-    el.subjectSelect.value = subject;
-    populateYears();
-    const title = window.TEACH_TOPICS?.[subject]?.lessons?.[topic]?.title || 'This topic';
-    // Use DOM APIs for option values: topic identifiers must not be HTML-encoded.
-    const topicOption = new Option('📝 Topic practice: ' + title, 'keypoint-' + topic);
-    el.yearSelect.add(topicOption);
-    el.yearSelect.value = 'keypoint-' + topic;
-    // Some subjects have no dated questions: make the topic selector visible anyway.
-    el.yearField?.classList.remove('hidden');
-    if (el.questionCountSelect) el.questionCountSelect.value = 'all';
-    startSession();
+    const questions = keyPointPool(subject, topic);
+    if (!questions.length) { showInfoToast('No mapped past questions are available for this lesson yet.'); return; }
+    const btn = [...document.querySelectorAll('#jambKeyPointsBody .kp-practice-btn')]
+      .find(node => node.dataset.topic === topic);
+    if (!btn) return;
+    const wrap = btn.closest('.kp-practice-wrap');
+    if (!wrap) return;
+    document.querySelectorAll('#jambKeyPointsBody .kp-inline-practice').forEach(node => node.remove());
+    const panel = document.createElement('section');
+    panel.className = 'kp-inline-practice';
+    panel.setAttribute('aria-live', 'polite');
+    wrap.insertAdjacentElement('afterend', panel);
+    kpPractice = { subject, topic, questions, index: 0, answers: {}, panel };
+    renderKeyPointPractice();
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function renderKeyPointPractice() {
+    const p = kpPractice;
+    if (!p || !p.panel.isConnected) return;
+    const q = p.questions[p.index];
+    const selected = p.answers[p.index];
+    const answered = selected !== undefined;
+    const accepted = [q.answer, ...(Array.isArray(q.alsoAccept) ? q.alsoAccept : [])];
+    const correct = q.keyVerdict === 'noanswer' || accepted.includes(selected);
+    const score = Object.entries(p.answers).filter(([index, answer]) => {
+      const item = p.questions[Number(index)];
+      return item.keyVerdict === 'noanswer' || item.answer === answer ||
+        (Array.isArray(item.alsoAccept) && item.alsoAccept.includes(answer));
+    }).length;
+    const years = new Set();
+    const group = repeatGroup(q, p.subject);
+    if (group?.qs?.length) repeatYears(group).forEach(y => { if (/^(19|20)\\d{2}$/.test(String(y))) years.add(Number(y)); });
+    if (/^(19|20)\\d{2}$/.test(String(q.year))) years.add(Number(q.year));
+    const yearText = [...years].sort((a,b) => a-b).join(' · ');
+    const title = window.TEACH_TOPICS?.[p.subject]?.lessons?.[p.topic]?.title || 'Topic';
+    p.panel.innerHTML =
+      '<h3>📝 ' + escHtml(fmt(p.subject)) + ' · Topic Past Questions</h3>' +
+      '<p class="kp-inline-meta">' + escHtml(title) + ' · Question ' + (p.index + 1) + ' of ' +
+      p.questions.length + ' · ' + Object.keys(p.answers).length + ' answered · ' + score + ' correct</p>' +
+      (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
+      '<p class="kp-inline-question">' + escHtml(q.question) + '</p>' +
+      q.options.map((option, i) => '<button type="button" class="kp-inline-answer' +
+        (answered && accepted.includes(i) ? ' correct' : answered && selected === i ? ' wrong' : '') +
+        '" data-answer="' + i + '"' + (answered ? ' disabled' : '') + '>' +
+        String.fromCharCode(65 + i) + '. ' + escHtml(option) + '</button>').join('') +
+      (answered ? '<div class="kp-inline-feedback"><strong>' + (correct ? '✓ Correct' : '✗ Not correct') +
+        '</strong><p>Answer: ' + (q.keyVerdict === 'noanswer' ? 'Question reviewed; attempted answer receives credit' :
+          accepted.map(i => String.fromCharCode(65 + i)).join(' or ')) +
+        '</p><p>' + escHtml(q.explanation || q.answerNote || 'Review the correct answer above.') + '</p></div>' : '') +
+      '<div class="kp-inline-nav"><button type="button" data-kp-back>' +
+      (p.index ? '← Previous' : '← Close practice') + '</button><button type="button" data-kp-next>' +
+      (p.index === p.questions.length - 1 ? 'Finish' : 'Next →') + '</button></div>';
+    p.panel.querySelectorAll('[data-answer]').forEach(button => button.onclick = () => {
+      p.answers[p.index] = Number(button.dataset.answer);
+      renderKeyPointPractice();
+    });
+    p.panel.querySelector('[data-kp-back]').onclick = () => {
+      if (p.index) { p.index--; renderKeyPointPractice(); }
+      else { p.panel.remove(); kpPractice = null; }
+    };
+    p.panel.querySelector('[data-kp-next]').onclick = () => {
+      if (p.index < p.questions.length - 1) { p.index++; renderKeyPointPractice(); }
+      else {
+        p.panel.innerHTML = '<h3>Practice summary</h3><p>Answered ' +
+          Object.keys(p.answers).length + ' of ' + p.questions.length +
+          ' questions · ' + score + ' correct.</p>' +
+          '<button type="button" data-kp-close>Return to lesson</button>';
+        p.panel.querySelector('[data-kp-close]').onclick = () => { p.panel.remove(); kpPractice = null; };
+      }
+    };
   }
 
   /* ── Exam Traps: the genuinely tempting wrong options, by topic ──
