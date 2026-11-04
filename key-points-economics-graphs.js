@@ -48,11 +48,11 @@ if(title==="Marginal product"){
 annotations+=dot(40,85,"MP peak",9,-11)+dot(100,0,"MP = 0",-65,-12);
 }
 if(title==="Average and marginal cost"){
-annotations+=dot(55,37,"MC = AC",9,-12)+dot(40,40,"AC minimum",-92,-15)+text(277,84,"MC","#b26b17")+text(279,140,"AC");
+annotations+=dot(55,37,"AC minimum",-94,-12)+text(194,161,"MC crosses AC")+text(277,84,"MC","#b26b17")+text(279,140,"AC");
 }
 if(title==="Total cost and revenue"){
 annotations+=text(276,52,"TR","#b26b17")+text(275,93,"TC");
-annotations+=dot(60,60,"TR",8,-13);
+annotations+=text(172,117,"Profit = TR − TC");
 }
 if(title==="Competitive firm: P = AR = MR"){
 annotations+=text(224,109,"P = AR = MR");
