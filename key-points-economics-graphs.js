@@ -12,10 +12,55 @@ const C={
 };
 function graph(spec){
 const [title,xlab,ylab,first,note,second]=spec;
-const pts=arr=>arr.map(([x,y])=>(44+x*2.45).toFixed(1)+","+(216-y*1.75).toFixed(1)).join(" ");
+const xy=([x,y])=>[44+x*2.45,216-y*1.75];
+const pts=arr=>arr.map(p=>xy(p).map(v=>v.toFixed(1)).join(",")).join(" ");
 const line=(arr,color)=>'<polyline fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="'+pts(arr)+'"/>';
+const text=(x,y,value,color="#263e5d")=>'<text x="'+x+'" y="'+y+'" font-size="12" font-weight="700" fill="'+color+'">'+value+'</text>';
+const dot=(x,y,label,dx=9,dy=-9)=>{const [px,py]=xy([x,y]);return '<circle cx="'+px+'" cy="'+py+'" r="4.5" fill="white" stroke="#1a416c" stroke-width="2"/>'+text(px+dx,py+dy,label);};
+const guide=(x,y)=>{const [px,py]=xy([x,y]);return '<path d="M'+px+' '+py+' V216 M'+px+' '+py+' H44" stroke="#7489a2" stroke-width="1.3" stroke-dasharray="5 4" fill="none"/>';};
 const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anchor="middle" font-size="10" fill="#66748b">'+n+'</text><text x="35" y="'+(220-n*1.75)+'" text-anchor="end" font-size="10" fill="#66748b">'+n+'</text>').join('');
-return '<figure class="econ-figure"><figcaption>'+title+'</figcaption><svg viewBox="0 0 320 260" role="img" aria-label="'+title+'. '+note+'"><path d="M44 30 V216 H300" fill="none" stroke="#58677d" stroke-width="1.7"/>'+ticks+line(first,"#1763a6")+(second?line(second,"#d28a36"):"")+'<text x="170" y="250" text-anchor="middle" font-size="12" fill="#253e60">'+xlab+'</text><text x="6" y="16" font-size="12" fill="#253e60">'+ylab+'</text></svg><p>'+note+'</p></figure>';
+let annotations="";
+if(title==="Production possibility frontier"){
+annotations+=dot(40,84,"A (efficient)",-20,-13)+dot(35,38,"B (inside)",8,18)+dot(77,85,"C (unattainable)",-110,-10);
+annotations+='<circle cx="'+xy([35,38])[0]+'" cy="'+xy([35,38])[1]+'" r="3" fill="#1763a6"/><circle cx="'+xy([77,85])[0]+'" cy="'+xy([77,85])[1]+'" r="3" fill="#d28a36"/>';
+}
+if(title==="Demand curve"||title==="Supply curve"){
+annotations+=dot(30,title==="Demand curve"?70:30,"A")+dot(70,title==="Demand curve"?30:70,"B");
+annotations+=text(276,title==="Demand curve"?185:48,title==="Demand curve"?"D":"S");
+}
+if(title==="Market equilibrium"){
+annotations+=guide(50,50)+dot(50,50,"E",10,-12)+text(48,121,"Pe")+text(167,214,"Qe");
+annotations+=text(270,185,"D")+text(270,53,"S");
+}
+if(title==="Elastic and inelastic demand"){
+annotations+=text(258,188,"Elastic", "#1763a6")+text(195,46,"Inelastic","#b26b17");
+}
+if(title==="Total and marginal utility"){
+annotations+=dot(80,91,"Maximum TU",-91,-12)+text(268,86,"TU");
+}
+if(title==="Budget line"){
+annotations+=dot(0,100,"Y-intercept",8,15)+dot(100,0,"X-intercept",-110,-12)+text(200,116,"BL");
+}
+if(title==="Total product"){
+annotations+=dot(83,100,"TP maximum",-113,20)+text(282,42,"TP");
+}
+if(title==="Marginal product"){
+annotations+=dot(40,85,"MP peak",9,-11)+dot(100,0,"MP = 0",-65,-12);
+}
+if(title==="Average and marginal cost"){
+annotations+=dot(55,37,"MC = AC",9,-12)+dot(40,40,"AC minimum",-92,-15)+text(277,84,"MC","#b26b17")+text(279,140,"AC");
+}
+if(title==="Total cost and revenue"){
+annotations+=text(276,52,"TR","#b26b17")+text(275,93,"TC");
+annotations+=dot(60,60,"TR",8,-13);
+}
+if(title==="Competitive firm: P = AR = MR"){
+annotations+=text(224,109,"P = AR = MR");
+}
+if(title==="Monopoly: AR and MR"){
+annotations+=text(265,166,"AR")+text(165,183,"MR","#b26b17");
+}
+return '<figure class="econ-figure"><figcaption>'+title+'</figcaption><svg viewBox="0 0 320 260" role="img" aria-label="'+title+'. '+note+'"><path d="M44 30 V216 H300" fill="none" stroke="#58677d" stroke-width="1.7"/>'+ticks+line(first,"#1763a6")+(second?line(second,"#d28a36"):"")+annotations+'<text x="170" y="250" text-anchor="middle" font-size="12" fill="#253e60">'+xlab+'</text><text x="6" y="16" font-size="12" fill="#253e60">'+ylab+'</text></svg><p>'+note+'</p></figure>';
 }
 window.renderEconomicsGraphs=function(id){
 const host=document.getElementById("economics-visuals"),lesson=document.getElementById("newText");
