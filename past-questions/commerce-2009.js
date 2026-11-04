@@ -865,12 +865,15 @@
     "sourcePages": [
       2
     ],
-    "explanation": "A is retained as the supplied classroom intention: legitimate money is officially authorized rather than counterfeit. The wording is loose because legal status alone cannot physically stop forgery; authenticity requires checking appropriate security features.",
+    "explanation": "Recognition can help users identify genuine money and distinguish counterfeits; legality concerns authorized issue and legal sanctions against forgery. Both C and this paper’s printed A are defensible interpretations of the loosely stated anti-forgery characteristic. Accept A and C, consistent with the later paper’s recognition key. Neither legal status nor recognition literally guarantees that forgery cannot occur.",
     "reviewCompleted": "2026-10-29",
     "reviewConfidence": "independently reviewed",
-    "keyVerdict": "debatable",
+    "keyVerdict": "multiple",
     "keyAnswer": "A",
-    "answerNote": "A is retained as the supplied classroom intention: legitimate money is officially authorized rather than counterfeit. The wording is loose because legal status alone cannot physically stop forgery; authenticity requires checking appropriate security features.",
+    "answerNote": "Recognition can help users identify genuine money and distinguish counterfeits; legality concerns authorized issue and legal sanctions against forgery. Both C and this paper’s printed A are defensible interpretations of the loosely stated anti-forgery characteristic. Accept A and C, consistent with the later paper’s recognition key. Neither legal status nor recognition literally guarantees that forgery cannot occur.",
+    "alsoAccept": [
+      2
+    ],
     "teachKey": "commerce-2009-q36"
   },
   {

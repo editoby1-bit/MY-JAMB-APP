@@ -1977,7 +1977,8 @@
     const selected = p.answers[p.index];
     const answered = selected !== undefined;
     const accepted = [q.answer, ...(Array.isArray(q.alsoAccept) ? q.alsoAccept : [])];
-    const correct = q.keyVerdict === 'noanswer' || accepted.includes(selected);
+    const noAnswer = q.keyVerdict === 'noanswer';
+    const correct = noAnswer || accepted.includes(selected);
     const score = Object.entries(p.answers).filter(([index, answer]) => {
       const item = p.questions[Number(index)];
       return item.keyVerdict === 'noanswer' || item.answer === answer ||
@@ -1996,10 +1997,10 @@
       (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
       '<p class="kp-inline-question">' + escHtml(q.question) + '</p>' +
       q.options.map((option, i) => '<button type="button" class="kp-inline-answer' +
-        (answered && accepted.includes(i) ? ' correct' : answered && selected === i ? ' wrong' : '') +
+        (answered && !noAnswer && accepted.includes(i) ? ' correct' : answered && !noAnswer && selected === i ? ' wrong' : '') +
         '" data-answer="' + i + '"' + (answered ? ' disabled' : '') + '>' +
         String.fromCharCode(65 + i) + '. ' + escHtml(option) + '</button>').join('') +
-      (answered ? '<div class="kp-inline-feedback"><strong>' + (correct ? '✓ Correct' : '✗ Not correct') +
+      (answered ? '<div class="kp-inline-feedback"><strong>' + (noAnswer ? 'Attempt credited' : correct ? '✓ Correct' : '✗ Not correct') +
         '</strong><p>Answer: ' + (q.keyVerdict === 'noanswer' ? 'Question reviewed; attempted answer receives credit' :
           accepted.map(i => String.fromCharCode(65 + i)).join(' or ')) +
         '</p><p>' + escHtml(q.explanation || q.answerNote || 'Review the correct answer above.') + '</p></div>' : '') +
