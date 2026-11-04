@@ -17,7 +17,18 @@
     const timer = setTimeout(() => controller.abort(), 45000);
     try {
       const response = await fetch(url, { signal: controller.signal, cache: 'no-cache' });
-      if (!response.ok) throw new Error('Content unavailable');
+      if (!response.ok) {
+        // A Pages deployment or stale service worker can temporarily return 404/503
+        // for an existing subject package. Fetch the same public repository file
+        // as a fallback; ensure() still verifies it against the manifest SHA-256.
+        const fileUrl = new URL(url);
+        const relative = fileUrl.pathname.slice(base.pathname.length);
+        if (!/^(past-questions|teach|booklet)\/[a-zA-Z0-9_./-]+$/.test(relative) || relative.includes('..')) throw new Error('Content unavailable');
+        const fallback = 'https://raw.githubusercontent.com/editoby1-bit/MY-JAMB-APP/main/' + relative;
+        const backup = await fetch(fallback, { signal: controller.signal, cache: 'no-cache' });
+        if (!backup.ok) throw new Error('Content unavailable from both site and repository');
+        return new Response(await backup.arrayBuffer(), { headers: backup.headers });
+      }
       // Include body download in the timeout, not just receipt of headers.
       return new Response(await response.arrayBuffer(), { headers: response.headers });
     } finally { clearTimeout(timer); }
