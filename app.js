@@ -1710,7 +1710,7 @@
     renderKeyPoints();
     document.getElementById('jambKeyPointsModal')?.classList.remove('hidden');
   }
-  function closeKeyPoints() { document.getElementById('jambKeyPointsModal')?.classList.add('hidden'); }
+  function closeKeyPoints() { kpSelectedRange = null; const dock = document.getElementById('kpSelectionDock'); if (dock) dock.hidden = true; document.getElementById('jambKeyPointsModal')?.classList.add('hidden'); }
   // Load the Economics visual module on demand as well as from the page shell.
   // This covers installed PWAs with an older cached index.html.
   let economicsVisualsPromise;
@@ -1872,6 +1872,36 @@
       if(host){host.replaceChildren();window.renderEconomicsGraphs(topic,{host,lesson:root,inline:true});}
     }
   }
+  let kpSelectedRange = null;
+  function kpUpdateSelectionDock() {
+    const dock = document.getElementById('kpSelectionDock');
+    const modal = document.getElementById('jambKeyPointsModal');
+    if (!dock || !modal || modal.classList.contains('hidden')) { if (dock) dock.hidden = true; return; }
+    const selection = window.getSelection();
+    const range = selection && !selection.isCollapsed && selection.rangeCount ? selection.getRangeAt(0) : null;
+    const root = range?.startContainer?.parentElement?.closest?.('.kp-lesson-content');
+    if (range && root && root.contains(range.endContainer) && range.toString().trim()) {
+      kpSelectedRange = range.cloneRange();
+      dock.hidden = false;
+    } else if (!kpSelectedRange) dock.hidden = true;
+  }
+  document.addEventListener('selectionchange', kpUpdateSelectionDock);
+  document.getElementById('kpSelectionSave')?.addEventListener('pointerdown', event => event.preventDefault());
+  document.getElementById('kpSelectionSave')?.addEventListener('click', () => {
+    if (kpSelectedRange) {
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(kpSelectedRange);
+    }
+    document.querySelector('#jambKeyPointsBody [data-kp-highlight]')?.click();
+    kpSelectedRange = null;
+    document.getElementById('kpSelectionDock').hidden = true;
+  });
+  document.getElementById('kpSelectionDismiss')?.addEventListener('click', () => {
+    kpSelectedRange = null;
+    window.getSelection()?.removeAllRanges();
+    document.getElementById('kpSelectionDock').hidden = true;
+  });
   function initLessonHighlights(subject, body) {
     const toolbar = document.createElement('div');
     toolbar.className = 'kp-highlight-toolbar';
@@ -1966,6 +1996,8 @@
         subject, topic, start, end, quote: root.textContent.slice(start, end), createdAt: Date.now() };
       if (!kpSaveHighlights([...all, item])) return;
       selection.removeAllRanges();
+      kpSelectedRange = null;
+      document.getElementById('kpSelectionDock').hidden = true;
       kpPaintHighlights(root, subject, topic);
       showInfoToast('Saved to My Highlights on this device.');
     });
