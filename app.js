@@ -1778,7 +1778,7 @@
             await ensureEconomicsVisuals();
             if (!details.isConnected || !details.open) return;
             host.replaceChildren();
-            window.renderEconomicsGraphs(root.dataset.lesson, { host, lesson: root, gallery: true });
+            window.renderEconomicsGraphs(root.dataset.lesson, { host, lesson: root, inline: true });
             finished = true;
             if (!host.children.length) host.textContent = 'This lesson has no separate diagrams.';
           } catch (err) {
@@ -1793,6 +1793,11 @@
       });
     }
     initLessonHighlights(subject, body);
+    if(subject==='economics') {
+      body.querySelectorAll('.kp-lesson-content').forEach(root=>{
+        root.dataset.originalLessonText=t.lessons[root.dataset.lesson]?.body||'';
+      });
+    }
   }
 
 
@@ -1860,6 +1865,12 @@
       try { range.surroundContents(mark); }
       catch (_) { /* Cross-element selections are saved but not visually wrapped. */ }
     });
+    // Highlight repaint restores original lesson HTML. Restore inline diagrams
+    // in an already-open Economics lesson without changing highlight offsets.
+    if(subject==='economics' && root.closest('details')?.open && typeof window.renderEconomicsGraphs==='function'){
+      const host=root.parentNode.querySelector('.kp-economics-visuals');
+      if(host){host.replaceChildren();window.renderEconomicsGraphs(topic,{host,lesson:root,inline:true});}
+    }
   }
   function initLessonHighlights(subject, body) {
     const toolbar = document.createElement('div');
