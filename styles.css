@@ -1931,3 +1931,10 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 #jambKeyPointsBody .kp-highlight-inline-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:16px 0;padding:13px;background:#fff8e5;border:1px solid #e8d399;border-radius:12px}
 #jambKeyPointsBody .kp-highlight-inline-controls span{flex:1 1 100%;font-size:13px;font-weight:650;color:#755717}
 #jambKeyPointsBody .kp-highlight-inline-controls button{flex:1 1 140px;padding:11px;border:1px solid #d8bd6c;border-radius:9px;background:white;color:#674c12;font-size:13px;font-weight:750;cursor:pointer}
+
+/* One-time highlighting onboarding */
+#jambKeyPointsBody .kp-first-highlight-tip{margin:0 0 16px;padding:14px 16px;background:#fffdf1;border:1px solid #ecd68b;border-left:4px solid #dfae35;border-radius:12px;color:#51401a}
+#jambKeyPointsBody .kp-first-highlight-heading{font-weight:800;font-size:15px;margin-bottom:6px}
+#jambKeyPointsBody .kp-first-highlight-tip p{font-size:13px;line-height:1.65;margin:0 0 10px}
+#jambKeyPointsBody .kp-tip-dismiss{background:#153f78;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:750;cursor:pointer}
+#jambKeyPointsBody .kp-highlight-nudge{display:block;flex-basis:100%;font-size:12px;font-weight:800;color:#8d5d06;letter-spacing:.01em}
