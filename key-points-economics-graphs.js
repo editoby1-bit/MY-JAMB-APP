@@ -33,7 +33,7 @@ annotations+=guide(50,50)+dot(50,50,"E",10,-12)+text(48,121,"Pe")+text(167,214,"
 annotations+=text(270,185,"D")+text(270,53,"S");
 }
 if(title==="Elastic and inelastic demand"){
-annotations+=text(271,184,"D₁","#1763a6")+text(195,45,"D₂","#b26b17");
+annotations+=text(258,184,"Elastic D₁","#1763a6")+text(195,45,"Inelastic D₂","#b26b17");
 }
 if(title==="Total and marginal utility"){
 annotations+=dot(80,91,"Maximum TU",-91,-12)+text(268,86,"TU");
