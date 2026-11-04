@@ -1715,11 +1715,11 @@
   // This covers installed PWAs with an older cached index.html.
   let economicsVisualsPromise;
   function ensureEconomicsVisuals() {
-    if (typeof window.renderEconomicsGraphs === 'function') return Promise.resolve(true);
+    if (window.ECONOMICS_VISUALS_VERSION === 'inline-v5' && typeof window.renderEconomicsGraphs === 'function') return Promise.resolve(true);
     if (!economicsVisualsPromise) {
       economicsVisualsPromise = new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = './key-points-economics-graphs.js?v=production-econ-20261104';
+        script.src = './key-points-economics-graphs.js?v=inline-v5';
         script.onload = () => typeof window.renderEconomicsGraphs === 'function'
           ? resolve(true) : reject(new Error('Economics diagrams module did not initialise'));
         script.onerror = () => reject(new Error('Economics diagrams could not be downloaded'));
