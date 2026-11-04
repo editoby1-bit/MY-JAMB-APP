@@ -1736,10 +1736,156 @@
       if (!paid && i >= KP_FREE_TOPICS) {
         return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
       }
-      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body">${fuText(L.body)}<div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
+    initLessonHighlights(subject, body);
+  }
+
+
+  // Offline-first personal highlights. Account names are device-local identities;
+  // cloud sync is deliberately not claimed without a verified authenticated API.
+  const KP_HIGHLIGHT_PREFIX = 'myjamb-highlights-v1:';
+  function kpHighlightStorageKey() {
+    return KP_HIGHLIGHT_PREFIX + (loadCurrentUser() || 'guest');
+  }
+  function kpLoadHighlights() {
+    try {
+      const data = JSON.parse(localStorage.getItem(kpHighlightStorageKey()) || '[]');
+      return Array.isArray(data) ? data.filter(x => x && x.id && x.subject && x.topic && x.quote) : [];
+    } catch (_) { return []; }
+  }
+  function kpSaveHighlights(items) {
+    try { localStorage.setItem(kpHighlightStorageKey(), JSON.stringify(items)); return true; }
+    catch (_) { showInfoToast('Unable to save highlight on this device. Check available storage.'); return false; }
+  }
+  function kpTextNodes(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    return nodes;
+  }
+  function kpOffsetOf(root, node, offset) {
+    let total = 0;
+    for (const textNode of kpTextNodes(root)) {
+      if (textNode === node) return total + offset;
+      total += textNode.textContent.length;
+    }
+    return -1;
+  }
+  function kpRangeForOffsets(root, start, end) {
+    const nodes = kpTextNodes(root);
+    let total = 0, begin = null, finish = null;
+    for (const node of nodes) {
+      const next = total + node.textContent.length;
+      if (!begin && start >= total && start < next) begin = { node, offset: start - total };
+      if (end > total && end <= next) { finish = { node, offset: end - total }; break; }
+      total = next;
+    }
+    if (!begin || !finish) return null;
+    const range = document.createRange();
+    range.setStart(begin.node, begin.offset);
+    range.setEnd(finish.node, finish.offset);
+    return range;
+  }
+  function kpPaintHighlights(root, subject, topic) {
+    const saved = kpLoadHighlights().filter(x => x.subject === subject && x.topic === topic);
+    // Rebuild from the original lesson HTML to keep offsets stable.
+    if (!root.dataset.baseHtml) root.dataset.baseHtml = root.innerHTML;
+    root.innerHTML = root.dataset.baseHtml;
+    const text = root.textContent;
+    const valid = saved.filter(x => text.slice(x.start, x.end) === x.quote);
+    // Reverse order ensures earlier offsets are unchanged by inserted markup.
+    valid.sort((a, b) => b.start - a.start).forEach(x => {
+      const range = kpRangeForOffsets(root, x.start, x.end);
+      if (!range) return;
+      const mark = document.createElement('mark');
+      mark.className = 'kp-user-highlight';
+      mark.title = 'Saved for revision';
+      mark.dataset.highlightId = x.id;
+      try { range.surroundContents(mark); }
+      catch (_) { /* Cross-element selections are saved but not visually wrapped. */ }
+    });
+  }
+  function initLessonHighlights(subject, body) {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'kp-highlight-toolbar';
+    toolbar.innerHTML = '<span>Select a passage in a lesson, then tap Highlight.</span>' +
+      '<button type="button" data-kp-highlight>🖍 Highlight selection</button>' +
+      '<button type="button" data-kp-library>📚 My Highlights</button>';
+    body.prepend(toolbar);
+    const lessonRoots = [...body.querySelectorAll('.kp-lesson-content')];
+    lessonRoots.forEach(root => kpPaintHighlights(root, subject, root.dataset.lesson));
+    // Pointer down prevents the button from collapsing the text selection.
+    toolbar.querySelector('[data-kp-highlight]').addEventListener('mousedown', e => e.preventDefault());
+    toolbar.querySelector('[data-kp-highlight]').addEventListener('click', () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || !selection.rangeCount) {
+        showInfoToast('Select text in a lesson first, then tap Highlight.'); return;
+      }
+      const range = selection.getRangeAt(0);
+      const root = lessonRoots.find(node => node.contains(range.startContainer) && node.contains(range.endContainer));
+      if (!root) { showInfoToast('Select text inside one lesson only.'); return; }
+      const quote = selection.toString();
+      if (!quote.trim() || quote.length > 2000) {
+        showInfoToast('Select a passage of up to 2,000 characters.'); return;
+      }
+      // Reconstruct offsets against the original text, not the current marked DOM.
+      const start = kpOffsetOf(root, range.startContainer, range.startOffset);
+      const end = kpOffsetOf(root, range.endContainer, range.endOffset);
+      if (start < 0 || end <= start) { showInfoToast('Please select plain lesson text.'); return; }
+      const all = kpLoadHighlights();
+      const topic = root.dataset.lesson;
+      if (all.some(x => x.subject === subject && x.topic === topic && x.start === start && x.end === end)) {
+        showInfoToast('This passage is already highlighted.'); return;
+      }
+      const item = { id: 'h-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+        subject, topic, start, end, quote: root.textContent.slice(start, end), createdAt: Date.now() };
+      if (!kpSaveHighlights([...all, item])) return;
+      selection.removeAllRanges();
+      kpPaintHighlights(root, subject, topic);
+      showInfoToast('Saved to My Highlights on this device.');
+    });
+    toolbar.querySelector('[data-kp-library]').addEventListener('click', () => {
+      body.querySelector('.kp-highlight-library')?.remove();
+      const panel = document.createElement('section');
+      panel.className = 'kp-highlight-library';
+      const items = kpLoadHighlights();
+      panel.innerHTML = '<h3>📚 My Highlights</h3><p>Saved on this device. Cloud sync is not yet enabled.</p>' +
+        (items.length ? items.map(x =>
+          '<div class="kp-highlight-item"><strong>' + escHtml(fmt(x.subject)) + ' · ' +
+          escHtml(window.TEACH_TOPICS?.[x.subject]?.lessons?.[x.topic]?.title || x.topic) +
+          '</strong><blockquote>' + escHtml(x.quote) + '</blockquote>' +
+          '<button type="button" data-kp-jump="' + escHtml(x.id) + '">Open lesson</button> ' +
+          '<button type="button" data-kp-remove="' + escHtml(x.id) + '">Remove</button></div>'
+        ).join('') : '<p>No highlights yet. Select lesson text to get started.</p>');
+      toolbar.insertAdjacentElement('afterend', panel);
+      panel.querySelectorAll('[data-kp-remove]').forEach(button => button.onclick = () => {
+        const id = button.dataset.kpRemove;
+        if (!kpSaveHighlights(kpLoadHighlights().filter(x => x.id !== id))) return;
+        lessonRoots.forEach(root => kpPaintHighlights(root, subject, root.dataset.lesson));
+        toolbar.querySelector('[data-kp-library]').click();
+      });
+      panel.querySelectorAll('[data-kp-jump]').forEach(button => button.onclick = () => {
+        const item = kpLoadHighlights().find(x => x.id === button.dataset.kpJump);
+        if (!item) return;
+        if (item.subject !== subject) {
+          const select = document.getElementById('kpSubjectSelect');
+          select.value = item.subject;
+          renderKeyPoints().then(() => {
+            const target = document.querySelector('#jambKeyPointsBody .kp-lesson-content[data-lesson="' + CSS.escape(item.topic) + '"]');
+            target?.closest('details')?.setAttribute('open', '');
+            target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+          return;
+        }
+        const root = lessonRoots.find(node => node.dataset.lesson === item.topic);
+        root?.closest('details')?.setAttribute('open', '');
+        root?.querySelector('[data-highlight-id="' + item.id + '"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
   }
 
   // Reuse the existing practice session and its answer/explanation flow.
