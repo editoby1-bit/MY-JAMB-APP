@@ -23,3 +23,34 @@ This document is a second-opinion handoff, not proof that the ten HOLD questions
 
 ## Next step
 Resolve the ten HOLD cases with original-paper and credible independent sources if a conclusive answer is needed; otherwise preserve current scoring and document the uncertainty. No new answer-key change is justified by this second pass alone.
+
+
+## External-source verification addendum — 2026-11-04
+
+This addendum checks the ten held questions using independent reference materials. It is a decision record for owner approval, not a claim of an official JAMB key. Original papers remain the controlling source for stem and options.
+
+| Question | Independent source-based finding | Recommended owner decision |
+|---|---|---|
+| 2017 Q14 and 2019 Q12 | Cartels coordinate competition, typically pricing/output/markets; the question only says independent voluntary organisations cooperate. This does not distinguish cartel from consortium. Cornell LII https://www.law.cornell.edu/wex/cartel and ACCC https://www.accc.gov.au/business/competition-and-exemptions/cartels | **Defective/ambiguous wording**; retain historical C as the intended key for now, explain missing defining feature; owner to decide whether special credit is warranted. |
+| 2017 Q23 | ECB/European Commission explain anti-counterfeit protection in terms of recognisable security features, not the mere legality of money. https://www.ecb.europa.eu/euro/pdf/material/Trainer_A4_EN_SPECIMEN.pdf and https://economy-finance.ec.europa.eu/euro/euro-coins-and-notes/euro-banknotes_en | **Propose C only, move legality A to Exam Traps**, but reconcile 2009 Q36 before implementing. |
+| 2018 Q13 | World Bank evidence documents both currency/exchange-rate issues and transportation/trade costs as substantial international trade problems. https://blogs.worldbank.org/en/developmenttalk/invoicing-currency-developing-countries-imports-do-exchange-rates-and-tariffs and https://www.worldbank.org/en/topic/infrastructure/publication/shrinking-economic-distance-understanding-how-markets-and-places-can-lower-transport-costs-in-developing-countries | Keep D as conventional intended answer; **do not assert that 'major' is uniquely established**. Owner review only if special credit is proposed. |
+| 2018 Q24 | The arithmetic 20% × 5,000,000 × ₦0.50 = ₦500,000 measures unissued share capital, not technical reserve capital (uncalled amount reserved for winding up). https://www.ncert.nic.in/textbook/pdf/leac201.pdf and https://liicornell.org/wex/unissued_stock | **Defective terminology**; preserve A as historical intended calculation pending owner approval; do not teach unissued capital and reserve capital as synonyms. |
+| 2018 Q35 | 'Most effective but limited' depends on audience and campaign goals; the stem offers no metric or context. No credible universal ranking established by this review. | Keep historical A with qualification; **owner decision** on whether it merits defective treatment. |
+| 2018 Q38 | 'Most difficult to control' among land/water/air pollution depends on contaminant, geography and intervention; no universal ranking established. | Keep C as intended classroom answer, explicitly qualify; **owner decision** if a stricter standard is desired. |
+| 2019 Q17 | Product-line pricing requires multiple related products with differentiated prices; warm clothing alone does not establish a product line. https://openstax.org/books/principles-marketing/pages/12-5-pricing-strategies-and-tactics-for-existing-products and https://openstax.org/books/principles-marketing/pages/1-2-the-marketing-mix-and-the-4ps-of-marketing | **Question underdetermined**. D not justified by the stem; C variable pricing is plausible if seasonality is assumed, but also not uniquely entailed. Owner to decide defective vs retaining historical D with warning. |
+| 2019 Q21 | Technology is a valid business environment factor; supply and rivalry can also affect operations. 'A major factor' does not necessarily mean the only factor. | Retain A as standard best answer; **remove debatable special prominence**, explain other influences as distractor nuance. |
+| 2020 Q10 | Warehousing is storing/maintaining products, not manufacturing. It supports production, shipping, import logistics and packing. https://openstax.org/books/principles-marketing/pages/17-6-logistics-and-its-functions | **Question likely defective/underdetermined**; none of A–D unambiguously states its core importance (storage/time utility). Owner decision on no-answer protection. |
+
+### Owner-review shortlist after online research
+
+1. **2017 Q23 and earlier 2009 Q36:** approve C alone and trap treatment, or retain both A/C for the broad historical wording? This must be consistent across years.
+2. **2017 Q14 / 2019 Q12:** generic association wording cannot identify cartel uniquely; decide whether to credit an alternative, classify as defective, or retain intended C with a warning.
+3. **2018 Q24:** reserve-capital wording is technically incorrect; decide whether to treat as defective while teaching the intended ₦500,000 calculation.
+4. **2018 Q35 / Q38:** decide whether the subjective superlatives merit special treatment or only careful explanations.
+5. **2019 Q17:** no option is uniquely supported by the given warm-clothing stem; decide defective treatment or retain historical D with qualification.
+6. **2020 Q10:** no option directly defines the principal purpose of warehousing; decide defective treatment.
+7. **2018 Q13:** currency is a conventional classroom answer but not demonstrably the universal greatest obstacle; retain D unless the owner prefers ambiguity treatment.
+
+### Scope of verification
+
+All 50 flagged items were read directly from the question scripts during the second pass. External web research focused on the cases where an authoritative distinction could change a ruling; it did **not** establish an official marking scheme or validate every original PDF against a fresh scan. No production scoring or special-section membership has been changed. The remaining decisions are now explicitly framed for owner review, rather than unresearched holds.
