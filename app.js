@@ -1821,38 +1821,34 @@
     const hintKey = 'myjamb-highlight-bubble-seen-v3';
     let hintShown = false;
     try { hintShown = !!localStorage.getItem(hintKey); } catch (_) {}
-    let highlightObserver = null;
+    // Introduce highlighting as soon as a lesson is expanded, not only when
+    // the bottom-of-lesson controls happen to intersect the viewport.
     function showHighlightBubble(controls, replay = false) {
       if ((!replay && hintShown) || controls.querySelector('.kp-highlight-bubble')) return;
-      hintShown = true;
-      try { localStorage.setItem(hintKey, '1'); } catch (_) {}
       const bubble = document.createElement('div');
       bubble.className = 'kp-highlight-bubble';
       bubble.setAttribute('role', 'status');
       bubble.innerHTML = '<strong>✨ Highlight important passages</strong>' +
-        '<span>Select a sentence in this lesson, then tap <b>Highlight selected text</b> below. ' +
-        'Use <b>My Highlights</b> to revise it later.</span>' +
+        '<span>Select a sentence in this lesson, then tap <b>Highlight selection</b>. ' +
+        'Find saved passages in <b>My Highlights</b>.</span>' +
         '<button type="button" aria-label="Dismiss highlighting tip">×</button>';
       controls.prepend(bubble);
+      // Only record a completed display, never an attempted off-screen display.
+      hintShown = true;
+      try { localStorage.setItem(hintKey, '1'); } catch (_) {}
       let timer = null;
       function dismiss() { if (timer) clearTimeout(timer); bubble.remove(); }
       bubble.querySelector('button').addEventListener('click', dismiss);
       timer = window.setTimeout(dismiss, 8500);
     }
     function watchHighlightControls(controls, details) {
-      if (typeof IntersectionObserver === 'undefined') {
-        // Older browsers: retain an accessible replay button.
-        return;
-      }
-      if (!highlightObserver) highlightObserver = new IntersectionObserver(entries => {
-        for (const entry of entries) {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.45 &&
-              !hintShown && entry.target.closest('details')?.open) {
-            showHighlightBubble(entry.target);
-          }
-        }
-      }, { threshold: [0.45] });
-      highlightObserver.observe(controls);
+      const onOpen = () => {
+        if (!details.open || hintShown) return;
+        // The toolbar sits above the lesson, where it can be discovered on open.
+        showHighlightBubble(toolbar);
+      };
+      details.addEventListener('toggle', onOpen);
+      if (details.open) onOpen();
     }
     // Also expose controls INSIDE every open lesson: students may be scrolled
     // far below the subject-level toolbar when selecting a passage.
@@ -1867,7 +1863,7 @@
       replay.type = 'button';
       replay.className = 'kp-highlight-help';
       replay.textContent = 'ⓘ How to highlight';
-      replay.addEventListener('click', () => showHighlightBubble(controls, true));
+      replay.addEventListener('click', () => { showHighlightBubble(toolbar, true); toolbar.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
       controls.append(replay);
       const details = root.closest('details');
       if (details) watchHighlightControls(controls, details);
