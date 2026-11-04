@@ -1711,6 +1711,24 @@
     document.getElementById('jambKeyPointsModal')?.classList.remove('hidden');
   }
   function closeKeyPoints() { document.getElementById('jambKeyPointsModal')?.classList.add('hidden'); }
+  // Load the Economics visual module on demand as well as from the page shell.
+  // This covers installed PWAs with an older cached index.html.
+  let economicsVisualsPromise;
+  function ensureEconomicsVisuals() {
+    if (typeof window.renderEconomicsGraphs === 'function') return Promise.resolve(true);
+    if (!economicsVisualsPromise) {
+      economicsVisualsPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = './key-points-economics-graphs.js?v=production-econ-20261104';
+        script.onload = () => typeof window.renderEconomicsGraphs === 'function'
+          ? resolve(true) : reject(new Error('Economics diagrams module did not initialise'));
+        script.onerror = () => reject(new Error('Economics diagrams could not be downloaded'));
+        document.head.appendChild(script);
+      }).catch(err => { economicsVisualsPromise = null; throw err; });
+    }
+    return economicsVisualsPromise;
+  }
+
   async function renderKeyPoints() {
     const subject = document.getElementById('kpSubjectSelect').value;
     document.getElementById('jambKeyPointsBody').textContent = 'Choose a subject to prepare its saved study content.';
@@ -1740,14 +1758,25 @@
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
-    if (subject === 'economics' && typeof window.renderEconomicsGraphs === 'function') {
-      body.querySelectorAll('.kp-lesson-content').forEach(root => {
-        const host = document.createElement('section');
-        host.className = 'kp-economics-visuals';
-        host.setAttribute('aria-label', 'Economics lesson diagrams and worked tables');
-        root.parentNode.insertBefore(host, root);
-        window.renderEconomicsGraphs(root.dataset.lesson, { host, lesson: root, gallery: true });
-      });
+    if (subject === 'economics') {
+      try {
+        await ensureEconomicsVisuals();
+        if (document.getElementById('kpSubjectSelect').value !== subject) return;
+        body.querySelectorAll('.kp-lesson-content').forEach(root => {
+          const host = document.createElement('section');
+          host.className = 'kp-economics-visuals';
+          host.setAttribute('aria-label', 'Economics lesson diagrams and worked tables');
+          root.parentNode.insertBefore(host, root);
+          try {
+            window.renderEconomicsGraphs(root.dataset.lesson, { host, lesson: root, gallery: true });
+          } catch (err) {
+            host.textContent = 'Unable to draw this lesson’s diagrams: ' + err.message;
+          }
+        });
+      } catch (err) {
+        body.insertAdjacentHTML('afterbegin', '<p class="kp-visual-warning">Economics diagrams are temporarily unavailable. Reload the app when connected.</p>');
+        console.warn('Economics visual module:', err);
+      }
     }
     initLessonHighlights(subject, body);
   }
