@@ -74,6 +74,14 @@
           node.querySelector('[role="status"]').textContent = err.code === 'INTEGRITY'
             ? 'This content could not be verified. Reload the app to check for an updated version, or choose other saved content.'
             : 'Still preparing — check your connection and try again, or choose content already saved on this device.';
+          // Surface the failed package to make content-loading problems actionable.
+          // No user information or private data is included in this diagnostic.
+          if (err.contentFile) {
+            node.querySelector('[role="status"]').textContent +=
+              ' Failed file: ' + err.contentFile + (err.message ? ' (' + err.message + ')' : '');
+          } else if (err.message) {
+            node.querySelector('[role="status"]').textContent += ' Details: ' + err.message;
+          }
           node.querySelector('progress').removeAttribute('value');
           node.querySelector('.content-loading-actions').hidden = false;
           const retry = node.querySelector('[data-retry]');
@@ -195,7 +203,7 @@
           }
           bytes.set(file, body);
           progress(++done, files.length);
-        } catch (err) { error = err; }
+        } catch (err) { err.contentFile = file; error = err; }
       }
     }));
     if (error) throw error;
