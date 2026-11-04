@@ -1927,3 +1927,7 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 #jambKeyPointsBody .kp-highlight-item strong{font-size:13px}
 #jambKeyPointsBody .kp-highlight-item blockquote{margin:8px 0 12px;border-left:3px solid #e6b83d;padding:8px 12px;background:#fff9e8;color:#14243d;white-space:pre-wrap;font-size:14px}
 @media(max-width:600px){#jambKeyPointsBody .kp-highlight-toolbar{position:static}#jambKeyPointsBody .kp-highlight-toolbar button{flex:1 1 auto}}
+
+#jambKeyPointsBody .kp-highlight-inline-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:16px 0;padding:13px;background:#fff8e5;border:1px solid #e8d399;border-radius:12px}
+#jambKeyPointsBody .kp-highlight-inline-controls span{flex:1 1 100%;font-size:13px;font-weight:650;color:#755717}
+#jambKeyPointsBody .kp-highlight-inline-controls button{flex:1 1 140px;padding:11px;border:1px solid #d8bd6c;border-radius:9px;background:white;color:#674c12;font-size:13px;font-weight:750;cursor:pointer}
