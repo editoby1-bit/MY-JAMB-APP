@@ -1882,3 +1882,18 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .subject-offline-status.is-saved { color: #146347; }
 .subject-offline-status[hidden] { display: none; }
 .subject-offline-status { text-transform: none; letter-spacing: normal; }
+
+/* Key Points refresh: carry the approved mobile review-page reading style
+   into the app without changing exam, subscription or other subject screens. */
+#jambKeyPointsBody { color:#14243d; line-height:1.75; font-size:15px; overflow-wrap:anywhere; }
+#jambKeyPointsBody .kp-topic { background:#fff; border:1px solid #dce3ed; border-radius:16px; overflow:hidden; margin:12px 0; box-shadow:0 4px 18px rgba(21,43,75,.04); }
+#jambKeyPointsBody .kp-topic summary { background:#e9eff8; color:#153f78; font-size:15px; font-weight:700; padding:16px 18px; line-height:1.5; }
+#jambKeyPointsBody .kp-topic[open] summary { background:#e0f4e9; color:#125b38; }
+#jambKeyPointsBody .kp-topic .topic-body { background:#fff; color:#14243d; padding:20px; font-size:15px; line-height:1.75; overflow-wrap:anywhere; }
+#jambKeyPointsBody .kp-count { color:#60708a; font-size:12px; font-weight:600; white-space:normal; }
+#jambKeyPointsBody .kp-practice-wrap { margin:22px 0 0; padding:16px; border:1px solid #c7e4d4; background:#f0faf4; border-radius:12px; }
+#jambKeyPointsBody .kp-practice-btn { width:100%; background:#176c47; color:#fff; border:0; border-radius:10px; padding:14px; font-size:15px; font-weight:750; line-height:1.45; cursor:pointer; }
+#jambKeyPointsBody .kp-practice-btn:focus-visible { outline:3px solid #153f78; outline-offset:3px; }
+#jambKeyPointsBody .kp-locked { background:#fff; border-color:#dce3ed; color:#60708a; padding:16px; }
+#jambKeyPointsBody .kp-unlock { color:#60708a; }
+@media(max-width:700px){ #jambKeyPointsBody .kp-topic .topic-body{padding:16px} #jambKeyPointsBody .kp-practice-wrap{padding:12px} }
