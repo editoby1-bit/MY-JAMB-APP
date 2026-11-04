@@ -1817,6 +1817,23 @@
       '<button type="button" data-kp-library>📚 My Highlights</button>';
     body.prepend(toolbar);
     const lessonRoots = [...body.querySelectorAll('.kp-lesson-content')];
+    // Also expose controls INSIDE every open lesson: students may be scrolled
+    // far below the subject-level toolbar when selecting a passage.
+    lessonRoots.forEach(root => {
+      const controls = document.createElement('div');
+      controls.className = 'kp-highlight-inline-controls';
+      controls.innerHTML = '<span>🖍 Select text above to save it for revision</span>' +
+        '<button type="button" data-kp-inline-highlight>Highlight selected text</button>' +
+        '<button type="button" data-kp-inline-library>My Highlights</button>';
+      root.insertAdjacentElement('afterend', controls);
+      controls.querySelector('[data-kp-inline-highlight]').addEventListener('mousedown', e => e.preventDefault());
+      controls.querySelector('[data-kp-inline-highlight]').addEventListener('click', () =>
+        toolbar.querySelector('[data-kp-highlight]').click());
+      controls.querySelector('[data-kp-inline-library]').addEventListener('click', () => {
+        toolbar.querySelector('[data-kp-library]').click();
+        toolbar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
     lessonRoots.forEach(root => kpPaintHighlights(root, subject, root.dataset.lesson));
     // Pointer down prevents the button from collapsing the text selection.
     toolbar.querySelector('[data-kp-highlight]').addEventListener('mousedown', e => e.preventDefault());
