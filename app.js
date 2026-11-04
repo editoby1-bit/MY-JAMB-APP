@@ -1818,23 +1818,41 @@
     body.prepend(toolbar);
     const lessonRoots = [...body.querySelectorAll('.kp-lesson-content')];
     // Show the walkthrough beside the actual controls, only when a lesson is opened.
-    const hintKey = 'myjamb-highlight-bubble-seen-v2';
+    const hintKey = 'myjamb-highlight-bubble-seen-v3';
     let hintShown = false;
     try { hintShown = !!localStorage.getItem(hintKey); } catch (_) {}
-    function showHighlightBubble(controls) {
-      if (hintShown || controls.querySelector('.kp-highlight-bubble')) return;
+    let highlightObserver = null;
+    function showHighlightBubble(controls, replay = false) {
+      if ((!replay && hintShown) || controls.querySelector('.kp-highlight-bubble')) return;
       hintShown = true;
       try { localStorage.setItem(hintKey, '1'); } catch (_) {}
       const bubble = document.createElement('div');
       bubble.className = 'kp-highlight-bubble';
       bubble.setAttribute('role', 'status');
-      bubble.innerHTML = '<strong>✨ New! Highlight as you study</strong>' +
-        '<span>Select a sentence above, then tap <b>Highlight selected text</b> here. ' +
-        'Revisit it anytime in <b>My Highlights</b>.</span>' +
+      bubble.innerHTML = '<strong>✨ Highlight important passages</strong>' +
+        '<span>Select a sentence in this lesson, then tap <b>Highlight selected text</b> below. ' +
+        'Use <b>My Highlights</b> to revise it later.</span>' +
         '<button type="button" aria-label="Dismiss highlighting tip">×</button>';
       controls.prepend(bubble);
-      bubble.querySelector('button').addEventListener('click', () => bubble.remove());
-      window.setTimeout(() => bubble.remove(), 8500);
+      let timer = null;
+      function dismiss() { if (timer) clearTimeout(timer); bubble.remove(); }
+      bubble.querySelector('button').addEventListener('click', dismiss);
+      timer = window.setTimeout(dismiss, 8500);
+    }
+    function watchHighlightControls(controls, details) {
+      if (typeof IntersectionObserver === 'undefined') {
+        // Older browsers: retain an accessible replay button.
+        return;
+      }
+      if (!highlightObserver) highlightObserver = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.45 &&
+              !hintShown && entry.target.closest('details')?.open) {
+            showHighlightBubble(entry.target);
+          }
+        }
+      }, { threshold: [0.45] });
+      highlightObserver.observe(controls);
     }
     // Also expose controls INSIDE every open lesson: students may be scrolled
     // far below the subject-level toolbar when selecting a passage.
@@ -1845,13 +1863,14 @@
         '<button type="button" data-kp-inline-highlight>Highlight selected text</button>' +
         '<button type="button" data-kp-inline-library>My Highlights</button>';
       root.insertAdjacentElement('afterend', controls);
+      const replay = document.createElement('button');
+      replay.type = 'button';
+      replay.className = 'kp-highlight-help';
+      replay.textContent = 'ⓘ How to highlight';
+      replay.addEventListener('click', () => showHighlightBubble(controls, true));
+      controls.append(replay);
       const details = root.closest('details');
-      if (details) {
-        details.addEventListener('toggle', () => {
-          if (details.open) showHighlightBubble(controls);
-        });
-        if (details.open) showHighlightBubble(controls);
-      }
+      if (details) watchHighlightControls(controls, details);
       controls.querySelector('[data-kp-inline-highlight]').addEventListener('mousedown', e => e.preventDefault());
       controls.querySelector('[data-kp-inline-highlight]').addEventListener('click', () =>
         toolbar.querySelector('[data-kp-highlight]').click());
