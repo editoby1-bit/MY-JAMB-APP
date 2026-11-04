@@ -18,12 +18,54 @@ const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anch
 return '<figure class="econ-figure"><figcaption>'+title+'</figcaption><svg viewBox="0 0 320 260" role="img" aria-label="'+title+'. '+note+'"><path d="M44 30 V216 H300" fill="none" stroke="#58677d" stroke-width="1.7"/>'+ticks+line(first,"#1763a6")+(second?line(second,"#d28a36"):"")+'<text x="170" y="250" text-anchor="middle" font-size="12" fill="#253e60">'+xlab+'</text><text x="6" y="16" font-size="12" fill="#253e60">'+ylab+'</text></svg><p>'+note+'</p></figure>';
 }
 window.renderEconomicsGraphs=function(id){
-const host=document.getElementById("economics-visuals");if(!host)return;
+const host=document.getElementById("economics-visuals"),lesson=document.getElementById("newText");
+if(!host||!lesson)return;
 host.replaceChildren();
 if(!C[id])return;
-const heading=document.createElement("h3");heading.textContent="Visual learning";host.appendChild(heading);
-const intro=document.createElement("p");intro.textContent="Schematic teaching diagrams. Axis values are illustrative and should not be treated as observed economic data.";host.appendChild(intro);
-if(id==="tools-analysis"){const tables=document.createElement("div");tables.className="econ-data-tables";tables.innerHTML='<h4>Demand schedule</h4><table><thead><tr><th>Price (₦)</th><th>Quantity demanded</th></tr></thead><tbody><tr><td>100</td><td>30</td></tr><tr><td>200</td><td>20</td></tr><tr><td>300</td><td>10</td></tr></tbody></table><h4>Frequency distribution</h4><table><thead><tr><th>Score</th><th>Frequency</th><th>Cumulative frequency</th></tr></thead><tbody><tr><td>0–9</td><td>2</td><td>2</td></tr><tr><td>10–19</td><td>3</td><td>5</td></tr><tr><td>20–29</td><td>5</td><td>10</td></tr></tbody></table><h4>Chart examples</h4><div class="econ-graph-grid"><figure class="econ-figure"><figcaption>Bar chart — output by sector</figcaption><svg viewBox="0 0 320 230" role="img" aria-label="Illustrative bar chart with agriculture 40, manufacturing 65, services 85"><path d="M35 20V190H305" fill="none" stroke="#58677d" stroke-width="2"/><rect x="58" y="110" width="47" height="80" fill="#1763a6"/><rect x="140" y="60" width="47" height="130" fill="#1763a6"/><rect x="222" y="20" width="47" height="170" fill="#1763a6"/><g font-size="10" fill="#34445b" text-anchor="middle"><text x="82" y="207">Agriculture</text><text x="164" y="207">Industry</text><text x="246" y="207">Services</text></g></svg><p>Separate categories have gaps between bars.</p></figure><figure class="econ-figure"><figcaption>Histogram — grouped frequencies</figcaption><svg viewBox="0 0 320 230" role="img" aria-label="Illustrative histogram with touching bars"><path d="M35 20V190H305" fill="none" stroke="#58677d" stroke-width="2"/><rect x="45" y="150" width="80" height="40" fill="#1763a6" stroke="white"/><rect x="125" y="110" width="80" height="80" fill="#1763a6" stroke="white"/><rect x="205" y="50" width="80" height="140" fill="#1763a6" stroke="white"/><g font-size="11" fill="#34445b" text-anchor="middle"><text x="85" y="207">0–9</text><text x="165" y="207">10–19</text><text x="245" y="207">20–29</text></g></svg><p>Adjacent class intervals are represented by touching bars.</p></figure></div>';host.appendChild(tables);}
-const grid=document.createElement("div");grid.className="econ-graph-grid";grid.innerHTML=C[id].map(graph).join("");host.appendChild(grid);
+const figures=C[id].map(spec=>{const el=document.createElement("div");el.className="econ-inline-visual";el.innerHTML=graph(spec);return el;});
+const visuals=[];
+if(id==="tools-analysis"){
+const table=document.createElement("div");table.className="econ-inline-visual econ-data-tables";
+table.innerHTML='<h4>Demand schedule</h4><table><thead><tr><th>Price (₦)</th><th>Quantity demanded</th></tr></thead><tbody><tr><td>100</td><td>30</td></tr><tr><td>200</td><td>20</td></tr><tr><td>300</td><td>10</td></tr></tbody></table>';
+visuals.push({section:"1. TABLES AND SCHEDULES",element:table});
+const charts=document.createElement("div");charts.className="econ-inline-visual";
+charts.innerHTML='<h4>Bar chart and histogram</h4><div class="econ-graph-grid"><figure class="econ-figure"><figcaption>Bar chart — separate categories</figcaption><svg viewBox="0 0 320 220" role="img" aria-label="Bar chart of three categories"><path d="M35 20V190H305" fill="none" stroke="#58677d" stroke-width="2"/><rect x="58" y="110" width="47" height="80" fill="#1763a6"/><rect x="140" y="60" width="47" height="130" fill="#1763a6"/><rect x="222" y="20" width="47" height="170" fill="#1763a6"/><g font-size="10" text-anchor="middle"><text x="82" y="207">Agriculture</text><text x="164" y="207">Industry</text><text x="246" y="207">Services</text></g></svg><p>Bars have gaps for separate categories.</p></figure><figure class="econ-figure"><figcaption>Histogram — continuous classes</figcaption><svg viewBox="0 0 320 220" role="img" aria-label="Histogram with adjacent bars"><path d="M35 20V190H305" fill="none" stroke="#58677d" stroke-width="2"/><rect x="45" y="150" width="80" height="40" fill="#1763a6"/><rect x="125" y="110" width="80" height="80" fill="#1763a6"/><rect x="205" y="50" width="80" height="140" fill="#1763a6"/><g font-size="10" text-anchor="middle"><text x="85" y="207">0–9</text><text x="165" y="207">10–19</text><text x="245" y="207">20–29</text></g></svg><p>Histogram bars touch for adjacent intervals of equal width.</p></figure></div>';
+visuals.push({section:"3. CHOOSING THE RIGHT CHART",element:charts});
+const pie=document.createElement("div");pie.className="econ-inline-visual";
+pie.innerHTML='<h4>Pie chart — household expenditure</h4><figure class="econ-figure"><svg viewBox="0 0 340 260" role="img" aria-label="Pie chart: food 40 percent, housing 30 percent, transport 15 percent, other 15 percent"><circle cx="122" cy="120" r="92" fill="#1763a6"/><path d="M122 120 L122 28 A92 92 0 0 1 176.1 194.4 Z" fill="#1763a6"/><path d="M122 120 L176.1 194.4 A92 92 0 0 1 34.5 91.6 Z" fill="#d28a36"/><path d="M122 120 L34.5 91.6 A92 92 0 0 1 47.6 65.9 Z" fill="#48a59a"/><path d="M122 120 L47.6 65.9 A92 92 0 0 1 122 28 Z" fill="#9275b9"/><g font-size="12" fill="#263d57"><text x="224" y="70">Food 40% = 144°</text><text x="224" y="100">Housing 30% = 108°</text><text x="224" y="130">Transport 15% = 54°</text><text x="224" y="160">Other 15% = 54°</text></g></svg><p>Each sector angle = category percentage × 360° ÷ 100. The four sectors sum to 100% and 360°.</p></figure>';
+visuals.push({section:"3. CHOOSING THE RIGHT CHART",element:pie});
+const freq=document.createElement("div");freq.className="econ-inline-visual econ-data-tables";
+freq.innerHTML='<h4>Frequency and cumulative frequency</h4><table><thead><tr><th>Score</th><th>Frequency</th><th>Cumulative frequency</th></tr></thead><tbody><tr><td>0–9</td><td>2</td><td>2</td></tr><tr><td>10–19</td><td>3</td><td>5</td></tr><tr><td>20–29</td><td>5</td><td>10</td></tr></tbody></table>';
+visuals.push({section:"10. FREQUENCY DISTRIBUTIONS",element:freq});
+visuals.push({section:"2. GRAPHS: WHAT THE AXES MEAN",element:figures[0]});
+}else{
+const sections={
+"nature-concepts":["PRODUCTION POSSIBILITY","PRODUCTION POSSIBILITY"],
+"demand-supply":["1. DEMAND:","3. SUPPLY:","EQUILIBRIUM"],
+"elasticity":["PRICE ELASTICITY","PRICE ELASTICITY"],
+"consumer-behaviour":["TOTAL UTILITY","BUDGET LINE"],
+"production":["TOTAL PRODUCT","MARGINAL PRODUCT"],
+"costs-revenue":["AVERAGE COST","TOTAL REVENUE"],
+"market-structures":["PERFECT COMPETITION","MONOPOLY"]
+};
+const terms=sections[id]||[];
+figures.forEach((el,i)=>visuals.push({section:terms[i]||"",element:el}));
+}
+const raw=lesson.textContent;
+const lines=raw.split("\n");
+const placements=new Map();
+for(const item of visuals){
+const index=lines.findIndex(l=>l.toUpperCase().includes(item.section.toUpperCase()));
+if(index<0){host.appendChild(item.element);continue;}
+const target=Math.min(lines.length,index+3);
+if(!placements.has(target))placements.set(target,[]);
+placements.get(target).push(item.element);
+}
+lesson.replaceChildren();
+lines.forEach((line,i)=>{
+const span=document.createElement("span");span.textContent=line+(i<lines.length-1?"\n":"");lesson.appendChild(span);
+const attached=placements.get(i+1)||[];
+attached.forEach(el=>lesson.appendChild(el));
+});
 };
 })();
