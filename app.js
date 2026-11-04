@@ -2059,6 +2059,7 @@
       p.questions.length + ' · ' + Object.keys(p.answers).length + ' answered · ' + score + ' correct</p>' +
       (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
       '<p class="kp-inline-question">' + escHtml(q.question) + '</p>' +
+      (q.diagram ? '<div class="kp-inline-diagram" role="group" aria-label="Diagram for this past question">' + q.diagram + '</div>' : '') +
       q.options.map((option, i) => '<button type="button" class="kp-inline-answer' +
         (answered && !noAnswer && accepted.includes(i) ? ' correct' : answered && !noAnswer && selected === i ? ' wrong' : '') +
         '" data-answer="' + i + '"' + (answered ? ' disabled' : '') + '>' +
