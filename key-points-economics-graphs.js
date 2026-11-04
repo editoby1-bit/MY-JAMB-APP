@@ -8,6 +8,11 @@ const C={
 "consumer-behaviour":[["Total and marginal utility","Units consumed","Utility",[[0,0],[20,35],[40,64],[60,82],[80,91],[100,86]],"Total utility can rise at a decreasing rate and eventually fall when marginal utility becomes negative."],["Budget line","Good X","Good Y",[[0,100],[100,0]],"The line shows affordable combinations when the whole budget is spent; a price change rotates the line."]],
 "production":[["Total product","Labour","Total output",[[0,0],[17,16],[33,42],[50,69],[67,87],[83,100],[100,100]],"Total output rises while marginal product is positive; it levels off when marginal product reaches zero."],["Marginal product","Labour","Marginal output",[[0,25],[20,60],[40,85],[60,65],[80,30],[100,0]],"Diminishing marginal returns begin when marginal product starts falling, not when total output falls."]],
 "costs-revenue":[["Average and marginal cost","Output","Cost per unit",[[10,85],[25,54],[40,40],[55,37],[70,48],[90,80]],"Illustrative U-shaped average cost.",[[10,70],[25,35],[40,20],[55,38],[70,70],[90,100]]],["Total cost and revenue","Output","Naira (relative scale)",[[0,25],[20,38],[40,51],[60,64],[80,77],[100,90]],"The gap between total revenue and total cost represents profit or loss.",[[0,0],[20,20],[40,40],[60,60],[80,80],[100,100]]]],
+"national-income":[["Real GDP over time","Year index","Real GDP index",[[0,20],[20,29],[40,44],[60,52],[80,74],[100,88]],"Illustrative real-output growth over time; real values remove price effects."]],
+"money-inflation":[["Consumer price index","Period","CPI index",[[0,25],[20,35],[40,46],[60,60],[80,78],[100,90]],"A rising CPI indicates a higher price level; inflation measures the percentage change, not the index itself."]],
+"financial-institutions":[["Interest rate and borrowing","Quantity of loans demanded","Interest rate",[[10,90],[30,75],[50,55],[70,32],[90,12]],"An illustrative inverse relationship between borrowing costs and quantity of loans demanded, other factors equal."]],
+"public-finance":[["Illustrative progressive tax rate","Income","Average tax rate",[[0,5],[20,15],[40,25],[60,35],[80,42],[100,48]],"A progressive tax has a rising average tax rate as income increases; illustrative values only."]],
+"growth-development":[["Lorenz curve and equality line","Cumulative population (%)","Cumulative income (%)",[[0,0],[20,4],[40,12],[60,27],[80,55],[100,100]],"The bowed Lorenz curve lies below the 45-degree equality line; a larger gap indicates more inequality.",[[0,0],[20,20],[40,40],[60,60],[80,80],[100,100]]]],
 "market-structures":[["Competitive firm: P = AR = MR","Quantity","Price / revenue",[[0,55],[100,55]],"An individual perfectly competitive firm faces a horizontal price line."],["Monopoly: AR and MR","Quantity","Price / revenue",[[0,95],[100,20]],"With a downward-sloping demand (AR), marginal revenue generally lies below it.",[[0,85],[65,0]]]]
 };
 function graph(spec){
@@ -20,6 +25,7 @@ const dot=(x,y,label,dx=9,dy=-9)=>{const [px,py]=xy([x,y]);return '<circle cx="'
 const guide=(x,y)=>{const [px,py]=xy([x,y]);return '<path d="M'+px+' '+py+' V216 M'+px+' '+py+' H44" stroke="#7489a2" stroke-width="1.3" stroke-dasharray="5 4" fill="none"/>';};
 let extraNote="";if(title==="Production possibility frontier")extraNote="  A — ON THE CURVE: efficient production. B — INSIDE THE CURVE: underutilised resources. C — OUTSIDE THE CURVE: currently unattainable production.";if(title==="Elastic and inelastic demand")extraNote=" At their common price–quantity point, D₁ (blue, flatter) is relatively more elastic and D₂ (orange, steeper) is relatively less elastic. Slope alone does not establish elasticity at different points; elasticity uses percentage changes.";const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anchor="middle" font-size="10" fill="#66748b">'+n+'</text><text x="35" y="'+(220-n*1.75)+'" text-anchor="end" font-size="10" fill="#66748b">'+n+'</text>').join('');
 let annotations="";
+if(title==="Lorenz curve and equality line"){annotations+=text(242,78,"Equality","#b26b17")+text(226,168,"Lorenz");}
 if(title==="Production possibility frontier"){
 annotations+=dot(40,84,"A",-17,-12)+dot(35,38,"B",9,18)+dot(77,85,"C",9,-10);
 annotations+='<circle cx="'+xy([35,38])[0]+'" cy="'+xy([35,38])[1]+'" r="3" fill="#1763a6"/><circle cx="'+xy([77,85])[0]+'" cy="'+xy([77,85])[1]+'" r="3" fill="#d28a36"/>';
@@ -91,7 +97,7 @@ const sections={
 "consumer-behaviour":["TOTAL UTILITY","BUDGET LINE"],
 "production":["TOTAL PRODUCT","MARGINAL PRODUCT"],
 "costs-revenue":["AVERAGE COST","TOTAL REVENUE"],
-"market-structures":["PERFECT COMPETITION","MONOPOLY"]
+"market-structures":["PERFECT COMPETITION","MONOPOLY"],"national-income":["5. REAL GDP"],"money-inflation":["7. MEASURING INFLATION"],"financial-institutions":["9. MONETARY POLICY TRANSMISSION"],"public-finance":["4. PROGRESSIVE"],"growth-development":["4. INCOME INEQUALITY"]
 };
 const terms=sections[id]||[];
 figures.forEach((el,i)=>visuals.push({section:terms[i]||"",element:el}));
