@@ -1740,6 +1740,15 @@
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
+    if (subject === 'economics' && typeof window.renderEconomicsGraphs === 'function') {
+      body.querySelectorAll('.kp-lesson-content').forEach(root => {
+        const host = document.createElement('section');
+        host.className = 'kp-economics-visuals';
+        host.setAttribute('aria-label', 'Economics lesson diagrams and worked tables');
+        root.parentNode.insertBefore(host, root);
+        window.renderEconomicsGraphs(root.dataset.lesson, { host, lesson: root, gallery: true });
+      });
+    }
     initLessonHighlights(subject, body);
   }
 
