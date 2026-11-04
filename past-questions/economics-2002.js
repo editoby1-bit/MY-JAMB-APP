@@ -24,7 +24,7 @@
     q("In the pie chart above, the percentage for children is equivalent to",
       ["288°", "144°", "90°", "72°"], B,
       "A whole pie is 360°, so children's 40% is 40/100 × 360° = 144°.",
-      { diagram: IMG('economics-2002-q4.png') }),
+      { diagram: '<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pie chart: children 40 percent, women 35 percent, men 25 percent"><circle cx="160" cy="160" r="145" fill="#ffffff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L160 15 A145 145 0 0 1 245.23 277.31 Z" fill="#d9ebff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L245.23 277.31 A145 145 0 0 1 15 160 Z" fill="#f9e8d5" stroke="#24344a" stroke-width="2"/><path d="M160 160 L15 160 A145 145 0 0 1 160 15 Z" fill="#e0f2e6" stroke="#24344a" stroke-width="2"/><g font-family="Arial,sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#14263c"><text x="206" y="83">Children</text><text x="206" y="105">40%</text><text x="99" y="218">Women</text><text x="99" y="239">35%</text><text x="245" y="190">Men</text><text x="245" y="211">25%</text></g></svg>' }),
     q("In the diagram above, the marginal rate of substitution of X for Y for a movement from S to T is",
       ["5:1", "1:5", "18:4", "13:3"], B,
       "No option is correct. From S (2 units of X, 18 of Y) to T (4 units of X, 15 of Y), the consumer gives up 3 units of Y for 2 more units of X, so MRS of X for Y = 3 ÷ 2 = 1.5 (3:2), which is not among the options.",
