@@ -115,17 +115,17 @@ addSchedule("International organisations — exam comparison",["Organisation","E
 if(id==="tools-analysis"){
 const table=document.createElement("div");table.className="econ-inline-visual econ-data-tables";
 table.innerHTML='<h4>Demand schedule</h4><table><thead><tr><th>Price (₦)</th><th>Quantity demanded</th></tr></thead><tbody><tr><td>100</td><td>30</td></tr><tr><td>200</td><td>20</td></tr><tr><td>300</td><td>10</td></tr></tbody></table>';
-visuals.push({section:"1. TABLES AND SCHEDULES",element:table});
+visuals.push({section:"EXAMPLE — DEMAND SCHEDULE",element:table});
 const charts=document.createElement("div");charts.className="econ-inline-visual";
 charts.innerHTML='<h4>Bar chart and histogram</h4><div class="econ-graph-grid"><figure class="econ-figure"><figcaption>Bar chart — separate categories</figcaption><svg viewBox="0 0 320 220" role="img" aria-label="Bar chart of three categories"><path d="M35 20V190H305" fill="none" stroke="#58677d" stroke-width="2"/><rect x="58" y="110" width="47" height="80" fill="#1763a6"/><rect x="140" y="60" width="47" height="130" fill="#1763a6"/><rect x="222" y="20" width="47" height="170" fill="#1763a6"/><g font-size="10" text-anchor="middle"><text x="82" y="207">Agriculture</text><text x="164" y="207">Industry</text><text x="246" y="207">Services</text></g></svg><p>Bars have gaps for separate categories.</p></figure><figure class="econ-figure"><figcaption>Histogram — continuous classes</figcaption><svg viewBox="0 0 320 220" role="img" aria-label="Histogram with adjacent bars"><path d="M35 20V190H305" fill="none" stroke="#58677d" stroke-width="2"/><rect x="45" y="150" width="80" height="40" fill="#1763a6"/><rect x="125" y="110" width="80" height="80" fill="#1763a6"/><rect x="205" y="50" width="80" height="140" fill="#1763a6"/><g font-size="10" text-anchor="middle"><text x="85" y="207">0–9</text><text x="165" y="207">10–19</text><text x="245" y="207">20–29</text></g></svg><p>Histogram bars touch for adjacent intervals of equal width.</p></figure></div>';
-visuals.push({section:"3. CHOOSING THE RIGHT CHART",element:charts});
+visuals.push({section:"HISTOGRAM — GROUPED CONTINUOUS MEASUREMENTS",element:charts});
 const pie=document.createElement("div");pie.className="econ-inline-visual";
 pie.innerHTML='<h4>Pie chart — household expenditure</h4><figure class="econ-figure"><div role="img" aria-label="Pie chart: food 40 percent, housing 30 percent, transport 15 percent and other 15 percent" style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:center"><div style="width:190px;height:190px;flex:none;border-radius:50%;background:conic-gradient(#1763a6 0% 40%,#d28a36 40% 70%,#48a59a 70% 85%,#9275b9 85% 100%)"></div><div style="font-size:13px;line-height:2"><div>🔵 Food: 40% = 144°</div><div>🟠 Housing: 30% = 108°</div><div>🟢 Transport: 15% = 54°</div><div>🟣 Other: 15% = 54°</div></div></div><p>Sector angle = percentage × 360° ÷ 100. The four sectors total 100% and 360°.</p></figure>';
-visuals.push({section:"3. CHOOSING THE RIGHT CHART",element:pie});
+visuals.push({section:"WORKED EXAMPLE — PIE CHART",element:pie});
 const freq=document.createElement("div");freq.className="econ-inline-visual econ-data-tables";
 freq.innerHTML='<h4>Frequency and cumulative frequency</h4><table><thead><tr><th>Score</th><th>Frequency</th><th>Cumulative frequency</th></tr></thead><tbody><tr><td>0–9</td><td>2</td><td>2</td></tr><tr><td>10–19</td><td>3</td><td>5</td></tr><tr><td>20–29</td><td>5</td><td>10</td></tr></tbody></table>';
 visuals.push({section:"10. FREQUENCY DISTRIBUTIONS",element:freq});
-visuals.push({section:"2. GRAPHS: WHAT THE AXES MEAN",element:figures[0]});
+visuals.push({section:"EXAMPLE — READING A GRAPH",element:figures[0]});
 }else{
 const sections={
 "nature-concepts":["PRODUCTION POSSIBILITY","PRODUCTION POSSIBILITY"],
@@ -149,8 +149,10 @@ if(options?.inline){
   const placements=new Map();
   for(const item of visuals){
     const index=lines.findIndex(line=>line.toUpperCase().includes(item.section.toUpperCase()));
-    if(index<0){host.appendChild(item.element);continue;}
-    const target=Math.min(breaks.length,index+3);
+    // A missing heading must never send a diagram back to the top.
+    // Place it after the lesson if the teaching text has been revised.
+    if(index<0){lesson.appendChild(item.element);continue;}
+    const target=Math.min(breaks.length,index+(id==='tools-analysis'?2:3));
     if(!placements.has(target))placements.set(target,[]);
     placements.get(target).push(item.element);
   }
