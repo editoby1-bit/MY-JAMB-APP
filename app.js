@@ -2033,6 +2033,30 @@
     renderKeyPointPractice();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+  function keyPointQuestionHtml(value) {
+    const lines = String(value || '').split('\n');
+    const heading = lines.findIndex(line => /price/i.test(line) && /quantity/i.test(line) && line.includes('...'));
+    if (heading >= 0) {
+      const rows = [];
+      let end = heading + 1;
+      for (; end < lines.length; end++) {
+        const parts = lines[end].trim().split(/\s*\.{2,}\s*/);
+        if (parts.length !== 2 || !parts.every(part => /^[₦]?[-+]?\d[\d,.]*$/.test(part))) break;
+        rows.push(parts);
+      }
+      if (rows.length >= 2) {
+        const titles = lines[heading].split(/\s*\.{2,}\s*/);
+        return escHtml(lines.slice(0, heading).join(' ')) +
+          '<div class="kp-inline-diagram kp-inline-table"><table><thead><tr><th>' +
+          escHtml(titles[0]) + '</th><th>' + escHtml(titles[1] || 'Quantity') +
+          '</th></tr></thead><tbody>' +
+          rows.map(row => '<tr><td>' + escHtml(row[0]) + '</td><td>' + escHtml(row[1]) + '</td></tr>').join('') +
+          '</tbody></table></div>' +
+          escHtml(lines.slice(end).join(' '));
+      }
+    }
+    return escHtml(value).replace(/\n/g, '<br>');
+  }
   function renderKeyPointPractice() {
     const p = kpPractice;
     if (!p || !p.panel.isConnected) return;
@@ -2058,7 +2082,7 @@
       '<p class="kp-inline-meta">' + escHtml(title) + ' · Question ' + (p.index + 1) + ' of ' +
       p.questions.length + ' · ' + Object.keys(p.answers).length + ' answered · ' + score + ' correct</p>' +
       (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
-      '<p class="kp-inline-question">' + escHtml(q.question) + '</p>' +
+      '<div class="kp-inline-question">' + keyPointQuestionHtml(q.question) + '</div>' +
       (q.diagram ? '<div class="kp-inline-diagram" role="group" aria-label="Diagram for this past question">' + q.diagram + '</div>' : '') +
       q.options.map((option, i) => '<button type="button" class="kp-inline-answer' +
         (answered && !noAnswer && accepted.includes(i) ? ' correct' : answered && !noAnswer && selected === i ? ' wrong' : '') +
