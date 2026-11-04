@@ -18,10 +18,10 @@ const line=(arr,color)=>'<polyline fill="none" stroke="'+color+'" stroke-width="
 const text=(x,y,value,color="#263e5d")=>'<text x="'+x+'" y="'+y+'" font-size="12" font-weight="700" fill="'+color+'">'+value+'</text>';
 const dot=(x,y,label,dx=9,dy=-9)=>{const [px,py]=xy([x,y]);return '<circle cx="'+px+'" cy="'+py+'" r="4.5" fill="white" stroke="#1a416c" stroke-width="2"/>'+text(px+dx,py+dy,label);};
 const guide=(x,y)=>{const [px,py]=xy([x,y]);return '<path d="M'+px+' '+py+' V216 M'+px+' '+py+' H44" stroke="#7489a2" stroke-width="1.3" stroke-dasharray="5 4" fill="none"/>';};
-const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anchor="middle" font-size="10" fill="#66748b">'+n+'</text><text x="35" y="'+(220-n*1.75)+'" text-anchor="end" font-size="10" fill="#66748b">'+n+'</text>').join('');
+let extraNote="";if(title==="Production possibility frontier")extraNote=" A: efficient (on PPC). B: underutilised resources (inside). C: unattainable with current resources and technology (outside).";if(title==="Elastic and inelastic demand")extraNote=" At their common price–quantity point, D₁ (blue, flatter) is relatively more elastic and D₂ (orange, steeper) is relatively less elastic. Slope alone does not establish elasticity at different points; elasticity uses percentage changes.";const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anchor="middle" font-size="10" fill="#66748b">'+n+'</text><text x="35" y="'+(220-n*1.75)+'" text-anchor="end" font-size="10" fill="#66748b">'+n+'</text>').join('');
 let annotations="";
 if(title==="Production possibility frontier"){
-annotations+=dot(40,84,"A (efficient)",-20,-13)+dot(35,38,"B (inside)",8,18)+dot(77,85,"C (unattainable)",-110,-10);
+annotations+=dot(40,84,"A",-17,-12)+dot(35,38,"B",9,18)+dot(77,85,"C",9,-10);
 annotations+='<circle cx="'+xy([35,38])[0]+'" cy="'+xy([35,38])[1]+'" r="3" fill="#1763a6"/><circle cx="'+xy([77,85])[0]+'" cy="'+xy([77,85])[1]+'" r="3" fill="#d28a36"/>';
 }
 if(title==="Demand curve"||title==="Supply curve"){
@@ -33,7 +33,7 @@ annotations+=guide(50,50)+dot(50,50,"E",10,-12)+text(48,121,"Pe")+text(167,214,"
 annotations+=text(270,185,"D")+text(270,53,"S");
 }
 if(title==="Elastic and inelastic demand"){
-annotations+=text(258,188,"Elastic", "#1763a6")+text(195,46,"Inelastic","#b26b17");
+annotations+=text(271,184,"D₁","#1763a6")+text(195,45,"D₂","#b26b17");
 }
 if(title==="Total and marginal utility"){
 annotations+=dot(80,91,"Maximum TU",-91,-12)+text(268,86,"TU");
