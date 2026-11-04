@@ -12,6 +12,8 @@ const C={
 "money-inflation":[["Consumer price index","Period","CPI index",[[0,25],[20,35],[40,46],[60,60],[80,78],[100,90]],"A rising CPI indicates a higher price level; inflation measures the percentage change, not the index itself."]],
 "financial-institutions":[["Interest rate and borrowing","Quantity of loans demanded","Interest rate",[[10,90],[30,75],[50,55],[70,32],[90,12]],"An illustrative inverse relationship between borrowing costs and quantity of loans demanded, other factors equal."]],
 "public-finance":[["Illustrative progressive tax rate","Income","Average tax rate",[[0,5],[20,15],[40,25],[60,35],[80,42],[100,48]],"A progressive tax has a rising average tax rate as income increases; illustrative values only."]],
+"population-labour":[["Malthus: geometric population and arithmetic food","Time periods","Illustrative index",[[0,10],[25,20],[50,40],[75,65],[100,100]],"Stylised illustration of Malthus's claim, not actual population or food data.",[[0,10],[25,22],[50,34],[75,46],[100,58]]],["Optimum population and income per person","Population (relative scale)","Income per person",[[10,25],[30,60],[50,85],[70,66],[90,38]],"Per-capita output rises to an optimum (O) then falls in this simplified model."]],
+"international-trade":[["Foreign currency demand and supply","Foreign currency quantity","Naira price per foreign currency unit",[[10,90],[30,70],[50,50],[70,30],[90,10]],"Demand and supply intersect at an illustrative foreign-exchange market equilibrium.",[[10,10],[30,30],[50,50],[70,70],[90,90]]]],
 "growth-development":[["Lorenz curve and equality line","Cumulative population (%)","Cumulative income (%)",[[0,0],[20,4],[40,12],[60,27],[80,55],[100,100]],"The bowed Lorenz curve lies below the 45-degree equality line; a larger gap indicates more inequality.",[[0,0],[20,20],[40,40],[60,60],[80,80],[100,100]]]],
 "market-structures":[["Competitive firm: P = AR = MR","Quantity","Price / revenue",[[0,55],[100,55]],"An individual perfectly competitive firm faces a horizontal price line."],["Monopoly: AR and MR","Quantity","Price / revenue",[[0,95],[100,20]],"With a downward-sloping demand (AR), marginal revenue generally lies below it.",[[0,85],[65,0]]]]
 };
@@ -25,6 +27,9 @@ const dot=(x,y,label,dx=9,dy=-9)=>{const [px,py]=xy([x,y]);return '<circle cx="'
 const guide=(x,y)=>{const [px,py]=xy([x,y]);return '<path d="M'+px+' '+py+' V216 M'+px+' '+py+' H44" stroke="#7489a2" stroke-width="1.3" stroke-dasharray="5 4" fill="none"/>';};
 let extraNote="";if(title==="Production possibility frontier")extraNote="  A — ON THE CURVE: efficient production. B — INSIDE THE CURVE: underutilised resources. C — OUTSIDE THE CURVE: currently unattainable production.";if(title==="Elastic and inelastic demand")extraNote=" At their common price–quantity point, D₁ (blue, flatter) is relatively more elastic and D₂ (orange, steeper) is relatively less elastic. Slope alone does not establish elasticity at different points; elasticity uses percentage changes.";const ticks=[0,25,50,75,100].map(n=>'<text x="'+(44+n*2.45)+'" y="231" text-anchor="middle" font-size="10" fill="#66748b">'+(title==="Total product"||title==="Marginal product"?Math.round(n*6/100):n)+'</text><text x="35" y="'+(220-n*1.75)+'" text-anchor="end" font-size="10" fill="#66748b">'+(title==="Total product"?Math.round(n*48/100):title==="Marginal product"?Math.round(n*13/100):n)+'</text>').join('');
 let annotations="";
+if(title==="Malthus: geometric population and arithmetic food"){annotations+=text(230,45,"Population","#1763a6")+text(235,111,"Food","#b26b17");}
+if(title==="Optimum population and income per person"){annotations+=dot(50,85,"O (optimum)",-70,-13);}
+if(title==="Foreign currency demand and supply"){annotations+=guide(50,50)+dot(50,50,"E",10,-10)+text(271,186,"D")+text(271,53,"S");}
 if(title==="Lorenz curve and equality line"){annotations+=text(242,78,"Equality","#b26b17")+text(226,168,"Lorenz");}
 if(title==="Production possibility frontier"){
 annotations+=dot(40,84,"A",-17,-12)+dot(35,38,"B",9,18)+dot(77,85,"C",9,-10);
@@ -98,6 +103,14 @@ addSchedule("Total and marginal utility — cups of juice",["Cups consumed","Tot
 if(id==="costs-revenue"){
 addSchedule("Cost schedule — fixed cost is ₦300 at every output level",["Output (units)","Fixed cost FC (₦)","Variable cost VC (₦)","Total cost TC (₦)","Marginal cost MC (₦)"],[[0,300,0,300,"—"],[1,300,120,420,120],[2,300,210,510,90],[3,300,270,570,60],[4,300,360,660,90],[5,300,480,780,120]],"WORKED TABLE — FIXED COST ₦300","TC = FC + VC. MC = change in TC when output increases by one unit. At output 4: TC = 300 + 360 = ₦660, MC = 660 − 570 = ₦90; AFC = ₦75, AVC = ₦90, ATC = ₦165.",[4]);
 }
+
+if(id==="international-trade"){
+addSchedule("Comparative advantage — output from one worker-day",["Country","Cocoa (bags)","Cloth (rolls)","Cost of 1 cocoa (cloth)","Cost of 1 cloth (cocoa)"],[["Nigeria","10","5","0.50","2.00"],["Ghana","6","4","0.67","1.50"]],"2. ABSOLUTE VERSUS COMPARATIVE ADVANTAGE","Nigeria has absolute advantage in both goods, but lower opportunity cost in cocoa (0.50 < 0.67). Ghana has lower opportunity cost in cloth (1.50 < 2.00). Specialisation follows comparative advantage.");
+addSchedule("Balance of payments — worked current account",["Component","Net balance (₦bn)"],[["Goods exports","500"],["Goods imports","−650"],["Goods balance","−150"],["Net services","−40"],["Net primary income","−20"],["Net secondary income","+80"],["Current account","−130"]],"6. BOP WORKED EXAMPLE","Goods balance = 500 − 650 = −150. Current account = −150 − 40 − 20 + 80 = −130 (₦bn). The BOP includes further accounts and financing.");
+}
+if(id==="international-organisations"){
+addSchedule("International organisations — exam comparison",["Organisation","Established","Headquarters","Principal purpose"],[["ECOWAS","1975","Abuja","West African integration"],["AU","2002 (OAU 1963)","Addis Ababa","African cooperation"],["IMF","Bretton Woods 1944","Washington, DC","External payments and monetary stability"],["World Bank","Bretton Woods 1944","Washington, DC","Development finance"],["AfDB","1964","Abidjan","African development finance"],["WTO","1995 (GATT 1947)","Geneva","International trade rules"],["OPEC","1960","Vienna","Oil policy coordination"],["UNCTAD","1964","Geneva","Trade and development"]],"10. COMPARATIVE ORGANISATION GUIDE","Dates distinguish founding from predecessor institutions. ECOWAS was founded by a treaty signed in Lagos, although its Commission is headquartered in Abuja.");
+}
 if(id==="tools-analysis"){
 const table=document.createElement("div");table.className="econ-inline-visual econ-data-tables";
 table.innerHTML='<h4>Demand schedule</h4><table><thead><tr><th>Price (₦)</th><th>Quantity demanded</th></tr></thead><tbody><tr><td>100</td><td>30</td></tr><tr><td>200</td><td>20</td></tr><tr><td>300</td><td>10</td></tr></tbody></table>';
@@ -120,7 +133,7 @@ const sections={
 "consumer-behaviour":["TOTAL UTILITY","BUDGET LINE"],
 "production":["TOTAL PRODUCT","MARGINAL PRODUCT"],
 "costs-revenue":["AVERAGE COST","TOTAL REVENUE"],
-"market-structures":["PERFECT COMPETITION","MONOPOLY"],"national-income":["5. REAL GDP"],"money-inflation":["7. MEASURING INFLATION"],"financial-institutions":["9. MONETARY POLICY TRANSMISSION"],"public-finance":["4. PROGRESSIVE"],"growth-development":["4. INCOME INEQUALITY"]
+"market-structures":["PERFECT COMPETITION","MONOPOLY"],"national-income":["5. REAL GDP"],"money-inflation":["7. MEASURING INFLATION"],"financial-institutions":["9. MONETARY POLICY TRANSMISSION"],"public-finance":["4. PROGRESSIVE"],"growth-development":["4. INCOME INEQUALITY"],"population-labour":["3. MALTHUSIAN","4. OPTIMUM POPULATION"],"international-trade":["8. FOREIGN-EXCHANGE DEMAND"]
 };
 const terms=sections[id]||[];
 figures.forEach((el,i)=>visuals.push({section:terms[i]||"",element:el}));
