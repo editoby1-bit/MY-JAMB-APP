@@ -1914,3 +1914,16 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 #jambKeyPointsBody .kp-inline-nav button,#jambKeyPointsBody [data-kp-close]{flex:1;padding:12px 10px;border-radius:10px;border:1px solid #cbd7e8;background:#fff;color:#153f78;font-weight:700;cursor:pointer}
 #jambKeyPointsBody .kp-inline-nav button:last-child{background:#153f78;color:#fff}
 @media(max-width:600px){#jambKeyPointsBody .kp-inline-practice{padding:14px}#jambKeyPointsBody .kp-inline-nav{flex-wrap:wrap}}
+
+/* Student highlights and offline revision library */
+#jambKeyPointsBody .kp-highlight-toolbar{position:sticky;top:0;z-index:3;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;background:#f0f6ff;border:1px solid #cbd9ee;border-radius:12px;margin:0 0 16px;box-shadow:0 3px 12px #10244812}
+#jambKeyPointsBody .kp-highlight-toolbar span{flex:1 1 160px;font-size:12px;color:#39506f;line-height:1.4}
+#jambKeyPointsBody .kp-highlight-toolbar button,#jambKeyPointsBody .kp-highlight-item button{border:1px solid #bed0e5;background:#fff;color:#153f78;border-radius:9px;padding:9px 12px;font-weight:700;font-size:13px;cursor:pointer}
+#jambKeyPointsBody mark.kp-user-highlight{background:#ffeb8a;color:inherit;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#jambKeyPointsBody .kp-highlight-library{background:#fff;border:1px solid #dce3ed;border-radius:14px;padding:16px;margin:0 0 16px}
+#jambKeyPointsBody .kp-highlight-library h3{margin:0 0 8px;color:#153f78}
+#jambKeyPointsBody .kp-highlight-library>p{color:#64748b;font-size:13px}
+#jambKeyPointsBody .kp-highlight-item{padding:12px 0;border-top:1px solid #e5ebf2}
+#jambKeyPointsBody .kp-highlight-item strong{font-size:13px}
+#jambKeyPointsBody .kp-highlight-item blockquote{margin:8px 0 12px;border-left:3px solid #e6b83d;padding:8px 12px;background:#fff9e8;color:#14243d;white-space:pre-wrap;font-size:14px}
+@media(max-width:600px){#jambKeyPointsBody .kp-highlight-toolbar{position:static}#jambKeyPointsBody .kp-highlight-toolbar button{flex:1 1 auto}}
