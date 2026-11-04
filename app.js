@@ -1817,6 +1817,24 @@
       '<button type="button" data-kp-library>📚 My Highlights</button>';
     body.prepend(toolbar);
     const lessonRoots = [...body.querySelectorAll('.kp-lesson-content')];
+    const hintKey = 'myjamb-highlight-tip-seen-v1';
+    let firstVisit = false;
+    try { firstVisit = !localStorage.getItem(hintKey); } catch (_) {}
+    if (firstVisit && lessonRoots.length) {
+      const tip = document.createElement('div');
+      tip.className = 'kp-first-highlight-tip';
+      tip.setAttribute('role', 'note');
+      tip.innerHTML = '<div class="kp-first-highlight-heading">✨ New: Save what matters as you study</div>' +
+        '<p><strong>1.</strong> Open a lesson and select a sentence (hold and drag on mobile). ' +
+        '<strong>2.</strong> Tap <b>Highlight selected text</b> beneath the lesson. ' +
+        '<strong>3.</strong> Find it anytime in <b>My Highlights</b>.</p>' +
+        '<button type="button" class="kp-tip-dismiss">Got it ✓</button>';
+      toolbar.insertAdjacentElement('afterend', tip);
+      tip.querySelector('.kp-tip-dismiss').addEventListener('click', () => {
+        try { localStorage.setItem(hintKey, '1'); } catch (_) {}
+        tip.remove();
+      });
+    }
     // Also expose controls INSIDE every open lesson: students may be scrolled
     // far below the subject-level toolbar when selecting a passage.
     lessonRoots.forEach(root => {
@@ -1826,6 +1844,12 @@
         '<button type="button" data-kp-inline-highlight>Highlight selected text</button>' +
         '<button type="button" data-kp-inline-library>My Highlights</button>';
       root.insertAdjacentElement('afterend', controls);
+      if (firstVisit && root === lessonRoots[0]) {
+        const nudge = document.createElement('span');
+        nudge.className = 'kp-highlight-nudge';
+        nudge.textContent = '✨ NEW · Save key passages for quick revision';
+        controls.prepend(nudge);
+      }
       controls.querySelector('[data-kp-inline-highlight]').addEventListener('mousedown', e => e.preventDefault());
       controls.querySelector('[data-kp-inline-highlight]').addEventListener('click', () =>
         toolbar.querySelector('[data-kp-highlight]').click());
