@@ -28,14 +28,25 @@ async function startTopicPractice(){
   const of=window.TEACH_TOPICS.government.of||{};
   const questions=window.QUESTION_BANK.government.filter(q=>!q.reviewPending&&Array.isArray(q.options)&&q.options.length>=2&&of[practiceKey(q)]===lesson.id);
   if(!questions.length){panel.innerHTML='<h2>No mapped past questions yet</h2><p>There are no usable past questions mapped to this lesson in the current bank.</p>';return}
-  activePractice={lesson:lesson.id,questions:questions.slice(),index:0,answers:{}};renderTopicPractice();
+  activePractice={lesson:lesson.id,questions:questions.slice().sort(()=>Math.random()-.5),index:0,answers:{}};renderTopicPractice();
  }catch(e){panel.innerHTML='<h2>Unable to load practice</h2><p>'+escapePractice(e.message)+'</p><button id="retryTopic">Try again</button>';document.getElementById('retryTopic').onclick=startTopicPractice}
 }
+function repeatSignature(q){
+ const norm=v=>String(v||'').toLowerCase().replace(/<[^>]*>/g,'').replace(/[^a-z0-9]/g,'');
+ return norm(q.question)+'|'+norm(q.passage||'');
+}
 function verifiedQuestionYears(q,questions){
- // Only group exact same wording AND ordered answer options; never conflate variants.
- const signature=x=>JSON.stringify([String(x.question||'').trim(),...(x.options||[]).map(o=>String(o).trim())]);
- const sig=signature(q);
- return [...new Set(questions.filter(x=>signature(x)===sig&&/^20\\d{2}$|^19\\d{2}$/.test(String(x.year))).map(x=>Number(x.year)))].sort((a,b)=>a-b);
+ // Match repeated question wording even when answer choices were reordered.
+ // For safety, require at least three matching option texts.
+ const norm=v=>String(v||'').toLowerCase().replace(/<[^>]*>/g,'').replace(/[^a-z0-9]/g,'');
+ const opts=new Set((q.options||[]).map(norm));
+ const sig=repeatSignature(q);
+ return [...new Set(questions.filter(x=>{
+  if(repeatSignature(x)!==sig || !/^(19|20)\\d{2}$/.test(String(x.year)))return false;
+  const overlap=new Set((x.options||[]).map(norm);
+  let shared=0;opts.forEach(o=>{if(overlap.has(o))shared++});
+  return shared>=Math.min(3,opts.size);
+ }).map(x=>Number(x.year)))].sort((a,b)=>a-b);
 }
 function renderTopicPractice(){
  const p=activePractice;if(!p)return;const panel=document.getElementById('practicePanel'),q=p.questions[p.index],selected=p.answers[p.index],done=selected!==undefined;
