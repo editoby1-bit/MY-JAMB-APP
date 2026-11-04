@@ -1949,3 +1949,5 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 @keyframes kpBubbleEnter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 @keyframes kpBubbleLeave{to{opacity:0;transform:translateY(-5px);pointer-events:none}}
 @media(prefers-reduced-motion:reduce){#jambKeyPointsBody .kp-highlight-bubble{animation:none}}
+
+#jambKeyPointsBody .kp-highlight-inline-controls .kp-highlight-help{flex:0 1 auto;border:0;background:transparent;color:#7b5a18;text-decoration:underline;text-underline-offset:3px;padding:8px 4px;font-size:12px;font-weight:650}
