@@ -1759,24 +1759,38 @@
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
     if (subject === 'economics') {
-      try {
-        await ensureEconomicsVisuals();
-        if (document.getElementById('kpSubjectSelect').value !== subject) return;
-        body.querySelectorAll('.kp-lesson-content').forEach(root => {
-          const host = document.createElement('section');
-          host.className = 'kp-economics-visuals';
-          host.setAttribute('aria-label', 'Economics lesson diagrams and worked tables');
-          root.parentNode.insertBefore(host, root);
+      // Build diagrams only when a lesson is opened. Rendering every lesson at
+      // once was unnecessarily expensive on low-memory mobile browsers.
+      body.querySelectorAll('details.kp-topic').forEach(details => {
+        const root = details.querySelector('.kp-lesson-content');
+        if (!root) return;
+        const host = document.createElement('section');
+        host.className = 'kp-economics-visuals';
+        host.setAttribute('aria-label', 'Economics lesson diagrams and worked tables');
+        root.parentNode.insertBefore(host, root);
+        let finished = false;
+        let inFlight = false;
+        async function draw() {
+          if (!details.open || finished || inFlight) return;
+          inFlight = true;
+          host.textContent = 'Preparing lesson diagrams…';
           try {
+            await ensureEconomicsVisuals();
+            if (!details.isConnected || !details.open) return;
+            host.replaceChildren();
             window.renderEconomicsGraphs(root.dataset.lesson, { host, lesson: root, gallery: true });
+            finished = true;
+            if (!host.children.length) host.textContent = 'This lesson has no separate diagrams.';
           } catch (err) {
-            host.textContent = 'Unable to draw this lesson’s diagrams: ' + err.message;
-          }
-        });
-      } catch (err) {
-        body.insertAdjacentHTML('afterbegin', '<p class="kp-visual-warning">Economics diagrams are temporarily unavailable. Reload the app when connected.</p>');
-        console.warn('Economics visual module:', err);
-      }
+            host.textContent = 'Diagrams could not load: ' + err.message + '. Tap here to retry.';
+            host.setAttribute('role', 'status');
+            host.onclick = () => { host.onclick = null; draw(); };
+            console.warn('Economics diagrams:', root.dataset.lesson, err);
+          } finally { inFlight = false; }
+        }
+        details.addEventListener('toggle', draw);
+        if (details.open) draw();
+      });
     }
     initLessonHighlights(subject, body);
   }
