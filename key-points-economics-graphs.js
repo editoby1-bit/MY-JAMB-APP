@@ -138,6 +138,29 @@ const sections={
 const terms=sections[id]||[];
 figures.forEach((el,i)=>visuals.push({section:terms[i]||"",element:el}));
 }
+if(options?.inline){
+  // The production viewer formats lesson newlines as <br> rather than text
+  // newlines. Match the original lesson lines and attach diagrams after the
+  // corresponding line break without replacing its formatted text.
+  const breaks=[...lesson.querySelectorAll('br')];
+  const rawLines=lesson.dataset.originalLessonText?.split('\\n')||[];
+  const lines=rawLines.length?rawLines:lesson.innerText.split('\\n');
+  const placements=new Map();
+  for(const item of visuals){
+    const index=lines.findIndex(line=>line.toUpperCase().includes(item.section.toUpperCase()));
+    if(index<0){host.appendChild(item.element);continue;}
+    const target=Math.min(breaks.length,index+3);
+    if(!placements.has(target))placements.set(target,[]);
+    placements.get(target).push(item.element);
+  }
+  for(const [target,items] of placements){
+    const anchor=breaks[target-1];
+    if(!anchor){items.forEach(el=>lesson.appendChild(el));continue;}
+    let previous=anchor;
+    for(const item of items){previous.after(item);previous=item;}
+  }
+  return;
+}
 if(options?.gallery){visuals.forEach(item=>host.appendChild(item.element));return;}
 const raw=lesson.textContent;
 const lines=raw.split("\n");
