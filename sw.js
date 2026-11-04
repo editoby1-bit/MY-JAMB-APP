@@ -1,6 +1,6 @@
 // Cache only the app shell at install. Subject packages are saved by
 // content-loader.js after integrity checks; keep them across shell updates.
-const CACHE = 'jamb-app-v2';
+const CACHE = 'jamb-app-v3';
 const CONTENT_CACHE = 'jamb-content-v1';
 const FONT_CACHE = 'jamb-fonts-v1';
 
