@@ -121,7 +121,7 @@
       try {
         const storage = await cache();
         const urls = new Set(storage ? (await storage.keys()).map(req => req.url) : []);
-        const shell = await caches.open('jamb-app-v2');
+        const shell = await caches.open('jamb-app-v3');
         const shellUrls = new Set((await shell.keys()).map(req => req.url));
         const shellFiles = ['index.html', 'content-manifest.json', 'styles.css', ...[...document.scripts]
           .map(script => script.getAttribute('src')).filter(src => src && new URL(src, base).origin === base.origin && !src.startsWith('blob:'))];
