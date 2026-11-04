@@ -2083,7 +2083,10 @@
       p.questions.length + ' · ' + Object.keys(p.answers).length + ' answered · ' + score + ' correct</p>' +
       (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
       '<div class="kp-inline-question">' + keyPointQuestionHtml(q.question) + '</div>' +
-      (q.diagram ? '<div class="kp-inline-diagram" role="group" aria-label="Diagram for this past question">' + q.diagram + '</div>' : '') +
+      (q.diagram ? '<div class="kp-inline-diagram" role="group" aria-label="Diagram for this past question">' +
+        (/percentage for children is equivalent to/i.test(q.question) && p.subject === 'economics'
+          ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Pie chart showing children 40 percent, women 35 percent, men 25 percent"><circle cx="160" cy="160" r="145" fill="#fff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L160 15 A145 145 0 0 1 245.23 277.31 Z" fill="#d9ebff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L245.23 277.31 A145 145 0 0 1 15 160 Z" fill="#f9e8d5" stroke="#24344a" stroke-width="2"/><path d="M160 160 L15 160 A145 145 0 0 1 160 15 Z" fill="#e0f2e6" stroke="#24344a" stroke-width="2"/><g font-family="Arial,sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#14263c"><text x="205" y="84">Children</text><text x="205" y="106">40%</text><text x="97" y="217">Women</text><text x="97" y="239">35%</text><text x="246" y="188">Men</text><text x="246" y="210">25%</text></g></svg>'
+          : q.diagram) + '</div>' : '') +
       q.options.map((option, i) => '<button type="button" class="kp-inline-answer' +
         (answered && !noAnswer && accepted.includes(i) ? ' correct' : answered && !noAnswer && selected === i ? ' wrong' : '') +
         '" data-answer="' + i + '"' + (answered ? ' disabled' : '') + '>' +
