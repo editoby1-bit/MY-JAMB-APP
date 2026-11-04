@@ -1897,3 +1897,20 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 #jambKeyPointsBody .kp-locked { background:#fff; border-color:#dce3ed; color:#60708a; padding:16px; }
 #jambKeyPointsBody .kp-unlock { color:#60708a; }
 @media(max-width:700px){ #jambKeyPointsBody .kp-topic .topic-body{padding:16px} #jambKeyPointsBody .kp-practice-wrap{padding:12px} }
+
+/* Topic practice stays in the Key Points lesson, matching the approved review layout. */
+#jambKeyPointsBody .kp-inline-practice{margin:18px 0 24px;padding:20px;background:#fff;border:1px solid #dce3ed;border-radius:16px;color:#14243d;line-height:1.65;overflow-wrap:anywhere}
+#jambKeyPointsBody .kp-inline-practice h3{font-size:19px;line-height:1.4;margin:0 0 12px;color:#14243d}
+#jambKeyPointsBody .kp-inline-meta{font-size:12px;color:#61718b;margin:0 0 14px}
+#jambKeyPointsBody .kp-inline-year{display:inline-block;background:#e9eff8;border:1px solid #c9d8ee;color:#153f78;border-radius:99px;padding:4px 11px;font-size:12px;font-weight:750;margin:0 0 12px}
+#jambKeyPointsBody .kp-inline-question{font-weight:750;margin:10px 0 18px}
+#jambKeyPointsBody .kp-inline-answer{display:block;width:100%;text-align:left;background:#fff;color:#14243d;border:1px solid #cbd7e8;border-radius:10px;padding:12px 14px;margin:6px 0;font-size:15px;line-height:1.5;cursor:pointer}
+#jambKeyPointsBody .kp-inline-answer.correct{background:#e1f6e9;border-color:#23935b}
+#jambKeyPointsBody .kp-inline-answer.wrong{background:#ffe8e8;border-color:#b94c4c}
+#jambKeyPointsBody .kp-inline-answer:disabled{opacity:1;cursor:default}
+#jambKeyPointsBody .kp-inline-feedback{background:#f1f5fa;border-radius:10px;padding:12px;margin:14px 0}
+#jambKeyPointsBody .kp-inline-feedback p{margin:8px 0}
+#jambKeyPointsBody .kp-inline-nav{display:flex;gap:10px;margin-top:18px}
+#jambKeyPointsBody .kp-inline-nav button,#jambKeyPointsBody [data-kp-close]{flex:1;padding:12px 10px;border-radius:10px;border:1px solid #cbd7e8;background:#fff;color:#153f78;font-weight:700;cursor:pointer}
+#jambKeyPointsBody .kp-inline-nav button:last-child{background:#153f78;color:#fff}
+@media(max-width:600px){#jambKeyPointsBody .kp-inline-practice{padding:14px}#jambKeyPointsBody .kp-inline-nav{flex-wrap:wrap}}
