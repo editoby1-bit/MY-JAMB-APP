@@ -66,7 +66,7 @@ const base = process.env.JAMB_TEST_URL || 'http://127.0.0.1:8001/';
     }, { file, originalHash });
     assert.equal(await page.evaluate(() => JambContent.isSaved('mathematics')), true);
     await page.evaluate(async () => {
-      await caches.delete('jamb-app-v2');
+      for (const name of await caches.keys()) if (/^jamb-app-v[0-9]+$/.test(name)) await caches.delete(name);
       await JambContent.refreshSaved();
     });
     assert.equal(await page.evaluate(() => JambContent.isSaved('mathematics')), false);

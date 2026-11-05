@@ -1,3 +1,5 @@
+> **Superseded by the completed release:** the owner decisions and final treatments are recorded in [CRS 2017–2020 completed review](crs-2017-2020-answer-review.md). This document preserves the earlier decision packet.
+
 # CRS 2017–2020: resuming the unfinished batch
 
 Status: review draft, not published. The live CRS bank goes through 2016. All four later supplied papers contain 40 questions, giving 160 new questions. The settled 2003 Q3 C-only answer remains unchanged. Earlier interpretation queues are preserved; this pass prioritizes the unfinished uploaded papers.

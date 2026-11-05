@@ -21,7 +21,7 @@ self.addEventListener('install', event => {
     const html = await response.clone().text();
     await storage.put('./index.html', response);
     await storage.put('./', new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
-    const local = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)]
+    const local = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css)(?:[?#][^"]*)?)"/g)]
       .map(m => m[1]).filter(url => !/^(?:https?:)?\/\//.test(url));
     await storage.addAll([...new Set([...local, './content-manifest.json'])]);
     await self.skipWaiting();

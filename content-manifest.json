@@ -393,6 +393,10 @@
         "past-questions/crs-2014.js",
         "past-questions/crs-2015.js",
         "past-questions/crs-2016.js",
+        "past-questions/crs-2017.js",
+        "past-questions/crs-2018.js",
+        "past-questions/crs-2019.js",
+        "past-questions/crs-2020.js",
         "teach/crs.js",
         "teach/crs-topics.js",
         "booklet/errors.js"
@@ -414,18 +418,22 @@
         "2013": 50,
         "2014": 50,
         "2015": 50,
-        "2016": 50
+        "2016": 50,
+        "2017": 40,
+        "2018": 40,
+        "2019": 40,
+        "2020": 40
       },
-      "count": 850,
-      "repeats": 94,
-      "lessons": 32,
+      "count": 1010,
+      "repeats": 158,
+      "lessons": 36,
       "traps": true,
       "tricky": {
-        "multi": 53,
-        "none": 6
+        "multi": 55,
+        "none": 13
       },
-      "gameCount": 788,
-      "memoryCount": 157
+      "gameCount": 939,
+      "memoryCount": 200
     },
     "economics": {
       "scripts": [
@@ -1601,12 +1609,12 @@
       "bytes": 38495
     },
     "teach/crs.js": {
-      "sha256": "7a539f9f7a6aa2db8f09f45556404372cae6a7aee673da933fa6cbd6d6af9f8a",
-      "bytes": 478865
+      "sha256": "37e960c1f86cfa93a13145edbd6d30dacac15f43ef9408b7b8569acf5dd67246",
+      "bytes": 612761
     },
     "teach/crs-topics.js": {
-      "sha256": "ecd56ed6af0ddb995cbaff8d2201bef72d4ff6b7cdffb72c78ce33c5bd3d884e",
-      "bytes": 275900
+      "sha256": "b82ef0bf4b58cadcd32707454b93c751239414fd5d9ba1b91aafa94322d55b4f",
+      "bytes": 300072
     },
     "past-questions/economics-2001.js": {
       "sha256": "83ab7b609bd6108a2556797f7b843f2ad571b970137780c7c228f12f7ca0dbf0",
@@ -2005,8 +2013,8 @@
       "bytes": 43597
     },
     "teach/commerce.js": {
-      "sha256": "fb387f0814756c80fd4f9c0cf1ee333af5f67923b6b7f8e3500ab310806f78b7",
-      "bytes": 888137
+      "sha256": "6f29f2d3cfb8e38367cb97ef2de7bd6b954367ebba50e5e86f7d9984bb4d5958",
+      "bytes": 889251
     },
     "teach/commerce-topics.js": {
       "sha256": "73c25b510b7690ab9ac0dc21b95b933a1251aa07a8316e0a0d0eb365ccca3354",
@@ -2087,7 +2095,23 @@
     "past-questions/commerce-2020.js": {
       "sha256": "32cf6694c0170c4f6132d89b52c54aaaede6dd9b3462ca1a5c5d8629be7f7526",
       "bytes": 52854
+    },
+    "past-questions/crs-2017.js": {
+      "sha256": "abf465f005be115930fbadbbcdf5ea0d1a1cc9f5ad138d6841ad76b0077a1ba9",
+      "bytes": 33138
+    },
+    "past-questions/crs-2018.js": {
+      "sha256": "0fe83f78e8dc378e4adf17aabcb3dea185e2b28f3a3ffed20e6fb2121e6867b6",
+      "bytes": 28965
+    },
+    "past-questions/crs-2019.js": {
+      "sha256": "9fff92f7830880eba54fc8024d317c1fc151cae28b06f0492e9b65f5f0a89058",
+      "bytes": 45536
+    },
+    "past-questions/crs-2020.js": {
+      "sha256": "1afc5b7b03f50106cd0ffb9db7b84c35e6345301b671a1233b85fa6accb88f0e",
+      "bytes": 45116
     }
   },
-  "version": "e03a6e10e72a9871"
+  "version": "44089aaa12e34379"
 }

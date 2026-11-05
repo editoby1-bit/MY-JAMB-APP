@@ -123,8 +123,10 @@
         const urls = new Set(storage ? (await storage.keys()).map(req => req.url) : []);
         const shell = await caches.open('jamb-app-v3');
         const shellUrls = new Set((await shell.keys()).map(req => req.url));
-        const shellFiles = ['index.html', 'content-manifest.json', 'styles.css', ...[...document.scripts]
-          .map(script => script.getAttribute('src')).filter(src => src && new URL(src, base).origin === base.origin && !src.startsWith('blob:'))];
+        const localAssets = [...document.scripts].map(script => script.getAttribute('src'))
+          .concat([...document.querySelectorAll('link[rel="stylesheet"][href]')].map(link => link.getAttribute('href')))
+          .filter(src => src && new URL(src, base).origin === base.origin && !src.startsWith('blob:'));
+        const shellFiles = ['index.html', 'content-manifest.json', ...localAssets];
         const shellReady = shellFiles.every(file => shellUrls.has(urlFor(file)));
         for (const [subject, pkg] of Object.entries(manifest.subjects)) {
           if (shellReady && [...pkg.scripts, ...pkg.images].every(file => urls.has(urlFor(file) + '?content=' + manifest.files[file].sha256))

@@ -8,12 +8,12 @@ const base = process.env.JAMB_TEST_URL || 'http://127.0.0.1:8001/';
 const context = vm.createContext({ window: {} });
 const load = f => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), context, { filename: f });
 load('questions.js');
-for (let year = 2001; year <= 2016; year++) load(`past-questions/crs-${year}.js`);
+for (let year = 2001; year <= 2020; year++) load(`past-questions/crs-${year}.js`);
 load('teach/crs.js'); load('teach/crs-topics.js');
 const bank = JSON.parse(vm.runInContext('JSON.stringify(QUESTION_BANK.crs)', context));
 const teach = JSON.parse(JSON.stringify(context.window.TEACH_ME.crs));
 const topics = JSON.parse(JSON.stringify(context.window.TEACH_TOPICS.crs));
-const key = q => (q.passageId || '') + '|' + q.question + '|' + q.options.join('|');
+const key = q => q.teachKey || (q.passageId || '') + '|' + q.question + '|' + q.options.join('|');
 const printed = {
   2001: 'DADBCBCBDCCDCBCAACCCBBACDACCACABABABCBDACDBACDDBBA',
   2002: 'ABDBAACDDDCCDADDCCACCADCBDDCBBDABCACAABDACACDDDCCC',
@@ -30,10 +30,14 @@ const printed = {
   2013: '*DBADCBACBDDCBCACDAAABACDCAABDBDCCDCBDDCCDDCDBADCA',
   2014: '*ACABAAAABBABAAABCABBBDCDDBDACACBDBACAABBCACDBBCBC',
   2015: 'CDCBDDCADBCDCDDCACCBAADDBACDADBCDAADDDAAABCABCDADD',
-  2016: 'ABBDDDDAADACBCBCCACBBBAACACBBCADBCCDBBDDCBABCDCDCC'
+  2016: 'ABBDDDDAADACBCBCCACBBBAACACBBCADBCCDBBDDCBABCDCDCC',
+  2017: 'ADDCCDAAABBCDCDABDADABCCADACDACCCABDBDCA',
+  2018: 'CACCDBBABBBCBBAADCBABBABCBBCCCCDCCBAADAD',
+  2019: 'CADBCCDCBABBCABBDBACBABCCDBBCCBDCDCABBDB',
+  2020: 'DABDDDCBACBDCDAAADACACDBCADBCCCACCDBCCDC'
 };
-assert.equal(bank.length, 850);
-assert.equal(new Set(bank.filter(q => q.year).map(q => q.id)).size, 800);
+assert.equal(bank.length, 1010);
+assert.equal(new Set(bank.filter(q => q.year).map(q => q.id)).size, 960);
 for (const q of bank) {
   assert.equal(q.options.length, 4); assert(q.explanation);
   assert(teach[key(q)]?.length > 100);
@@ -50,21 +54,24 @@ for (const q of bank) {
     assert.equal(new Set([q.answer, ...q.alsoAccept]).size, q.alsoAccept.length + 1);
   }
 }
-for (let year = 2001; year <= 2016; year++) {
+for (let year = 2001; year <= 2020; year++) {
   const qs = bank.filter(q => q.year === year);
-  assert.equal(qs.length, 50);
-  assert.deepEqual(qs.map(q => q.paperQuestion), Array.from({ length: 50 }, (_, i) => i + 1));
+  assert.equal(qs.length, printed[year].length);
+  assert.deepEqual(qs.map(q => q.paperQuestion), Array.from({ length: printed[year].length }, (_, i) => i + 1));
 }
-assert.equal(bank.filter(q => q.bookletKey).length, 36);
+assert.equal(bank.filter(q => q.bookletKey).length, 46);
 const imageQuestion = bank.find(q => q.id === 'crs-2003-q3');
 assert.equal(imageQuestion.answer, 2);
 assert.equal(imageQuestion.alsoAccept, undefined);
 assert.equal(imageQuestion.keyVerdict, undefined);
 assert(!/B and C|both defensible/.test(teach[key(imageQuestion)]));
-assert.equal(bank.filter(q => q.alsoAccept).length, 53);
-assert.equal(bank.filter(q => q.keyVerdict === 'noanswer').length, 9);
-assert.equal(Object.keys(topics.lessons).length, 32);
-for (const id of ['crs-2005-q44', 'crs-2006-q42', 'crs-2007-q20', 'crs-2008-q17', 'crs-2008-q38']) assert.equal(topics.of[key(bank.find(q => q.id === id))], 'joshua-judges');
+assert.equal(bank.filter(q => q.alsoAccept).length, 55);
+assert.equal(bank.filter(q => q.keyVerdict === 'noanswer').length, 16);
+assert.equal(bank.filter(q => q.reviewPending).length, 0);
+for (const q of bank.filter(q => q.reviewPending)) { assert.equal(q.answer, 'ABCD'.indexOf(q.printedKey)); assert.equal(q.keyVerdict, 'pending'); assert.equal(q.alsoAccept, undefined); }
+assert.equal(Object.keys(topics.lessons).length, 36);
+for (const id of ['crs-2005-q44', 'crs-2007-q20', 'crs-2008-q17']) assert.equal(topics.of[key(bank.find(q => q.id === id))], 'joshua-judges');
+for (const id of ['crs-2006-q42', 'crs-2008-q38']) assert.equal(topics.of[key(bank.find(q => q.id === id))], 'holiness-worship');
 for (const lesson of Object.values(topics.lessons)) {
   const words = lesson.body.split(/\s+/).length;
   assert(words >= 300 && words <= 450, lesson.title);
@@ -74,20 +81,29 @@ for (const [id, group] of Object.entries(topics.repeats)) {
   const q = bank.find(q => q.id === id); assert(q?.year && !q.administrative);
   const rows = repeatGroups.get(group) || []; rows.push(q); repeatGroups.set(group, rows);
 }
-assert.equal(repeatGroups.size, 94);
-assert.equal(Object.keys(topics.repeats).length, 206);
+assert.equal(repeatGroups.size, 158);
+assert.equal(Object.keys(topics.repeats).length, 357);
 assert.equal(topics.repeats['crs-2005-q31'], topics.repeats['crs-2010-q19']);
 for (const rows of repeatGroups.values()) assert(new Set(rows.map(q => q.year)).size >= 2);
-for (const [year, count] of Object.entries({2005:9,2006:12,2007:11,2008:9,2009:17,2010:24,2011:23,2012:21,2013:13,2014:26,2015:24,2016:14})) {
+for (const [year, count] of Object.entries({2005:9,2006:12,2007:11,2008:9,2009:17,2010:24,2011:23,2012:21,2013:13,2014:26,2015:24,2016:14,2017:12,2018:20,2019:9,2020:14})) {
   const rows = bank.filter(q => q.year === Number(year) && /The trap:/.test(teach[key(q)]));
   assert.equal(rows.length, count, 'Authored traps for '+year);
   for (const q of rows) assert(!/Reference:|Bible reference:/.test(teach[key(q)].split('The trap:')[1]));
 }
+for (const q of bank.filter(q => q.year >= 2017)) {
+  const words = teach[key(q)].trim().split(/\s+/).length; assert(words >= 100 && words <= 180, q.id + ' teaching');
+  if (q.keyVerdict) assert.equal(q.keyAnswer, q.printedKey, q.id + ' source-key label');
+}
+assert.deepEqual(bank.find(q => q.id === 'crs-2020-q29').alsoAccept, [0, 3]);
+assert.deepEqual(bank.find(q => q.id === 'crs-2020-q39').alsoAccept, [2]);
+const age = bank.find(q => q.id === 'crs-2019-q15'); assert.equal(age.answer, 1); assert(age.answerNote.includes('does not directly state'));
+const mission = bank.find(q => q.id === 'crs-2019-q33'); assert.equal(mission.answer, 2); assert(!mission.alsoAccept && !mission.keyVerdict);
+assert(!/component|Trinity/.test(teach[key(mission)]));
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'content-manifest.json')));
-assert.equal(manifest.subjects.crs.repeats, 94);
-assert.equal(manifest.subjects.crs.tricky.none, 6);
+assert.equal(manifest.subjects.crs.repeats, 158);
+assert.equal(manifest.subjects.crs.tricky.none, 13);
 console.log('PASS repeat provenance, all authored traps, and administrative exclusion from tricky metadata');
-console.log('PASS all 800 source items, printed-key provenance, 50 starter explanations and 32 topic lessons');
+console.log('PASS all 960 source items, printed-key provenance, 50 starter explanations and 36 topic lessons');
 (async () => {
   const browser = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox'] });
   try {
@@ -102,7 +118,7 @@ console.log('PASS all 800 source items, printed-key provenance, 50 starter expla
     await page.locator('.config-btn[data-group="session"][data-value="single"]').click();
     await page.locator('.config-btn[data-group="mode"][data-value="practice"]').click();
     await page.locator('#subjectSelect').selectOption('crs');
-    for (let year = Number(process.env.JAMB_BROWSER_FROM || 2001); year <= Number(process.env.JAMB_BROWSER_TO || 2016); year++) {
+    for (let year = Number(process.env.JAMB_BROWSER_FROM || 2001); !process.env.CRS_HUBS_ONLY && year <= Number(process.env.JAMB_BROWSER_TO || 2020); year++) {
       // Each paper is a fresh trial in this isolated browser fixture.
       // Keep the production ten-session limit and payment logic unchanged.
       await page.evaluate(() => localStorage.removeItem('jamb-free-v1'));
@@ -113,15 +129,18 @@ console.log('PASS all 800 source items, printed-key provenance, 50 starter expla
       await page.waitForFunction(text => document.querySelector('#questionText')?.textContent === text, qs[0].question);
       for (let i = 0; i < qs.length; i++) {
         const q = qs[i];
-        assert.equal(await page.locator('#questionText').innerText(), q.question);
+        assert.equal((await page.locator('#questionText').innerText()).replace(/\s+/g, ' ').trim(), q.question.replace(/\s+/g, ' ').trim());
         if (q.id === 'crs-2003-q3') {
           await page.locator('#optionsList .option-btn').nth(1).click();
           assert(await page.locator('#optionsList .option-btn').nth(1).evaluate(n => n.classList.contains('wrong') && !n.classList.contains('correct')));
           assert.equal(await page.locator('#explanationBox .key-check').count(), 0);
         }
-        const answer = q.keyVerdict === 'noanswer' ? (q.answer + 1) % 4 : q.alsoAccept?.[0] ?? q.answer;
-        await page.locator('#optionsList .option-btn').nth(answer).click();
-        assert(await page.locator('#optionsList .option-btn').nth(answer).evaluate((n, noAnswer) => n.classList.contains(noAnswer ? 'no-answer' : 'correct') && n.classList.contains('selected'), q.keyVerdict === 'noanswer'));
+        const accepted = q.keyVerdict === 'noanswer' ? [0, 1, 2, 3] : [q.answer, ...(q.alsoAccept || [])];
+        for (const answer of accepted) {
+          await page.locator('#optionsList .option-btn').nth(answer).click();
+          assert(await page.locator('#optionsList .option-btn').nth(answer).evaluate((n, mode) => n.classList.contains(mode === 'noanswer' ? 'no-answer' : 'correct') && n.classList.contains('selected'), q.keyVerdict));
+        }
+        if (q.keyVerdict === 'noanswer') assert.equal(await page.locator('#optionsList .option-btn.correct, #optionsList .option-btn.wrong').count(), 0);
         if (topics.repeats[q.id]) {
           const note = await page.locator('.repeat-note').innerText(); assert(note.includes('tested this point'));
           for (const row of repeatGroups.get(topics.repeats[q.id])) assert(note.includes(String(row.year)));
@@ -132,19 +151,19 @@ console.log('PASS all 800 source items, printed-key provenance, 50 starter expla
       await page.locator('#submitBtn').click();
       await page.locator('#resultScore').waitFor({ state: 'visible' });
       assert.equal(await page.locator('#resultScore').textContent(), '100%');
-      console.log(`PASS CRS ${year}: 50 questions rendered, accepted alternatives scored and notes displayed`);
+      console.log(`PASS CRS ${year}: ${qs.length} questions rendered, accepted alternatives scored and notes displayed`);
       await page.locator('#restartBtn').click();
     }
     await page.locator('#jambRepeatBanner').click();
-    assert((await page.locator('.repeat-subject[data-subject="crs"] .gtc-sub').innerText()).includes('94'));
+    assert((await page.locator('.repeat-subject[data-subject="crs"] .gtc-sub').innerText()).includes('158'));
     await page.locator('#jambRepeatClose').click();
     await page.locator('#jambBookletBanner').click();
     await page.locator('#bkSubjectSelect').selectOption('crs');
-    await page.waitForFunction(() => document.querySelectorAll('#jambBookletBody .trap-item').length === 36);
+    await page.waitForFunction(() => document.querySelectorAll('#jambBookletBody .trap-item').length === 46);
     await page.locator('#jambBookletClose').click();
     await page.locator('#jambKeyPointsBanner').click();
     await page.locator('#kpSubjectSelect').selectOption('crs');
-    await page.waitForFunction(() => document.querySelectorAll('#jambKeyPointsBody details, #jambKeyPointsBody [data-locked]').length === 32);
+    await page.waitForFunction(() => document.querySelectorAll('#jambKeyPointsBody details, #jambKeyPointsBody [data-locked]').length === 36);
     await page.locator('#jambKeyPointsClose').click();
     await page.locator('#jambTrapsBanner').click();
     await page.locator('#trapSubjectSelect').selectOption('crs');
@@ -152,15 +171,15 @@ console.log('PASS all 800 source items, printed-key provenance, 50 starter expla
     await page.locator('#jambTrapsClose').click();
     await page.locator('#jambTrickyBanner').click();
     assert(await page.locator('.tricky-subject[data-subject="crs"][data-kind="multi"]').count());
-    assert.equal((await page.locator('.tricky-subject[data-subject="crs"][data-kind="none"] .gtc-sub').innerText()).trim(), '6 questions');
+    assert.equal((await page.locator('.tricky-subject[data-subject="crs"][data-kind="none"] .gtc-sub').innerText()).trim(), '13 questions');
     assert.deepEqual(errors, []);
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await ctx.setOffline(true); await page.reload();
     await page.waitForFunction(() => window.JambContent?.manifest && document.querySelector('#subjectSelect')?.options.length > 1);
     assert(await page.evaluate(() => JambContent.run('Offline CRS', () => JambContent.ensure(['crs']))));
-    assert.equal(await page.evaluate(() => QUESTION_BANK.crs.length), 850);
-    assert.equal(await page.evaluate(() => Object.keys(window.TEACH_ME.crs).length), 850);
-    assert.equal(await page.evaluate(() => Object.keys(window.TEACH_TOPICS.crs.repeats).length), 206);
+    assert.equal(await page.evaluate(() => QUESTION_BANK.crs.length), 1010);
+    assert.equal(await page.evaluate(() => Object.keys(window.TEACH_ME.crs).length), 1010);
+    assert.equal(await page.evaluate(() => Object.keys(window.TEACH_TOPICS.crs.repeats).length), 357);
     console.log('PASS CRS Wrong Answers, Key Points, Exam Traps, Tricky Questions and offline teaching data');
     await ctx.close();
   } finally { await browser.close(); }
