@@ -4,6 +4,11 @@ const diagrams={
 'production-factors':[{title:'Stages of production: rice',nodes:['PADDY FARMING','RICE MILLING','TRANSPORT AND TRADE','FINAL CONSUMER'],note:'Primary → secondary → tertiary activities → consumption.'},{title:'Division of labour: tailoring workshop',nodes:['MEASURE','CUT','SEW','INSPECT','DELIVER'],note:'Different workers can specialise in successive stages of one production process.'},{title:'Factors and rewards',nodes:['LAND → RENT|LABOUR → WAGES','CAPITAL → INTEREST|ENTERPRISE → PROFIT'],note:'Conventional JAMB associations; actual returns depend on business arrangements.'}],
 'enterprise-location':[{title:'Forms of business combination',nodes:['BUSINESS COMBINATIONS','HORIZONTAL|VERTICAL|CONGLOMERATE','Same stage|Different related stages|Unrelated industries'],note:'Distinguish combinations by how the businesses are related.'}],
 'sole-trade-partnership':[{title:'Business ownership and liability',nodes:['BUSINESS OWNERSHIP','SOLE TRADER|PARTNERSHIP','One owner|Two or more persons'],note:'Ordinary sole proprietors and general partners commonly face unlimited liability; legal exceptions exist.'}],
+'cooperatives-public-enterprises':[{title:'Business reform: what changes?',nodes:['PUBLIC ENTERPRISE REFORM','PRIVATISATION|COMMERCIALISATION','Ownership moves to private investors|Government can retain ownership'],note:'Privatisation changes ownership; commercialisation changes the operating approach.'}],
+'business-management':[{title:'Management control cycle',nodes:['SET TARGET','MEASURE ACTUAL RESULTS','COMPARE WITH TARGET','TAKE CORRECTIVE ACTION','REVIEW'],note:'Controlling compares actual performance with standards and corrects deviations.'}],
+'business-finance':[{title:'Business finance: source and term',nodes:['BUSINESS FINANCE','INTERNAL|EXTERNAL','Retained earnings / Asset sales|Shares / Loans / Trade credit'],note:'Match the duration of finance to the duration of the need.'}],
+'trade-retailing-wholesaling':[{title:'Typical distribution channel',nodes:['PRODUCER','WHOLESALER','RETAILER','FINAL CONSUMER'],note:'Some channels omit intermediaries; this is a common indirect channel.'}],
+'trade-documents-payments':[{title:'Buying and selling documents',nodes:['ENQUIRY','QUOTATION','ORDER','DELIVERY NOTE','INVOICE','PAYMENT / RECEIPT'],note:'A common sequence; actual transactions may involve advance payment or different timing.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -23,7 +28,12 @@ const placements={
 'production-factors':['2. STAGES OF PRODUCTION','5. SPECIALISATION AND DIVISION OF LABOUR','3. FACTORS OF PRODUCTION'],
 'enterprise-location':['BUSINESS COMBINATION'],
 'sole-trade-partnership':['PARTNERSHIP'],
-'companies-liquidation':['SHARES','LIQUIDATION']
+'companies-liquidation':['SHARES','LIQUIDATION'],
+'cooperatives-public-enterprises':['7. PRIVATISATION','7. PRIVATISATION'].slice(0,1),
+'business-management':['2. FUNCTIONS OF MANAGEMENT'],
+'business-finance':['2. INTERNAL AND EXTERNAL SOURCES'],
+'trade-retailing-wholesaling':['2. CHANNELS OF DISTRIBUTION'],
+'trade-documents-payments':['1. THE NORMAL BUYING AND SELLING PROCEDURE']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
