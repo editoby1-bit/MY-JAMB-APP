@@ -656,15 +656,15 @@
       "Development of human civilization and the desire to meet their needs",
       "Primitive stage of existence of human beings"
     ],
-    "answer": 2,
+    "answer": 0,
     "printedKey": "A",
-    "explanation": "C expresses the broad development of commerce through civilization, specialization and meeting needs. A identifies barter as the early exchange stage emphasized in Nigerian classroom histories. The phrase “traceable to” does not clearly distinguish the broad origin from that stage. Accept C and A for this wording; the supplied key is A. This does not establish a universal historical sequence for every society.",
+    "explanation": "A is the best answer. The barter economy represents an early stage of exchange in the historical development of commerce in Nigeria. C describes the broader growth of human civilization rather than the specific origin of exchange asked here.",
     "sourceFile": "Commerce 2003.pdf",
     "sourcePages": [
       1
     ],
     "reviewCompleted": "2026-10-29",
-    "reviewConfidence": "owner review integrated; wording qualifications explicit",
+    "reviewConfidence": "reassessed 2026-11-05; A only",
     "reviewSources": [
       {
         "url": "https://classnotes.com.ng/lesson/118/history-of-commerce-in-nigeria",
@@ -675,8 +675,7 @@
         "title": "History of Commerce — SS1 Commerce, Federal Ministry of Education Inspire"
       }
     ],
-    "answerNote": "C expresses the broad development of commerce through civilization, specialization and meeting needs. A identifies barter as the early exchange stage emphasized in Nigerian classroom histories. The phrase “traceable to” does not clearly distinguish the broad origin from that stage. Accept C and A for this wording; the supplied key is A. This does not establish a universal historical sequence for every society.",
-    "alsoAccept": [
+        "alsoAccept": [
       0
     ],
     "keyVerdict": "multiple",
