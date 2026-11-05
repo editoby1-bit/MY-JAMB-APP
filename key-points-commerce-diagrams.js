@@ -14,6 +14,11 @@ const diagrams={
 'capital-market':[{title:'Primary and secondary securities markets',nodes:['SECURITIES MARKET','PRIMARY MARKET|SECONDARY MARKET','New securities / Issuer receives funds|Existing securities / Investors trade'],note:'The issuer usually receives proceeds in a primary issue, not in a secondary resale.'}],
 'insurance-principles':[{title:'How insurance risk pooling works',nodes:['MANY POLICYHOLDERS','PREMIUMS PAID INTO POOL','COVERED CLAIMS ASSESSED','ELIGIBLE CLAIMS PAID'],note:'Payment depends on coverage, policy conditions and claim assessment.'}],
 'transport-logistics':[{title:'Choosing a transport mode',nodes:['TRANSPORT NEED','ROAD|RAIL|SEA|AIR|PIPELINE','Flexible local delivery|Heavy land loads|Bulk overseas cargo|Urgent cargo|Suitable fluids'],note:'Compare cost, speed, accessibility, safety and the nature of the goods.'}],
+'warehousing':[{title:'Reorder level: when to buy more stock',nodes:['AVERAGE DAILY DEMAND × LEAD TIME','ADD SAFETY STOCK','REORDER LEVEL'],note:'Example: 10 cartons daily × 5 days + 20 safety cartons = 70 cartons.'}],
+'communication-ict':[{title:'The communication process',nodes:['SENDER','ENCODING AND MESSAGE','CHANNEL','RECEIVER DECODES','FEEDBACK TO SENDER'],note:'Noise can interfere at any stage; feedback checks understanding.'}],
+'marketing-advertising':[{title:'The four Ps of marketing',nodes:['MARKETING MIX','PRODUCT|PRICE','PLACE|PROMOTION'],note:'Product: what is offered; Price: what is paid; Place: how it reaches buyers; Promotion: how it is communicated.'}],
+'foreign-trade-documents':[{title:'Visible trade balance',nodes:['GOODS EXPORTS − GOODS IMPORTS','POSITIVE = SURPLUS|NEGATIVE = DEFICIT'],note:'A goods trade balance is only one component of the wider balance of payments.'}],
+'economic-integration':[{title:'Stages of economic integration',nodes:['FREE-TRADE AREA','CUSTOMS UNION','COMMON MARKET','ECONOMIC UNION'],note:'Successive stages generally add external tariff coordination, factor mobility and deeper policy coordination.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -43,7 +48,12 @@ const placements={
 'banking-money':['4. CENTRAL BANK VERSUS COMMERCIAL BANK'],
 'capital-market':['2. PRIMARY AND SECONDARY MARKETS'],
 'insurance-principles':['1. MEANING OF INSURANCE'],
-'transport-logistics':['7. FACTORS IN CHOOSING TRANSPORT']
+'transport-logistics':['7. FACTORS IN CHOOSING TRANSPORT'],
+'warehousing':['5. REORDER LEVEL AND BUFFER STOCK'],
+'communication-ict':['2. ELEMENTS OF THE COMMUNICATION PROCESS'],
+'marketing-advertising':['3. THE MARKETING MIX'],
+'foreign-trade-documents':['3. VISIBLE AND INVISIBLE TRADE'],
+'economic-integration':['6. ECONOMIC UNION AND MONETARY UNION']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
