@@ -34,6 +34,11 @@ const diagrams={
 'financial-statements-capital':[{title:'The accounting equation',nodes:['ASSETS','LIABILITIES + EQUITY','EQUITY = ASSETS − LIABILITIES'],note:'Financial position is measured at a date; profit is measured over a period.'}],
 'accounting-depreciation-inventory':[{title:'Straight-line versus reducing-balance depreciation',nodes:['DEPRECIATION','STRAIGHT LINE|REDUCING BALANCE','Same annual amount|Rate on declining book value'],note:'Straight line: (cost minus residual value) divided by useful life.'}],
 'international-trade-economics':[{title:'Comparative advantage: opportunity costs',nodes:['COUNTRY A: COCOA 12 / CLOTH 6','COUNTRY B: COCOA 8 / CLOTH 8','A: 1 COCOA COSTS 0.5 CLOTH','B: 1 COCOA COSTS 1 CLOTH','A HAS LOWER COCOA OPPORTUNITY COST'],note:'Compare alternatives sacrificed per unit, not absolute production alone.'}],
+'shipping-orders-postal-documents':[{title:'Trade document sequence',nodes:['ENQUIRY','QUOTATION','ORDER','DELIVERY NOTE','INVOICE','RECEIPT'],note:'Delivery note checks goods; receipt acknowledges payment.'}],
+'employment-staffing-industrial-relations':[{title:'Employee staffing process',nodes:['RECRUIT','SELECT','APPOINT','PLACE','INDUCT','TRAIN'],note:'Recruitment attracts candidates; selection chooses among them.'}],
+'pricing-promotion-product-strategy':[{title:'Two launch pricing approaches',nodes:['NEW PRODUCT','PENETRATION: LOW INITIAL PRICE','SKIMMING: HIGH INITIAL PRICE'],note:'Penetration seeks early market reach; skimming targets buyers willing to pay more.'}],
+'networks-security-digital-information':[{title:'Network access comparison',nodes:['INTERNET: GLOBAL NETWORK','INTRANET: PRIVATE ORGANISATION','EXTRANET: APPROVED OUTSIDE PARTNERS'],note:'An extranet extends controlled access; it is not a public intranet.'}],
+'securities-trading-listing':[{title:'Where investment proceeds go',nodes:['PRIMARY MARKET: NEW SECURITIES','ISSUER RECEIVES ISSUE PROCEEDS','SECONDARY MARKET: EXISTING SECURITIES','SELLING INVESTOR RECEIVES RESALE PROCEEDS'],note:'Secondary-market trading ordinarily does not give the issuer new capital.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -83,7 +88,12 @@ const placements={
 'business-environment-institutions':['10. NAFDAC'],
 'financial-statements-capital':['2. ACCOUNTING EQUATION'],
 'accounting-depreciation-inventory':['6. STRAIGHT LINE VERSUS REDUCING BALANCE'],
-'international-trade-economics':['4. COMPARATIVE ADVANTAGE']
+'international-trade-economics':['4. COMPARATIVE ADVANTAGE'],
+'shipping-orders-postal-documents':['1. THE DOCUMENTARY CHAIN'],
+'employment-staffing-industrial-relations':['2. RECRUITMENT AND SELECTION'],
+'pricing-promotion-product-strategy':['4. PRICE SKIMMING'],
+'networks-security-digital-information':['2. INTERNET, INTRANET AND EXTRANET'],
+'securities-trading-listing':['5. PRIMARY AND SECONDARY MARKETS']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
