@@ -70,9 +70,9 @@ if(i<rows.length-1){const arrow=document.createElementNS(ns,'text');arrow.setAtt
 const placements={
 'commerce-occupations':['1. MEANING AND SCOPE OF COMMERCE'],
 'production-factors':['2. STAGES OF PRODUCTION','5. SPECIALISATION AND DIVISION OF LABOUR','3. FACTORS OF PRODUCTION'],
-'enterprise-location':['BUSINESS COMBINATION'],
-'sole-trade-partnership':['PARTNERSHIP'],
-'companies-liquidation':['SHARES','LIQUIDATION'],
+'enterprise-location':['16. EXTERNAL BUSINESS GROWTH'],
+'sole-trade-partnership':['4. PARTNERSHIP'],
+'companies-liquidation':['11. DEBENTURES AND BONDS','15. LIQUIDATION OR WINDING UP'],
 'cooperatives-public-enterprises':['7. PRIVATISATION','7. PRIVATISATION'].slice(0,1),
 'business-management':['2. FUNCTIONS OF MANAGEMENT'],
 'business-finance':['2. INTERNAL AND EXTERNAL SOURCES'],
