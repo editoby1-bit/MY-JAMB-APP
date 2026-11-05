@@ -7,5 +7,27 @@ const diagrams={
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){const fig=document.createElement('figure');fig.className='commerce-figure';const cap=document.createElement('figcaption');cap.textContent=d.title;fig.appendChild(cap);const rows=d.nodes.map(s=>s.split('|'));const w=620,unit=65,h=rows.length*unit+16;const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 '+w+' '+h);svg.setAttribute('role','img');svg.setAttribute('aria-label',d.title+'. '+d.note);rows.forEach((cells,i)=>{const gap=10,bw=(w-24-(cells.length-1)*gap)/cells.length,y=8+i*unit;cells.forEach((value,j)=>{const x=12+j*(bw+gap),rect=document.createElementNS(ns,'rect');for(const [k,v] of Object.entries({x,y,width:bw,height:48,rx:9,fill:i===0?'#e1edf9':'#edf7f1',stroke:'#9bb5c9'}))rect.setAttribute(k,v);svg.appendChild(rect);const t=document.createElementNS(ns,'text');for(const [k,v] of Object.entries({x:x+bw/2,y:y+25,'text-anchor':'middle','dominant-baseline':'middle','font-size':cells.length>2?'11':'13','font-weight':'600',fill:'#173353'}))t.setAttribute(k,v);t.textContent=value;svg.appendChild(t)});if(i<rows.length-1){const t=document.createElementNS(ns,'text');t.setAttribute('x',w/2);t.setAttribute('y',y+61);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','15');t.setAttribute('fill','#42698b');t.textContent='↓';svg.appendChild(t)}});fig.appendChild(svg);const p=document.createElement('p');p.textContent=d.note;fig.appendChild(p);return fig}
-window.renderCommerceDiagrams=function(id){const host=document.getElementById('commerce-visuals');if(!host)return;host.replaceChildren();(diagrams[id]||[]).forEach(d=>host.appendChild(make(d)))};
+const placements={
+'commerce-occupations':['1. MEANING AND SCOPE OF COMMERCE'],
+'production-factors':['2. STAGES OF PRODUCTION','5. SPECIALISATION AND DIVISION OF LABOUR','3. FACTORS OF PRODUCTION'],
+'enterprise-location':['BUSINESS COMBINATION'],
+'sole-trade-partnership':['PARTNERSHIP'],
+'companies-liquidation':['SHARES','LIQUIDATION']
+};
+window.renderCommerceDiagrams=function(id){
+const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
+if(host)host.replaceChildren();
+if(!lesson||!id||!diagrams[id])return;
+const raw=lesson.textContent,lines=raw.split('\\n'),items=diagrams[id],targets=placements[id]||[],inserts=new Map();
+items.forEach((d,i)=>{
+const term=targets[i]||'',needle=term.toUpperCase();
+let index=needle?lines.findIndex(l=>l.toUpperCase().includes(needle)):-1;
+if(index<0){const fallback=lines.findIndex(l=>/^\\d+\\. /.test(l));index=fallback>=0?fallback:Math.min(2,lines.length-1)}
+const at=Math.min(lines.length,index+1);
+if(!inserts.has(at))inserts.set(at,[]);
+inserts.get(at).push(make(d));
+});
+lesson.replaceChildren();
+lines.forEach((line,i)=>{const span=document.createElement('span');span.textContent=line+(i<lines.length-1?'\\n':'');lesson.appendChild(span);(inserts.get(i+1)||[]).forEach(fig=>lesson.appendChild(fig))});
+};
 })();
