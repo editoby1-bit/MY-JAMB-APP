@@ -39,6 +39,11 @@ const diagrams={
 'pricing-promotion-product-strategy':[{title:'Two launch pricing approaches',nodes:['NEW PRODUCT','PENETRATION: LOW INITIAL PRICE','SKIMMING: HIGH INITIAL PRICE'],note:'Penetration seeks early market reach; skimming targets buyers willing to pay more.'}],
 'networks-security-digital-information':[{title:'Network access comparison',nodes:['INTERNET: GLOBAL NETWORK','INTRANET: PRIVATE ORGANISATION','EXTRANET: APPROVED OUTSIDE PARTNERS'],note:'An extranet extends controlled access; it is not a public intranet.'}],
 'securities-trading-listing':[{title:'Where investment proceeds go',nodes:['PRIMARY MARKET: NEW SECURITIES','ISSUER RECEIVES ISSUE PROCEEDS','SECONDARY MARKET: EXISTING SECURITIES','SELLING INVESTOR RECEIVES RESALE PROCEEDS'],note:'Secondary-market trading ordinarily does not give the issuer new capital.'}],
+'business-combinations-cooperation':[{title:'Business combinations by relationship',nodes:['BUSINESS COMBINATIONS','HORIZONTAL: SAME STAGE','VERTICAL: SUPPLY CHAIN','CONGLOMERATE: UNRELATED INDUSTRIES'],note:'A cartel instead coordinates competitors’ conduct and may restrict competition.'}],
+'modern-retailing-channels':[{title:'Retail distribution channel',nodes:['PRODUCER','WHOLESALER','RETAILER','FINAL CONSUMER'],note:'Retailing sells to final consumers; wholesaling mainly supplies business buyers.'}],
+'production-labour-distinctions':[{title:'Four factors and their rewards',nodes:['LAND → RENT','LABOUR → WAGES','CAPITAL → INTEREST','ENTREPRENEURSHIP → PROFIT'],note:'Skilled labour may be manual or white-collar; these categories can overlap.'}],
+'insurance-average-benefits-claims':[{title:'Underinsurance and average clause',nodes:['PROPERTY VALUE: ₦1,000,000','SUM INSURED: ₦600,000','COVERED LOSS: ₦200,000','CLAIM = 600,000 / 1,000,000 × 200,000','CLAIM PAYABLE: ₦120,000'],note:'Apply the average formula only when the policy includes the relevant clause.'}],
+'contracts-forms-remedies':[{title:'Unpaid seller rights',nodes:['GOODS WITH SELLER → LIEN','GOODS WITH CARRIER → STOPPAGE IN TRANSITU','RESALE / ACTION FOR PRICE: SUBJECT TO LAW'],note:'Lien retains goods in possession; stoppage can intercept qualifying goods in transit.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -93,7 +98,12 @@ const placements={
 'employment-staffing-industrial-relations':['2. RECRUITMENT AND SELECTION'],
 'pricing-promotion-product-strategy':['4. PRICE SKIMMING'],
 'networks-security-digital-information':['2. INTERNET, INTRANET AND EXTRANET'],
-'securities-trading-listing':['5. PRIMARY AND SECONDARY MARKETS']
+'securities-trading-listing':['5. PRIMARY AND SECONDARY MARKETS'],
+'business-combinations-cooperation':['3. MERGER'],
+'modern-retailing-channels':['4. DISTRIBUTION CHANNELS'],
+'production-labour-distinctions':['2. FOUR FACTORS OF PRODUCTION'],
+'insurance-average-benefits-claims':['8. AVERAGE CLAUSE'],
+'contracts-forms-remedies':['14. LIEN VERSUS STOPPAGE IN TRANSITU']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
