@@ -513,7 +513,7 @@
       2
     ],
     "reviewCompleted": "2026-10-29",
-    "diagram": "<img src=\"past-questions/img/commerce-2006-communication.png\" alt=\"Source communication diagram: Sender points to Y, Y points to X, X points to Feedback, and Feedback returns to Sender.\">",
+    "diagram": "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 255" role="img" aria-label="Communication process: Sender points right to Y, Y points down to X, X points left to Feedback, and Feedback returns up to Sender."><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#34465c"/></marker></defs><style>text{font:600 25px Arial,sans-serif;fill:#14253b}rect{fill:white;stroke:#34465c;stroke-width:2.5}path.line{fill:none;stroke:#34465c;stroke-width:3;marker-end:url(#arrow)}</style><rect x="25" y="22" width="160" height="64" rx="5"/><text x="105" y="63" text-anchor="middle">Sender</text><rect x="515" y="22" width="96" height="64" rx="5"/><text x="563" y="63" text-anchor="middle">Y</text><rect x="515" y="158" width="96" height="64" rx="5"/><text x="563" y="199" text-anchor="middle">X</text><rect x="230" y="158" width="218" height="64" rx="5"/><text x="339" y="199" text-anchor="middle">Feedback</text><path class="line" d="M185 54 H515"/><path class="line" d="M563 86 V158"/><path class="line" d="M515 190 H448"/><path class="line" d="M230 190 H105 V86"/></svg>",
     "teachKey": "commerce-2006-q21"
   },
   {
@@ -536,7 +536,7 @@
       2
     ],
     "reviewCompleted": "2026-10-29",
-    "diagram": "<img src=\"past-questions/img/commerce-2006-communication.png\" alt=\"Source communication diagram: Sender points to Y, Y points to X, X points to Feedback, and Feedback returns to Sender.\">",
+    "diagram": "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 255" role="img" aria-label="Communication process: Sender points right to Y, Y points down to X, X points left to Feedback, and Feedback returns up to Sender."><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#34465c"/></marker></defs><style>text{font:600 25px Arial,sans-serif;fill:#14253b}rect{fill:white;stroke:#34465c;stroke-width:2.5}path.line{fill:none;stroke:#34465c;stroke-width:3;marker-end:url(#arrow)}</style><rect x="25" y="22" width="160" height="64" rx="5"/><text x="105" y="63" text-anchor="middle">Sender</text><rect x="515" y="22" width="96" height="64" rx="5"/><text x="563" y="63" text-anchor="middle">Y</text><rect x="515" y="158" width="96" height="64" rx="5"/><text x="563" y="199" text-anchor="middle">X</text><rect x="230" y="158" width="218" height="64" rx="5"/><text x="339" y="199" text-anchor="middle">Feedback</text><path class="line" d="M185 54 H515"/><path class="line" d="M563 86 V158"/><path class="line" d="M515 190 H448"/><path class="line" d="M230 190 H105 V86"/></svg>",
     "teachKey": "commerce-2006-q22"
   },
   {
