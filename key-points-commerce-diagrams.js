@@ -19,6 +19,11 @@ const diagrams={
 'marketing-advertising':[{title:'The four Ps of marketing',nodes:['MARKETING MIX','PRODUCT|PRICE','PLACE|PROMOTION'],note:'Product: what is offered; Price: what is paid; Place: how it reaches buyers; Promotion: how it is communicated.'}],
 'foreign-trade-documents':[{title:'Visible trade balance',nodes:['GOODS EXPORTS − GOODS IMPORTS','POSITIVE = SURPLUS|NEGATIVE = DEFICIT'],note:'A goods trade balance is only one component of the wider balance of payments.'}],
 'economic-integration':[{title:'Stages of economic integration',nodes:['FREE-TRADE AREA','CUSTOMS UNION','COMMON MARKET','ECONOMIC UNION'],note:'Successive stages generally add external tariff coordination, factor mobility and deeper policy coordination.'}],
+'law-contract-agency':[{title:'How a contract is formed',nodes:['OFFER','UNQUALIFIED ACCEPTANCE','CONSIDERATION / INTENTION / CAPACITY / LEGALITY','ENFORCEABLE CONTRACT'],note:'An invitation to treat is not ordinarily the offer itself; all relevant legal requirements must be met.'}],
+'consumer-business-environment':[{title:'SWOT: inside and outside the business',nodes:['SWOT ANALYSIS','INTERNAL FACTORS|EXTERNAL FACTORS','Strengths / Weaknesses|Opportunities / Threats'],note:'Strengths and weaknesses are internal; opportunities and threats arise externally.'}],
+'tourism':[{title:'Tourism by direction of travel',nodes:['TOURISM','DOMESTIC|INBOUND|OUTBOUND','Residents travel at home|Non-residents visit|Residents travel abroad'],note:'Inbound and outbound are defined from the perspective of the country being studied.'}],
+'trade-associations':[{title:'Different business and worker bodies',nodes:['ORGANISATIONS','TRADE ASSOCIATION|CHAMBER OF COMMERCE','One trade or industry|Businesses across trades'],note:'A trade union chiefly represents workers; a professional body focuses on occupational standards.'}],
+'business-computing':[{title:'Computer information-processing cycle',nodes:['INPUT','PROCESSING','OUTPUT','STORAGE / FEEDBACK'],note:'Input supplies raw data; processing transforms it into useful output that can be stored.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -53,7 +58,12 @@ const placements={
 'communication-ict':['2. ELEMENTS OF THE COMMUNICATION PROCESS'],
 'marketing-advertising':['3. THE MARKETING MIX'],
 'foreign-trade-documents':['3. VISIBLE AND INVISIBLE TRADE'],
-'economic-integration':['6. ECONOMIC UNION AND MONETARY UNION']
+'economic-integration':['6. ECONOMIC UNION AND MONETARY UNION'],
+'law-contract-agency':['1. MEANING OF CONTRACT'],
+'consumer-business-environment':['4. SWOT ANALYSIS'],
+'tourism':['2. DOMESTIC, INBOUND AND OUTBOUND TOURISM'],
+'trade-associations':['6. TRADE ASSOCIATION VERSUS CHAMBER'],
+'business-computing':['2. INFORMATION-PROCESSING CYCLE']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
