@@ -49,6 +49,10 @@ const diagrams={
 'office-trade-records-adjustments':[{title:'Statement of account calculation',nodes:['OPENING DEBT + NEW INVOICES','+ DEBIT ADJUSTMENTS','− CREDIT NOTES − PAYMENTS','= CLOSING AMOUNT OWED'],note:'A statement summarises transactions across a period; an invoice records a charge.'}],
 'data-retrieval-business-applications':[{title:'Business information cycle',nodes:['INPUT','PROCESSING','OUTPUT','STORAGE / RETRIEVAL'],note:'Data become meaningful information through processing and presentation.'}],
 'professional-consumer-regulation':[{title:'Associations and their members',nodes:['PROFESSIONAL BODY: PROFESSION','TRADE ASSOCIATION: INDUSTRY FIRMS','CHAMBER: BROAD BUSINESS','TRADE UNION: WORKERS'],note:'Professional associations and statutory regulators do not have identical powers.'}],
+'money-acceptability-token-value':[{title:'Four functions of money',nodes:['PRICE → UNIT OF ACCOUNT','PAY → MEDIUM OF EXCHANGE','SAVE → STORE OF VALUE','FUTURE DEBT → DEFERRED PAYMENT'],note:'Face value of a token coin can exceed its intrinsic metal value.'}],
+'company-documents-share-rights':[{title:'Company documents compared',nodes:['MEMORANDUM: FUNDAMENTALS','ARTICLES: INTERNAL RULES','PROSPECTUS: INVESTMENT OFFER'],note:'Older authorised-capital questions may use historical Nigerian legal terminology.'}],
+'postal-delivery-services':[{title:'Postal services by purpose',nodes:['PROOF OF POSTING → CERTIFICATE','PROOF OF DELIVERY → RECORDED SERVICE','TRAVELLER COLLECTION → POSTE RESTANTE','URGENT PARCEL → EXPRESS / COURIER'],note:'Speed, tracking and insurance are separate service features.'}],
+'communication-forms-media':[{title:'Communication process',nodes:['SENDER / ENCODING','MESSAGE THROUGH CHANNEL','RECEIVER / DECODING','FEEDBACK TO SENDER'],note:'Noise can interfere at any stage; written words are still verbal communication.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -113,7 +117,11 @@ const placements={
 'securities-dividends-settlement':['7. CUM DIVIDEND AND EX DIVIDEND'],
 'office-trade-records-adjustments':['10. WORKED STATEMENT OF ACCOUNT'],
 'data-retrieval-business-applications':['2. INFORMATION-PROCESSING CYCLE'],
-'professional-consumer-regulation':['3. CHAMBERS OF COMMERCE']
+'professional-consumer-regulation':['3. CHAMBERS OF COMMERCE'],
+'money-acceptability-token-value':['4. MEDIUM OF EXCHANGE'],
+'company-documents-share-rights':['5. MEMORANDUM VERSUS ARTICLES'],
+'postal-delivery-services':['7. CERTIFICATE OF POSTING'],
+'communication-forms-media':['3. ELEMENTS OF THE PROCESS']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
