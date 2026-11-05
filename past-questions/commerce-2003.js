@@ -675,11 +675,6 @@
         "title": "History of Commerce — SS1 Commerce, Federal Ministry of Education Inspire"
       }
     ],
-        "alsoAccept": [
-      0
-    ],
-    "keyVerdict": "multiple",
-    "keyAnswer": "A",
     "teachKey": "commerce-2003-q28"
   },
   {
