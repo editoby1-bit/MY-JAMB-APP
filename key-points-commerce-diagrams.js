@@ -44,6 +44,11 @@ const diagrams={
 'production-labour-distinctions':[{title:'Four factors and their rewards',nodes:['LAND → RENT','LABOUR → WAGES','CAPITAL → INTEREST','ENTREPRENEURSHIP → PROFIT'],note:'Skilled labour may be manual or white-collar; these categories can overlap.'}],
 'insurance-average-benefits-claims':[{title:'Underinsurance and average clause',nodes:['PROPERTY VALUE: ₦1,000,000','SUM INSURED: ₦600,000','COVERED LOSS: ₦200,000','CLAIM = 600,000 / 1,000,000 × 200,000','CLAIM PAYABLE: ₦120,000'],note:'Apply the average formula only when the policy includes the relevant clause.'}],
 'contracts-forms-remedies':[{title:'Unpaid seller rights',nodes:['GOODS WITH SELLER → LIEN','GOODS WITH CARRIER → STOPPAGE IN TRANSITU','RESALE / ACTION FOR PRICE: SUBJECT TO LAW'],note:'Lien retains goods in possession; stoppage can intercept qualifying goods in transit.'}],
+'product-benefits-segmentation':[{title:'Three product levels',nodes:['CORE BENEFIT: THE NEED','ACTUAL PRODUCT: FEATURES / BRAND','AUGMENTED PRODUCT: SUPPORT / WARRANTY'],note:'A rechargeable lamp provides light; its warranty is an additional benefit.'}],
+'securities-dividends-settlement':[{title:'Dividend entitlement',nodes:['CUM DIVIDEND: WITH ENTITLEMENT','EX DIVIDEND: WITHOUT THAT DIVIDEND','RECORD DATE: ELIGIBLE HOLDERS','PAYMENT DATE: DISTRIBUTION'],note:'Check market timetable and settlement rules; record and ex-dividend dates can differ.'}],
+'office-trade-records-adjustments':[{title:'Statement of account calculation',nodes:['OPENING DEBT + NEW INVOICES','+ DEBIT ADJUSTMENTS','− CREDIT NOTES − PAYMENTS','= CLOSING AMOUNT OWED'],note:'A statement summarises transactions across a period; an invoice records a charge.'}],
+'data-retrieval-business-applications':[{title:'Business information cycle',nodes:['INPUT','PROCESSING','OUTPUT','STORAGE / RETRIEVAL'],note:'Data become meaningful information through processing and presentation.'}],
+'professional-consumer-regulation':[{title:'Associations and their members',nodes:['PROFESSIONAL BODY: PROFESSION','TRADE ASSOCIATION: INDUSTRY FIRMS','CHAMBER: BROAD BUSINESS','TRADE UNION: WORKERS'],note:'Professional associations and statutory regulators do not have identical powers.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -103,7 +108,12 @@ const placements={
 'modern-retailing-channels':['4. DISTRIBUTION CHANNELS'],
 'production-labour-distinctions':['2. FOUR FACTORS OF PRODUCTION'],
 'insurance-average-benefits-claims':['8. AVERAGE CLAUSE'],
-'contracts-forms-remedies':['14. LIEN VERSUS STOPPAGE IN TRANSITU']
+'contracts-forms-remedies':['14. LIEN VERSUS STOPPAGE IN TRANSITU'],
+'product-benefits-segmentation':['2. THREE PRODUCT LEVELS'],
+'securities-dividends-settlement':['7. CUM DIVIDEND AND EX DIVIDEND'],
+'office-trade-records-adjustments':['10. WORKED STATEMENT OF ACCOUNT'],
+'data-retrieval-business-applications':['2. INFORMATION-PROCESSING CYCLE'],
+'professional-consumer-regulation':['3. CHAMBERS OF COMMERCE']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
