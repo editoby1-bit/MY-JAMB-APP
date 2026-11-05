@@ -18,16 +18,16 @@ window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
 if(host)host.replaceChildren();
 if(!lesson||!id||!diagrams[id])return;
-const raw=lesson.textContent,lines=raw.split('\\n'),items=diagrams[id],targets=placements[id]||[],inserts=new Map();
+const raw=lesson.textContent,lines=raw.split('\n'),items=diagrams[id],targets=placements[id]||[],inserts=new Map();
 items.forEach((d,i)=>{
 const term=targets[i]||'',needle=term.toUpperCase();
 let index=needle?lines.findIndex(l=>l.toUpperCase().includes(needle)):-1;
-if(index<0){const fallback=lines.findIndex(l=>/^\\d+\\. /.test(l));index=fallback>=0?fallback:Math.min(2,lines.length-1)}
+if(index<0){const fallback=lines.findIndex(l=>/^\d+\. /.test(l));index=fallback>=0?fallback:Math.min(2,lines.length-1)}
 const at=Math.min(lines.length,index+1);
 if(!inserts.has(at))inserts.set(at,[]);
 inserts.get(at).push(make(d));
 });
 lesson.replaceChildren();
-lines.forEach((line,i)=>{const span=document.createElement('span');span.textContent=line+(i<lines.length-1?'\\n':'');lesson.appendChild(span);(inserts.get(i+1)||[]).forEach(fig=>lesson.appendChild(fig))});
+lines.forEach((line,i)=>{const span=document.createElement('span');span.textContent=line+(i<lines.length-1?'\n':'');lesson.appendChild(span);(inserts.get(i+1)||[]).forEach(fig=>lesson.appendChild(fig))});
 };
 })();
