@@ -24,6 +24,11 @@ const diagrams={
 'tourism':[{title:'Tourism by direction of travel',nodes:['TOURISM','DOMESTIC|INBOUND|OUTBOUND','Residents travel at home|Non-residents visit|Residents travel abroad'],note:'Inbound and outbound are defined from the perspective of the country being studied.'}],
 'trade-associations':[{title:'Different business and worker bodies',nodes:['ORGANISATIONS','TRADE ASSOCIATION|CHAMBER OF COMMERCE','One trade or industry|Businesses across trades'],note:'A trade union chiefly represents workers; a professional body focuses on occupational standards.'}],
 'business-computing':[{title:'Computer information-processing cycle',nodes:['INPUT','PROCESSING','OUTPUT','STORAGE / FEEDBACK'],note:'Input supplies raw data; processing transforms it into useful output that can be stored.'}],
+'office-communication':[{title:'Communication and feedback',nodes:['SENDER ENCODES','MESSAGE VIA CHANNEL','RECEIVER DECODES','FEEDBACK RETURNS'],note:'Noise can disrupt the message; feedback helps confirm understanding.'}],
+'securities-capital-calculations':[{title:'Share value distinctions',nodes:['SHARE','NOMINAL VALUE|ISSUE PRICE|MARKET PRICE','Stated face value|New issue price|Investor resale price'],note:'A secondary-market trade does not ordinarily provide new capital to the issuing company.'}],
+'banking-policy-payments':[{title:'The three parties to a cheque',nodes:['DRAWER WRITES CHEQUE','DRAWEE BANK IS ORDERED TO PAY','PAYEE RECEIVES PAYMENT'],note:'The drawer is the account holder, the drawee is the bank, and the payee is the recipient.'}],
+'external-trade-terms':[{title:'Documentary credit payment flow',nodes:['IMPORTER REQUESTS CREDIT','ISSUING BANK OPENS CREDIT','EXPORTER SHIPS GOODS','DOCUMENTS PRESENTED AND CHECKED','PAYMENT UNDER CREDIT TERMS'],note:'Banks examine stipulated documents rather than physically verifying every item shipped.'}],
+'business-legal-protection':[{title:'Intellectual-property categories',nodes:['INTELLECTUAL PROPERTY','COPYRIGHT|TRADEMARK','PATENT|INDUSTRIAL DESIGN'],note:'Expression, identifying signs, inventions and ornamental designs are different forms of protected subject matter.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -63,7 +68,12 @@ const placements={
 'consumer-business-environment':['4. SWOT ANALYSIS'],
 'tourism':['2. DOMESTIC, INBOUND AND OUTBOUND TOURISM'],
 'trade-associations':['6. TRADE ASSOCIATION VERSUS CHAMBER'],
-'business-computing':['2. INFORMATION-PROCESSING CYCLE']
+'business-computing':['2. INFORMATION-PROCESSING CYCLE'],
+'office-communication':['2. THE COMMUNICATION PROCESS'],
+'securities-capital-calculations':['4. NOMINAL, ISSUE AND MARKET VALUES'],
+'banking-policy-payments':['6. CHEQUES: THE THREE PARTIES'],
+'external-trade-terms':['7. LETTER OF CREDIT'],
+'business-legal-protection':['2. INTELLECTUAL PROPERTY: THE BIG DISTINCTIONS']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
