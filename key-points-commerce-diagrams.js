@@ -9,6 +9,11 @@ const diagrams={
 'business-finance':[{title:'Business finance: source and term',nodes:['BUSINESS FINANCE','INTERNAL|EXTERNAL','Retained earnings / Asset sales|Shares / Loans / Trade credit'],note:'Match the duration of finance to the duration of the need.'}],
 'trade-retailing-wholesaling':[{title:'Typical distribution channel',nodes:['PRODUCER','WHOLESALER','RETAILER','FINAL CONSUMER'],note:'Some channels omit intermediaries; this is a common indirect channel.'}],
 'trade-documents-payments':[{title:'Buying and selling documents',nodes:['ENQUIRY','QUOTATION','ORDER','DELIVERY NOTE','INVOICE','PAYMENT / RECEIPT'],note:'A common sequence; actual transactions may involve advance payment or different timing.'}],
+'discounts-profit-ratios':[{title:'From sales to net profit',nodes:['NET SALES','LESS COST OF GOODS SOLD','GROSS PROFIT','LESS OPERATING EXPENSES','NET PROFIT'],note:'Use the question’s specified other income and expenses when calculating net profit.'}],
+'banking-money':[{title:'Banking roles',nodes:['BANKING SYSTEM','CENTRAL BANK|COMMERCIAL BANK','Currency / Monetary policy|Deposits / Payments / Loans'],note:'The central bank and commercial banks perform different roles.'}],
+'capital-market':[{title:'Primary and secondary securities markets',nodes:['SECURITIES MARKET','PRIMARY MARKET|SECONDARY MARKET','New securities / Issuer receives funds|Existing securities / Investors trade'],note:'The issuer usually receives proceeds in a primary issue, not in a secondary resale.'}],
+'insurance-principles':[{title:'How insurance risk pooling works',nodes:['MANY POLICYHOLDERS','PREMIUMS PAID INTO POOL','COVERED CLAIMS ASSESSED','ELIGIBLE CLAIMS PAID'],note:'Payment depends on coverage, policy conditions and claim assessment.'}],
+'transport-logistics':[{title:'Choosing a transport mode',nodes:['TRANSPORT NEED','ROAD|RAIL|SEA|AIR|PIPELINE','Flexible local delivery|Heavy land loads|Bulk overseas cargo|Urgent cargo|Suitable fluids'],note:'Compare cost, speed, accessibility, safety and the nature of the goods.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -33,7 +38,12 @@ const placements={
 'business-management':['2. FUNCTIONS OF MANAGEMENT'],
 'business-finance':['2. INTERNAL AND EXTERNAL SOURCES'],
 'trade-retailing-wholesaling':['2. CHANNELS OF DISTRIBUTION'],
-'trade-documents-payments':['1. THE NORMAL BUYING AND SELLING PROCEDURE']
+'trade-documents-payments':['1. THE NORMAL BUYING AND SELLING PROCEDURE'],
+'discounts-profit-ratios':['3. COST PRICE, SELLING PRICE AND GROSS PROFIT'],
+'banking-money':['4. CENTRAL BANK VERSUS COMMERCIAL BANK'],
+'capital-market':['2. PRIMARY AND SECONDARY MARKETS'],
+'insurance-principles':['1. MEANING OF INSURANCE'],
+'transport-logistics':['7. FACTORS IN CHOOSING TRANSPORT']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
