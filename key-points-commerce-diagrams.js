@@ -29,6 +29,11 @@ const diagrams={
 'banking-policy-payments':[{title:'The three parties to a cheque',nodes:['DRAWER WRITES CHEQUE','DRAWEE BANK IS ORDERED TO PAY','PAYEE RECEIVES PAYMENT'],note:'The drawer is the account holder, the drawee is the bank, and the payee is the recipient.'}],
 'external-trade-terms':[{title:'Documentary credit payment flow',nodes:['IMPORTER REQUESTS CREDIT','ISSUING BANK OPENS CREDIT','EXPORTER SHIPS GOODS','DOCUMENTS PRESENTED AND CHECKED','PAYMENT UNDER CREDIT TERMS'],note:'Banks examine stipulated documents rather than physically verifying every item shipped.'}],
 'business-legal-protection':[{title:'Intellectual-property categories',nodes:['INTELLECTUAL PROPERTY','COPYRIGHT|TRADEMARK','PATENT|INDUSTRIAL DESIGN'],note:'Expression, identifying signs, inventions and ornamental designs are different forms of protected subject matter.'}],
+'marketing-practice':[{title:'Marketing mix: four coordinated decisions',nodes:['MARKETING MIX','PRODUCT|PRICE','PLACE|PROMOTION'],note:'Product is the offering; price is the charge; place is distribution; promotion communicates value.'}],
+'business-environment-institutions':[{title:'Nigerian business institutions',nodes:['BUSINESS REGULATION','CAC|NAFDAC|SON','Registration|Covered product regulation|Standards'],note:'FCCPC focuses on consumer protection and competition; agencies have distinct mandates.'}],
+'financial-statements-capital':[{title:'The accounting equation',nodes:['ASSETS','LIABILITIES + EQUITY','EQUITY = ASSETS − LIABILITIES'],note:'Financial position is measured at a date; profit is measured over a period.'}],
+'accounting-depreciation-inventory':[{title:'Straight-line versus reducing-balance depreciation',nodes:['DEPRECIATION','STRAIGHT LINE|REDUCING BALANCE','Same annual amount|Rate on declining book value'],note:'Straight line: (cost minus residual value) divided by useful life.'}],
+'international-trade-economics':[{title:'Comparative advantage: opportunity costs',nodes:['COUNTRY A: COCOA 12 / CLOTH 6','COUNTRY B: COCOA 8 / CLOTH 8','A: 1 COCOA COSTS 0.5 CLOTH','B: 1 COCOA COSTS 1 CLOTH','A HAS LOWER COCOA OPPORTUNITY COST'],note:'Compare alternatives sacrificed per unit, not absolute production alone.'}],
 'companies-liquidation':[{title:'Company financing: shares and debentures',nodes:['COMPANY FINANCE','SHARES|DEBENTURES','Ownership capital|Borrowed capital','Dividend (if declared)|Interest (as agreed)'],note:'Shareholders are owners; debenture holders are creditors.'},{title:'Simplified company winding-up',nodes:['WINDING-UP DECISION','LIQUIDATOR APPOINTED','ASSETS REALISED','CLAIMS PAID IN LEGAL PRIORITY','SURPLUS TO MEMBERS (IF ANY)'],note:'Illustrative sequence only; legal priorities and procedures depend on applicable law.'}]
 };
 function make(d){
@@ -73,7 +78,12 @@ const placements={
 'securities-capital-calculations':['4. NOMINAL, ISSUE AND MARKET VALUES'],
 'banking-policy-payments':['6. CHEQUES: THE THREE PARTIES'],
 'external-trade-terms':['7. LETTER OF CREDIT'],
-'business-legal-protection':['2. INTELLECTUAL PROPERTY: THE BIG DISTINCTIONS']
+'business-legal-protection':['2. INTELLECTUAL PROPERTY: THE BIG DISTINCTIONS'],
+'marketing-practice':['2. THE FOUR Ps OF MARKETING'],
+'business-environment-institutions':['10. NAFDAC'],
+'financial-statements-capital':['2. ACCOUNTING EQUATION'],
+'accounting-depreciation-inventory':['6. STRAIGHT LINE VERSUS REDUCING BALANCE'],
+'international-trade-economics':['4. COMPARATIVE ADVANTAGE']
 };
 window.renderCommerceDiagrams=function(id){
 const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
