@@ -2227,6 +2227,21 @@
         +label(12,26,'Cost/revenue (₦)')+label(470,365,'Output');
     }
     if(type==='indiff'){body=line('M115 80Q125 235 340 305')+line('M175 53Q185 200 450 290','#cb842c')+line('M240 43Q250 185 520 275','#729b86')+line('M95 70L500 310','#ad4d51',3)+label(344,305,'I₁')+label(452,289,'I₂')+label(522,275,'I₃')+label(290,220,point||'K')+label(95,63,'S')+label(500,329,'T');if(point==='K')body+=label(245,270,'M');if(point==='S')body+=label(255,270,'U');}
+    // Year-specific 2011 Q20: point S is the budget-line tangency on II.
+    // This is a semantic reconstruction; original scan geometry awaits comparison.
+    if(match[1]==='2011-q20'){
+      body=line('M76 330H562','#263b52',3)+line('M76 330V32','#263b52',3)
+        +line('M116 75L500 315','#ad4d51',3)
+        +line('M105 135Q180 270 340 308','#176b94',3)
+        +line('M165 65Q195 218 450 280','#cb842c',3)
+        +line('M250 45Q275 155 525 236','#729b86',3)
+        +'<circle cx="260" cy="165" r="5" fill="#263b52"/>'
+        +label(273,163,'S')+label(344,309,'I')
+        +label(455,283,'II')+label(528,240,'III')
+        +label(155,233,'U')+label(355,290,'T')
+        +label(371,92,'R')+label(10,27,'Input Y')
+        +label(470,365,'Input X');
+    }
     if(type==='both'||type==='supplyshift'||type==='demandshift'||type==='movement'||type==='complement'){body=type==='demandshift'||type==='complement'?D+line('M225 70L562 263','#cb842c'):S+line('M210 288L562 75','#cb842c');body+=label(500,68,type==='demandshift'||type==='complement'?'D₀':'S₁')+label(552,67,type==='demandshift'||type==='complement'?'D₁':'S₂');if(type==='both')body+=D+line('M225 70L562 263','#cb842c');if(type==='movement')body+=label(200,238,'M')+label(350,165,'T')+label(50,238,'P₁')+label(50,165,'P₂');if(type==='supplyshift')body+=label(250,210,'T')+label(340,210,'N');}
     if(type==='monocomp')body=D+line('M120 85L390 308','#cb842c')+label(490,292,'W (AR)')+label(390,320,'M (MR)');
     if(type==='cost'||type==='atc')body=line('M125 95Q305 365 495 100')+line('M145 45Q285 330 520 80','#cb842c')+label(495,110,'AC / ATC')+label(525,80,'MC')+label(302,256,'M')+(type==='atc'?label(295,349,'20 units')+label(26,265,'₦15'):'');
@@ -2239,7 +2254,7 @@
     if(type==='flow')body='<rect x="110" y="125" width="150" height="75" rx="12" fill="#e6f2f8" stroke="#176b94" stroke-width="2"/><rect x="360" y="125" width="150" height="75" rx="12" fill="#fff2dd" stroke="#cb842c" stroke-width="2"/>'+label(129,169,'Households')+label(408,169,'Firms')+line('M265 144H350','#cb842c')+line('M355 185H265')+label(268,128,'K: spending →')+label(260,218,'← goods/services');
     if(type.startsWith('pie')){const parts=type==='pieoil'?((match[1]==='2012-q5'||match[1]==='2020-q35')?[['Oil',160],['Agriculture',90],['Manufacturing',80],['Mining',30]]:[['Oil',160],['Agriculture',90],['Manufacturing',80],['Other',30]]):type==='pieservices'?((match[1]==='2014-q5'||match[1]==='2020-q25')?[['Mining',126],['Agriculture',72],['Manufacturing',108],['Services',54]]:[['Agriculture',126],['Oil',72],['Manufacturing',108],['Services',54]]):[['Oil',120],['Transport',60],['Remaining sectors',180]];const colors=['#397ba5','#e4a347','#6ca68b','#b78db5'];let a=-Math.PI/2;body='';for(let i=0;i<parts.length;i++){const [name,deg]=parts[i],b=a+deg*Math.PI/180,x1=315+125*Math.cos(a),y1=180+125*Math.sin(a),x2=315+125*Math.cos(b),y2=180+125*Math.sin(b);body+='<path d="M315 180L'+x1+' '+y1+'A125 125 0 '+(deg>180?1:0)+' 1 '+x2+' '+y2+'Z" fill="'+colors[i]+'" stroke="white" stroke-width="3"/>'+'<circle cx="'+(82+(i%2)*255)+'" cy="'+(334+Math.floor(i/2)*27)+'" r="7" fill="'+colors[i]+'"/>'+label(95+(i%2)*255,340+Math.floor(i/2)*27,((name==='Services'&&(match[1]==='2014-q5'||match[1]==='2020-q25'))||(name==='Manufacturing'&&(match[1]==='2012-q5'||match[1]==='2020-q35'))?name:name+': '+deg+'°'));a=b;}extra='';}
     if(!body)return html;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':(type==='costlines'||match[1]==='2013-q23'||match[1]==='2013-q24'?'':axes))+body+extra+'</svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':(type==='costlines'||match[1]==='2013-q23'||match[1]==='2013-q24'||match[1]==='2011-q20'?'':axes))+body+extra+'</svg>';
   }
 function accountingFinancialQuestionHtml(value) {
     const lines=String(value||'').split(/\r?\n/);
