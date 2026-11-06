@@ -2258,6 +2258,22 @@
         +label(371,92,'R')+label(10,27,'Input Y')
         +label(470,365,'Input X');
     }
+    // 2019 Q14: separate graph traced from the original paper supplied by the user.
+    // Budget line from U to T; S is the tangency on curve II, R is on III.
+    if(match[1]==='2019-q14'){
+      body=line('M85 34V330H560','#263b52',3)
+        +line('M108 85L420 321','#263b52',3)
+        +line('M113 105C127 205 232 292 420 319','#176b94',3)
+        +line('M155 66C169 166 240 243 450 270','#cb842c',3)
+        +line('M280 58C285 154 360 213 515 229','#729b86',3)
+        +'<circle cx="220" cy="215" r="4" fill="#263b52"/>'
+        +'<circle cx="316" cy="179" r="4" fill="#263b52"/>'
+        +label(116,119,'U')+label(203,207,'S')
+        +label(300,174,'R')+label(426,326,'T')
+        +label(430,309,'I')+label(453,267,'II')
+        +label(518,233,'III')+label(62,40,'P')
+        +label(557,350,'Q')+label(65,348,'O');
+    }
     if(type==='both'||type==='supplyshift'||type==='demandshift'||type==='movement'||type==='complement'){body=type==='demandshift'||type==='complement'?D+line('M225 70L562 263','#cb842c'):S+line('M210 288L562 75','#cb842c');body+=label(500,68,type==='demandshift'||type==='complement'?'D₀':'S₁')+label(552,67,type==='demandshift'||type==='complement'?'D₁':'S₂');if(type==='both')body+=D+line('M225 70L562 263','#cb842c');if(type==='movement')body+=label(200,238,'M')+label(350,165,'T')+label(50,238,'P₁')+label(50,165,'P₂');if(type==='supplyshift')body+=label(250,210,'T')+label(340,210,'N');}
     if(type==='monocomp')body=D+line('M120 85L390 308','#cb842c')+label(490,292,'W (AR)')+label(390,320,'M (MR)');
     if(type==='cost'||type==='atc')body=line('M125 95Q305 365 495 100')+line('M145 45Q285 330 520 80','#cb842c')+label(495,110,'AC / ATC')+label(525,80,'MC')+label(302,256,'M')+(type==='atc'?label(295,349,'20 units')+label(26,265,'₦15'):'');
@@ -2270,7 +2286,7 @@
     if(type==='flow')body='<rect x="110" y="125" width="150" height="75" rx="12" fill="#e6f2f8" stroke="#176b94" stroke-width="2"/><rect x="360" y="125" width="150" height="75" rx="12" fill="#fff2dd" stroke="#cb842c" stroke-width="2"/>'+label(129,169,'Households')+label(408,169,'Firms')+line('M265 144H350','#cb842c')+line('M355 185H265')+label(268,128,'K: spending →')+label(260,218,'← goods/services');
     if(type.startsWith('pie')){const parts=type==='pieoil'?((match[1]==='2012-q5'||match[1]==='2020-q35')?[['Oil',160],['Agriculture',90],['Manufacturing',80],['Mining',30]]:[['Oil',160],['Agriculture',90],['Manufacturing',80],['Other',30]]):type==='pieservices'?((match[1]==='2014-q5'||match[1]==='2020-q25')?[['Mining',126],['Agriculture',72],['Manufacturing',108],['Services',54]]:[['Agriculture',126],['Oil',72],['Manufacturing',108],['Services',54]]):[['Oil',120],['Transport',60],['Remaining sectors',180]];const colors=['#397ba5','#e4a347','#6ca68b','#b78db5'];let a=-Math.PI/2;body='';for(let i=0;i<parts.length;i++){const [name,deg]=parts[i],b=a+deg*Math.PI/180,x1=315+125*Math.cos(a),y1=180+125*Math.sin(a),x2=315+125*Math.cos(b),y2=180+125*Math.sin(b);body+='<path d="M315 180L'+x1+' '+y1+'A125 125 0 '+(deg>180?1:0)+' 1 '+x2+' '+y2+'Z" fill="'+colors[i]+'" stroke="white" stroke-width="3"/>'+'<circle cx="'+(82+(i%2)*255)+'" cy="'+(334+Math.floor(i/2)*27)+'" r="7" fill="'+colors[i]+'"/>'+label(95+(i%2)*255,340+Math.floor(i/2)*27,((name==='Services'&&(match[1]==='2014-q5'||match[1]==='2020-q25'))||(name==='Manufacturing'&&(match[1]==='2012-q5'||match[1]==='2020-q35'))?name:name+': '+deg+'°'));a=b;}extra='';}
     if(!body)return html;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':(type==='costlines'||match[1]==='2013-q23'||match[1]==='2013-q24'||match[1]==='2011-q20'||match[1]==='2019-q11'||match[1]==='2019-q12'?'':axes))+body+extra+'</svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':(type==='costlines'||match[1]==='2013-q23'||match[1]==='2013-q24'||match[1]==='2011-q20'||match[1]==='2019-q11'||match[1]==='2019-q12'||match[1]==='2019-q14'?'':axes))+body+extra+'</svg>';
   }
 function accountingFinancialQuestionHtml(value) {
     const lines=String(value||'').split(/\r?\n/);
