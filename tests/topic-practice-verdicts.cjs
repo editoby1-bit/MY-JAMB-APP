@@ -1,7 +1,7 @@
 // Check the actual inline renderer without changing licensing or production data.
 const fs = require('node:fs'), vm = require('node:vm'), assert = require('node:assert/strict'), path = require('node:path');
 const app = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
-const start = app.indexOf('  function renderKeyPointPractice() {');
+const start = app.indexOf('  function keyPointQuestionHtml(value) {');
 const end = app.indexOf('  /* ── Exam Traps:', start);
 assert(start >= 0 && end > start);
 const source = app.slice(start, end);

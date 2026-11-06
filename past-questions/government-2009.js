@@ -72,9 +72,9 @@
       "The Commonwealth is a voluntary association with no binding charter or enforcement machinery; its strongest sanction is suspension, so it cannot force members to obey its decisions."),
     q("Which of the following countries has withdrawn her membership of the ECOWAS?",
       ["Senegal", "Mauritania", "Guinea Bissau", "Burkina Faso"], B,
-      "Mauritania, a founding member, left ECOWAS in 2000. When this paper was set (2009) it was the only country to have left; since 29 January 2025 Burkina Faso, Mali and Niger have also left.",
-      { keyVerdict: 'multiple', alsoAccept: [D], keyAnswer: 'B',
-        answerNote: "Option D is also correct today: Burkina Faso withdrew from ECOWAS in January 2025, together with Mali and Niger. In 2009 only Mauritania (B) had left, so both are accepted." }),
+      "For this 2009 paper, B (Mauritania) is correct: it withdrew from ECOWAS in 2000. Burkina Faso's withdrawal took effect on 29 January 2025, after this paper was set.",
+      { keyAnswer: 'B',
+        answerNote: "Use the withdrawal history at the date of the paper. Burkina Faso (D) withdrew in 2025, together with Mali and Niger, so that later event does not make D correct in a 2009 question. Only B is accepted." }),
     // paper 21–30
     q("Which of the following is a major threat to OPEC?",
       ["Persistence of war in the Middle East", "The discovery of crude oil in more countries", "Antagonism by the major world powers", "Development of viable alternatives to crude oil"], D,

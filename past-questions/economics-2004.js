@@ -81,10 +81,11 @@
       "Nigeria has land and many raw materials, but a shortage of skilled technicians, engineers and managers has slowed industrial growth."),
     // 16
     q("The maximum wage legislation seeks to",
-      ["fix wages above the equilibrium wage rate", "set wages below the equilibrium wage rate", "deter employers from exploiting their employees", "ensure an upper limit to the wages payable"], B,
-      "A maximum wage is a legal ceiling on pay; to have any effect it must be set below the equilibrium wage rate.",
-      { keyVerdict: 'multiple', keyAnswer: 'B', alsoAccept: [D],
-        answerNote: "A maximum wage is an upper limit on the wages payable (D), and to be effective that limit is set below the equilibrium wage rate (B). Both describe the same policy, so either is accepted." }),
+      ["fix wages above the equilibrium wage rate", "set wages below the equilibrium wage rate", "deter employers from exploiting their employees", "ensure an upper limit to the wages payable"], D,
+      "A maximum wage sets a legal upper limit on wages payable, D. Being below equilibrium describes when that ceiling binds, not the general purpose of maximum-wage legislation.",
+      { keyVerdict: 'corrected', keyAnswer: "B", bookletKey: "B",
+        bookletNote: "The supplied B describes a condition for a binding wage ceiling. The stem asks what maximum-wage legislation seeks to establish: an upper limit, D. A ceiling can also be set above equilibrium and remain non-binding.",
+        answerNote: "The supplied B describes a condition for a binding wage ceiling. The stem asks what maximum-wage legislation seeks to establish: an upper limit, D. A ceiling can also be set above equilibrium and remain non-binding." }),
     // 17
     q("The marketing of agricultural commodities in Nigeria is hampered by",
       ["lack of adequate storage facilities", "the existence of farmers' associations", "the existence of commodity exchange", "the abolition of marketing boards"], A,

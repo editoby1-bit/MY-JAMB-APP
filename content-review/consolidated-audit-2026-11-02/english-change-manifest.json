@@ -1,0 +1,884 @@
+{
+  "date": "2026-11-06",
+  "count": 14,
+  "sourceFiles": [
+    "past-questions/english-2002.js",
+    "past-questions/english-2004.js",
+    "past-questions/english-2005.js",
+    "past-questions/english-2006.js",
+    "past-questions/english-2008.js",
+    "past-questions/english-2009.js",
+    "past-questions/english-2011.js",
+    "past-questions/english-2015.js",
+    "past-questions/english-2016.js",
+    "past-questions/english-2019.js"
+  ],
+  "teachFile": "teach/english.js",
+  "questionOptionPassageMutations": 0,
+  "changes": [
+    {
+      "reportId": "EN02",
+      "file": "past-questions/english-2002.js",
+      "line": 52,
+      "year": 2002,
+      "passageId": "eng-2002-p3",
+      "passageLine": null,
+      "question": "One argument given in support of personal writing is that it",
+      "options": [
+        "has informal features which make it more diverting than impersonal writing",
+        "makes writers more focused and less boring",
+        "can be more objective than impersonal writing",
+        "is the style to use in all situations involving businessmen"
+      ],
+      "sourceKey": "B",
+      "beforeAccepted": [
+        "B",
+        "A"
+      ],
+      "afterAccepted": [
+        "A"
+      ],
+      "before": {
+        "question": "One argument given in support of personal writing is that it",
+        "options": [
+          "has informal features which make it more diverting than impersonal writing",
+          "makes writers more focused and less boring",
+          "can be more objective than impersonal writing",
+          "is the style to use in all situations involving businessmen"
+        ],
+        "answer": 1,
+        "alsoAccept": [
+          0
+        ],
+        "explanation": "Its supporters say personal writing is 'more forceful and direct' and, being 'more like conversation', 'more interesting'.",
+        "keyVerdict": "multiple",
+        "keyAnswer": "B",
+        "answerNote": "The key's B (more focused, less boring) matches 'more forceful and direct' and 'more interesting'. A says the same thing in other words: being 'more like conversation' is its informal feature, and 'more interesting' means more diverting. Both are marked right."
+      },
+      "after": {
+        "question": "One argument given in support of personal writing is that it",
+        "options": [
+          "has informal features which make it more diverting than impersonal writing",
+          "makes writers more focused and less boring",
+          "can be more objective than impersonal writing",
+          "is the style to use in all situations involving businessmen"
+        ],
+        "answer": 0,
+        "explanation": "Personal-writing advocates describe conversation-like, interesting writing. A reflects that argument; B adds an unsupported claim that the writers themselves become more focused.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "B",
+        "answerNote": "Personal-writing advocates describe conversation-like, interesting writing. A reflects that argument; B adds an unsupported claim that the writers themselves become more focused.",
+        "bookletKey": "B",
+        "bookletNote": "Personal-writing advocates describe conversation-like, interesting writing. A reflects that argument; B adds an unsupported claim that the writers themselves become more focused."
+      },
+      "teachKey": "eng-2002-p3|One argument given in support of personal writing is that it|has informal features which make it more diverting than impersonal writing|makes writers more focused and less boring|can be more objective than impersonal writing|is the style to use in all situations involving businessmen",
+      "teachWords": 129,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "Personal-writing advocates describe conversation-like, interesting writing. A reflects that argument; B adds an unsupported claim that the writers themselves become more focused."
+    },
+    {
+      "reportId": "EN08",
+      "file": "past-questions/english-2004.js",
+      "line": 126,
+      "year": 2004,
+      "passageId": null,
+      "passageLine": null,
+      "question": "Choose the option NEAREST in meaning to the word(s) in capitals: The press described the efforts of the government in PEJORATIVE terms.",
+      "options": [
+        "superlative",
+        "palpable",
+        "critical",
+        "contemptible"
+      ],
+      "sourceKey": "D",
+      "beforeAccepted": [
+        "D",
+        "C"
+      ],
+      "afterAccepted": [
+        "C"
+      ],
+      "before": {
+        "question": "Choose the option NEAREST in meaning to the word(s) in capitals: The press described the efforts of the government in PEJORATIVE terms.",
+        "options": [
+          "superlative",
+          "palpable",
+          "critical",
+          "contemptible"
+        ],
+        "answer": 3,
+        "explanation": "Pejorative words express contempt or disapproval.",
+        "year": 2004,
+        "source": "JAMB UTME 2004",
+        "alsoAccept": [
+          2
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "D",
+        "answerNote": "Pejorative means expressing contempt or disapproval. The key's D carries the idea of contempt, although strictly 'contemptible' means deserving contempt ('contemptuous' would be exact). 'Critical' (C) is also a fair synonym, since pejorative terms are disapproving, so both are marked right."
+      },
+      "after": {
+        "question": "Choose the option NEAREST in meaning to the word(s) in capitals: The press described the efforts of the government in PEJORATIVE terms.",
+        "options": [
+          "superlative",
+          "palpable",
+          "critical",
+          "contemptible"
+        ],
+        "answer": 2,
+        "explanation": "Pejorative means disparaging or expressing disapproval. Critical is the nearest offered word; contemptible means deserving contempt, not expressing it.",
+        "year": 2004,
+        "source": "JAMB UTME 2004",
+        "keyVerdict": "corrected",
+        "keyAnswer": "D",
+        "answerNote": "Pejorative means disparaging or expressing disapproval. Critical is the nearest offered word; contemptible means deserving contempt, not expressing it.",
+        "bookletKey": "D",
+        "bookletNote": "Pejorative means disparaging or expressing disapproval. Critical is the nearest offered word; contemptible means deserving contempt, not expressing it."
+      },
+      "teachKey": "|Choose the option NEAREST in meaning to the word(s) in capitals: The press described the efforts of the government in PEJORATIVE terms.|superlative|palpable|critical|contemptible",
+      "teachWords": 114,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "Pejorative means disparaging or expressing disapproval. Critical is the nearest offered word; contemptible means deserving contempt, not expressing it."
+    },
+    {
+      "reportId": "EN10",
+      "file": "past-questions/english-2005.js",
+      "line": 100,
+      "year": 2005,
+      "passageId": null,
+      "passageLine": null,
+      "question": "Choose the option that has the same consonant sound as the letter(s) in capitals: eNGlish",
+      "options": [
+        "orange",
+        "ink",
+        "impugn",
+        "single"
+      ],
+      "sourceKey": "B",
+      "beforeAccepted": [
+        "D",
+        "B"
+      ],
+      "afterAccepted": [
+        "D"
+      ],
+      "before": {
+        "question": "Choose the option that has the same consonant sound as the letter(s) in capitals: eNGlish",
+        "options": [
+          "orange",
+          "ink",
+          "impugn",
+          "single"
+        ],
+        "answer": 3,
+        "explanation": "The ng in English is /ŋɡ/ (ING-glish), exactly as in single (SING-gl).",
+        "year": 2005,
+        "source": "JAMB UTME 2005",
+        "alsoAccept": [
+          1
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "B",
+        "answerNote": "The underlined ng in English is pronounced /ŋɡ/, and single has exactly the same /ŋɡ/, so D is the closest match. Ink has the /ŋ/ part of that sound (followed by /k/, not /ɡ/), so B is accepted too. Orange has /ndʒ/ and impugn a plain /n/."
+      },
+      "after": {
+        "question": "Choose the option that has the same consonant sound as the letter(s) in capitals: eNGlish",
+        "options": [
+          "orange",
+          "ink",
+          "impugn",
+          "single"
+        ],
+        "answer": 3,
+        "explanation": "The highlighted NG in English represents /ŋɡ/. Single has that same sequence; ink has /ŋk/, matching only the nasal component.",
+        "year": 2005,
+        "source": "JAMB UTME 2005",
+        "keyVerdict": "corrected",
+        "keyAnswer": "B",
+        "answerNote": "The highlighted NG in English represents /ŋɡ/. Single has that same sequence; ink has /ŋk/, matching only the nasal component.",
+        "bookletKey": "B",
+        "bookletNote": "The highlighted NG in English represents /ŋɡ/. Single has that same sequence; ink has /ŋk/, matching only the nasal component."
+      },
+      "teachKey": "|Choose the option that has the same consonant sound as the letter(s) in capitals: eNGlish|orange|ink|impugn|single",
+      "teachWords": 121,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "The highlighted NG in English represents /ŋɡ/. Single has that same sequence; ink has /ŋk/, matching only the nasal component."
+    },
+    {
+      "reportId": "EN14",
+      "file": "past-questions/english-2006.js",
+      "line": 122,
+      "year": 2006,
+      "passageId": null,
+      "passageLine": null,
+      "question": "Choose the appropriate stress pattern for the word (the stressed syllable is in capitals): Genealogy",
+      "options": [
+        "geneAlogy",
+        "Genealogy",
+        "geNEAlogy",
+        "geneALOGY"
+      ],
+      "sourceKey": "D",
+      "beforeAccepted": [
+        "A",
+        "D"
+      ],
+      "afterAccepted": [
+        "A"
+      ],
+      "before": {
+        "question": "Choose the appropriate stress pattern for the word (the stressed syllable is in capitals): Genealogy",
+        "options": [
+          "geneAlogy",
+          "Genealogy",
+          "geNEAlogy",
+          "geneALOGY"
+        ],
+        "answer": 0,
+        "explanation": "Genealogy is stressed on the third syllable: ge-ne-AL-o-gy.",
+        "year": 2006,
+        "source": "JAMB UTME 2006",
+        "alsoAccept": [
+          3
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "D",
+        "answerNote": "Genealogy is stressed on the 'al' syllable: ge-ne-AL-o-gy. A marks exactly that syllable. The key's D capitalizes 'ALOGY', which also starts with the stressed AL but wrongly marks three syllables, so it is accepted as well."
+      },
+      "after": {
+        "question": "Choose the appropriate stress pattern for the word (the stressed syllable is in capitals): Genealogy",
+        "options": [
+          "geneAlogy",
+          "Genealogy",
+          "geNEAlogy",
+          "geneALOGY"
+        ],
+        "answer": 0,
+        "explanation": "Genealogy has primary stress on AL: ge-ne-AL-o-gy. A marks that syllable. Printed D capitalizes ALOGY across several syllables and is a malformed stress-marking option.",
+        "year": 2006,
+        "source": "JAMB UTME 2006",
+        "keyVerdict": "corrected",
+        "keyAnswer": "D",
+        "answerNote": "Genealogy has primary stress on AL: ge-ne-AL-o-gy. A marks that syllable. Printed D capitalizes ALOGY across several syllables and is a malformed stress-marking option.",
+        "bookletKey": "D",
+        "bookletNote": "Genealogy has primary stress on AL: ge-ne-AL-o-gy. A marks that syllable. Printed D capitalizes ALOGY across several syllables and is a malformed stress-marking option."
+      },
+      "teachKey": "|Choose the appropriate stress pattern for the word (the stressed syllable is in capitals): Genealogy|geneAlogy|Genealogy|geNEAlogy|geneALOGY",
+      "teachWords": 125,
+      "classification": "single-correct-ordinary",
+      "note": "The printed stress option D is malformed. No stem, option or pronunciation spelling was silently repaired."
+    },
+    {
+      "reportId": "EN21",
+      "file": "past-questions/english-2008.js",
+      "line": 86,
+      "year": 2008,
+      "passageId": null,
+      "passageLine": null,
+      "question": "Select the option that best explains the information conveyed in the sentence: Visitors who are observant do not outstay their welcome.",
+      "options": [
+        "All visitors must be alert so as to know when to leave a place",
+        "Some visitors know when to leave a place so as to make their hosts happy",
+        "Some visitors are unable to know when their hosts do not want them around",
+        "All visitors, except a few, know when to leave a place"
+      ],
+      "sourceKey": "A",
+      "beforeAccepted": [
+        "A",
+        "B"
+      ],
+      "afterAccepted": [
+        "B"
+      ],
+      "before": {
+        "question": "Select the option that best explains the information conveyed in the sentence: Visitors who are observant do not outstay their welcome.",
+        "options": [
+          "All visitors must be alert so as to know when to leave a place",
+          "Some visitors know when to leave a place so as to make their hosts happy",
+          "Some visitors are unable to know when their hosts do not want them around",
+          "All visitors, except a few, know when to leave a place"
+        ],
+        "answer": 0,
+        "explanation": "Being observant (alert) is what lets a visitor know when it is time to leave.",
+        "year": 2008,
+        "source": "JAMB UTME 2008",
+        "alsoAccept": [
+          1
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "A",
+        "answerNote": "'Visitors who are observant' refers to some visitors, the observant ones, who know when to leave (B). The key's A (all visitors must be alert) captures the same lesson as advice, so both are marked right."
+      },
+      "after": {
+        "question": "Select the option that best explains the information conveyed in the sentence: Visitors who are observant do not outstay their welcome.",
+        "options": [
+          "All visitors must be alert so as to know when to leave a place",
+          "Some visitors know when to leave a place so as to make their hosts happy",
+          "Some visitors are unable to know when their hosts do not want them around",
+          "All visitors, except a few, know when to leave a place"
+        ],
+        "answer": 1,
+        "explanation": "The sentence describes observant visitors as knowing when to leave. B preserves that descriptive meaning; A turns it into advice addressed to all visitors.",
+        "year": 2008,
+        "source": "JAMB UTME 2008",
+        "keyVerdict": "corrected",
+        "keyAnswer": "A",
+        "answerNote": "The sentence describes observant visitors as knowing when to leave. B preserves that descriptive meaning; A turns it into advice addressed to all visitors.",
+        "bookletKey": "A",
+        "bookletNote": "The sentence describes observant visitors as knowing when to leave. B preserves that descriptive meaning; A turns it into advice addressed to all visitors."
+      },
+      "teachKey": "|Select the option that best explains the information conveyed in the sentence: Visitors who are observant do not outstay their welcome.|All visitors must be alert so as to know when to leave a place|Some visitors know when to leave a place so as to make their hosts happy|Some visitors are unable to know when their hosts do not want them around|All visitors, except a few, know when to leave a place",
+      "teachWords": 120,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "The sentence describes observant visitors as knowing when to leave. B preserves that descriptive meaning; A turns it into advice addressed to all visitors."
+    },
+    {
+      "reportId": "EN22",
+      "file": "past-questions/english-2008.js",
+      "line": 96,
+      "year": 2008,
+      "passageId": null,
+      "passageLine": null,
+      "question": "Choose the option OPPOSITE in meaning to the word(s) in capitals: As an ABSOLUTE RULER, Adayi brooks no opposition from his subordinates.",
+      "options": [
+        "a despotic dictator",
+        "a shameless king",
+        "a benevolent leader",
+        "a magnanimous democrat"
+      ],
+      "sourceKey": "C",
+      "beforeAccepted": [
+        "D",
+        "C"
+      ],
+      "afterAccepted": [
+        "D"
+      ],
+      "before": {
+        "question": "Choose the option OPPOSITE in meaning to the word(s) in capitals: As an ABSOLUTE RULER, Adayi brooks no opposition from his subordinates.",
+        "options": [
+          "a despotic dictator",
+          "a shameless king",
+          "a benevolent leader",
+          "a magnanimous democrat"
+        ],
+        "answer": 3,
+        "explanation": "An absolute ruler holds all power and allows no opposition; a democrat shares power and accepts opposition.",
+        "year": 2008,
+        "source": "JAMB UTME 2008",
+        "alsoAccept": [
+          2
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "C",
+        "answerNote": "An absolute ruler holds all power and 'brooks no opposition'. A ruler who shares power and accepts opposition, a democrat (D), is the closest opposite. The key's C (a benevolent leader) is the opposite of a despotic ruler (A), which is also defensible, so both C and D are marked right."
+      },
+      "after": {
+        "question": "Choose the option OPPOSITE in meaning to the word(s) in capitals: As an ABSOLUTE RULER, Adayi brooks no opposition from his subordinates.",
+        "options": [
+          "a despotic dictator",
+          "a shameless king",
+          "a benevolent leader",
+          "a magnanimous democrat"
+        ],
+        "answer": 3,
+        "explanation": "The opposite concerns unrestricted power: a democrat contrasts with an absolute ruler. Benevolence concerns kindness and can coexist with absolute rule.",
+        "year": 2008,
+        "source": "JAMB UTME 2008",
+        "keyVerdict": "corrected",
+        "keyAnswer": "C",
+        "answerNote": "The opposite concerns unrestricted power: a democrat contrasts with an absolute ruler. Benevolence concerns kindness and can coexist with absolute rule.",
+        "bookletKey": "C",
+        "bookletNote": "The opposite concerns unrestricted power: a democrat contrasts with an absolute ruler. Benevolence concerns kindness and can coexist with absolute rule."
+      },
+      "teachKey": "|Choose the option OPPOSITE in meaning to the word(s) in capitals: As an ABSOLUTE RULER, Adayi brooks no opposition from his subordinates.|a despotic dictator|a shameless king|a benevolent leader|a magnanimous democrat",
+      "teachWords": 117,
+      "classification": "single-correct-ordinary",
+      "note": "The opposite concerns unrestricted power: a democrat contrasts with an absolute ruler. Benevolence concerns kindness and can coexist with absolute rule."
+    },
+    {
+      "reportId": "EN23",
+      "file": "past-questions/english-2008.js",
+      "line": 124,
+      "year": 2008,
+      "passageId": null,
+      "passageLine": null,
+      "question": "Choose the option that best completes the gap(s): The scholar examined _____ of the subject.",
+      "options": [
+        "three a part analysis",
+        "a part-three analysis",
+        "a three-part analysis",
+        "a three part analysis"
+      ],
+      "sourceKey": "D",
+      "beforeAccepted": [
+        "D",
+        "C"
+      ],
+      "afterAccepted": [
+        "C"
+      ],
+      "before": {
+        "question": "Choose the option that best completes the gap(s): The scholar examined _____ of the subject.",
+        "options": [
+          "three a part analysis",
+          "a part-three analysis",
+          "a three-part analysis",
+          "a three part analysis"
+        ],
+        "answer": 3,
+        "explanation": "A number + noun used before a noun forms a compound adjective in the singular: a three-part analysis.",
+        "year": 2008,
+        "source": "JAMB UTME 2008",
+        "alsoAccept": [
+          2
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "D",
+        "answerNote": "C and D are the same phrase; the only difference is the hyphen. Standard British usage hyphenates a compound adjective before a noun (a three-part analysis), so C is also correct, and D is the key's answer."
+      },
+      "after": {
+        "question": "Choose the option that best completes the gap(s): The scholar examined _____ of the subject.",
+        "options": [
+          "three a part analysis",
+          "a part-three analysis",
+          "a three-part analysis",
+          "a three part analysis"
+        ],
+        "answer": 2,
+        "explanation": "The standard attributive compound is a three-part analysis. C includes the hyphen joining the number and singular noun before analysis.",
+        "year": 2008,
+        "source": "JAMB UTME 2008",
+        "keyVerdict": "corrected",
+        "keyAnswer": "D",
+        "answerNote": "The standard attributive compound is a three-part analysis. C includes the hyphen joining the number and singular noun before analysis.",
+        "bookletKey": "D",
+        "bookletNote": "The standard attributive compound is a three-part analysis. C includes the hyphen joining the number and singular noun before analysis."
+      },
+      "teachKey": "|Choose the option that best completes the gap(s): The scholar examined _____ of the subject.|three a part analysis|a part-three analysis|a three-part analysis|a three part analysis",
+      "teachWords": 120,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "The standard attributive compound is a three-part analysis. C includes the hyphen joining the number and singular noun before analysis."
+    },
+    {
+      "reportId": "EN26",
+      "file": "past-questions/english-2009.js",
+      "line": 29,
+      "year": 2009,
+      "passageId": "eng-2009-p2",
+      "passageLine": null,
+      "question": "From the passage, which of the following is the most important reason why Nigerian pidgin is popular?",
+      "options": [
+        "it is used in social occasions",
+        "it has no ethnic affiliation",
+        "it is extensively used along the coast",
+        "it is used by many creative writers"
+      ],
+      "sourceKey": "D",
+      "beforeAccepted": [
+        "B",
+        "D"
+      ],
+      "afterAccepted": [
+        "B"
+      ],
+      "before": {
+        "question": "From the passage, which of the following is the most important reason why Nigerian pidgin is popular?",
+        "options": [
+          "it is used in social occasions",
+          "it has no ethnic affiliation",
+          "it is extensively used along the coast",
+          "it is used by many creative writers"
+        ],
+        "answer": 1,
+        "explanation": "Pidgin is 'the first choice of most Nigerians' when they are 'among those from different ethnic and linguistic backgrounds': it belongs to no one ethnic group, so everyone can use it.",
+        "alsoAccept": [
+          3
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "D",
+        "answerNote": "The key gives D, and the passage does show many writers now using pidgin. But the reason the passage itself gives for pidgin being everyone's first choice is that it bridges people of 'different ethnic and linguistic backgrounds' (B); being used by writers is more a sign of its popularity than the cause. Both are accepted."
+      },
+      "after": {
+        "question": "From the passage, which of the following is the most important reason why Nigerian pidgin is popular?",
+        "options": [
+          "it is used in social occasions",
+          "it has no ethnic affiliation",
+          "it is extensively used along the coast",
+          "it is used by many creative writers"
+        ],
+        "answer": 1,
+        "explanation": "Pidgin’s use across different ethnic and linguistic backgrounds explains its popularity. Creative writers’ use is evidence of its spread, not the main cause identified.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "D",
+        "answerNote": "Pidgin’s use across different ethnic and linguistic backgrounds explains its popularity. Creative writers’ use is evidence of its spread, not the main cause identified.",
+        "bookletKey": "D",
+        "bookletNote": "Pidgin’s use across different ethnic and linguistic backgrounds explains its popularity. Creative writers’ use is evidence of its spread, not the main cause identified."
+      },
+      "teachKey": "eng-2009-p2|From the passage, which of the following is the most important reason why Nigerian pidgin is popular?|it is used in social occasions|it has no ethnic affiliation|it is extensively used along the coast|it is used by many creative writers",
+      "teachWords": 123,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "Pidgin’s use across different ethnic and linguistic backgrounds explains its popularity. Creative writers’ use is evidence of its spread, not the main cause identified."
+    },
+    {
+      "reportId": "EN27",
+      "file": "past-questions/english-2009.js",
+      "line": 39,
+      "year": 2009,
+      "passageId": "eng-2009-p3",
+      "passageLine": 17,
+      "question": "From the passage, doctors find it hard to convince their patients of the gravity of lack of sleep because",
+      "options": [
+        "it is caused by a variety of reasons",
+        "the patients are often tired and cannot get enough sleep",
+        "people believe that it enhances one's personality",
+        "its impact on the patient is slow"
+      ],
+      "sourceKey": "A",
+      "beforeAccepted": [
+        "D",
+        "C"
+      ],
+      "afterAccepted": [
+        "D"
+      ],
+      "before": {
+        "question": "From the passage, doctors find it hard to convince their patients of the gravity of lack of sleep because",
+        "options": [
+          "it is caused by a variety of reasons",
+          "the patients are often tired and cannot get enough sleep",
+          "people believe that it enhances one's personality",
+          "its impact on the patient is slow"
+        ],
+        "answer": 3,
+        "explanation": "'Because their condition often worsens very gradually, victims of sleep deprivation may not recognize that they suffer from a serious disorder.'",
+        "alsoAccept": [
+          2
+        ],
+        "keyVerdict": "corrected",
+        "keyAnswer": "A",
+        "answerNote": "The variety of causes (A, the key's answer) is mentioned about insomnia, not as the reason patients ignore sleep loss. The last paragraph gives two reasons: some consider chronic fatigue 'a status symbol' (C), and the condition 'often worsens very gradually' (D). Both are marked right."
+      },
+      "after": {
+        "question": "From the passage, doctors find it hard to convince their patients of the gravity of lack of sleep because",
+        "options": [
+          "it is caused by a variety of reasons",
+          "the patients are often tired and cannot get enough sleep",
+          "people believe that it enhances one's personality",
+          "its impact on the patient is slow"
+        ],
+        "answer": 3,
+        "explanation": "The passage explicitly says the condition worsens gradually, so victims may not recognize its seriousness. A status symbol is not a claim that sleep deprivation improves personality.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "A",
+        "answerNote": "The passage explicitly says the condition worsens gradually, so victims may not recognize its seriousness. A status symbol is not a claim that sleep deprivation improves personality.",
+        "bookletKey": "A",
+        "bookletNote": "The passage explicitly says the condition worsens gradually, so victims may not recognize its seriousness. A status symbol is not a claim that sleep deprivation improves personality."
+      },
+      "teachKey": "eng-2009-p3|From the passage, doctors find it hard to convince their patients of the gravity of lack of sleep because|it is caused by a variety of reasons|the patients are often tired and cannot get enough sleep|people believe that it enhances one's personality|its impact on the patient is slow",
+      "teachWords": 124,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "The passage explicitly says the condition worsens gradually, so victims may not recognize its seriousness. A status symbol is not a claim that sleep deprivation improves personality."
+    },
+    {
+      "reportId": "EN41",
+      "file": "past-questions/english-2011.js",
+      "line": 22,
+      "year": 2011,
+      "passageId": "eng-2011-p1",
+      "passageLine": 15,
+      "question": "Which of the following is true according to the passage?",
+      "options": [
+        "Scientists felt that the bio cell would produce very costly energy.",
+        "Bio cells, at the beginning, derived their energy from sugar.",
+        "Sugar and fuel were initially used as source of energy for bio cells.",
+        "Bio cells were forms of power used by the scientists."
+      ],
+      "sourceKey": "C",
+      "beforeAccepted": [
+        "B",
+        "C"
+      ],
+      "afterAccepted": [
+        "B"
+      ],
+      "before": {
+        "question": "Which of the following is true according to the passage?",
+        "options": [
+          "Scientists felt that the bio cell would produce very costly energy.",
+          "Bio cells, at the beginning, derived their energy from sugar.",
+          "Sugar and fuel were initially used as source of energy for bio cells.",
+          "Bio cells were forms of power used by the scientists."
+        ],
+        "answer": 1,
+        "explanation": "The passage says 'Early bio cells were powered with sugar', which B restates exactly.",
+        "alsoAccept": [
+          2
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "C",
+        "answerNote": "B is the closest restatement of 'Early bio cells were powered with sugar', so it is marked right. The key's C can also be defended, since the bio cell ran on a liquid fuel and the early ones were powered with sugar, so it is accepted as well. A is false: scientists expected cheap power."
+      },
+      "after": {
+        "question": "Which of the following is true according to the passage?",
+        "options": [
+          "Scientists felt that the bio cell would produce very costly energy.",
+          "Bio cells, at the beginning, derived their energy from sugar.",
+          "Sugar and fuel were initially used as source of energy for bio cells.",
+          "Bio cells were forms of power used by the scientists."
+        ],
+        "answer": 1,
+        "explanation": "Early bio cells were powered with sugar is the explicit historical statement. The ability to use a wider range of fuels is a separate claim, not the initial sugar-and-fuel combination in C.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "C",
+        "answerNote": "Early bio cells were powered with sugar is the explicit historical statement. The ability to use a wider range of fuels is a separate claim, not the initial sugar-and-fuel combination in C.",
+        "bookletKey": "C",
+        "bookletNote": "Early bio cells were powered with sugar is the explicit historical statement. The ability to use a wider range of fuels is a separate claim, not the initial sugar-and-fuel combination in C."
+      },
+      "teachKey": "eng-2011-p1|Which of the following is true according to the passage?|Scientists felt that the bio cell would produce very costly energy.|Bio cells, at the beginning, derived their energy from sugar.|Sugar and fuel were initially used as source of energy for bio cells.|Bio cells were forms of power used by the scientists.",
+      "teachWords": 128,
+      "classification": "single-correct-ordinary",
+      "note": "Early bio cells were powered with sugar is the explicit historical statement. The ability to use a wider range of fuels is a separate claim, not the initial sugar-and-fuel combination in C."
+    },
+    {
+      "reportId": "EN56",
+      "file": "past-questions/english-2015.js",
+      "line": 25,
+      "year": 2015,
+      "passageId": "eng-2015-p1",
+      "passageLine": 16,
+      "question": "Which of the following statements can be inferred from the passage?",
+      "options": [
+        "Insignificant improvement occurred in transport since the advent of the motor cars, the lorries and the motorcycles",
+        "Human society was static without the express speed of cars and motorcycles",
+        "Society would be less chaotic without the increasing volume and speed of motor cars, lorries and motorcycles",
+        "People no longer use trains with the advent of cars and lorries"
+      ],
+      "sourceKey": "A",
+      "beforeAccepted": [
+        "A",
+        "C"
+      ],
+      "afterAccepted": [
+        "C"
+      ],
+      "before": {
+        "question": "Which of the following statements can be inferred from the passage?",
+        "options": [
+          "Insignificant improvement occurred in transport since the advent of the motor cars, the lorries and the motorcycles",
+          "Human society was static without the express speed of cars and motorcycles",
+          "Society would be less chaotic without the increasing volume and speed of motor cars, lorries and motorcycles",
+          "People no longer use trains with the advent of cars and lorries"
+        ],
+        "answer": 0,
+        "explanation": "Improvement of the roads to match the new vehicles had 'scarcely been tackled before 1914'.",
+        "alsoAccept": [
+          2
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "A",
+        "answerNote": "Read as being about the roads, A fits: widening and straightening them had 'scarcely been tackled before 1914', so little improvement had been made. But C can be inferred just as well: the new traffic brought noise, accidents, crowding and danger, so society would be less chaotic without it. Both are marked right."
+      },
+      "after": {
+        "question": "Which of the following statements can be inferred from the passage?",
+        "options": [
+          "Insignificant improvement occurred in transport since the advent of the motor cars, the lorries and the motorcycles",
+          "Human society was static without the express speed of cars and motorcycles",
+          "Society would be less chaotic without the increasing volume and speed of motor cars, lorries and motorcycles",
+          "People no longer use trains with the advent of cars and lorries"
+        ],
+        "answer": 2,
+        "explanation": "C follows from the described noise, crowding, accidents and danger. A confuses inadequate road adaptation with insignificant improvement in transport as a whole.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "A",
+        "answerNote": "C follows from the described noise, crowding, accidents and danger. A confuses inadequate road adaptation with insignificant improvement in transport as a whole.",
+        "bookletKey": "A",
+        "bookletNote": "C follows from the described noise, crowding, accidents and danger. A confuses inadequate road adaptation with insignificant improvement in transport as a whole."
+      },
+      "teachKey": "eng-2015-p1|Which of the following statements can be inferred from the passage?|Insignificant improvement occurred in transport since the advent of the motor cars, the lorries and the motorcycles|Human society was static without the express speed of cars and motorcycles|Society would be less chaotic without the increasing volume and speed of motor cars, lorries and motorcycles|People no longer use trains with the advent of cars and lorries",
+      "teachWords": 119,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "C follows from the described noise, crowding, accidents and danger. A confuses inadequate road adaptation with insignificant improvement in transport as a whole."
+    },
+    {
+      "reportId": "EN57",
+      "file": "past-questions/english-2015.js",
+      "line": 32,
+      "year": 2015,
+      "passageId": "eng-2015-p2",
+      "passageLine": 17,
+      "question": "Which of the following is true according to the passage?",
+      "options": [
+        "Chimpanzees are meticulous when searching for food.",
+        "Chimpanzees are reactive when in groups.",
+        "Chimpanzees are restless when hungry.",
+        "Chimpanzees are carnivorous and gregarious."
+      ],
+      "sourceKey": "D",
+      "beforeAccepted": [
+        "A",
+        "D"
+      ],
+      "afterAccepted": [
+        "A"
+      ],
+      "before": {
+        "question": "Which of the following is true according to the passage?",
+        "options": [
+          "Chimpanzees are meticulous when searching for food.",
+          "Chimpanzees are reactive when in groups.",
+          "Chimpanzees are restless when hungry.",
+          "Chimpanzees are carnivorous and gregarious."
+        ],
+        "answer": 0,
+        "explanation": "They 'carefully select' stems, trim them to 'the appropriate length', ignore hills that are not ready and eat 'slowly and deliberately': meticulous.",
+        "alsoAccept": [
+          3
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "D",
+        "answerNote": "The passage stresses how carefully chimpanzees get their food (selecting and trimming stems, waiting for the right season), so A is well supported. The key's D is partly right too: the males hunt and eat meat, and they share it rather than 'everyone for himself', though 'carnivorous' overstates it, since they are 'predominantly fruit eaters'. Both are marked right."
+      },
+      "after": {
+        "question": "Which of the following is true according to the passage?",
+        "options": [
+          "Chimpanzees are meticulous when searching for food.",
+          "Chimpanzees are reactive when in groups.",
+          "Chimpanzees are restless when hungry.",
+          "Chimpanzees are carnivorous and gregarious."
+        ],
+        "answer": 0,
+        "explanation": "Careful selection, trimming and use of stems directly supports meticulous food-searching. Predominantly fruit-eating with occasional meat does not justify D’s unqualified carnivorous description.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "D",
+        "answerNote": "Careful selection, trimming and use of stems directly supports meticulous food-searching. Predominantly fruit-eating with occasional meat does not justify D’s unqualified carnivorous description.",
+        "bookletKey": "D",
+        "bookletNote": "Careful selection, trimming and use of stems directly supports meticulous food-searching. Predominantly fruit-eating with occasional meat does not justify D’s unqualified carnivorous description."
+      },
+      "teachKey": "eng-2015-p2|Which of the following is true according to the passage?|Chimpanzees are meticulous when searching for food.|Chimpanzees are reactive when in groups.|Chimpanzees are restless when hungry.|Chimpanzees are carnivorous and gregarious.",
+      "teachWords": 122,
+      "classification": "single-correct-ordinary",
+      "note": "Careful selection, trimming and use of stems directly supports meticulous food-searching. Predominantly fruit-eating with occasional meat does not justify D’s unqualified carnivorous description."
+    },
+    {
+      "reportId": "EN61",
+      "file": "past-questions/english-2016.js",
+      "line": 20,
+      "year": 2016,
+      "passageId": "eng-2016-p1",
+      "passageLine": 15,
+      "question": "From the passage, it can be deduced that",
+      "options": [
+        "prevailing circumstances push a warring nation to sue for peace",
+        "all nations prefer the military option",
+        "all nations adopt the peaceful approach",
+        "conflicts are noted for facilitating opportunities"
+      ],
+      "sourceKey": "D",
+      "beforeAccepted": [
+        "D",
+        "A"
+      ],
+      "afterAccepted": [
+        "A"
+      ],
+      "before": {
+        "question": "From the passage, it can be deduced that",
+        "options": [
+          "prevailing circumstances push a warring nation to sue for peace",
+          "all nations prefer the military option",
+          "all nations adopt the peaceful approach",
+          "conflicts are noted for facilitating opportunities"
+        ],
+        "answer": 3,
+        "explanation": "The passage says force can be used to 'create a situation in which diplomatic negotiations can occur', so a conflict can open up an opportunity for a settlement. B and C contradict the passage's 'many different approaches'.",
+        "alsoAccept": [
+          0
+        ],
+        "keyVerdict": "multiple",
+        "keyAnswer": "D",
+        "answerNote": "The key gives D: the use of force can 'create a situation in which diplomatic negotiations can occur', i.e. conflict can facilitate an opportunity for peace talks. A rests on the same sentence (and on approaches having 'utility in particular circumstances'): circumstances such as the use of force can push a warring side to negotiate, i.e. to sue for peace. Both are fair deductions, so both are marked right."
+      },
+      "after": {
+        "question": "From the passage, it can be deduced that",
+        "options": [
+          "prevailing circumstances push a warring nation to sue for peace",
+          "all nations prefer the military option",
+          "all nations adopt the peaceful approach",
+          "conflicts are noted for facilitating opportunities"
+        ],
+        "answer": 0,
+        "explanation": "The passage says physical force may create circumstances for diplomatic negotiations. A is the specific peace-seeking inference; D generalizes that purpose into an undefined benefit of conflicts as such.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "D",
+        "answerNote": "The passage says physical force may create circumstances for diplomatic negotiations. A is the specific peace-seeking inference; D generalizes that purpose into an undefined benefit of conflicts as such.",
+        "bookletKey": "D",
+        "bookletNote": "The passage says physical force may create circumstances for diplomatic negotiations. A is the specific peace-seeking inference; D generalizes that purpose into an undefined benefit of conflicts as such."
+      },
+      "teachKey": "eng-2016-p1|From the passage, it can be deduced that|prevailing circumstances push a warring nation to sue for peace|all nations prefer the military option|all nations adopt the peaceful approach|conflicts are noted for facilitating opportunities",
+      "teachWords": 129,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "The passage says physical force may create circumstances for diplomatic negotiations. A is the specific peace-seeking inference; D generalizes that purpose into an undefined benefit of conflicts as such."
+    },
+    {
+      "reportId": "EN69",
+      "file": "past-questions/english-2019.js",
+      "line": 26,
+      "year": 2019,
+      "passageId": "eng-2019-p2",
+      "passageLine": 16,
+      "question": "Gap 6: The development of money ... was occasioned by increased specialization of human beings, this necessitated _____. This is a movement away from a ... society",
+      "options": [
+        "money",
+        "capital",
+        "exchange",
+        "movement"
+      ],
+      "sourceKey": "D",
+      "beforeAccepted": [
+        "D",
+        "C"
+      ],
+      "afterAccepted": [
+        "C"
+      ],
+      "before": {
+        "question": "Gap 6: The development of money ... was occasioned by increased specialization of human beings, this necessitated _____. This is a movement away from a ... society",
+        "options": [
+          "money",
+          "capital",
+          "exchange",
+          "movement"
+        ],
+        "answer": 3,
+        "alsoAccept": [
+          2
+        ],
+        "explanation": "The next sentence explains the word in the gap: 'This is a movement away from a primitive society', so the gap is movement. Exchange also makes good sense, since specialized people must exchange goods.",
+        "keyVerdict": "multiple",
+        "keyAnswer": "D",
+        "answerNote": "The key's movement (D) fits because the next sentence begins 'This is a movement away from...'. But exchange (C) is equally right: increased specialization is exactly what makes exchange necessary, and the passage is about money as a medium of exchange. Both are marked right."
+      },
+      "after": {
+        "question": "Gap 6: The development of money ... was occasioned by increased specialization of human beings, this necessitated _____. This is a movement away from a ... society",
+        "options": [
+          "money",
+          "capital",
+          "exchange",
+          "movement"
+        ],
+        "answer": 2,
+        "explanation": "Specialization creates a need for exchange between people producing different goods. Movement in the next sentence describes the wider transition away from self-sufficiency, not the required economic activity.",
+        "keyVerdict": "corrected",
+        "keyAnswer": "D",
+        "answerNote": "Specialization creates a need for exchange between people producing different goods. Movement in the next sentence describes the wider transition away from self-sufficiency, not the required economic activity.",
+        "bookletKey": "D",
+        "bookletNote": "Specialization creates a need for exchange between people producing different goods. Movement in the next sentence describes the wider transition away from self-sufficiency, not the required economic activity."
+      },
+      "teachKey": "eng-2019-p2|Gap 6: The development of money ... was occasioned by increased specialization of human beings, this necessitated _____. This is a movement away from a ... society|money|capital|exchange|movement",
+      "teachWords": 118,
+      "classification": "single-correct-with-genuine-trap",
+      "note": "Specialization creates a need for exchange between people producing different goods. Movement in the next sentence describes the wider transition away from self-sufficiency, not the required economic activity."
+    }
+  ]
+}

@@ -55,10 +55,10 @@
       "lessons": 21,
       "traps": true,
       "tricky": {
-        "multi": 73,
+        "multi": 59,
         "none": 9
       },
-      "gameCount": 1297,
+      "gameCount": 1303,
       "memoryCount": 80
     },
     "mathematics": {
@@ -309,11 +309,11 @@
       "lessons": 17,
       "traps": true,
       "tricky": {
-        "multi": 31,
+        "multi": 29,
         "none": 2
       },
-      "gameCount": 975,
-      "memoryCount": 364
+      "gameCount": 977,
+      "memoryCount": 365
     },
     "literature": {
       "scripts": [
@@ -541,11 +541,11 @@
       "lessons": 20,
       "traps": true,
       "tricky": {
-        "multi": 29,
+        "multi": 26,
         "none": 11
       },
-      "gameCount": 970,
-      "memoryCount": 235
+      "gameCount": 973,
+      "memoryCount": 236
     },
     "accounting": {
       "scripts": [
@@ -601,10 +601,10 @@
       "lessons": 24,
       "traps": true,
       "tricky": {
-        "multi": 7,
+        "multi": 6,
         "none": 17
       },
-      "gameCount": 976,
+      "gameCount": 977,
       "memoryCount": 136
     },
     "physics": {
@@ -716,10 +716,10 @@
       "lessons": 54,
       "traps": true,
       "tricky": {
-        "multi": 66,
+        "multi": 65,
         "none": 16
       },
-      "gameCount": 870,
+      "gameCount": 871,
       "memoryCount": 255
     }
   },
@@ -729,44 +729,44 @@
       "bytes": 42166
     },
     "past-questions/english-2002.js": {
-      "sha256": "fe046158f5e8152fba08dcf8753c76cef2aa62d7e7e31b455f37b44d91b3d949",
-      "bytes": 40374
+      "sha256": "d83b3080d5808f6c077da509a780cadfcc005ce64b2960b11d601b9d9a36006c",
+      "bytes": 40540
     },
     "past-questions/english-2003.js": {
       "sha256": "fda36b09139c8642a8d10f72961bfa20878b91680fabc0c535ac9f569f9b3e84",
       "bytes": 38709
     },
     "past-questions/english-2004.js": {
-      "sha256": "1fdfa4fe59aa2ea49548d989b0931588450996425e5a58935955c781e3de10f7",
-      "bytes": 37860
+      "sha256": "2d8daefd4e44e6281392aacd066509193220fc72d638e979b150ec0589836a42",
+      "bytes": 37990
     },
     "past-questions/english-2005.js": {
-      "sha256": "7dac6ad9acfca9855b46f1697429c917406bd137661deb6cddc5246971693feb",
-      "bytes": 39265
+      "sha256": "1f09e4223177d0d347ed7d8bb0c7bace5da7a83daf0640171b47479116ab1e19",
+      "bytes": 39351
     },
     "past-questions/english-2006.js": {
-      "sha256": "d3f199184d47e473994f8989c4f46a00a7f8525bee7b8a9069e955d9bc08cb92",
-      "bytes": 42870
+      "sha256": "500183ca092d37302947c48219d1ff79547e91017ede35645ace7af33c8782b4",
+      "bytes": 43109
     },
     "past-questions/english-2007.js": {
       "sha256": "f3c1b589f2868d4fed6382d9f6fe73e64193303b760507ddfa7dba55160ce164",
       "bytes": 43568
     },
     "past-questions/english-2008.js": {
-      "sha256": "05bc35eff274097f9a9609d3c7f1400e7a9f01faa301627e25a78a18c75ac5a3",
-      "bytes": 39525
+      "sha256": "ebcbb3f4228c8796483642e699e4c04cb999ecb83bb22f23921e97b7d010f7bf",
+      "bytes": 39921
     },
     "past-questions/english-2009.js": {
-      "sha256": "5c929ca295181a17181c0c2456355fbff0983dbff3b5feab308f8cee34334e18",
-      "bytes": 45987
+      "sha256": "929a5825b50a6ce761203aa914f12f313d69f136798dfccbea89c7ef226a09f3",
+      "bytes": 46139
     },
     "past-questions/english-2010.js": {
       "sha256": "0ddcc333c5c6f3a1760be14a895587bbd7d18a49621f698910a5e98850be774e",
       "bytes": 38561
     },
     "past-questions/english-2011.js": {
-      "sha256": "169d9fa1fa1b2c681189a871f85ce031ecff631ce8abbb782b8e99cf9766c93c",
-      "bytes": 39866
+      "sha256": "9014c5a90d2e48045881c8c769a1d7b78c1d8f179d7adf0a6019640eff8eabd6",
+      "bytes": 40075
     },
     "past-questions/english-2012.js": {
       "sha256": "f712b3c60633baf029f1c97b6e1f3e1b239da13e88c7ba1545eb627d8efffd3c",
@@ -781,12 +781,12 @@
       "bytes": 28282
     },
     "past-questions/english-2015.js": {
-      "sha256": "722dba472d0ea7299b26c06c3e7523eae8e4955c110ccdbf40c78500101563ac",
-      "bytes": 29383
+      "sha256": "02af7e97549b00e94826e88e91a55cb44c611de35b73d176454b9b83f18db298",
+      "bytes": 29564
     },
     "past-questions/english-2016.js": {
-      "sha256": "904f6c9ebc225c232653afe0c02070e52b645a13bd794ca4dd2fc57f07bbaf97",
-      "bytes": 28275
+      "sha256": "19170525a4a16ec04bcaea319cbccb603bd1f878b4f95e5e20a323588df241f6",
+      "bytes": 28265
     },
     "past-questions/english-2017.js": {
       "sha256": "cf9befe7953212871c94a60553defda5b5dddf8bf7ad96f92aeda3640d192d1c",
@@ -797,16 +797,16 @@
       "bytes": 19244
     },
     "past-questions/english-2019.js": {
-      "sha256": "e72d8ca89e53c40b9a80138963d931e1550b6e322f3b38f3ad5ea2793692adc2",
-      "bytes": 18521
+      "sha256": "4d93ed56a6801c9f6e02b2188fe07f33d7180d83827d5e99e47d79470bd6c758",
+      "bytes": 18685
     },
     "past-questions/english-2020.js": {
       "sha256": "d8d0f4282a5fc64317a7e5b5bd926a13e7f3b9365513ffacdfdc472f76ea0cd9",
       "bytes": 17965
     },
     "teach/english.js": {
-      "sha256": "bd771bfb8fad082ea442f9fd80731a0b79dd8744cb4d8e6cf0350e795a38863c",
-      "bytes": 875616
+      "sha256": "98360fcd118224bcfeaa06232def2d2e7b59ac725c43395caf962f1dd0b46d97",
+      "bytes": 881411
     },
     "teach/english-topics.js": {
       "sha256": "f79ab67a854a891c9a7c78cf60a9cabfbda64d565f95f549db45baf177df47e8",
@@ -1377,8 +1377,8 @@
       "bytes": 20172
     },
     "past-questions/government-2003.js": {
-      "sha256": "91d3de3e814f60db713664475a6057849aca7f08625796cc41504722567ae076",
-      "bytes": 18926
+      "sha256": "f87b588ee7527a07844fc397741b7c9d9342e15c758602f2a47cefa7238f8b1c",
+      "bytes": 18906
     },
     "past-questions/government-2004.js": {
       "sha256": "83da75840185497ec0ba97a76fabbdecc9a74c7836b81755304a658e918ca9fc",
@@ -1401,8 +1401,8 @@
       "bytes": 18683
     },
     "past-questions/government-2009.js": {
-      "sha256": "7d7f48ad17fcc5eb897dbb2bb5a6a11a97357426ea025e1fc4244a3e10178364",
-      "bytes": 19742
+      "sha256": "77f30774282d22cc79d7bff4ac5feda87381aa0beafe9b51eccdc31ef2661a50",
+      "bytes": 19707
     },
     "past-questions/government-2010.js": {
       "sha256": "b0ed61a322987a8e5baabe24159ab611245033729e69a5391f6a045ae87e2506",
@@ -1449,12 +1449,12 @@
       "bytes": 14967
     },
     "teach/government.js": {
-      "sha256": "fad6362adccf9fd7821e7964fe37ee803c4cc2661a6126eb92841e45f04b0c95",
-      "bytes": 751767
+      "sha256": "a84e307f3afdd9fd9cb003e6056bba9b86901dd3c035a8552c29530445a586d0",
+      "bytes": 752032
     },
     "teach/government-topics.js": {
       "sha256": "e622a5bb32c64ed73ca3a529e9dc224d3f2871f31802e93d5e726de4028e51c8",
-      "bytes": 368401
+      "bytes": 371529
     },
     "past-questions/literature-2001.js": {
       "sha256": "675d680e6130f17632e164b99bce9c33d0ef0bb516d4f3de3b6d371fdac30c04",
@@ -1629,12 +1629,12 @@
       "bytes": 20568
     },
     "past-questions/economics-2004.js": {
-      "sha256": "158f540ab88dfadd012b3c6d81f5efa7203de3442834887b81b6ee192a92f834",
-      "bytes": 20459
+      "sha256": "7238826a7ff1ba5052450cbbbd12e90a1b43a43c8d1c14711be031899e04469a",
+      "bytes": 20792
     },
     "past-questions/economics-2005.js": {
-      "sha256": "404da1026ed7a72ef40b8b556ac73024ba902bfe850aa8133869c02656d3d6f6",
-      "bytes": 22052
+      "sha256": "02b4614727a23a010c35df5a15c3a0f04388c28e4cd91b6bd85f458104556609",
+      "bytes": 22341
     },
     "past-questions/economics-2006.js": {
       "sha256": "8ca8623cb309a3c1e35583aa470e12b1a53174bf924d8e89edc3d4916e6c6e14",
@@ -1649,8 +1649,8 @@
       "bytes": 17853
     },
     "past-questions/economics-2009.js": {
-      "sha256": "fba88dd26a53fdf342ea1ed887a06fff7c1154bea51e69ff1debfdd0d0d8736e",
-      "bytes": 21120
+      "sha256": "35dc7eca430dd5084a0d399c6591450c45eac2757fb1656f4a5ae9ea5cd5ee85",
+      "bytes": 21266
     },
     "past-questions/economics-2010.js": {
       "sha256": "e39a9c15ede42a9678af83ab77dffe6da87119c5bdf1e1a0513ccda542ecdbbc",
@@ -1697,12 +1697,12 @@
       "bytes": 16217
     },
     "teach/economics.js": {
-      "sha256": "db4b8806f26b492b19b5577281e154ebb6231f78ac2f9b1f3628e184dc0d8504",
-      "bytes": 783199
+      "sha256": "557668c2a67f46897ffaf44adb8d0587fbd0391d2e480a302a87356a1d679f7e",
+      "bytes": 784178
     },
     "teach/economics-topics.js": {
       "sha256": "98bca911c897b59408da76cb83520674b7e429f4eb4d59868b121e69fd9c86ae",
-      "bytes": 367150
+      "bytes": 366359
     },
     "past-questions/img/economics-2001-q7.png": {
       "sha256": "36853ddefe3bd5d7282f380c44b8e6fd7c51779aeb95e9f3f362bf18c068e6c9",
@@ -1925,8 +1925,8 @@
       "bytes": 21073
     },
     "past-questions/accounting-2005.js": {
-      "sha256": "4d457498c81f40c2f36a72b04c8f3cbb6fff5a72d28fc8a952f710ef7032d3d0",
-      "bytes": 22068
+      "sha256": "1565b0e99fc27c6fb18ea5a8d3f3d48f9c957d700b1ed082e44c230fa58383e3",
+      "bytes": 22225
     },
     "past-questions/accounting-2006.js": {
       "sha256": "895f336351b9eb4570f2148b86c9fb33ec458db62b0e006a79e9cf85ebafbe4f",
@@ -1989,8 +1989,8 @@
       "bytes": 17869
     },
     "teach/accounting.js": {
-      "sha256": "532228926147748f48212f741e5dd9d5bb37c75f913c70945896d2d152778cf0",
-      "bytes": 760285
+      "sha256": "158254591708b7e55a3ddb04b26e244f6846ed01b619b85771656fe37e1a0751",
+      "bytes": 760705
     },
     "teach/accounting-topics.js": {
       "sha256": "beba2a487e6a58978c45ce37e8f13b3814a0e0e497fd956f2878e5b22283f355",
@@ -2006,11 +2006,11 @@
     },
     "past-questions/commerce-2003.js": {
       "sha256": "cee3b60efd0c821035c61a5b17178591997e474874a539c889b7b8b573640d19",
-      "bytes": 47291
+      "bytes": 46562
     },
     "past-questions/commerce-2004.js": {
       "sha256": "a9001e26c63fbefd33a110f5ae42d990f3bfc09674cddc7a9631027c11fe28f9",
-      "bytes": 43597
+      "bytes": 47491
     },
     "teach/commerce.js": {
       "sha256": "6f29f2d3cfb8e38367cb97ef2de7bd6b954367ebba50e5e86f7d9984bb4d5958",
@@ -2018,7 +2018,7 @@
     },
     "teach/commerce-topics.js": {
       "sha256": "a3586a6252a8fa06969aec9e0df5beac88e13af84ddd7804be65738e0f00d16b",
-      "bytes": 247252
+      "bytes": 517898
     },
     "past-questions/img/commerce-2004-q34-35.png": {
       "sha256": "acc70265de5a8a3627e57536e9abd406d714aa0599dd58b41dc4741b5b42e68d",
@@ -2030,7 +2030,7 @@
     },
     "past-questions/commerce-2006.js": {
       "sha256": "b106528a1393b699c6e06731c5c1d8e3e5ab3aab3e2e83c580fab62c2450f642",
-      "bytes": 49937
+      "bytes": 52109
     },
     "past-questions/commerce-2007.js": {
       "sha256": "97f18325e9c9b0b1c50433159b13d8e2b2faacd6b3d1f0baeb28d7bff9b7d058",
@@ -2054,7 +2054,7 @@
     },
     "past-questions/commerce-2011.js": {
       "sha256": "cbbb332977d919726e7c104a6e74ab638501636f6a8a065426882f95a46fbe80",
-      "bytes": 59112
+      "bytes": 60695
     },
     "past-questions/commerce-2012.js": {
       "sha256": "24960725533be65d39b9d06c02a662eaee92f8f642cae2c65f8270eba205fa8d",
@@ -2113,5 +2113,5 @@
       "bytes": 45116
     }
   },
-  "version": "accounting-24-20261106"
+  "version": "8880662ce46e9afe"
 }

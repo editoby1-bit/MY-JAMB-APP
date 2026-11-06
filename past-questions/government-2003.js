@@ -166,9 +166,9 @@
       "In 2003, 6 of OPEC's 11 members (Iran, Iraq, Kuwait, Qatar, Saudi Arabia, UAE) were in the Middle East. Today the African members (6 of 12) outnumber the Middle Eastern ones (5)."),
     q("The non-British colony which is a member of the Commonwealth is",
       ["Guinea-Bissau", "Mozambique", "Rwanda", "Eritrea"], B,
-      "Mozambique, a former Portuguese colony, joined the Commonwealth in 1995. Today Rwanda (joined 2009), Gabon and Togo (2022) are also non-British members.",
-      { keyVerdict: 'multiple', alsoAccept: [C], keyAnswer: 'B',
-        answerNote: "Option C is also correct today: Rwanda, a former Belgian territory, joined the Commonwealth in 2009. When this paper was set only Mozambique (B) had joined, so both are accepted." }),
+      "For this 2003 paper, B (Mozambique) is correct: the former Portuguese colony joined the Commonwealth in 1995. Rwanda joined in 2009, after this paper was set.",
+      { keyAnswer: 'B',
+        answerNote: "Use the membership facts at the date of the paper. Rwanda (C) joined in 2009 and is a non-British member today, but it was not a member in 2003. Only B is accepted for this historical question." }),
     q("The major problem of the ECOWAS is lack of",
       ["a common Customs Union", "a common currency", "uniform ideology", "commitment by members"], B,
       "ECOWAS members use several currencies (the CFA franc, naira, cedi and others), which makes trade and payments between them difficult; the planned single currency (the Eco) has still not been launched.")

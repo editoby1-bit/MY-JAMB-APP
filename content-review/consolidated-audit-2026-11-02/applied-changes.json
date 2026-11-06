@@ -1,0 +1,792 @@
+[
+  {
+    "subject": "english",
+    "index": 132,
+    "part": 0,
+    "old": {
+      "question": "One argument given in support of personal writing is that it",
+      "options": [
+        "has informal features which make it more diverting than impersonal writing",
+        "makes writers more focused and less boring",
+        "can be more objective than impersonal writing",
+        "is the style to use in all situations involving businessmen"
+      ],
+      "answer": 1,
+      "alsoAccept": [
+        0
+      ],
+      "explanation": "Its supporters say personal writing is 'more forceful and direct' and, being 'more like conversation', 'more interesting'.",
+      "keyVerdict": "multiple",
+      "keyAnswer": "B",
+      "answerNote": "The key's B (more focused, less boring) matches 'more forceful and direct' and 'more interesting'. A says the same thing in other words: being 'more like conversation' is its informal feature, and 'more interesting' means more diverting. Both are marked right."
+    },
+    "new": {
+      "question": "One argument given in support of personal writing is that it",
+      "options": [
+        "has informal features which make it more diverting than impersonal writing",
+        "makes writers more focused and less boring",
+        "can be more objective than impersonal writing",
+        "is the style to use in all situations involving businessmen"
+      ],
+      "answer": 0,
+      "explanation": "Personal-writing advocates describe conversation-like, interesting writing. A reflects that argument; B adds an unsupported claim that the writers themselves become more focused.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "B",
+      "answerNote": "Personal-writing advocates describe conversation-like, interesting writing. A reflects that argument; B adds an unsupported claim that the writers themselves become more focused.",
+      "bookletKey": "B",
+      "bookletNote": "Personal-writing advocates describe conversation-like, interesting writing. A reflects that argument; B adds an unsupported claim that the writers themselves become more focused."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 338,
+    "old": {
+      "question": "Choose the option NEAREST in meaning to the word(s) in capitals: The press described the efforts of the government in PEJORATIVE terms.",
+      "options": [
+        "superlative",
+        "palpable",
+        "critical",
+        "contemptible"
+      ],
+      "answer": 3,
+      "explanation": "Pejorative words express contempt or disapproval.",
+      "year": 2004,
+      "source": "JAMB UTME 2004",
+      "alsoAccept": [
+        2
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "answerNote": "Pejorative means expressing contempt or disapproval. The key's D carries the idea of contempt, although strictly 'contemptible' means deserving contempt ('contemptuous' would be exact). 'Critical' (C) is also a fair synonym, since pejorative terms are disapproving, so both are marked right."
+    },
+    "new": {
+      "question": "Choose the option NEAREST in meaning to the word(s) in capitals: The press described the efforts of the government in PEJORATIVE terms.",
+      "options": [
+        "superlative",
+        "palpable",
+        "critical",
+        "contemptible"
+      ],
+      "answer": 2,
+      "explanation": "Pejorative means disparaging or expressing disapproval. Critical is the nearest offered word; contemptible means deserving contempt, not expressing it.",
+      "year": 2004,
+      "source": "JAMB UTME 2004",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "answerNote": "Pejorative means disparaging or expressing disapproval. Critical is the nearest offered word; contemptible means deserving contempt, not expressing it.",
+      "bookletKey": "D",
+      "bookletNote": "Pejorative means disparaging or expressing disapproval. Critical is the nearest offered word; contemptible means deserving contempt, not expressing it."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 391,
+    "old": {
+      "question": "Choose the option that has the same consonant sound as the letter(s) in capitals: eNGlish",
+      "options": [
+        "orange",
+        "ink",
+        "impugn",
+        "single"
+      ],
+      "answer": 3,
+      "explanation": "The ng in English is /ŋɡ/ (ING-glish), exactly as in single (SING-gl).",
+      "year": 2005,
+      "source": "JAMB UTME 2005",
+      "alsoAccept": [
+        1
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "B",
+      "answerNote": "The underlined ng in English is pronounced /ŋɡ/, and single has exactly the same /ŋɡ/, so D is the closest match. Ink has the /ŋ/ part of that sound (followed by /k/, not /ɡ/), so B is accepted too. Orange has /ndʒ/ and impugn a plain /n/."
+    },
+    "new": {
+      "question": "Choose the option that has the same consonant sound as the letter(s) in capitals: eNGlish",
+      "options": [
+        "orange",
+        "ink",
+        "impugn",
+        "single"
+      ],
+      "answer": 3,
+      "explanation": "The highlighted NG in English represents /ŋɡ/. Single has that same sequence; ink has /ŋk/, matching only the nasal component.",
+      "year": 2005,
+      "source": "JAMB UTME 2005",
+      "keyVerdict": "corrected",
+      "keyAnswer": "B",
+      "answerNote": "The highlighted NG in English represents /ŋɡ/. Single has that same sequence; ink has /ŋk/, matching only the nasal component.",
+      "bookletKey": "B",
+      "bookletNote": "The highlighted NG in English represents /ŋɡ/. Single has that same sequence; ink has /ŋk/, matching only the nasal component."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 492,
+    "old": {
+      "question": "Choose the appropriate stress pattern for the word (the stressed syllable is in capitals): Genealogy",
+      "options": [
+        "geneAlogy",
+        "Genealogy",
+        "geNEAlogy",
+        "geneALOGY"
+      ],
+      "answer": 0,
+      "explanation": "Genealogy is stressed on the third syllable: ge-ne-AL-o-gy.",
+      "year": 2006,
+      "source": "JAMB UTME 2006",
+      "alsoAccept": [
+        3
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "answerNote": "Genealogy is stressed on the 'al' syllable: ge-ne-AL-o-gy. A marks exactly that syllable. The key's D capitalizes 'ALOGY', which also starts with the stressed AL but wrongly marks three syllables, so it is accepted as well."
+    },
+    "new": {
+      "question": "Choose the appropriate stress pattern for the word (the stressed syllable is in capitals): Genealogy",
+      "options": [
+        "geneAlogy",
+        "Genealogy",
+        "geNEAlogy",
+        "geneALOGY"
+      ],
+      "answer": 0,
+      "explanation": "Genealogy has primary stress on AL: ge-ne-AL-o-gy. A marks that syllable. Printed D capitalizes ALOGY across several syllables and is a malformed stress-marking option.",
+      "year": 2006,
+      "source": "JAMB UTME 2006",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "answerNote": "Genealogy has primary stress on AL: ge-ne-AL-o-gy. A marks that syllable. Printed D capitalizes ALOGY across several syllables and is a malformed stress-marking option.",
+      "bookletKey": "D",
+      "bookletNote": "Genealogy has primary stress on AL: ge-ne-AL-o-gy. A marks that syllable. Printed D capitalizes ALOGY across several syllables and is a malformed stress-marking option."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 616,
+    "old": {
+      "question": "Select the option that best explains the information conveyed in the sentence: Visitors who are observant do not outstay their welcome.",
+      "options": [
+        "All visitors must be alert so as to know when to leave a place",
+        "Some visitors know when to leave a place so as to make their hosts happy",
+        "Some visitors are unable to know when their hosts do not want them around",
+        "All visitors, except a few, know when to leave a place"
+      ],
+      "answer": 0,
+      "explanation": "Being observant (alert) is what lets a visitor know when it is time to leave.",
+      "year": 2008,
+      "source": "JAMB UTME 2008",
+      "alsoAccept": [
+        1
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "A",
+      "answerNote": "'Visitors who are observant' refers to some visitors, the observant ones, who know when to leave (B). The key's A (all visitors must be alert) captures the same lesson as advice, so both are marked right."
+    },
+    "new": {
+      "question": "Select the option that best explains the information conveyed in the sentence: Visitors who are observant do not outstay their welcome.",
+      "options": [
+        "All visitors must be alert so as to know when to leave a place",
+        "Some visitors know when to leave a place so as to make their hosts happy",
+        "Some visitors are unable to know when their hosts do not want them around",
+        "All visitors, except a few, know when to leave a place"
+      ],
+      "answer": 1,
+      "explanation": "The sentence describes observant visitors as knowing when to leave. B preserves that descriptive meaning; A turns it into advice addressed to all visitors.",
+      "year": 2008,
+      "source": "JAMB UTME 2008",
+      "keyVerdict": "corrected",
+      "keyAnswer": "A",
+      "answerNote": "The sentence describes observant visitors as knowing when to leave. B preserves that descriptive meaning; A turns it into advice addressed to all visitors.",
+      "bookletKey": "A",
+      "bookletNote": "The sentence describes observant visitors as knowing when to leave. B preserves that descriptive meaning; A turns it into advice addressed to all visitors."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 626,
+    "old": {
+      "question": "Choose the option OPPOSITE in meaning to the word(s) in capitals: As an ABSOLUTE RULER, Adayi brooks no opposition from his subordinates.",
+      "options": [
+        "a despotic dictator",
+        "a shameless king",
+        "a benevolent leader",
+        "a magnanimous democrat"
+      ],
+      "answer": 3,
+      "explanation": "An absolute ruler holds all power and allows no opposition; a democrat shares power and accepts opposition.",
+      "year": 2008,
+      "source": "JAMB UTME 2008",
+      "alsoAccept": [
+        2
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "C",
+      "answerNote": "An absolute ruler holds all power and 'brooks no opposition'. A ruler who shares power and accepts opposition, a democrat (D), is the closest opposite. The key's C (a benevolent leader) is the opposite of a despotic ruler (A), which is also defensible, so both C and D are marked right."
+    },
+    "new": {
+      "question": "Choose the option OPPOSITE in meaning to the word(s) in capitals: As an ABSOLUTE RULER, Adayi brooks no opposition from his subordinates.",
+      "options": [
+        "a despotic dictator",
+        "a shameless king",
+        "a benevolent leader",
+        "a magnanimous democrat"
+      ],
+      "answer": 3,
+      "explanation": "The opposite concerns unrestricted power: a democrat contrasts with an absolute ruler. Benevolence concerns kindness and can coexist with absolute rule.",
+      "year": 2008,
+      "source": "JAMB UTME 2008",
+      "keyVerdict": "corrected",
+      "keyAnswer": "C",
+      "answerNote": "The opposite concerns unrestricted power: a democrat contrasts with an absolute ruler. Benevolence concerns kindness and can coexist with absolute rule.",
+      "bookletKey": "C",
+      "bookletNote": "The opposite concerns unrestricted power: a democrat contrasts with an absolute ruler. Benevolence concerns kindness and can coexist with absolute rule."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 654,
+    "old": {
+      "question": "Choose the option that best completes the gap(s): The scholar examined _____ of the subject.",
+      "options": [
+        "three a part analysis",
+        "a part-three analysis",
+        "a three-part analysis",
+        "a three part analysis"
+      ],
+      "answer": 3,
+      "explanation": "A number + noun used before a noun forms a compound adjective in the singular: a three-part analysis.",
+      "year": 2008,
+      "source": "JAMB UTME 2008",
+      "alsoAccept": [
+        2
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "answerNote": "C and D are the same phrase; the only difference is the hyphen. Standard British usage hyphenates a compound adjective before a noun (a three-part analysis), so C is also correct, and D is the key's answer."
+    },
+    "new": {
+      "question": "Choose the option that best completes the gap(s): The scholar examined _____ of the subject.",
+      "options": [
+        "three a part analysis",
+        "a part-three analysis",
+        "a three-part analysis",
+        "a three part analysis"
+      ],
+      "answer": 2,
+      "explanation": "The standard attributive compound is a three-part analysis. C includes the hyphen joining the number and singular noun before analysis.",
+      "year": 2008,
+      "source": "JAMB UTME 2008",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "answerNote": "The standard attributive compound is a three-part analysis. C includes the hyphen joining the number and singular noun before analysis.",
+      "bookletKey": "D",
+      "bookletNote": "The standard attributive compound is a three-part analysis. C includes the hyphen joining the number and singular noun before analysis."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 684,
+    "part": 1,
+    "old": {
+      "question": "From the passage, which of the following is the most important reason why Nigerian pidgin is popular?",
+      "options": [
+        "it is used in social occasions",
+        "it has no ethnic affiliation",
+        "it is extensively used along the coast",
+        "it is used by many creative writers"
+      ],
+      "answer": 1,
+      "explanation": "Pidgin is 'the first choice of most Nigerians' when they are 'among those from different ethnic and linguistic backgrounds': it belongs to no one ethnic group, so everyone can use it.",
+      "alsoAccept": [
+        3
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "answerNote": "The key gives D, and the passage does show many writers now using pidgin. But the reason the passage itself gives for pidgin being everyone's first choice is that it bridges people of 'different ethnic and linguistic backgrounds' (B); being used by writers is more a sign of its popularity than the cause. Both are accepted."
+    },
+    "new": {
+      "question": "From the passage, which of the following is the most important reason why Nigerian pidgin is popular?",
+      "options": [
+        "it is used in social occasions",
+        "it has no ethnic affiliation",
+        "it is extensively used along the coast",
+        "it is used by many creative writers"
+      ],
+      "answer": 1,
+      "explanation": "Pidgin’s use across different ethnic and linguistic backgrounds explains its popularity. Creative writers’ use is evidence of its spread, not the main cause identified.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "answerNote": "Pidgin’s use across different ethnic and linguistic backgrounds explains its popularity. Creative writers’ use is evidence of its spread, not the main cause identified.",
+      "bookletKey": "D",
+      "bookletNote": "Pidgin’s use across different ethnic and linguistic backgrounds explains its popularity. Creative writers’ use is evidence of its spread, not the main cause identified."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 685,
+    "part": 4,
+    "old": {
+      "question": "From the passage, doctors find it hard to convince their patients of the gravity of lack of sleep because",
+      "options": [
+        "it is caused by a variety of reasons",
+        "the patients are often tired and cannot get enough sleep",
+        "people believe that it enhances one's personality",
+        "its impact on the patient is slow"
+      ],
+      "answer": 3,
+      "explanation": "'Because their condition often worsens very gradually, victims of sleep deprivation may not recognize that they suffer from a serious disorder.'",
+      "alsoAccept": [
+        2
+      ],
+      "keyVerdict": "corrected",
+      "keyAnswer": "A",
+      "answerNote": "The variety of causes (A, the key's answer) is mentioned about insomnia, not as the reason patients ignore sleep loss. The last paragraph gives two reasons: some consider chronic fatigue 'a status symbol' (C), and the condition 'often worsens very gradually' (D). Both are marked right."
+    },
+    "new": {
+      "question": "From the passage, doctors find it hard to convince their patients of the gravity of lack of sleep because",
+      "options": [
+        "it is caused by a variety of reasons",
+        "the patients are often tired and cannot get enough sleep",
+        "people believe that it enhances one's personality",
+        "its impact on the patient is slow"
+      ],
+      "answer": 3,
+      "explanation": "The passage explicitly says the condition worsens gradually, so victims may not recognize its seriousness. A status symbol is not a claim that sleep deprivation improves personality.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "A",
+      "answerNote": "The passage explicitly says the condition worsens gradually, so victims may not recognize its seriousness. A status symbol is not a claim that sleep deprivation improves personality.",
+      "bookletKey": "A",
+      "bookletNote": "The passage explicitly says the condition worsens gradually, so victims may not recognize its seriousness. A status symbol is not a claim that sleep deprivation improves personality."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 841,
+    "part": 1,
+    "old": {
+      "question": "Which of the following is true according to the passage?",
+      "options": [
+        "Scientists felt that the bio cell would produce very costly energy.",
+        "Bio cells, at the beginning, derived their energy from sugar.",
+        "Sugar and fuel were initially used as source of energy for bio cells.",
+        "Bio cells were forms of power used by the scientists."
+      ],
+      "answer": 1,
+      "explanation": "The passage says 'Early bio cells were powered with sugar', which B restates exactly.",
+      "alsoAccept": [
+        2
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "C",
+      "answerNote": "B is the closest restatement of 'Early bio cells were powered with sugar', so it is marked right. The key's C can also be defended, since the bio cell ran on a liquid fuel and the early ones were powered with sugar, so it is accepted as well. A is false: scientists expected cheap power."
+    },
+    "new": {
+      "question": "Which of the following is true according to the passage?",
+      "options": [
+        "Scientists felt that the bio cell would produce very costly energy.",
+        "Bio cells, at the beginning, derived their energy from sugar.",
+        "Sugar and fuel were initially used as source of energy for bio cells.",
+        "Bio cells were forms of power used by the scientists."
+      ],
+      "answer": 1,
+      "explanation": "Early bio cells were powered with sugar is the explicit historical statement. The ability to use a wider range of fuels is a separate claim, not the initial sugar-and-fuel combination in C.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "C",
+      "answerNote": "Early bio cells were powered with sugar is the explicit historical statement. The ability to use a wider range of fuels is a separate claim, not the initial sugar-and-fuel combination in C.",
+      "bookletKey": "C",
+      "bookletNote": "Early bio cells were powered with sugar is the explicit historical statement. The ability to use a wider range of fuels is a separate claim, not the initial sugar-and-fuel combination in C."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 1135,
+    "part": 4,
+    "old": {
+      "question": "Which of the following statements can be inferred from the passage?",
+      "options": [
+        "Insignificant improvement occurred in transport since the advent of the motor cars, the lorries and the motorcycles",
+        "Human society was static without the express speed of cars and motorcycles",
+        "Society would be less chaotic without the increasing volume and speed of motor cars, lorries and motorcycles",
+        "People no longer use trains with the advent of cars and lorries"
+      ],
+      "answer": 0,
+      "explanation": "Improvement of the roads to match the new vehicles had 'scarcely been tackled before 1914'.",
+      "alsoAccept": [
+        2
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "A",
+      "answerNote": "Read as being about the roads, A fits: widening and straightening them had 'scarcely been tackled before 1914', so little improvement had been made. But C can be inferred just as well: the new traffic brought noise, accidents, crowding and danger, so society would be less chaotic without it. Both are marked right."
+    },
+    "new": {
+      "question": "Which of the following statements can be inferred from the passage?",
+      "options": [
+        "Insignificant improvement occurred in transport since the advent of the motor cars, the lorries and the motorcycles",
+        "Human society was static without the express speed of cars and motorcycles",
+        "Society would be less chaotic without the increasing volume and speed of motor cars, lorries and motorcycles",
+        "People no longer use trains with the advent of cars and lorries"
+      ],
+      "answer": 2,
+      "explanation": "C follows from the described noise, crowding, accidents and danger. A confuses inadequate road adaptation with insignificant improvement in transport as a whole.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "A",
+      "answerNote": "C follows from the described noise, crowding, accidents and danger. A confuses inadequate road adaptation with insignificant improvement in transport as a whole.",
+      "bookletKey": "A",
+      "bookletNote": "C follows from the described noise, crowding, accidents and danger. A confuses inadequate road adaptation with insignificant improvement in transport as a whole."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 1136,
+    "part": 4,
+    "old": {
+      "question": "Which of the following is true according to the passage?",
+      "options": [
+        "Chimpanzees are meticulous when searching for food.",
+        "Chimpanzees are reactive when in groups.",
+        "Chimpanzees are restless when hungry.",
+        "Chimpanzees are carnivorous and gregarious."
+      ],
+      "answer": 0,
+      "explanation": "They 'carefully select' stems, trim them to 'the appropriate length', ignore hills that are not ready and eat 'slowly and deliberately': meticulous.",
+      "alsoAccept": [
+        3
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "answerNote": "The passage stresses how carefully chimpanzees get their food (selecting and trimming stems, waiting for the right season), so A is well supported. The key's D is partly right too: the males hunt and eat meat, and they share it rather than 'everyone for himself', though 'carnivorous' overstates it, since they are 'predominantly fruit eaters'. Both are marked right."
+    },
+    "new": {
+      "question": "Which of the following is true according to the passage?",
+      "options": [
+        "Chimpanzees are meticulous when searching for food.",
+        "Chimpanzees are reactive when in groups.",
+        "Chimpanzees are restless when hungry.",
+        "Chimpanzees are carnivorous and gregarious."
+      ],
+      "answer": 0,
+      "explanation": "Careful selection, trimming and use of stems directly supports meticulous food-searching. Predominantly fruit-eating with occasional meat does not justify D’s unqualified carnivorous description.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "answerNote": "Careful selection, trimming and use of stems directly supports meticulous food-searching. Predominantly fruit-eating with occasional meat does not justify D’s unqualified carnivorous description.",
+      "bookletKey": "D",
+      "bookletNote": "Careful selection, trimming and use of stems directly supports meticulous food-searching. Predominantly fruit-eating with occasional meat does not justify D’s unqualified carnivorous description."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 1203,
+    "part": 0,
+    "old": {
+      "question": "From the passage, it can be deduced that",
+      "options": [
+        "prevailing circumstances push a warring nation to sue for peace",
+        "all nations prefer the military option",
+        "all nations adopt the peaceful approach",
+        "conflicts are noted for facilitating opportunities"
+      ],
+      "answer": 3,
+      "explanation": "The passage says force can be used to 'create a situation in which diplomatic negotiations can occur', so a conflict can open up an opportunity for a settlement. B and C contradict the passage's 'many different approaches'.",
+      "alsoAccept": [
+        0
+      ],
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "answerNote": "The key gives D: the use of force can 'create a situation in which diplomatic negotiations can occur', i.e. conflict can facilitate an opportunity for peace talks. A rests on the same sentence (and on approaches having 'utility in particular circumstances'): circumstances such as the use of force can push a warring side to negotiate, i.e. to sue for peace. Both are fair deductions, so both are marked right."
+    },
+    "new": {
+      "question": "From the passage, it can be deduced that",
+      "options": [
+        "prevailing circumstances push a warring nation to sue for peace",
+        "all nations prefer the military option",
+        "all nations adopt the peaceful approach",
+        "conflicts are noted for facilitating opportunities"
+      ],
+      "answer": 0,
+      "explanation": "The passage says physical force may create circumstances for diplomatic negotiations. A is the specific peace-seeking inference; D generalizes that purpose into an undefined benefit of conflicts as such.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "answerNote": "The passage says physical force may create circumstances for diplomatic negotiations. A is the specific peace-seeking inference; D generalizes that purpose into an undefined benefit of conflicts as such.",
+      "bookletKey": "D",
+      "bookletNote": "The passage says physical force may create circumstances for diplomatic negotiations. A is the specific peace-seeking inference; D generalizes that purpose into an undefined benefit of conflicts as such."
+    }
+  },
+  {
+    "subject": "english",
+    "index": 1346,
+    "part": 0,
+    "old": {
+      "question": "Gap 6: The development of money ... was occasioned by increased specialization of human beings, this necessitated _____. This is a movement away from a ... society",
+      "options": [
+        "money",
+        "capital",
+        "exchange",
+        "movement"
+      ],
+      "answer": 3,
+      "alsoAccept": [
+        2
+      ],
+      "explanation": "The next sentence explains the word in the gap: 'This is a movement away from a primitive society', so the gap is movement. Exchange also makes good sense, since specialized people must exchange goods.",
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "answerNote": "The key's movement (D) fits because the next sentence begins 'This is a movement away from...'. But exchange (C) is equally right: increased specialization is exactly what makes exchange necessary, and the passage is about money as a medium of exchange. Both are marked right."
+    },
+    "new": {
+      "question": "Gap 6: The development of money ... was occasioned by increased specialization of human beings, this necessitated _____. This is a movement away from a ... society",
+      "options": [
+        "money",
+        "capital",
+        "exchange",
+        "movement"
+      ],
+      "answer": 2,
+      "explanation": "Specialization creates a need for exchange between people producing different goods. Movement in the next sentence describes the wider transition away from self-sufficiency, not the required economic activity.",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "answerNote": "Specialization creates a need for exchange between people producing different goods. Movement in the next sentence describes the wider transition away from self-sufficiency, not the required economic activity.",
+      "bookletKey": "D",
+      "bookletNote": "Specialization creates a need for exchange between people producing different goods. Movement in the next sentence describes the wider transition away from self-sufficiency, not the required economic activity."
+    }
+  },
+  {
+    "subject": "government",
+    "index": 201,
+    "old": {
+      "question": "The non-British colony which is a member of the Commonwealth is",
+      "options": [
+        "Guinea-Bissau",
+        "Mozambique",
+        "Rwanda",
+        "Eritrea"
+      ],
+      "answer": 1,
+      "explanation": "Mozambique, a former Portuguese colony, joined the Commonwealth in 1995. Today Rwanda (joined 2009), Gabon and Togo (2022) are also non-British members.",
+      "year": 2003,
+      "source": "JAMB UTME 2003",
+      "keyVerdict": "multiple",
+      "alsoAccept": [
+        2
+      ],
+      "keyAnswer": "B",
+      "answerNote": "Option C is also correct today: Rwanda, a former Belgian territory, joined the Commonwealth in 2009. When this paper was set only Mozambique (B) had joined, so both are accepted."
+    },
+    "new": {
+      "question": "The non-British colony which is a member of the Commonwealth is",
+      "options": [
+        "Guinea-Bissau",
+        "Mozambique",
+        "Rwanda",
+        "Eritrea"
+      ],
+      "answer": 1,
+      "explanation": "For this 2003 paper, B (Mozambique) is correct: the former Portuguese colony joined the Commonwealth in 1995. Rwanda joined in 2009, after this paper was set.",
+      "year": 2003,
+      "source": "JAMB UTME 2003",
+      "keyAnswer": "B",
+      "answerNote": "Use the membership facts at the date of the paper. Rwanda (C) joined in 2009 and is a non-British member today, but it was not a member in 2003. Only B is accepted for this historical question."
+    }
+  },
+  {
+    "subject": "government",
+    "index": 472,
+    "old": {
+      "question": "Which of the following countries has withdrawn her membership of the ECOWAS?",
+      "options": [
+        "Senegal",
+        "Mauritania",
+        "Guinea Bissau",
+        "Burkina Faso"
+      ],
+      "answer": 1,
+      "explanation": "Mauritania, a founding member, left ECOWAS in 2000. When this paper was set (2009) it was the only country to have left; since 29 January 2025 Burkina Faso, Mali and Niger have also left.",
+      "year": 2009,
+      "source": "JAMB UTME 2009",
+      "keyVerdict": "multiple",
+      "alsoAccept": [
+        3
+      ],
+      "keyAnswer": "B",
+      "answerNote": "Option D is also correct today: Burkina Faso withdrew from ECOWAS in January 2025, together with Mali and Niger. In 2009 only Mauritania (B) had left, so both are accepted."
+    },
+    "new": {
+      "question": "Which of the following countries has withdrawn her membership of the ECOWAS?",
+      "options": [
+        "Senegal",
+        "Mauritania",
+        "Guinea Bissau",
+        "Burkina Faso"
+      ],
+      "answer": 1,
+      "explanation": "For this 2009 paper, B (Mauritania) is correct: it withdrew from ECOWAS in 2000. Burkina Faso's withdrawal took effect on 29 January 2025, after this paper was set.",
+      "year": 2009,
+      "source": "JAMB UTME 2009",
+      "keyAnswer": "B",
+      "answerNote": "Use the withdrawal history at the date of the paper. Burkina Faso (D) withdrew in 2025, together with Mali and Niger, so that later event does not make D correct in a 2009 question. Only B is accepted."
+    }
+  },
+  {
+    "subject": "economics",
+    "index": 220,
+    "old": {
+      "question": "The maximum wage legislation seeks to",
+      "options": [
+        "fix wages above the equilibrium wage rate",
+        "set wages below the equilibrium wage rate",
+        "deter employers from exploiting their employees",
+        "ensure an upper limit to the wages payable"
+      ],
+      "answer": 1,
+      "explanation": "A maximum wage is a legal ceiling on pay; to have any effect it must be set below the equilibrium wage rate.",
+      "year": 2004,
+      "source": "JAMB UTME 2004",
+      "keyVerdict": "multiple",
+      "keyAnswer": "B",
+      "alsoAccept": [
+        3
+      ],
+      "answerNote": "A maximum wage is an upper limit on the wages payable (D), and to be effective that limit is set below the equilibrium wage rate (B). Both describe the same policy, so either is accepted."
+    },
+    "new": {
+      "question": "The maximum wage legislation seeks to",
+      "options": [
+        "fix wages above the equilibrium wage rate",
+        "set wages below the equilibrium wage rate",
+        "deter employers from exploiting their employees",
+        "ensure an upper limit to the wages payable"
+      ],
+      "answer": 3,
+      "explanation": "A maximum wage sets a legal upper limit on wages payable, D. Being below equilibrium describes when that ceiling binds, not the general purpose of maximum-wage legislation.",
+      "year": 2004,
+      "source": "JAMB UTME 2004",
+      "keyVerdict": "corrected",
+      "keyAnswer": "B",
+      "bookletKey": "B",
+      "bookletNote": "The supplied B describes a condition for a binding wage ceiling. The stem asks what maximum-wage legislation seeks to establish: an upper limit, D. A ceiling can also be set above equilibrium and remain non-binding.",
+      "answerNote": "The supplied B describes a condition for a binding wage ceiling. The stem asks what maximum-wage legislation seeks to establish: an upper limit, D. A ceiling can also be set above equilibrium and remain non-binding."
+    }
+  },
+  {
+    "subject": "economics",
+    "index": 291,
+    "old": {
+      "question": "In economics, production takes place only when",
+      "options": [
+        "producers sell to retailers",
+        "value has been added to a commodity",
+        "modern equipment is used",
+        "consumption has taken place"
+      ],
+      "answer": 3,
+      "explanation": "Production in economics is complete only when goods reach the final consumer; it is the creation of utility, which also means adding value to goods.",
+      "year": 2005,
+      "source": "JAMB UTME 2005",
+      "keyVerdict": "multiple",
+      "keyAnswer": "D",
+      "alsoAccept": [
+        1
+      ],
+      "answerNote": "Both B and D are accepted. Production is the creation of utility, that is, adding value to a commodity (B). Nigerian textbooks also stress that production is not complete until the goods reach the final consumer, the point the booklet answer (D) makes."
+    },
+    "new": {
+      "question": "In economics, production takes place only when",
+      "options": [
+        "producers sell to retailers",
+        "value has been added to a commodity",
+        "modern equipment is used",
+        "consumption has taken place"
+      ],
+      "answer": 1,
+      "explanation": "Production occurs when utility or value is created or added, B. Consumption uses that output and is not a necessary condition for production to take place.",
+      "year": 2005,
+      "source": "JAMB UTME 2005",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "bookletKey": "D",
+      "bookletNote": "The supplied D confuses producing utility with consuming it. Goods can be produced and remain unsold or stored. The school statement that production is complete when goods reach the final consumer does not mean consumption must already have occurred.",
+      "answerNote": "The supplied D confuses producing utility with consuming it. Goods can be produced and remain unsold or stored. The school statement that production is complete when goods reach the final consumer does not mean consumption must already have occurred."
+    }
+  },
+  {
+    "subject": "economics",
+    "index": 462,
+    "old": {
+      "question": "The demand curve for a luxury good is",
+      "options": [
+        "negatively sloped",
+        "parallel to the price axis",
+        "parallel to the quantity axis",
+        "positively sloped"
+      ],
+      "answer": 3,
+      "explanation": "Here a luxury good is taken as a good of ostentation (prestige), bought partly because it is expensive, so more is demanded at a higher price and the curve slopes upwards: an exceptional demand curve.",
+      "year": 2009,
+      "source": "JAMB UTME 2009",
+      "keyVerdict": "multiple",
+      "alsoAccept": [
+        0
+      ],
+      "keyAnswer": "D",
+      "answerNote": "Both D and A are accepted. If the luxury is a good of ostentation, bought for the prestige of its high price, more is demanded at a higher price and the curve slopes upwards (D), an exceptional demand curve. An ordinary luxury that is not bought for show still obeys the law of demand, so its curve is negatively sloped (A)."
+    },
+    "new": {
+      "question": "The demand curve for a luxury good is",
+      "options": [
+        "negatively sloped",
+        "parallel to the price axis",
+        "parallel to the quantity axis",
+        "positively sloped"
+      ],
+      "answer": 0,
+      "explanation": "The ordinary demand curve for a luxury good slopes downwards, A, other things equal. Luxury describes responsiveness to income; it does not by itself establish the exceptional Veblen or prestige-price case.",
+      "year": 2009,
+      "source": "JAMB UTME 2009",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "bookletKey": "D",
+      "bookletNote": "The supplied D assumes that the luxury is a Veblen good bought because its high price conveys status. The stem supplies no such condition. An ordinary luxury follows downward-sloping demand, so A is the best answer.",
+      "answerNote": "The supplied D assumes that the luxury is a Veblen good bought because its high price conveys status. The stem supplies no such condition. An ordinary luxury follows downward-sloping demand, so A is the best answer."
+    }
+  },
+  {
+    "subject": "accounting",
+    "index": 268,
+    "old": {
+      "question": "Use the following information: \nJide and Haruna contribute ₦12,000 each as capital and share profit equally. Jide draws ₦1,500 and Haruna ₦1,700 half-yearly. The profit for the year is ₦10,000. Jide receives a salary of ₦2,000.\n\nCalculate the profit available for appropriation",
+      "options": [
+        "₦7,000",
+        "₦12,000",
+        "₦10,000",
+        "₦8,000"
+      ],
+      "answer": 3,
+      "explanation": "Jide's salary of ₦2,000 is taken first, leaving ₦10,000 − ₦2,000 = ₦8,000 to be shared equally between the partners.",
+      "year": 2005,
+      "source": "JAMB UTME 2005",
+      "keyVerdict": "multiple",
+      "alsoAccept": [
+        2
+      ],
+      "keyAnswer": "D",
+      "answerNote": "Option C is also correct. A partner's salary is itself an appropriation of profit, so strictly the whole net profit of ₦10,000 is available for appropriation (C); ₦8,000 (D) is what remains to be shared in the profit-sharing ratio after the salary. Both readings are common, so both are accepted."
+    },
+    "new": {
+      "question": "Use the following information: \nJide and Haruna contribute ₦12,000 each as capital and share profit equally. Jide draws ₦1,500 and Haruna ₦1,700 half-yearly. The profit for the year is ₦10,000. Jide receives a salary of ₦2,000.\n\nCalculate the profit available for appropriation",
+      "options": [
+        "₦7,000",
+        "₦12,000",
+        "₦10,000",
+        "₦8,000"
+      ],
+      "answer": 2,
+      "explanation": "The whole net profit of ₦10,000 is available for appropriation (C). Jide's ₦2,000 salary is itself an appropriation; deducting it leaves ₦8,000 for sharing, not the initial profit available for appropriation.",
+      "year": 2005,
+      "source": "JAMB UTME 2005",
+      "keyVerdict": "corrected",
+      "keyAnswer": "D",
+      "bookletKey": "D",
+      "bookletNote": "The supplied key gives D (₦8,000), the residual profit after Jide's salary. The question asks for profit available for appropriation, which is C (₦10,000).",
+      "answerNote": "C alone is accepted. A partner's salary is an appropriation of net profit, not a business expense. The ₦8,000 remaining after the salary is the residual profit available for sharing."
+    }
+  }
+]
