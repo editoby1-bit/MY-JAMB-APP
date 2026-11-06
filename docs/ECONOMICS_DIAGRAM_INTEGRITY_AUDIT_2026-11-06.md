@@ -156,3 +156,13 @@ Reviewed question-bank records in `past-questions/economics-2008.js`, `economics
 - **2019 Q11–Q12:** Added source-question point names O, B, G, H and their price/output guides to a year-specific profit diagram. This supports the rectangle question but is **a provisional reconstruction**. Exact curve intersections and rectangle placement still require visual comparison with the original 2019 paper. The 2013 graph remains a separate template pending source reconstruction.
 - No repeated questions, years, answers, or option sets were altered.
 - **Outstanding:** Original-paper image comparisons for 2011 indifference curves, 2013 profit graph, 2019 profit graph and 2019 cost graph. Do not mark these as fully source-verified.
+
+
+## Original paper comparison: 2013 and 2011
+- 2013 original question PDF: https://winpaq.wordpress.com/wp-content/uploads/2018/01/jamb-utme-economics-questions-2013.pdf ; corroborating scan descriptions: https://myexamcode.net/wp-content/uploads/2022/04/JAMB-ECONOMICS-PAST-QUESTIONS.pdf .
+- **2013 Q23:** source figure labels vertical axis Cost and horizontal Output, with T horizontal, M rising from zero, and R rising above M from the fixed-cost intercept. Production graph previously inherited generic Price / Y and Quantity / X axes. Corrected to Cost (₦) and Output, and retained T/R/M source-specific curve names. **Geometry not certified pixel-accurate.**
+- **2013 Q24–25:** original scan describes a richer profit diagram with G,H,E,J,F,C,D,MR and B,S, multiple guides and a revenue rectangle. Existing generic template is still inadequate. **BLOCKED for faithful reconstruction pending visual tracing of source image.** Do not certify.
+- **2011 Q20:** the source question and answer S are corroborated by https://myschool.ng/classroom/economics/32348?exam_type=jamb&exam_year=2011&page=8 . The shared indifference-curve template does not show verified S/R/U/T placement. **BLOCKED for faithful reconstruction pending visual tracing.**
+- **2019 Q11–12 and Q36:** 2019 original graph remains unverified; the 2019 profit reconstruction is provisional. The cost diagram now uses Cost (₦) and Output axes instead of generic price/quantity, with E/F source-specific names. **Not certified.**
+
+Source comparison here supports labels and relationships but does not constitute pixel-accurate graph reconstruction. No answer or year mappings modified.
