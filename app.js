@@ -918,7 +918,7 @@
 
     const hasDiagram = Boolean(q.diagram);
     el.diagramBox.classList.toggle('hidden', !hasDiagram);
-    el.diagramBox.innerHTML = hasDiagram ? q.diagram : '';
+    el.diagramBox.innerHTML = hasDiagram ? ((q.sourceSubject || state.subject) === 'economics' ? economicsVectorDiagram(q.diagram) : q.diagram) : '';
 
     el.optionsList.innerHTML = '';
     const selectedAnswer = state.answers[state.currentIndex];
@@ -2104,7 +2104,41 @@
     renderKeyPointPractice();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-  function accountingFinancialQuestionHtml(value) {
+  
+  // Vector replacements for Economics figures, keyed by the original exam image ID.
+  // Only diagrams with sufficient information in the question and explanation are redrawn.
+  const economicsVectorSpecs={"2001-q7":["utility"],"2002-q5":["mrs"],"2002-q23":["trade"],"2002-q34":["excess"],"2003-q5":["ppc"],"2003-q6":["ppc"],"2004-q7":["monopoly"],"2004-q35":["indiff","L"],"2004-q44":["both"],"2004-q45":["supplyshift"],"2004-q46":["supplyshift"],"2005-q2":["flow"],"2006-q22":["ceiling"],"2006-q43":["indiff","K"],"2006-q44":["indiff","P"],"2007-q22":["monocomp"],"2008-q19":["surplus"],"2008-q23":["cost"],"2008-q44":["population"],"2009-q4":["pie2009"],"2009-q5":["pie2009"],"2011-q20":["indiff","S"],"2011-q23":["atc"],"2011-q34":["gap"],"2012-q5":["pieoil"],"2012-q13":["indiff","K"],"2012-q50":["wage"],"2013-q10":["vertical"],"2013-q13":["indiff","S"],"2013-q23":["costlines"],"2013-q24":["profit"],"2014-q5":["pieservices"],"2014-q7":["demandshift"],"2014-q11":["indiff","K"],"2016-q11":["floor"],"2016-q14":["ceiling"],"2016-q37":["unitary"],"2017-q14":["movement"],"2019-q11":["profit"],"2019-q12":["profit"],"2019-q14":["indiff","S"],"2019-q36":["costlines"],"2020-q10":["demandshift"],"2020-q25":["pieservices"],"2020-q33":["indiff","K"],"2020-q35":["pieoil"]};
+  function economicsVectorDiagram(html) {
+    const match=String(html||'').match(/economics-(\d{4}-q\d+)\.png/i);
+    if(!match || !economicsVectorSpecs[match[1]])return html;
+    const [type,point]=economicsVectorSpecs[match[1]];
+    const line=(d,color='#176b94',width=4)=>'<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+width+'" stroke-linecap="round"/>';
+    const label=(x,y,t)=>'<text x="'+x+'" y="'+y+'" font-family="Arial,sans-serif" font-size="18" fill="#263b52">'+t+'</text>';
+    const axes=line('M76 32V330H562','#263b52',3)+label(12,26,'Price / Y')+label(455,363,'Quantity / X');
+    const S=line('M120 288L495 70'),D=line('M120 70L495 288');
+    let body='',extra='',legend='';
+    if(type==='utility')body=line('M90 300Q290 40 485 155')+label(390,115,'M (maximum TU)')+label(225,56,'Total utility');
+    if(type==='mrs')body=line('M120 80Q155 230 500 292')+label(120,85,'S (2,18)')+label(245,216,'T (4,15)')+label(118,342,'X')+label(35,100,'Y');
+    if(type==='trade')body=line('M92 75L245 318')+line('M342 75L540 318','#c27c26')+label(100,60,'Ghana: cocoa 20, cotton 5')+label(345,60,'Nigeria: cocoa 60, cotton 30')+label(115,375,'Cost per cotton: Ghana 4; Nigeria 2');
+    if(type==='excess'||type==='surplus'||type==='ceiling'||type==='floor'||type==='wage'){body=S+D+label(497,70,'S')+label(500,294,'D')+label(293,185,'E');let y=type==='floor'||type==='surplus'?136:type==='wage'?183:255;body+=line('M76 '+y+'H537','#cb842c',3)+label(80,y-10,type==='floor'?'P₂':type==='ceiling'?'P₁':type==='wage'?'OW':type==='excess'?'₦60':'Controlled price');if(type==='excess')body+=label(133,350,'Qs = 100')+label(385,350,'Qd = 300');if(type==='surplus')body+=label(126,350,'Qd = 20')+label(386,350,'Qs = 40');if(type==='ceiling')body+=label(120,350,'Q₁')+label(300,350,'Q₂')+label(490,350,'Q₃');}
+    if(type==='ppc')body=line('M80 70Q105 260 485 330')+label(105,110,'V')+label(185,205,'Y')+label(360,288,'W')+label(225,310,'X')+label(485,215,'Z')+label(190,40,'Production possibility curve');
+    if(type==='monopoly'||type==='profit'){body=line('M115 92L482 287')+line('M115 130L440 308','#c27c26')+line('M110 290Q280 40 493 155','#4b9579')+label(492,286,'AR')+label(438,320,'MR')+label(495,153,'MC')+line('M300 200V330','#8b96a5',2)+label(280,352,type==='monopoly'?'Q₂':'OB / OH')+label(301,197,'C');}
+    if(type==='indiff'){body=line('M115 80Q125 235 340 305')+line('M175 53Q185 200 450 290','#cb842c')+line('M240 43Q250 185 520 275','#729b86')+line('M95 70L500 310','#ad4d51',3)+label(344,305,'I₁')+label(452,289,'I₂')+label(522,275,'I₃')+label(290,220,point||'K')+label(95,63,'S')+label(500,329,'T');if(point==='K')body+=label(245,270,'M');if(point==='S')body+=label(255,270,'U');}
+    if(type==='both'||type==='supplyshift'||type==='demandshift'||type==='movement'||type==='complement'){body=type==='demandshift'||type==='complement'?D+line('M225 70L562 263','#cb842c'):S+line('M210 288L562 75','#cb842c');body+=label(500,68,type==='demandshift'||type==='complement'?'D₀':'S₁')+label(552,67,type==='demandshift'||type==='complement'?'D₁':'S₂');if(type==='both')body+=D+line('M225 70L562 263','#cb842c');if(type==='movement')body+=label(200,238,'M')+label(350,165,'T')+label(50,238,'P₁')+label(50,165,'P₂');if(type==='supplyshift')body+=label(250,210,'T')+label(340,210,'N');}
+    if(type==='monocomp')body=D+line('M120 85L390 308','#cb842c')+label(490,292,'W (AR)')+label(390,320,'M (MR)');
+    if(type==='cost'||type==='atc')body=line('M125 95Q305 365 495 100')+line('M145 45Q285 330 520 80','#cb842c')+label(495,110,'AC / ATC')+label(525,80,'MC')+label(302,256,'M')+(type==='atc'?label(295,349,'20 units')+label(26,265,'₦15'):'');
+    if(type==='population')body=line('M100 303Q295 45 500 305')+label(290,80,'Maximum output per head')+label(115,315,'Underpopulation')+label(305,315,'Optimum');
+    if(type==='gap')body=S+D+label(185,157,'X')+label(415,255,'K')+label(297,188,'E')+label(500,70,'AS')+label(500,290,'AD');
+    if(type==='vertical')body=line('M310 60V330')+label(320,80,'D')+label(305,355,'OQ');
+    if(type==='unitary')body=line('M76 330L530 50')+label(535,51,'S');
+    if(type==='costlines')body=line('M80 235H520')+line('M80 235L490 60','#cb842c')+line('M80 330L490 150','#4b9579')+label(522,238,'E / T (fixed cost)')+label(493,58,'F / R (total cost)')+label(494,153,'M (variable cost)');
+    if(type==='elastic')body=line('M80 275L520 180')+label(525,182,'S');
+    if(type==='flow')body='<rect x="110" y="125" width="150" height="75" rx="12" fill="#e6f2f8" stroke="#176b94" stroke-width="2"/><rect x="360" y="125" width="150" height="75" rx="12" fill="#fff2dd" stroke="#cb842c" stroke-width="2"/>'+label(129,169,'Households')+label(408,169,'Firms')+line('M265 144H350','#cb842c')+line('M355 185H265')+label(268,128,'K: spending →')+label(260,218,'← goods/services');
+    if(type.startsWith('pie')){const parts=type==='pieoil'?[['Oil',160],['Agriculture',90],['Manufacturing',80],['Other',30]]:type==='pieservices'?[['Agriculture',126],['Oil',72],['Manufacturing',108],['Services',54]]:[['Oil',120],['Transport',60],['Other sectors',180]];const colors=['#397ba5','#e4a347','#6ca68b','#b78db5'];let a=-Math.PI/2;body='';for(let i=0;i<parts.length;i++){const [name,deg]=parts[i],b=a+deg*Math.PI/180,x1=315+125*Math.cos(a),y1=180+125*Math.sin(a),x2=315+125*Math.cos(b),y2=180+125*Math.sin(b);body+='<path d="M315 180L'+x1+' '+y1+'A125 125 0 '+(deg>180?1:0)+' 1 '+x2+' '+y2+'Z" fill="'+colors[i]+'" stroke="white" stroke-width="3"/>'+label(95+(i%2)*255,340+Math.floor(i/2)*27,name+': '+deg+'°');a=b;}extra='';}
+    if(!body)return html;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':axes)+body+extra+'</svg>';
+  }
+function accountingFinancialQuestionHtml(value) {
     const lines=String(value||'').split(/\r?\n/);
     const out=[];let rows=[];
     const flush=()=>{
@@ -2180,7 +2214,7 @@
       (q.diagram ? '<div class="kp-inline-diagram" role="group" aria-label="Diagram for this past question">' +
         (/percentage for children is equivalent to/i.test(q.question) && p.subject === 'economics'
           ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Pie chart showing children 40 percent, women 35 percent, men 25 percent"><circle cx="160" cy="160" r="145" fill="#fff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L160 15 A145 145 0 0 1 245.23 277.31 Z" fill="#d9ebff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L245.23 277.31 A145 145 0 0 1 15 160 Z" fill="#f9e8d5" stroke="#24344a" stroke-width="2"/><path d="M160 160 L15 160 A145 145 0 0 1 160 15 Z" fill="#e0f2e6" stroke="#24344a" stroke-width="2"/><g font-family="Arial,sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#14263c"><text x="205" y="84">Children</text><text x="205" y="106">40%</text><text x="97" y="217">Women</text><text x="97" y="239">35%</text><text x="246" y="188">Men</text><text x="246" y="210">25%</text></g></svg>'
-          : q.diagram) + '</div>' : '') +
+          : (p.subject === 'economics' ? economicsVectorDiagram(q.diagram) : q.diagram)) + '</div>' : '') +
       q.options.map((option, i) => '<button type="button" class="kp-inline-answer' +
         (answered && !noAnswer && accepted.includes(i) ? ' correct' : answered && !noAnswer && selected === i ? ' wrong' : '') +
         '" data-answer="' + i + '"' + (answered ? ' disabled' : '') + '>' +
