@@ -149,3 +149,10 @@ Reviewed question-bank records in `past-questions/economics-2008.js`, `economics
 - **2011 Q23–Q24**: ATC 15 at output 20 is given in graph and required to compute total cost 300. Keep source inputs, verify point coordinates against original scan.
 
 **Audit status:** The answer-leak fix is committed. The figure deficiencies are flagged; accurate replacements require original images. Do not classify the above as source-certified.
+
+
+## Targeted reconstruction pass: cost and profit figures
+- **2013 Q23 vs 2019 Q36:** Removed combined ambiguous cost-curve annotations `E / T` and `F / R`. 2013 now uses T, R, M; 2019 uses E, F, M. This follows the question-bank explanations, **not a pixel-accurate source scan**.
+- **2019 Q11–Q12:** Added source-question point names O, B, G, H and their price/output guides to a year-specific profit diagram. This supports the rectangle question but is **a provisional reconstruction**. Exact curve intersections and rectangle placement still require visual comparison with the original 2019 paper. The 2013 graph remains a separate template pending source reconstruction.
+- No repeated questions, years, answers, or option sets were altered.
+- **Outstanding:** Original-paper image comparisons for 2011 indifference curves, 2013 profit graph, 2019 profit graph and 2019 cost graph. Do not mark these as fully source-verified.
