@@ -914,7 +914,7 @@
       el.subjectPositionTag.classList.add('hidden');
     }
     renderPassage(q);
-    el.questionText.innerHTML = state.currentSubject === 'accounting' ? accountingFinancialQuestionHtml(q.question) : mathHtml(q.question).replace(/\n/g, '<br>');
+    el.questionText.innerHTML = (q.sourceSubject || state.subject) === 'accounting' ? accountingFinancialQuestionHtml(q.question) : mathHtml(q.question).replace(/\n/g, '<br>');
 
     const hasDiagram = Boolean(q.diagram);
     el.diagramBox.classList.toggle('hidden', !hasDiagram);
