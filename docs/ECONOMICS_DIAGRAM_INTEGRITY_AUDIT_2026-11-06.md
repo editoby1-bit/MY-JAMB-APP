@@ -79,3 +79,20 @@ Sources checked:
 - **2020 Q25 and Q35:** Source sector labels and values remain unverified. Deliberately not copied from 2014/2012 as though verified.
 
 These corrections establish **sector-value correspondence** for two source figures, not exact slice orientation or complete all-year verification. Other mapped templates and diagrams remain pending.
+
+
+## Cross-year provenance check — further audit
+Reviewed `past-questions/economics-2009.js`, `economics-2012.js`, `economics-2014.js`, and `economics-2020.js` alongside the production vector mappings.
+
+### Findings
+- **2020 Q25 vs 2014 Q5:** Both bank records ask the *same* services-percentage question with the *same* answer options, the same angle arithmetic (126°, 72°, 108°, 54°), and the same 15% answer. This strongly suggests duplicated/reused content. It does **not** establish that both original years contained this question. The 2020 renderer currently uses different sector labels from the corrected 2014 renderer. **Priority: HIGH; source-year authenticity and sector-label discrepancy require independent proof.**
+- **2020 Q35 vs 2012 Q5:** The 2020 question uses Oil 160°, Agriculture 90°, a 30° sector and Manufacturing 80°, matching the angular dataset used in 2012. The 2020 vector calls the 30° sector 'Other'; the 2012 source comparison identified it as 'Mining'. **Priority: HIGH; possible mislabeled duplicated figure.**
+- **2009 Q4–Q5:** Both records intentionally share one pie chart. The answer explanations require Oil 120° and Transport 60°; remainder 180°. The renderer reproduces those angle totals. **Arithmetic check PASS, original sector names, ordering and layout NOT source-certified.**
+- **2014 Q5 and 2012 Q5:** Source-backed label corrections already made; the renderer's slice rotation is still not certified as a facsimile.
+- External year-specific question listings differ in sequence and sometimes content from the repository. For example, a 2020 online compilation places a progressive-tax curve at question 25, whereas the app's 2020 Q25 is a services pie chart. Numbering alone cannot prove a discrepancy; a complete original paper is required to resolve competing editions/sets. See https://www.deeepsolve.com/jamb/economics/2020 and https://myschool.ng/classroom/economics?exam_type=jamb&exam_year=2020 .
+
+### Audit decision
+Do not silently propagate the 2012 or 2014 corrections into 2020. Flag the two 2020 diagrams as **SOURCE-YEAR UNVERIFIED / POSSIBLE CROSS-YEAR DUPLICATE** until the original 2020 paper is examined. Preserve the 2009 shared chart for Q4–Q5 because both questions explicitly use the same figure, but do not certify its visual fidelity.
+
+### Coverage note
+This check examined 4 year-specific source files and the 46-entry vector map. It did not inspect every original diagram, all other year files, or all subjects. It is not a completed whole-bank audit.
