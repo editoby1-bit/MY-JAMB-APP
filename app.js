@@ -366,6 +366,61 @@
     subjectRanges: {} // { subjectName: { start, end } }
   };
 
+  // Keep a live paper intact when the student refreshes the same browser tab.
+  // Store stable question identities as well as the question snapshots, so an
+  // updated question bank cannot silently substitute another question at Q15.
+  const ACTIVE_PAPER_KEY = 'jamb-active-paper-v1';
+  function clearActivePaper() {
+    try { sessionStorage.removeItem(ACTIVE_PAPER_KEY); } catch (_) {}
+  }
+  function saveActivePaper() {
+    if (!state.currentQuestions.length || state.reviewMode) return;
+    try {
+      sessionStorage.setItem(ACTIVE_PAPER_KEY, JSON.stringify({
+        student: state.currentUser, questions: state.currentQuestions,
+        answers: state.answers, index: state.currentIndex,
+        mode: state.mode, subject: state.subject, subjects: state.subjects,
+        sessionType: state.sessionType, ranges: state.subjectRanges,
+        duration: state.chosenDurationMinutes,
+        deadline: state.mode === 'exam' ? Date.now() + state.timeLeft * 1000 : null
+      }));
+    } catch (_) { /* Storage may be unavailable; exam remains usable. */ }
+  }
+  function restoreActivePaper() {
+    let saved;
+    try { saved = JSON.parse(sessionStorage.getItem(ACTIVE_PAPER_KEY) || 'null'); } catch (_) { return false; }
+    if (!saved || !Array.isArray(saved.questions) || !saved.questions.length ||
+        !Array.isArray(saved.answers) || saved.answers.length !== saved.questions.length ||
+        !saved.student || saved.student !== state.currentUser) return false;
+    if (saved.mode === 'exam' && (!Number.isFinite(saved.deadline) || saved.deadline <= Date.now())) {
+      clearActivePaper();
+      return false;
+    }
+    state.currentQuestions = saved.questions;
+    state.answers = saved.answers;
+    state.currentIndex = Math.max(0, Math.min(saved.questions.length - 1, Number(saved.index) || 0));
+    state.mode = saved.mode;
+    state.subject = saved.subject;
+    state.subjects = saved.subjects || [];
+    state.sessionType = saved.sessionType || 'single';
+    state.subjectRanges = saved.ranges || {};
+    state.chosenDurationMinutes = saved.duration;
+    state.student = saved.student;
+    state.reviewMode = false;
+    state.timeLeft = saved.mode === 'exam' ? Math.max(1, Math.ceil((saved.deadline - Date.now()) / 1000)) : 0;
+    el.sidebarStudent.textContent = state.student;
+    el.sidebarMode.textContent = state.mode === 'exam'
+      ? `Exam · ${state.chosenDurationMinutes} min` : 'Practice Mode';
+    const isCombo = state.sessionType === 'combo' && state.subjects.length > 1;
+    el.subjectSwitcher.classList.toggle('hidden', !isCombo);
+    if (isCombo) buildSubjectSwitcher();
+    buildQuestionPills();
+    renderQuestion();
+    showScreen('quiz');
+    if (state.mode === 'exam') startTimer();
+    return true;
+  }
+
   // ─────────────────────────────────────────────────
   function init() {
     populateSubjects();
@@ -376,6 +431,7 @@
     syncSessionTypeUi();
     syncStartButton();
     showScreen('home');
+    restoreActivePaper();
     initPaywall();
     initAIExplain();
     initCommunityQuiz();
@@ -623,6 +679,7 @@
       el.subjectSwitcher.classList.toggle('hidden', !isCombo);
       if (isCombo) buildSubjectSwitcher();
 
+      clearActivePaper();
       buildQuestionPills();
       renderQuestion();
       showScreen('quiz');
@@ -856,6 +913,7 @@
   // ─── RENDER QUESTION ─────────────────────────────
   function renderQuestion() {
     const q = state.currentQuestions[state.currentIndex];
+    if (!state.reviewMode) saveActivePaper();
     if (!q) return;
 
     // Show AI explain button only in Practice mode or when reviewing past
@@ -1036,6 +1094,7 @@
   // ─── FINISH QUIZ ─────────────────────────────────
   function finishQuiz(fromTimeout = false) {
     if (!state.currentQuestions.length) return;
+    clearActivePaper();
     if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
 
     const correct = state.currentQuestions.reduce((sum, q, i) =>
@@ -3315,6 +3374,7 @@ function accountingFinancialQuestionHtml(value) {
   async function confirmExit() {
     const leave = await showConfirmModal('Exit this session? Your progress will be lost.', 'Exit', 'Stay');
     if (leave) {
+      clearActivePaper();
       if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
       showScreen('home');
     }
@@ -3327,6 +3387,7 @@ function accountingFinancialQuestionHtml(value) {
       clearInterval(state.timerId); state.timerId = null;
       showScreen('home');
     }
+    clearActivePaper();
     state.currentUser = '';
     saveCurrentUser('');
     renderCurrentUser();
