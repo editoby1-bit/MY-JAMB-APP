@@ -749,7 +749,7 @@
     const count = countValue === 'all' ? pool.length : Math.min(Number(countValue), pool.length);
     // A whole year's paper is served in the paper's own order, like sitting
     // the real exam; any other selection is shuffled (passages kept whole).
-    const picked = year && count === pool.length
+    const picked = year
       ? fillFromUnits(toUnits(pool), count)
       : groupAwarePick(pool, count);
     const questions = picked.map(q => ({ ...q, sourceSubject: subject }));
@@ -977,6 +977,14 @@
     const hasDiagram = Boolean(q.diagram);
     el.diagramBox.classList.toggle('hidden', !hasDiagram);
     el.diagramBox.innerHTML = hasDiagram ? ((q.sourceSubject || state.subject) === 'economics' ? economicsVectorDiagram(q.diagram) : q.diagram) : '';
+    // Respect the original question's spatial reference. The markup places
+    // the diagram after the question by default, but "graph above" requires
+    // the diagram to precede the question. Restore default for "below".
+    if (hasDiagram && /\b(?:graph|diagram|figure|chart|table|curves?|illustration)\s+(?:shown\s+|given\s+|illustrated\s+)?above\b|\babove\s+(?:graph|diagram|figure|chart|table|curves?|illustration)\b/i.test(q.question)) {
+      el.questionText.parentNode.insertBefore(el.diagramBox, el.questionText);
+    } else {
+      el.questionText.parentNode.insertBefore(el.diagramBox, el.questionText.nextSibling);
+    }
 
     el.optionsList.innerHTML = '';
     const selectedAnswer = state.answers[state.currentIndex];
