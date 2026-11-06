@@ -914,7 +914,7 @@
       el.subjectPositionTag.classList.add('hidden');
     }
     renderPassage(q);
-    el.questionText.innerHTML = (q.sourceSubject || state.subject) === 'accounting' ? accountingFinancialQuestionHtml(q.question) : mathHtml(q.question).replace(/\n/g, '<br>');
+    el.questionText.innerHTML = ['accounting','economics'].includes(q.sourceSubject || state.subject) ? accountingFinancialQuestionHtml(q.question) : mathHtml(q.question).replace(/\n/g, '<br>');
 
     const hasDiagram = Boolean(q.diagram);
     el.diagramBox.classList.toggle('hidden', !hasDiagram);
@@ -2134,7 +2134,7 @@
     if(type==='costlines')body=line('M80 235H520')+line('M80 235L490 60','#cb842c')+line('M80 330L490 150','#4b9579')+label(522,238,'E / T (fixed cost)')+label(493,58,'F / R (total cost)')+label(494,153,'M (variable cost)');
     if(type==='elastic')body=line('M80 275L520 180')+label(525,182,'S');
     if(type==='flow')body='<rect x="110" y="125" width="150" height="75" rx="12" fill="#e6f2f8" stroke="#176b94" stroke-width="2"/><rect x="360" y="125" width="150" height="75" rx="12" fill="#fff2dd" stroke="#cb842c" stroke-width="2"/>'+label(129,169,'Households')+label(408,169,'Firms')+line('M265 144H350','#cb842c')+line('M355 185H265')+label(268,128,'K: spending →')+label(260,218,'← goods/services');
-    if(type.startsWith('pie')){const parts=type==='pieoil'?[['Oil',160],['Agriculture',90],['Manufacturing',80],['Other',30]]:type==='pieservices'?[['Agriculture',126],['Oil',72],['Manufacturing',108],['Services',54]]:[['Oil',120],['Transport',60],['Other sectors',180]];const colors=['#397ba5','#e4a347','#6ca68b','#b78db5'];let a=-Math.PI/2;body='';for(let i=0;i<parts.length;i++){const [name,deg]=parts[i],b=a+deg*Math.PI/180,x1=315+125*Math.cos(a),y1=180+125*Math.sin(a),x2=315+125*Math.cos(b),y2=180+125*Math.sin(b);body+='<path d="M315 180L'+x1+' '+y1+'A125 125 0 '+(deg>180?1:0)+' 1 '+x2+' '+y2+'Z" fill="'+colors[i]+'" stroke="white" stroke-width="3"/>'+label(95+(i%2)*255,340+Math.floor(i/2)*27,name+': '+deg+'°');a=b;}extra='';}
+    if(type.startsWith('pie')){const parts=type==='pieoil'?[['Oil',160],['Agriculture',90],['Manufacturing',80],['Other',30]]:type==='pieservices'?[['Agriculture',126],['Oil',72],['Manufacturing',108],['Services',54]]:[['Oil',120],['Transport',60],['Remaining sectors',180]];const colors=['#397ba5','#e4a347','#6ca68b','#b78db5'];let a=-Math.PI/2;body='';for(let i=0;i<parts.length;i++){const [name,deg]=parts[i],b=a+deg*Math.PI/180,x1=315+125*Math.cos(a),y1=180+125*Math.sin(a),x2=315+125*Math.cos(b),y2=180+125*Math.sin(b);body+='<path d="M315 180L'+x1+' '+y1+'A125 125 0 '+(deg>180?1:0)+' 1 '+x2+' '+y2+'Z" fill="'+colors[i]+'" stroke="white" stroke-width="3"/>'+label(95+(i%2)*255,340+Math.floor(i/2)*27,name+': '+deg+'°');a=b;}extra='';}
     if(!body)return html;
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':axes)+body+extra+'</svg>';
   }
@@ -2210,7 +2210,7 @@ function accountingFinancialQuestionHtml(value) {
       '<p class="kp-inline-meta">' + escHtml(title) + ' · Question ' + (p.index + 1) + ' of ' +
       p.questions.length + ' · ' + Object.keys(p.answers).length + ' answered · ' + score + ' correct</p>' +
       (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
-      '<div class="kp-inline-question">' + (p.subject === 'accounting' ? accountingFinancialQuestionHtml(q.question) : keyPointQuestionHtml(q.question)) + '</div>' +
+      '<div class="kp-inline-question">' + (['accounting','economics'].includes(p.subject) ? accountingFinancialQuestionHtml(q.question) : keyPointQuestionHtml(q.question)) + '</div>' +
       (q.diagram ? '<div class="kp-inline-diagram" role="group" aria-label="Diagram for this past question">' +
         (/percentage for children is equivalent to/i.test(q.question) && p.subject === 'economics'
           ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Pie chart showing children 40 percent, women 35 percent, men 25 percent"><circle cx="160" cy="160" r="145" fill="#fff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L160 15 A145 145 0 0 1 245.23 277.31 Z" fill="#d9ebff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L245.23 277.31 A145 145 0 0 1 15 160 Z" fill="#f9e8d5" stroke="#24344a" stroke-width="2"/><path d="M160 160 L15 160 A145 145 0 0 1 160 15 Z" fill="#e0f2e6" stroke="#24344a" stroke-width="2"/><g font-family="Arial,sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#14263c"><text x="205" y="84">Children</text><text x="205" y="106">40%</text><text x="97" y="217">Women</text><text x="97" y="239">35%</text><text x="246" y="188">Men</text><text x="246" y="210">25%</text></g></svg>'
