@@ -48,3 +48,21 @@ For every original figure: verify (a) correct paper/year/question, (b) figure ty
 
 ## Next required work
 Collect or locate the original 2001–2020 Economics papers (or individual diagrams) and perform a figure-by-figure visual comparison. Repeat the same inventory and audit for all other subjects and any diagram-containing question outside the vector map. This initial audit does not establish whole-bank coverage.
+
+
+## Source cross-check, 2026-11-06 (second pass)
+Sources: [Larnedu scanned compilation, Economics 1983–2004](https://www.larnedu.com/wp-content/uploads/2019/03/JAMB-Economics-Past-Questions-1983-2004.pdf); user-provided screenshot of the original Economics 2003 paper.
+
+| Diagram | Comparison | Status |
+|---|---|---|
+| 2003 Q5 and Q6 PPC | Original scan confirms a curve initially nearly horizontal then steepening toward the producer-goods axis; V, Y and W on frontier, X inside, Z outside; axis labels Consumer goods and Producer goods. Initial app curve was reversed. Subsequent renderer change addresses the shape and axes, but has not been overlaid pixel-for-pixel. | CONFIRMED ORIGINAL; RECONSTRUCTION NEEDS VISUAL QA |
+| 2002 Q34 excess-demand graph | Scanned compilation describes demand and supply crossing, price N60 and quantity marks 100, 200, 300. App template includes these quantities, but line crossings and price guide positions have not been checked against the image. | PARTIAL MATCH; NOT CERTIFIED |
+| 2014 Q5 pie | App data: Agriculture 126°, Oil 72°, Manufacturing 108°, Services 54°. Angles sum to 360°, services is 15%. No authenticated source diagram viewed. | ARITHMETIC PASS; SOURCE UNVERIFIED |
+| 2020 Q25 pie | Same 'pieservices' template as 2014 Q5; no evidence the original sectors/angles are identical. | HIGH RISK: SOURCE UNVERIFIED |
+| 2012 Q5 / 2020 Q35 pie | Both use 'pieoil' template with identical sector sizes, unverified for both papers. | HIGH RISK: SOURCE UNVERIFIED |
+
+### Integrity safeguards
+- Source fidelity is different from numerical or conceptual plausibility.
+- Secondary answer sites can conflict with the scanned figure; when they do, use the figure itself and record the disagreement.
+- Do not classify any of the remaining 46 mapped images as PASS without the matching original figure.
+- Full cross-subject coverage remains outstanding. This is a documented partial audit, not completion.
