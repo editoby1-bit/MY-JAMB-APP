@@ -114,7 +114,7 @@ function renderAccountingQuestion(q){
   const dots=/\s\.\.\.\s/.test(trimmed);
   if(pipe||dots){
    let cells;
-   if(pipe){cells=trimmed.split(/\s+\|\s+/).flatMap(part=>part.split(/\s+\.\.\.\s+/));}
+   if(pipe){cells=trimmed.split(/\s*\|\s*/).flatMap(part=>part.split(/\s+\.\.\.\s+/));}
    else cells=trimmed.split(/\s+\.\.\.\s+/);
    if(cells.length>=2&&cells.length<=9){pending.push(cells);continue;}
   }
