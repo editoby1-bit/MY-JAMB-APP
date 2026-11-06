@@ -132,3 +132,20 @@ These items are **FLAGGED FOR SOURCE COMPARISON**, not automatically removed. De
 - **2002 Q34, excess demand:** Bank asks for excess demand at ₦60. The diagram shows Qs 100 and Qd 300, which are inputs required to calculate the answer (200), not the answer itself. **Retained** pending original visual comparison.
 - **2002 Q5, MRS:** Diagram coordinates S(2,18), T(4,15) are required to calculate the ratio; **retained** pending original visual comparison. The bank flags the answer choices as having no correct option, a separate answer-key issue.
 - **Audit principle:** Remove a *derived result* prematurely displayed, not the raw numbers that make a problem solvable. These checks compare renderer against question text/explanations; they are not a full image-to-source certification.
+
+
+## Further question-to-figure audit: 2008, 2011, 2013 and 2019
+Reviewed question-bank records in `past-questions/economics-2008.js`, `economics-2011.js`, `economics-2013.js`, `economics-2019.js` against the current vector renderer.
+
+### Confirmed answer-leakage correction
+- The shared `profit` vector printed **"OB / OH"** at its output axis. The 2013 paper asks for output **OB**, while 2019 asks for **OH**; displaying both as a combined annotation gives away possible answers and is not a faithful axis label. Replaced with neutral **"Output"** pending source-specific reconstruction. Question content, year tags and answers unchanged.
+
+### High-priority figure deficiencies, NOT YET RECONSTRUCTED
+- **2013 Q24–Q25**: the question bank asks for total revenue rectangle **GHOB**. Current generic profit vector lacks the complete G/H/O/B rectangle and corresponding point placements. It cannot support the question properly.
+- **2019 Q11–Q12**: same generic profit vector reused, although the stated output axis uses **OH** and price **OB**; renderer lacks a full GHOB rectangle. Must reconstruct individually from the source figure, not use a merged OB/OH diagram.
+- **2011 Q20 and 2019 Q14**: explanations refer to an indifference-curve tangency at **S** on curve II and unreachable **R** on curve III. Shared renderer's point placement and labels do not explicitly represent this correctly. Source image comparison needed.
+- **2019 Q36 vs 2013 Q23**: renderer merges source-specific cost line names as **E / T**, **F / R**. The 2019 question explicitly asks what line **E** represents, while the 2013 question asks about **R**. Must use year-specific labels and curve geometry.
+- **2008 Q19**: explanation requires Qd=20, Qs=40 and a 20-unit excess supply. Inputs are necessary; do not remove them as if they are leaked answers.
+- **2011 Q23–Q24**: ATC 15 at output 20 is given in graph and required to compute total cost 300. Keep source inputs, verify point coordinates against original scan.
+
+**Audit status:** The answer-leak fix is committed. The figure deficiencies are flagged; accurate replacements require original images. Do not classify the above as source-certified.
