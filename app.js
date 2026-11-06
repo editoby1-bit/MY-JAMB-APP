@@ -2195,27 +2195,22 @@
     // 2019 Q11–Q12: reconstructed from the user-provided original 2019 scan.
     // Keep both questions on the same source figure; no generic AR/MC graph.
     if(type==='profit' && (match[1]==='2019-q11'||match[1]==='2019-q12')){
-      body=line('M90 35V335H562','#263b52',3)
-        // Original graph: downward demand/revenue curves, rising cost curves.
-        +line('M90 102L445 278','#263b52',3)
-        +line('M90 102L326 303','#ad4d51',3)
-        +line('M90 102C135 182 195 239 243 235C300 232 350 155 414 82','#176b94',4)
-        +line('M90 102C135 157 181 218 266 241C317 257 378 216 429 164','#4b9579',4)
-        // Original includes four price/cost levels and two output positions.
-        +line('M90 157H251','#8b96a5',2)
-        +line('M90 184H251','#8b96a5',2)
-        +line('M90 210H251','#8b96a5',2)
-        +line('M90 238H290','#8b96a5',2)
-        +line('M251 157V335','#8b96a5',2)
-        +line('M290 238V335','#8b96a5',2)
-        +label(60,340,'O')+label(65,162,'B')+label(65,189,'C')
-        +label(65,215,'E')+label(65,243,'J')
-        +label(242,353,'H')+label(281,353,'S')
-        +label(258,154,'G')+label(257,183,'F')
-        +label(260,209,'Q')+label(455,279,'D')
-        +label(327,307,'MR')
-        +label(15,24,'Cost/revenue (₦)')
-        +label(482,368,'Output');
+      // Both questions share the same graph. B is the price intercept, H is output,
+      // and G is their intersection: GHOB must be a real rectangle, not a label cluster.
+      body=line('M90 35V330H562','#263b52',3)
+        +line('M90 105L470 290','#263b52',3)
+        +line('M90 105L350 312','#ad4d51',3)
+        +line('M110 285Q235 80 475 170','#176b94',4)
+        +line('M110 310Q245 110 475 225','#4b9579',4)
+        +line('M90 165H275','#8b96a5',2)
+        +line('M275 165V330','#8b96a5',2)
+        +'<circle cx="275" cy="165" r="4" fill="#263b52"/>'
+        +label(66,345,'O')+label(65,170,'B')
+        +label(281,157,'G')+label(268,351,'H')
+        +label(460,291,'AR')+label(353,314,'MR')
+        +label(465,168,'MC')+label(464,229,'AC')
+        +label(10,25,'Cost/revenue (₦)')
+        +label(483,363,'Output');
     }
     // Traced from the original 2013 paper's two graphs (Q23, Q24–25).
     if(match[1]==='2013-q23'){
@@ -2261,17 +2256,19 @@
     // 2019 Q14: separate graph traced from the original paper supplied by the user.
     // Budget line from U to T; S is the tangency on curve II, R is on III.
     if(match[1]==='2019-q14'){
+      // Tangency is geometric: S lies on BOTH the budget line and curve II.
+      // R is deliberately outside the budget constraint on curve III.
       body=line('M85 34V330H560','#263b52',3)
-        +line('M108 85L420 321','#263b52',3)
-        +line('M113 105C127 205 232 292 420 319','#176b94',3)
-        +line('M155 66C169 166 240 243 450 270','#cb842c',3)
-        +line('M280 58C285 154 360 213 515 229','#729b86',3)
-        +'<circle cx="220" cy="215" r="4" fill="#263b52"/>'
-        +'<circle cx="316" cy="179" r="4" fill="#263b52"/>'
-        +label(116,119,'U')+label(203,207,'S')
-        +label(300,174,'R')+label(426,326,'T')
-        +label(430,309,'I')+label(453,267,'II')
-        +label(518,233,'III')+label(62,40,'P')
+        +line('M110 90L465 330','#263b52',3)
+        +line('M120 143Q165 258 390 312','#176b94',3)
+        +line('M155 68Q171 164 270 198Q340 243 450 266','#cb842c',3)
+        +line('M280 50Q292 132 365 173Q435 210 515 226','#729b86',3)
+        +'<circle cx="270" cy="198" r="5" fill="#263b52"/>'
+        +'<circle cx="365" cy="173" r="5" fill="#263b52"/>'
+        +label(103,84,'U')+label(252,190,'S')
+        +label(368,165,'R')+label(468,330,'T')
+        +label(393,310,'I')+label(451,265,'II')
+        +label(518,227,'III')+label(62,40,'P')
         +label(557,350,'Q')+label(65,348,'O');
     }
     if(type==='both'||type==='supplyshift'||type==='demandshift'||type==='movement'||type==='complement'){body=type==='demandshift'||type==='complement'?D+line('M225 70L562 263','#cb842c'):S+line('M210 288L562 75','#cb842c');body+=label(500,68,type==='demandshift'||type==='complement'?'D₀':'S₁')+label(552,67,type==='demandshift'||type==='complement'?'D₁':'S₂');if(type==='both')body+=D+line('M225 70L562 263','#cb842c');if(type==='movement')body+=label(200,238,'M')+label(350,165,'T')+label(50,238,'P₁')+label(50,165,'P₂');if(type==='supplyshift')body+=label(250,210,'T')+label(340,210,'N');}
