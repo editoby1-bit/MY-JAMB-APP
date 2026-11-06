@@ -2219,13 +2219,16 @@
     }
     // Traced from the original 2013 paper's two graphs (Q23, Q24–25).
     if(match[1]==='2013-q23'){
+      // Reconstructed from 2013 PaqPapers original, page 3:
+      // T horizontal at fixed-cost intercept N; R begins at N and curves
+      // upwards, while M begins at O and intersects T before rising.
       body=line('M100 330V50','#263b52',3)+line('M100 330H555','#263b52',3)
         +line('M100 235H430','#263b52',3)
-        +line('M100 235C180 220 215 165 265 75','#176b94',4)
-        +line('M100 330C175 280 210 248 265 165','#cb842c',4)
-        +label(66,54,'Cost')+label(69,84,'N')+label(270,75,'R')
-        +label(270,164,'M')+label(437,240,'T')+label(85,350,'0')
-        +label(455,360,'Output');
+        +line('M100 235C155 182 202 203 235 120C248 91 259 74 276 63','#176b94',4)
+        +line('M100 330C148 281 190 260 216 235C242 211 257 180 276 151','#cb842c',4)
+        +label(62,51,'Cost')+label(70,240,'N')+label(280,64,'R')
+        +label(280,153,'M')+label(436,241,'T')+label(85,350,'O')
+        +label(456,360,'Output');
     }
     if(match[1]==='2013-q24'){
       body=line('M92 35V330H560','#263b52',3)
