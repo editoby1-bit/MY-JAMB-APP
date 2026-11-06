@@ -2240,8 +2240,8 @@
         +line('M92 232H315','#8b96a5',2)+line('M265 172V330','#8b96a5',2)
         +line('M315 232V330','#8b96a5',2)+line('M92 151H265','#8b96a5',2)
         +label(65,346,'O')+label(258,352,'B')+label(308,352,'S')
-        +label(250,147,'G')+label(250,176,'H')+label(250,195,'E')
-        +label(250,230,'J')+label(275,192,'F')+label(319,235,'C')
+        +label(270,166,'G')+label(67,176,'H')+label(67,195,'E')
+        +label(67,235,'J')+label(275,192,'F')+label(319,235,'C')
         +label(492,234,'D')+label(408,299,'MR')
         +label(12,26,'Cost/revenue (₦)')+label(470,365,'Output');
     }
