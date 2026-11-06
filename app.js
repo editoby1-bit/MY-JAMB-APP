@@ -2195,22 +2195,27 @@
     // 2019 Q11–Q12: reconstructed from the user-provided original 2019 scan.
     // Keep both questions on the same source figure; no generic AR/MC graph.
     if(type==='profit' && (match[1]==='2019-q11'||match[1]==='2019-q12')){
-      // Both questions share the same graph. B is the price intercept, H is output,
-      // and G is their intersection: GHOB must be a real rectangle, not a label cluster.
+      // Source-specific 2019 Q11/Q12: shared diagram, four price levels,
+      // two output guides, descending D/MR and two upward-turning cost curves.
       body=line('M90 35V330H562','#263b52',3)
-        +line('M90 105L470 290','#263b52',3)
-        +line('M90 105L350 312','#ad4d51',3)
-        +line('M110 285Q235 80 475 170','#176b94',4)
-        +line('M110 310Q245 110 475 225','#4b9579',4)
-        +line('M90 165H275','#8b96a5',2)
-        +line('M275 165V330','#8b96a5',2)
-        +'<circle cx="275" cy="165" r="4" fill="#263b52"/>'
-        +label(66,345,'O')+label(65,170,'B')
-        +label(281,157,'G')+label(268,351,'H')
-        +label(460,291,'AR')+label(353,314,'MR')
-        +label(465,168,'MC')+label(464,229,'AC')
+        +line('M90 82L490 275','#263b52',3)
+        +line('M90 82L330 305','#ad4d51',3)
+        +line('M90 82C145 142 174 239 280 238C328 236 380 142 465 58','#176b94',4)
+        +line('M90 82C145 123 207 234 280 238C335 244 389 196 477 133','#4b9579',4)
+        +line('M90 150H245','#8b96a5',2)
+        +line('M90 178H245','#8b96a5',2)
+        +line('M90 207H245','#8b96a5',2)
+        +line('M90 238H280','#8b96a5',2)
+        +line('M245 150V330','#8b96a5',2)
+        +line('M280 238V330','#8b96a5',2)
+        +label(66,345,'O')+label(64,155,'B')
+        +label(64,183,'C')+label(64,212,'E')+label(64,243,'J')
+        +label(236,352,'H')+label(273,352,'S')
+        +label(248,147,'G')+label(249,176,'F')
+        +label(249,205,'Q')+label(495,277,'D')
+        +label(335,309,'MR')
         +label(10,25,'Cost/revenue (₦)')
-        +label(483,363,'Output');
+        +label(484,365,'Output');
     }
     // Traced from the original 2013 paper's two graphs (Q23, Q24–25).
     if(match[1]==='2013-q23'){
@@ -2256,19 +2261,20 @@
     // 2019 Q14: separate graph traced from the original paper supplied by the user.
     // Budget line from U to T; S is the tangency on curve II, R is on III.
     if(match[1]==='2019-q14'){
-      // Tangency is geometric: S lies on BOTH the budget line and curve II.
-      // R is deliberately outside the budget constraint on curve III.
+      // Source-specific 2019 Q14: budget line U-S-T tangent to curve II at S.
+      // S=(225,205) lies exactly on U(110,90) -> T(350,330).
+      // R lies on the unattainable curve III, not on the budget line.
       body=line('M85 34V330H560','#263b52',3)
-        +line('M110 90L465 330','#263b52',3)
-        +line('M120 143Q165 258 390 312','#176b94',3)
-        +line('M155 68Q171 164 270 198Q340 243 450 266','#cb842c',3)
-        +line('M280 50Q292 132 365 173Q435 210 515 226','#729b86',3)
-        +'<circle cx="270" cy="198" r="5" fill="#263b52"/>'
-        +'<circle cx="365" cy="173" r="5" fill="#263b52"/>'
-        +label(103,84,'U')+label(252,190,'S')
-        +label(368,165,'R')+label(468,330,'T')
-        +label(393,310,'I')+label(451,265,'II')
-        +label(518,227,'III')+label(62,40,'P')
+        +line('M110 90L350 330','#263b52',3)
+        +line('M118 100C123 220 225 312 350 330','#176b94',3)
+        +line('M170 55C170 130 190 170 225 205C260 240 310 267 400 277','#cb842c',3)
+        +line('M285 50C285 130 315 165 355 185C390 218 445 230 500 235','#729b86',3)
+        +'<circle cx="225" cy="205" r="4" fill="#263b52"/>'
+        +'<circle cx="355" cy="185" r="4" fill="#263b52"/>'
+        +label(111,84,'U')+label(203,198,'S')
+        +label(335,178,'R')+label(355,331,'T')
+        +label(357,319,'I')+label(405,278,'II')
+        +label(504,239,'III')+label(62,40,'P')
         +label(557,350,'Q')+label(65,348,'O');
     }
     if(type==='both'||type==='supplyshift'||type==='demandshift'||type==='movement'||type==='complement'){body=type==='demandshift'||type==='complement'?D+line('M225 70L562 263','#cb842c'):S+line('M210 288L562 75','#cb842c');body+=label(500,68,type==='demandshift'||type==='complement'?'D₀':'S₁')+label(552,67,type==='demandshift'||type==='complement'?'D₁':'S₂');if(type==='both')body+=D+line('M225 70L562 263','#cb842c');if(type==='movement')body+=label(200,238,'M')+label(350,165,'T')+label(50,238,'P₁')+label(50,165,'P₂');if(type==='supplyshift')body+=label(250,210,'T')+label(340,210,'N');}
