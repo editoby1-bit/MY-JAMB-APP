@@ -66,3 +66,16 @@ Sources: [Larnedu scanned compilation, Economics 1983–2004](https://www.larned
 - Secondary answer sites can conflict with the scanned figure; when they do, use the figure itself and record the disagreement.
 - Do not classify any of the remaining 46 mapped images as PASS without the matching original figure.
 - Full cross-subject coverage remains outstanding. This is a documented partial audit, not completion.
+
+
+## Source comparison follow-up — 2026-11-06
+Sources checked:
+- 2014 paper: https://winpaq.wordpress.com/wp-content/uploads/2018/01/jamb-utme-economics-questions-2014.pdf
+- 2012 compilation: https://utmehelp.com/wp-content/uploads/2024/01/JAMB-Economics-Past-Questions-and-Answers-2010-2018.pdf
+
+### Confirmed source discrepancies and code corrections
+- **2014 Q5:** Source pie labels are Mining 126°, Agriculture 72°, Manufacturing 108°, Services 54°. App previously used Agriculture 126° and Oil 72°. Fixed sector names and values specifically for 2014 Q5. Mathematical answer to services question remains 15%.
+- **2012 Q5:** Source pie labels Oil 160°, Agriculture 90°, Mining 30°, Manufacturing remaining 80°. App previously called Mining 'Other'. Fixed specifically for 2012 Q5.
+- **2020 Q25 and Q35:** Source sector labels and values remain unverified. Deliberately not copied from 2014/2012 as though verified.
+
+These corrections establish **sector-value correspondence** for two source figures, not exact slice orientation or complete all-year verification. Other mapped templates and diagrams remain pending.
