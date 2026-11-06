@@ -166,3 +166,11 @@ Reviewed question-bank records in `past-questions/economics-2008.js`, `economics
 - **2019 Q11–12 and Q36:** 2019 original graph remains unverified; the 2019 profit reconstruction is provisional. The cost diagram now uses Cost (₦) and Output axes instead of generic price/quantity, with E/F source-specific names. **Not certified.**
 
 Source comparison here supports labels and relationships but does not constitute pixel-accurate graph reconstruction. No answer or year mappings modified.
+
+
+## Original-scan tracing update — 2013 diagrams
+- Source: https://winpaq.wordpress.com/wp-content/uploads/2018/01/jamb-utme-economics-questions-2013.pdf , page 3 (PDF page index 2), visually inspected.
+- **2013 Q23:** Replaced the previous generic cost-line rendering with year-specific SVG based on the scanned graph: cost/output axes, horizontal T, rising M from origin and upper R starting at fixed-cost intercept.
+- **2013 Q24–25:** Replaced generic profit rendering with a dedicated diagram representing the original graph's multiple intersecting curves, MR, point names G/H/E/J/F/C, B and S output guides, and price/revenue levels. This is a manual vector tracing, not an exact pixel overlay. The rendered result still requires device-level QA.
+- **2011 Q20 and 2019 Q11–12/Q36:** No authenticated figure was visually traced in this pass. Retain status SOURCE IMAGE NEEDED; do not claim completion.
+- No question text, answer key, repeated-year association, or practice mapping changed.
