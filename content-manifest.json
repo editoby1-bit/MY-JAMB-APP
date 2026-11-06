@@ -598,7 +598,7 @@
       },
       "count": 1000,
       "repeats": 63,
-      "lessons": 19,
+      "lessons": 24,
       "traps": true,
       "tricky": {
         "multi": 7,
@@ -1993,8 +1993,8 @@
       "bytes": 760285
     },
     "teach/accounting-topics.js": {
-      "sha256": "e9a81844061fe5c65178515031b6dda931b606448ea83dbc9b7ecb128c341396",
-      "bytes": 320884
+      "sha256": "beba2a487e6a58978c45ce37e8f13b3814a0e0e497fd956f2878e5b22283f355",
+      "bytes": 362712
     },
     "past-questions/commerce-2001.js": {
       "sha256": "1c1d3269b46f1c63d6d05975b91a9bbbe039d78e615d4aceb1e0993dee16aec3",
