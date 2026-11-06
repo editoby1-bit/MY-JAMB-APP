@@ -2192,14 +2192,30 @@
     if(type==='monopoly'||type==='profit'){body=line('M115 92L482 287')+line('M115 130L440 308','#c27c26')+line('M110 290Q280 40 493 155','#4b9579')+label(492,286,'AR')+label(438,320,'MR')+label(495,153,'MC')+line('M300 200V330','#8b96a5',2)+label(280,352,type==='monopoly'?'Q₂':'Output')+label(301,197,'C');}
     // The 2019 source question explicitly names the revenue rectangle GHOB.
     // Show the source point names without spelling out which rectangle is revenue.
+    // 2019 Q11–Q12: reconstructed from the user-provided original 2019 scan.
+    // Keep both questions on the same source figure; no generic AR/MC graph.
     if(type==='profit' && (match[1]==='2019-q11'||match[1]==='2019-q12')){
-      body=line('M76 330H560','#263b52',3)+line('M76 330V30','#263b52',3)
-        +line('M112 265L490 90')+line('M112 285L470 172','#c27c26')
-        +line('M125 95Q280 290 490 112','#4b9579')
-        +line('M76 170H335','#8b96a5',2)+line('M335 170V330','#8b96a5',2)
-        +label(62,347,'O')+label(55,175,'B')+label(325,351,'H')+label(340,165,'G')
-        +label(493,94,'MC')+label(473,171,'MR')+label(492,114,'AR')
-        +label(455,364,'Quantity')+label(10,28,'Price');
+      body=line('M90 35V335H562','#263b52',3)
+        // Original graph: downward demand/revenue curves, rising cost curves.
+        +line('M90 102L445 278','#263b52',3)
+        +line('M90 102L326 303','#ad4d51',3)
+        +line('M90 102C135 182 195 239 243 235C300 232 350 155 414 82','#176b94',4)
+        +line('M90 102C135 157 181 218 266 241C317 257 378 216 429 164','#4b9579',4)
+        // Original includes four price/cost levels and two output positions.
+        +line('M90 157H251','#8b96a5',2)
+        +line('M90 184H251','#8b96a5',2)
+        +line('M90 210H251','#8b96a5',2)
+        +line('M90 238H290','#8b96a5',2)
+        +line('M251 157V335','#8b96a5',2)
+        +line('M290 238V335','#8b96a5',2)
+        +label(60,340,'O')+label(65,162,'B')+label(65,189,'C')
+        +label(65,215,'E')+label(65,243,'J')
+        +label(242,353,'H')+label(281,353,'S')
+        +label(258,154,'G')+label(257,183,'F')
+        +label(260,209,'Q')+label(455,279,'D')
+        +label(327,307,'MR')
+        +label(15,24,'Cost/revenue (₦)')
+        +label(482,368,'Output');
     }
     // Traced from the original 2013 paper's two graphs (Q23, Q24–25).
     if(match[1]==='2013-q23'){
@@ -2254,7 +2270,7 @@
     if(type==='flow')body='<rect x="110" y="125" width="150" height="75" rx="12" fill="#e6f2f8" stroke="#176b94" stroke-width="2"/><rect x="360" y="125" width="150" height="75" rx="12" fill="#fff2dd" stroke="#cb842c" stroke-width="2"/>'+label(129,169,'Households')+label(408,169,'Firms')+line('M265 144H350','#cb842c')+line('M355 185H265')+label(268,128,'K: spending →')+label(260,218,'← goods/services');
     if(type.startsWith('pie')){const parts=type==='pieoil'?((match[1]==='2012-q5'||match[1]==='2020-q35')?[['Oil',160],['Agriculture',90],['Manufacturing',80],['Mining',30]]:[['Oil',160],['Agriculture',90],['Manufacturing',80],['Other',30]]):type==='pieservices'?((match[1]==='2014-q5'||match[1]==='2020-q25')?[['Mining',126],['Agriculture',72],['Manufacturing',108],['Services',54]]:[['Agriculture',126],['Oil',72],['Manufacturing',108],['Services',54]]):[['Oil',120],['Transport',60],['Remaining sectors',180]];const colors=['#397ba5','#e4a347','#6ca68b','#b78db5'];let a=-Math.PI/2;body='';for(let i=0;i<parts.length;i++){const [name,deg]=parts[i],b=a+deg*Math.PI/180,x1=315+125*Math.cos(a),y1=180+125*Math.sin(a),x2=315+125*Math.cos(b),y2=180+125*Math.sin(b);body+='<path d="M315 180L'+x1+' '+y1+'A125 125 0 '+(deg>180?1:0)+' 1 '+x2+' '+y2+'Z" fill="'+colors[i]+'" stroke="white" stroke-width="3"/>'+'<circle cx="'+(82+(i%2)*255)+'" cy="'+(334+Math.floor(i/2)*27)+'" r="7" fill="'+colors[i]+'"/>'+label(95+(i%2)*255,340+Math.floor(i/2)*27,((name==='Services'&&(match[1]==='2014-q5'||match[1]==='2020-q25'))||(name==='Manufacturing'&&(match[1]==='2012-q5'||match[1]==='2020-q35'))?name:name+': '+deg+'°'));a=b;}extra='';}
     if(!body)return html;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':(type==='costlines'||match[1]==='2013-q23'||match[1]==='2013-q24'||match[1]==='2011-q20'?'':axes))+body+extra+'</svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" role="img" aria-label="Clean Economics diagram for '+match[1]+'" style="display:block;width:100%;max-width:620px;height:auto;background:white;border:1px solid #d9e2ed;border-radius:12px">'+(type.startsWith('pie')?'':(type==='costlines'||match[1]==='2013-q23'||match[1]==='2013-q24'||match[1]==='2011-q20'||match[1]==='2019-q11'||match[1]==='2019-q12'?'':axes))+body+extra+'</svg>';
   }
 function accountingFinancialQuestionHtml(value) {
     const lines=String(value||'').split(/\r?\n/);
