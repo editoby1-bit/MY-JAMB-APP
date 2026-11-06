@@ -189,3 +189,11 @@ The user supplied a scan of the original 2019 Economics paper, visibly containin
 - **2019 Q14:** The same screenshot establishes that the original has P/Q axes, three downward-convex indifference curves I/II/III, tangency at S on II, U on the left, R on III. Current shared `indiff` renderer is not faithful. Flag for year-specific reconstruction.
 - **2019 Q36:** This screenshot does not contain Q36. Original source visual still required.
 - No answer key or question mappings modified.
+
+
+## User-reported unchanged 2019 diagrams — remediation
+- User supplied side-by-side live app screenshot and original 2019 scan. App screenshot still showed a generic 2019 Q11 graph. The original scan shows Q11–12 shared graph with B/C/E/J price levels, H/S output markers, downward revenue curves and rising cost curves; Q14 shows U/S/R/T on three indifference curves.
+- **2019 Q11–12:** Dedicated source-guided vector renderer committed in `app.js`; both year IDs share the same source-based geometry.
+- **2019 Q14:** Replaced generic `indiff` renderer with a 2019-specific source-guided graph containing the scan's U/S/R/T and I/II/III labels, P/Q axes.
+- **Cache:** Updated `index.html` to `app.js?v=2019-q11-q12-q14-original-scan-20261106-b` to invalidate cached app JS.
+- **QA status:** GitHub commits verified. Live browser/device rendering has **not** been independently verified in this pass. User should reload after GitHub Pages deploy. Point placement is manually reconstructed rather than pixel-traced.
