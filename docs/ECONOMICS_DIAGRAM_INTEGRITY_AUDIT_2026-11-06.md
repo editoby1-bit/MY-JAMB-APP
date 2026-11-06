@@ -174,3 +174,9 @@ Source comparison here supports labels and relationships but does not constitute
 - **2013 Q24–25:** Replaced generic profit rendering with a dedicated diagram representing the original graph's multiple intersecting curves, MR, point names G/H/E/J/F/C, B and S output guides, and price/revenue levels. This is a manual vector tracing, not an exact pixel overlay. The rendered result still requires device-level QA.
 - **2011 Q20 and 2019 Q11–12/Q36:** No authenticated figure was visually traced in this pass. Retain status SOURCE IMAGE NEEDED; do not claim completion.
 - No question text, answer key, repeated-year association, or practice mapping changed.
+
+
+## 2011 Q20 dedicated reconstruction (follow-up)
+- Replaced shared indifference-curve template for **2011 Q20** with a dedicated vector including source-question labels S, U, T, R and curves I/II/III. Answer key and question explanations indicate S as the optimal point. Sources: https://myschool.ng/classroom/economics/32348?exam_type=jamb&exam_year=2011&page=8 and https://www.scribd.com/document/872269528/JAMB-Economics-Past-Questions-and-Answers-2010-2018-Converted .
+- **Status: PROVISIONAL, NOT SOURCE-CERTIFIED.** The reference text confirms question and answer but does not provide sufficiently traceable image coordinates. Exact tangency, point positions and curve identities require comparison with an authenticated original scan. This should not be described as a verified replica.
+- **2019 Q11–12 and Q36:** Still require direct visual verification of original figure. No further change made to them in this pass.
