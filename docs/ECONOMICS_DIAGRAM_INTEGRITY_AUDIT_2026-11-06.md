@@ -125,3 +125,10 @@ A new acceptance criterion is **no inferred numerical value, derived point, or a
 - Generic `Price / Y` and `Quantity / X` axes, including for non-price economic diagrams, need source-specific replacement.
 
 These items are **FLAGGED FOR SOURCE COMPARISON**, not automatically removed. Deleting an original printed value can itself make a question impossible. No further guessed removals were made.
+
+
+## 2002 answer-leakage correction
+- **2002 Q23, opportunity cost of cotton:** Bank asks the learner to calculate the comparative opportunity costs using Ghana cocoa 20/cotton 5 and Nigeria cocoa 60/cotton 30. Production SVG included the answer outright as `Cost per cotton: Ghana 4; Nigeria 2`. **Removed this derived answer annotation**, retained the original numerical production quantities. The answer explanation still gives the calculation after answering.
+- **2002 Q34, excess demand:** Bank asks for excess demand at ₦60. The diagram shows Qs 100 and Qd 300, which are inputs required to calculate the answer (200), not the answer itself. **Retained** pending original visual comparison.
+- **2002 Q5, MRS:** Diagram coordinates S(2,18), T(4,15) are required to calculate the ratio; **retained** pending original visual comparison. The bank flags the answer choices as having no correct option, a separate answer-key issue.
+- **Audit principle:** Remove a *derived result* prematurely displayed, not the raw numbers that make a problem solvable. These checks compare renderer against question text/explanations; they are not a full image-to-source certification.
