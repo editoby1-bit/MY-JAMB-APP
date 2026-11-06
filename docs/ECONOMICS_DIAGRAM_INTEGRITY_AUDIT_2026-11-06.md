@@ -104,3 +104,24 @@ This check examined 4 year-specific source files and the 46-entry vector map. It
 The earlier classification of 2014 Q5 / 2020 Q25 and 2012 Q5 / 2020 Q35 as suspicious *because they repeat* was an invalid inference. The actual defect was **inconsistent sector labels in visually identical repeated-question diagrams**.
 
 **Fixed in app.js:** 2014 Q5 and 2020 Q25 now both use Mining 126°, Agriculture 72°, Manufacturing 108°, Services 54°; 2012 Q5 and 2020 Q35 now both use Oil 160°, Agriculture 90°, Manufacturing 80°, Mining 30°. Existing year tags, question entries, answer options and repeated-question mappings were not modified. These updates align vector diagrams with their corresponding repeated-question data; individual source-year authentication remains a separate question and is not grounds for removal.
+
+
+## Answer-leakage audit — 2026-11-06
+A new acceptance criterion is **no inferred numerical value, derived point, or answer-bearing annotation may be shown in a question figure unless it is printed on the original exam figure**. Geometry can encode the unknown sector, but the text must not give its value away.
+
+### Confirmed and fixed
+- 2014 Q5 / 2020 Q25: Services is a sector of 54° but original 2020 scan intentionally omits the degree label. SVG now displays **Services** only. The 54° remains in the answer explanation.
+- 2012 Q5–Q6 / 2020 Q35: Manufacturing's 80° is explicitly derived in the bank's answer explanations as 360° − 160° − 90° − 30°. SVG now displays **Manufacturing** without 80°. This is a preventive answer-leakage correction; original 2012 figure's printed text still requires a direct source comparison.
+- Both changes preserve all question and year mappings.
+
+### Other potentially answer-bearing renderer annotations requiring original comparison
+- `excess`: Qs=100, Qd=300, price ₦60.
+- `surplus`: Qd=20 and Qs=40.
+- `atc`: '20 units' and '₦15'.
+- `mrs`: coordinates S(2,18), T(4,15).
+- `trade`: 'Cost per cotton: Ghana 4; Nigeria 2' is a **derived comparative-cost statement** in the drawing itself, potentially revealing the answer; must be checked against original.
+- `pie2009`: 'Remaining sectors: 180°' is a computed complement of Oil 120° and Transport 60°, but is not the full 240° of all other sectors. Original legend/sector identity not source-certified.
+- `costlines`: labels contain alternative point letters 'E / T', 'F / R' and 'M' rather than a verified source-specific diagram.
+- Generic `Price / Y` and `Quantity / X` axes, including for non-price economic diagrams, need source-specific replacement.
+
+These items are **FLAGGED FOR SOURCE COMPARISON**, not automatically removed. Deleting an original printed value can itself make a question impossible. No further guessed removals were made.
