@@ -914,7 +914,7 @@
       el.subjectPositionTag.classList.add('hidden');
     }
     renderPassage(q);
-    el.questionText.innerHTML = mathHtml(q.question).replace(/\n/g, '<br>');
+    el.questionText.innerHTML = state.currentSubject === 'accounting' ? accountingFinancialQuestionHtml(q.question) : mathHtml(q.question).replace(/\n/g, '<br>');
 
     const hasDiagram = Boolean(q.diagram);
     el.diagramBox.classList.toggle('hidden', !hasDiagram);
@@ -2067,6 +2067,29 @@
     renderKeyPointPractice();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+  function accountingFinancialQuestionHtml(value) {
+    const lines=String(value||'').split(/\r?\n/);
+    const out=[];let rows=[];
+    const flush=()=>{
+      if(!rows.length)return;
+      const width=Math.max(...rows.map(row=>row.length));
+      out.push('<div class="accounting-financial-table-scroll" style="max-width:100%;overflow-x:auto;margin:12px 0"><table style="width:100%;min-width:'+Math.max(300,width*100)+'px;border-collapse:collapse;font-size:.94em;font-variant-numeric:tabular-nums"><tbody>'+
+        rows.map((cells,i)=>'<tr>'+Array.from({length:width},(_,j)=>'<'+(i===0?'th':'td')+' style="padding:9px 10px;border-bottom:1px solid #d9e0e9;text-align:'+(j?'right':'left')+';'+(i===0?'background:#eaf1fa;':'')+'">'+escHtml(cells[j]||'')+'</'+(i===0?'th':'td')+'>').join('')+'</tr>').join('')+'</tbody></table></div>');
+      rows=[];
+    };
+    for(const line of lines){
+      const t=line.trim();
+      const isColumns=/\s\.{2,}\s/.test(t)||/\s+\|\s+/.test(t);
+      if(isColumns){
+        const cells=t.split(/\s+\|\s+|\s*\.{2,}\s*/).map(x=>x.trim());
+        if(cells.length>=2&&cells.length<=9){rows.push(cells);continue;}
+      }
+      flush();
+      out.push(t?'<div style="white-space:pre-wrap;overflow-wrap:anywhere">'+escHtml(line)+'</div>':'<div style="height:8px"></div>');
+    }
+    flush();
+    return out.join('');
+  }
   function keyPointQuestionHtml(value) {
     const lines = String(value || '').split('\n');
     const heading = lines.findIndex(line => /price/i.test(line) && /quantity/i.test(line) && line.includes('...'));
@@ -2116,7 +2139,7 @@
       '<p class="kp-inline-meta">' + escHtml(title) + ' · Question ' + (p.index + 1) + ' of ' +
       p.questions.length + ' · ' + Object.keys(p.answers).length + ' answered · ' + score + ' correct</p>' +
       (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
-      '<div class="kp-inline-question">' + keyPointQuestionHtml(q.question) + '</div>' +
+      '<div class="kp-inline-question">' + (p.subject === 'accounting' ? accountingFinancialQuestionHtml(q.question) : keyPointQuestionHtml(q.question)) + '</div>' +
       (q.diagram ? '<div class="kp-inline-diagram" role="group" aria-label="Diagram for this past question">' +
         (/percentage for children is equivalent to/i.test(q.question) && p.subject === 'economics'
           ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Pie chart showing children 40 percent, women 35 percent, men 25 percent"><circle cx="160" cy="160" r="145" fill="#fff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L160 15 A145 145 0 0 1 245.23 277.31 Z" fill="#d9ebff" stroke="#24344a" stroke-width="2"/><path d="M160 160 L245.23 277.31 A145 145 0 0 1 15 160 Z" fill="#f9e8d5" stroke="#24344a" stroke-width="2"/><path d="M160 160 L15 160 A145 145 0 0 1 160 15 Z" fill="#e0f2e6" stroke="#24344a" stroke-width="2"/><g font-family="Arial,sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#14263c"><text x="205" y="84">Children</text><text x="205" y="106">40%</text><text x="97" y="217">Women</text><text x="97" y="239">35%</text><text x="246" y="188">Men</text><text x="246" y="210">25%</text></g></svg>'
