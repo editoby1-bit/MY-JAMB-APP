@@ -180,3 +180,12 @@ Source comparison here supports labels and relationships but does not constitute
 - Replaced shared indifference-curve template for **2011 Q20** with a dedicated vector including source-question labels S, U, T, R and curves I/II/III. Answer key and question explanations indicate S as the optimal point. Sources: https://myschool.ng/classroom/economics/32348?exam_type=jamb&exam_year=2011&page=8 and https://www.scribd.com/document/872269528/JAMB-Economics-Past-Questions-and-Answers-2010-2018-Converted .
 - **Status: PROVISIONAL, NOT SOURCE-CERTIFIED.** The reference text confirms question and answer but does not provide sufficiently traceable image coordinates. Exact tangency, point positions and curve identities require comparison with an authenticated original scan. This should not be described as a verified replica.
 - **2019 Q11–12 and Q36:** Still require direct visual verification of original figure. No further change made to them in this pass.
+
+
+## 2019 original exam screenshot supplied by user
+The user supplied a scan of the original 2019 Economics paper, visibly containing **Q11 and Q12** on the same cost/revenue graph and Q14's separate indifference-curve graph, plus an app screenshot showing the former incorrect Q11 vector.
+
+- **2019 Q11–Q12:** Replaced the incorrect generic graph with a source-guided vector reconstruction. Original contains a vertical Cost/revenue (₦) axis, Output horizontal axis, downward-sloping D and MR lines, two rising cost curves, horizontal levels B/C/E/J, and two output positions H/S. This version includes those features and no longer shows the generic 'AR' annotation. **Status: SOURCE-GUIDED, requires visual rendering QA** (not pixel-perfect).
+- **2019 Q14:** The same screenshot establishes that the original has P/Q axes, three downward-convex indifference curves I/II/III, tangency at S on II, U on the left, R on III. Current shared `indiff` renderer is not faithful. Flag for year-specific reconstruction.
+- **2019 Q36:** This screenshot does not contain Q36. Original source visual still required.
+- No answer key or question mappings modified.
