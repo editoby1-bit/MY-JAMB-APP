@@ -2079,9 +2079,9 @@
     };
     for(const line of lines){
       const t=line.trim();
-      const isColumns=/\s\.{2,}\s/.test(t)||/\s+\|\s+/.test(t);
+      const isColumns=/\s\.{2,}\s/.test(t)||t.includes(' | ');
       if(isColumns){
-        const cells=t.split(/\s+\|\s+|\s*\.{2,}\s*/).map(x=>x.trim());
+        const cells=t.includes('|')?t.split(/\s*\|\s*/).flatMap(part=>part.split(/\s+\.{2,}\s+/)).map(x=>x.trim()):t.split(/\s+\.{2,}\s+/).map(x=>x.trim());
         if(cells.length>=2&&cells.length<=9){rows.push(cells);continue;}
       }
       flush();
