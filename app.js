@@ -898,7 +898,8 @@
     if (!/^\d{4}$/.test(yearSelection || '') || state.sessionType === 'combo') return null;
     const subject = state.subject;
     // CBT began in 2015: never apply a pre-CBT paper-number offset from 2015 onward.
-    if (Number(yearSelection) >= 2015) return null;\n    const start = PAPER_FIRST_QUESTION[subject]?.[Number(yearSelection)];
+    if (Number(yearSelection) >= 2015) return null;
+    const start = PAPER_FIRST_QUESTION[subject]?.[Number(yearSelection)];
     if (!start) return null;
     const q = state.currentQuestions[idx];
     const bank = QUESTION_BANK[subject]?.filter(item => item.year === Number(yearSelection)) || [];
