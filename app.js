@@ -524,7 +524,7 @@
     if (!el.yearSelect) return;
     const pool = QUESTION_BANK[el.subjectSelect.value] || [];
     const counts = JambContent.isLoaded(el.subjectSelect.value) ? {} : { ...(JambContent.manifest?.subjects?.[el.subjectSelect.value]?.years || {}) };
-    if (JambContent.isLoaded(el.subjectSelect.value)) pool.forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
+    if (JambContent.isLoaded(el.subjectSelect.value)) pool.filter(q => !q.administrative).forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
     const years = Object.keys(counts).map(Number).sort((a, b) => b - a);
     const nRep = JambContent.isLoaded(el.subjectSelect.value) ? mostRepeatedPool(el.subjectSelect.value).length : (JambContent.manifest?.subjects?.[el.subjectSelect.value]?.repeats || 0);
     el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
@@ -762,7 +762,7 @@
       };
     }
     const year = yearVal && yearVal !== 'all' ? Number(yearVal) : null;
-    const pool = year ? QUESTION_BANK[subject].filter(q => q.year === year) : QUESTION_BANK[subject];
+    const pool = year ? QUESTION_BANK[subject].filter(q => Number(q.year) === year && !q.administrative) : QUESTION_BANK[subject].filter(q => !q.administrative);
     const count = countValue === 'all' ? pool.length : Math.min(Number(countValue), pool.length);
     // A whole year's paper is served in the paper's own order, like sitting
     // the real exam; any other selection is shuffled (passages kept whole).
@@ -773,8 +773,9 @@
     // Some 2010–14 banks contain 49 (or 99 English) academic questions
     // because printed Q1 was paper-type identification. Earlier source
     // papers with 50 real questions (e.g. Economics 2002) begin at Q1.
-    const paperStart = year && year <= 2014 && (pool.length === 49 || pool.length === 99) ? 2 : 1;
-    const positions = year ? new Map(pool.map((q, i) => [q, paperStart + i])) : null;
+    const paperStart = year && Number.isInteger(pool[0]?.paperQuestion) ? pool[0].paperQuestion
+      : year && year <= 2014 && (pool.length === 49 || pool.length === 99) ? 2 : 1;
+    const positions = year ? new Map(pool.map((q, i) => [q, Number.isInteger(q.paperQuestion) ? q.paperQuestion : paperStart + i])) : null;
     const questions = picked.map(q => ({
       ...q, sourceSubject: subject,
       ...(positions ? { paperNumber: positions.get(q) ??
@@ -807,14 +808,14 @@
     let offset = 0;
     let allQuestions = [];
 
-    const enPool = QUESTION_BANK.english;
+    const enPool = QUESTION_BANK.english.filter(q => !q.administrative);
     const enQs = groupAwarePick(enPool, Math.min(engCount, enPool.length)).map(q => ({ ...q, sourceSubject: 'english' }));
     subjectRanges['english'] = { start: offset, end: offset + enQs.length - 1 };
     offset += enQs.length;
     allQuestions.push(...enQs);
 
     unique.forEach(subject => {
-      const pool = QUESTION_BANK[subject];
+      const pool = QUESTION_BANK[subject].filter(q => !q.administrative);
       const qs = groupAwarePick(pool, Math.min(otherCount, pool.length)).map(q => ({ ...q, sourceSubject: subject }));
       subjectRanges[subject] = { start: offset, end: offset + qs.length - 1 };
       offset += qs.length;
@@ -926,7 +927,7 @@
       (item.options?.join('|') || '') === (q?.options?.join('|') || ''));
     if (pos < 0) return null;
     const first = state.paperStart || (bank.length === 49 || bank.length === 99 ? 2 : 1);
-    return first + pos;
+    return Number.isInteger(bank[pos]?.paperQuestion) ? bank[pos].paperQuestion : first + pos;
   }
 
   function buildQuestionPills() {
@@ -2202,7 +2203,7 @@
   // Reuse the existing practice session and its answer/explanation flow.
   function keyPointPool(subject, topic) {
     const mapping = window.TEACH_TOPICS?.[subject]?.of || {};
-    return (QUESTION_BANK[subject] || []).filter(q => !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && mapping[teachMeKey(q)] === topic);
+    return (QUESTION_BANK[subject] || []).filter(q => !q.administrative && !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && mapping[teachMeKey(q)] === topic);
   }
   // Keep topic practice inside the lesson modal, like the approved review UI.
   let kpPractice = null;
