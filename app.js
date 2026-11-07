@@ -504,7 +504,7 @@
     note.classList.toggle('is-saved', !!saved);
     note.textContent = !subject ? '' : saved
       ? '✓ Saved offline — all available years, diagrams and study notes.'
-      : 'Not saved offline yet. Connect to the internet to prepare this subject.';
+      : 'When you start practice or an exam, this subject’s content will be downloaded and saved for offline use.';
   }
 
   // Year picker for single-subject sessions. Lists only the years that have
