@@ -165,7 +165,7 @@
     const data = await response.clone().json();
     if (data.schema !== 1 || !data.subjects || !data.files) throw new Error('Invalid content manifest');
     for (const [file, entry] of Object.entries(data.files)) {
-      if (!/^(past-questions|teach|booklet)\\/[a-zA-Z0-9_./-]+$/.test(file)
+      if (!/^(past-questions|teach|booklet)\/[a-zA-Z0-9_./-]+$/.test(file)
         || file.includes('..') || !/^[a-f0-9]{64}$/.test(entry.sha256)) throw new Error('Invalid content path');
     }
     try { await storage?.put(urlFor('content-manifest.json'), response); } catch (_) {}
@@ -202,7 +202,7 @@
       const fresh = await response.clone().json();
       if (fresh.schema === 1 && fresh.subjects && fresh.files &&
           Object.entries(fresh.files).every(([file, entry]) =>
-            /^(past-questions|teach|booklet)\\/[a-zA-Z0-9_./-]+$/.test(file) &&
+            /^(past-questions|teach|booklet)\/[a-zA-Z0-9_./-]+$/.test(file) &&
             !file.includes('..') && /^[a-f0-9]{64}$/.test(entry.sha256))) {
         manifest = fresh;
         try { await (await cache())?.put(urlFor('content-manifest.json'), response); } catch (_) {}
