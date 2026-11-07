@@ -61,7 +61,7 @@ if(currentSubject==='mathematics'){
     last=pattern.lastIndex;
   }
   appendMathFormatted(frag,content.slice(last));
-  if(inserted||last){revisedText.textContent='';revisedText.appendChild(frag);}
+  revisedText.textContent='';revisedText.appendChild(frag);
   if(!inserted&&diagramLibrary[x.id]&&!content.includes('[LESSON_DIAGRAM')){const box=document.createElement('div');box.innerHTML=diagramLibrary[x.id];revisedText.appendChild(box);}
 }
 if(typeof window.renderEconomicsGraphs==='function')window.renderEconomicsGraphs(currentSubject==='economics'?x.id:null);if(typeof window.renderCommerceDiagrams==='function')window.renderCommerceDiagrams(currentSubject==='commerce'?x.id:null);document.getElementById('previewPracticeCount').textContent='Practise mapped past questions from the existing '+(currentSubject==='government'?'Government':currentSubject==='commerce'?'Commerce':currentSubject==='accounting'?'Accounting':currentSubject==='mathematics'?'Mathematics':'Economics')+' question bank.';document.getElementById('practicePanel').classList.add('hidden');}sel.addEventListener('change',render);document.getElementById('previewPracticeBtn').addEventListener('click',startTopicPractice);populateLessons();for(const mode of ['compare','revised','original'])document.getElementById(mode).onclick=()=>{for(const m of ['compare','revised','original'])document.getElementById(m).setAttribute('aria-pressed',String(m===mode));document.getElementById('oldPanel').classList.toggle('hidden',mode==='revised');document.getElementById('newPanel').classList.toggle('hidden',mode==='original');document.getElementById('grid').style.gridTemplateColumns=mode==='compare'?'':'1fr';};
