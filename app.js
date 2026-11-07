@@ -426,6 +426,8 @@
     // Bind essential controls first: a failure in optional home widgets must
     // never prevent student login or starting a practice session.
     bindEvents();
+    // Exposed only for startup diagnostics: confirms the main controls are bound.
+    window.__myJambMainBooted = true;
     const steps = [
       ['subjects', populateSubjects],
       ['student', renderCurrentUser],
