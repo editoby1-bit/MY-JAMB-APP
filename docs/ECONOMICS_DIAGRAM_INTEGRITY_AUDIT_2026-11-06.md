@@ -197,3 +197,36 @@ The user supplied a scan of the original 2019 Economics paper, visibly containin
 - **2019 Q14:** Replaced generic `indiff` renderer with a 2019-specific source-guided graph containing the scan's U/S/R/T and I/II/III labels, P/Q axes.
 - **Cache:** Updated `index.html` to `app.js?v=2019-q11-q12-q14-original-scan-20261106-b` to invalidate cached app JS.
 - **QA status:** GitHub commits verified. Live browser/device rendering has **not** been independently verified in this pass. User should reload after GitHub Pages deploy. Point placement is manually reconstructed rather than pixel-traced.
+
+
+## 2026-11-07 — Economics 2001–2020 structural inventory (NOT visual certification)
+
+All 20 Economics question-bank JavaScript files were read. Counts are distinct IMG(filename) references per year and literal `{ diagram: ... }` fields, respectively. These are structural counts, not counts of unique original diagrams or verified image matches. Other inline visual content may exist.
+
+| Year | Distinct IMG filenames | Literal diagram fields |
+|---|---:|---:|
+| 2001 | 1 | 1 |
+| 2002 | 3 | 4 |
+| 2003 | 2 | 2 |
+| 2004 | 5 | 5 |
+| 2005 | 1 | 1 |
+| 2006 | 3 | 3 |
+| 2007 | 1 | 1 |
+| 2008 | 3 | 3 |
+| 2009 | 2 | 2 |
+| 2010 | 0 | 0 |
+| 2011 | 3 | 5 |
+| 2012 | 3 | 5 |
+| 2013 | 4 | 5 |
+| 2014 | 3 | 4 |
+| 2015 | 0 | 4 |
+| 2016 | 3 | 3 |
+| 2017 | 1 | 1 |
+| 2018 | 0 | 0 |
+| 2019 | 4 | 4 |
+| 2020 | 4 | 6 |
+| **Total** | **46** | **59** |
+
+2015 has four diagram fields but zero IMG filename references; inspect inline content. 2011, 2012, 2013, 2014 and 2020 have more fields than distinct image filenames; shared figures and inline content need checking. 2010 and 2018 have zero matches under this pattern, which does not prove those original papers lack visual questions. 2003 Q5 and Q6 refer to separate PNGs although both use a PPC context. The approved 2019 Q11–12 and Q14 diagrams must not be used to certify other years.
+
+**Outstanding:** An attempted image-path existence check exceeded the connector call limit; it is not recorded as passed. Original-paper image comparisons and deployed browser rendering QA remain incomplete. Extend inventory to the other seven subjects, then certify each figure individually. No answer keys or repeated-question mappings were changed by this documentation update.
