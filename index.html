@@ -821,6 +821,36 @@
   <script src="questions.js"></script>
   <script src="content-loader.js"></script>
   <script src="key-points-economics-graphs.js?v=inline-v6"></script>
-  <script src="app.js?v=syntaxfix-login-20261107"></script>
+  <script src="app.js?v=boot-recovery-20261107"></script>
+  <script>
+    // A broken or stale main script must not silently leave all controls dead.
+    window.addEventListener('load', () => {
+      setTimeout(async () => {
+        if (window.__myJambMainBooted) return;
+        const key = 'my-jamb-boot-recovery-20261107';
+        // One automatic repair, only when online and an old service worker
+        // could be intercepting fresh scripts. Never delete downloaded content.
+        try {
+          if (navigator.onLine && navigator.serviceWorker?.controller &&
+              sessionStorage.getItem(key) !== 'attempted') {
+            sessionStorage.setItem(key, 'attempted');
+            const path = new URL('./', location.href).href;
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.filter(reg => reg.scope === path).map(reg => reg.unregister()));
+            location.replace(new URL('index.html?recover=20261107b', path).href);
+            return;
+          }
+        } catch (err) { console.warn('App repair unavailable', err); }
+        if (document.getElementById('jambStartupError')) return;
+        const warning = document.createElement('div');
+        warning.id = 'jambStartupError';
+        warning.setAttribute('role', 'alert');
+        warning.style.cssText = 'position:fixed;z-index:15000;left:12px;right:12px;bottom:90px;background:#fff7e6;color:#162744;border:2px solid #e3a638;border-radius:14px;padding:14px;font:500 14px system-ui,sans-serif;box-shadow:0 4px 18px #0003';
+        warning.innerHTML = '<strong>App controls did not finish loading.</strong><p style="margin:7px 0">Your saved questions are safe. Check your connection and reload the app.</p><button type="button" id="jambStartupRetry" style="background:#122646;color:white;border:0;border-radius:8px;padding:10px 16px">Reload app</button>';
+        document.body.appendChild(warning);
+        warning.querySelector('button').addEventListener('click', () => location.reload());
+      }, 1200);
+    });
+  </script>
 </body>
 </html>
