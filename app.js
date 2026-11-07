@@ -470,7 +470,7 @@
     if (QUESTION_BANK['physics'])     el.comboSubject2.value = 'physics';
     if (QUESTION_BANK['chemistry'])   el.comboSubject3.value = 'chemistry';
 
-    const total = subjects.reduce((sum, s) => sum + (JambContent.manifest.subjects[s]?.count || QUESTION_BANK[s].length), 0);
+    const total = subjects.reduce((sum, s) => sum + (JambContent.manifest?.subjects?.[s]?.count || QUESTION_BANK[s].length), 0);
     el.statQuestions.textContent = String(total);
     // Plan cards quote the live bank size, so it never goes stale.
     document.querySelectorAll('[data-qcount]').forEach(n => { n.textContent = String(total); });
@@ -509,13 +509,13 @@
   function populateYears() {
     if (!el.yearSelect) return;
     const pool = QUESTION_BANK[el.subjectSelect.value] || [];
-    const counts = JambContent.isLoaded(el.subjectSelect.value) ? {} : { ...(JambContent.manifest.subjects[el.subjectSelect.value]?.years || {}) };
+    const counts = JambContent.isLoaded(el.subjectSelect.value) ? {} : { ...(JambContent.manifest?.subjects?.[el.subjectSelect.value]?.years || {}) };
     if (JambContent.isLoaded(el.subjectSelect.value)) pool.forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
     const years = Object.keys(counts).map(Number).sort((a, b) => b - a);
-    const nRep = JambContent.isLoaded(el.subjectSelect.value) ? mostRepeatedPool(el.subjectSelect.value).length : (JambContent.manifest.subjects[el.subjectSelect.value]?.repeats || 0);
+    const nRep = JambContent.isLoaded(el.subjectSelect.value) ? mostRepeatedPool(el.subjectSelect.value).length : (JambContent.manifest?.subjects?.[el.subjectSelect.value]?.repeats || 0);
     el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
       (nRep ? `<option value="repeated">🔁 Most repeated questions · ${nRep}</option>` : '') +
-      Object.keys(TRICKY).map(k => { const n = JambContent.isLoaded(el.subjectSelect.value) ? trickyPool(el.subjectSelect.value, k).length : (JambContent.manifest.subjects[el.subjectSelect.value]?.tricky[k] || 0);
+      Object.keys(TRICKY).map(k => { const n = JambContent.isLoaded(el.subjectSelect.value) ? trickyPool(el.subjectSelect.value, k).length : (JambContent.manifest?.subjects?.[el.subjectSelect.value]?.tricky?.[k] || 0);
         return n ? `<option value="tricky-${k}">${TRICKY[k].icon} ${TRICKY[k].label} · ${n}</option>` : ''; }).join('') +
       years.map(y => `<option value="${y}">JAMB ${y} · ${counts[y]} questions</option>`).join('');
     el.yearSelect.value = 'all';
@@ -5706,16 +5706,13 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     repeatIndex = null;
     for (const subject of Object.keys(trapCache)) delete trapCache[subject];
   });
-  JambContent.run('Opening My JAMB App…', () => JambContent.ready()).then(ok => {
-    if (ok) init();
-    else {
-      // Keep startup recoverable even if the first manifest request failed.
-      const button = document.createElement('button');
-      button.textContent = 'Try opening the app again';
-      button.className = 'primary-btn';
-      button.onclick = () => location.reload();
-      document.querySelector('main')?.prepend(button) || document.body.prepend(button);
-    }
+  // Login and home navigation must never depend on a network manifest request.
+  // Prepare content only when a student selects a resource.
+  init();
+  JambContent.ready().then(() => {
+    populateSubjects();
+  }).catch(() => {
+    // Offline/slow networks must not block student login.
   });
 
   // Offline support (see sw.js). Only over http(s): service workers don't
