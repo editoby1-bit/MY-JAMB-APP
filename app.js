@@ -362,6 +362,9 @@
     timeLeft: 0,
     chosenDurationMinutes: null,
     sessionType: 'single',
+    paperYear: null,
+    paperLength: 0,
+    paperStart: 1,
     // Subject switching data
     subjectRanges: {} // { subjectName: { start, end } }
   };
@@ -380,7 +383,9 @@
         student: state.currentUser, questions: state.currentQuestions,
         answers: state.answers, index: state.currentIndex,
         mode: state.mode, subject: state.subject, subjects: state.subjects,
-        sessionType: state.sessionType, ranges: state.subjectRanges,
+        sessionType: state.sessionType, paperYear: state.paperYear,
+        paperLength: state.paperLength, paperStart: state.paperStart,
+        ranges: state.subjectRanges,
         duration: state.chosenDurationMinutes,
         deadline: state.mode === 'exam' ? Date.now() + state.timeLeft * 1000 : null
       }));
@@ -403,6 +408,11 @@
     state.subject = saved.subject;
     state.subjects = saved.subjects || [];
     state.sessionType = saved.sessionType || 'single';
+    // Older saved tests predate paper numbering; recover their selected year.
+    state.paperYear = Number(saved.paperYear) || (state.sessionType === 'single'
+      ? (Number(String(saved.subject || '').match(/JAMB (20\d{2})/)?.[1]) || null) : null);
+    state.paperLength = Number(saved.paperLength) || 0;
+    state.paperStart = Number(saved.paperStart) || 1;
     state.subjectRanges = saved.ranges || {};
     state.chosenDurationMinutes = saved.duration;
     state.student = saved.student;
@@ -666,6 +676,9 @@
       state.subject = selection.sessionLabel;
       state.subjects = selection.subjects;
       state.subjectRanges = selection.subjectRanges || {};
+      state.paperYear = selection.paperYear ?? null;
+      state.paperLength = selection.paperLength || 0;
+      state.paperStart = selection.paperStart || 1;
       state.chosenDurationMinutes = getChosenDurationMinutes(state.currentQuestions.length, state.mode);
       state.timeLeft = state.mode === 'exam' ? state.chosenDurationMinutes * 60 : 0;
 
@@ -756,9 +769,20 @@
     const picked = year
       ? fillFromUnits(toUnits(pool), count)
       : groupAwarePick(pool, count);
-    const questions = picked.map(q => ({ ...q, sourceSubject: subject }));
+    // Preserve printed paper numbers, not the position in a shortened test.
+    // Some 2010–14 banks contain 49 (or 99 English) academic questions
+    // because printed Q1 was paper-type identification. Earlier source
+    // papers with 50 real questions (e.g. Economics 2002) begin at Q1.
+    const paperStart = year && year <= 2014 && (pool.length === 49 || pool.length === 99) ? 2 : 1;
+    const positions = year ? new Map(pool.map((q, i) => [q, paperStart + i])) : null;
+    const questions = picked.map(q => ({
+      ...q, sourceSubject: subject,
+      ...(positions ? { paperNumber: positions.get(q) ??
+          (paperStart + pool.findIndex(x => x.question === q.question)) } : {})
+    }));
     return {
-      questions,
+      questions, paperYear: year, paperLength: year ? pool.length : 0,
+      paperStart,
       subjects: [subject],
       sessionLabel: year ? `${fmt(subject)} · JAMB ${year}` : fmt(subject),
       subjectRanges: { [subject]: { start: 0, end: questions.length - 1 } }
@@ -888,31 +912,28 @@
   }
 
   // ─── PILLS ────────────────────────────────────────
-  // Paper labels are presentation-only; array indices and answer scoring stay unchanged.
-  // Register a year only when its source explicitly confirms a non-CBT question 1 was omitted.
-  const PAPER_FIRST_QUESTION = Object.fromEntries(
-    Object.keys(QUESTION_BANK).map(subject => [subject, Object.fromEntries(
-      Array.from({ length: 14 }, (_, i) => [2001 + i, 2])
-    )])
-  );
+  // Original paper numbers are stored with each selected question. This does
+  // not change scoring, order, question identities, or repeated-year mapping.
   function originalPaperNumber(idx) {
-    const yearSelection = el.yearSelect?.value;
-    if (!/^\d{4}$/.test(yearSelection || '') || state.sessionType === 'combo') return null;
-    const subject = state.subject;
-    // CBT began in 2015: never apply a pre-CBT paper-number offset from 2015 onward.
-    if (Number(yearSelection) >= 2015) return null;
-    const start = PAPER_FIRST_QUESTION[subject]?.[Number(yearSelection)];
-    if (!start) return null;
     const q = state.currentQuestions[idx];
-    const bank = QUESTION_BANK[subject]?.filter(item => item.year === Number(yearSelection)) || [];
-    const position = bank.findIndex(item => item === q || (item.question === q?.question && item.year === q?.year));
-    return position < 0 ? null : start + position;
+    if (state.sessionType !== 'single' || !state.paperYear ||
+        Number(q?.year) !== Number(state.paperYear)) return null;
+    if (Number.isInteger(q.paperNumber) && q.paperNumber > 0) return q.paperNumber;
+    // Backward-compatible recovery for tests saved before this correction.
+    const subject = state.subjects?.[0];
+    const bank = (QUESTION_BANK[subject] || []).filter(item => Number(item.year) === Number(state.paperYear));
+    const pos = bank.findIndex(item => item.question === q?.question &&
+      (item.options?.join('|') || '') === (q?.options?.join('|') || ''));
+    if (pos < 0) return null;
+    const first = state.paperStart || (bank.length === 49 || bank.length === 99 ? 2 : 1);
+    return first + pos;
   }
 
   function buildQuestionPills() {
     el.questionPills.innerHTML = '';
     // If combo, show label; else show "Questions"
-    el.pillsLabel.textContent = state.sessionType === 'combo' ? 'All Questions' : 'Questions';
+    el.pillsLabel.textContent = state.sessionType === 'combo' ? 'All Questions' :
+      state.paperYear && state.paperStart === 2 ? 'Questions · Original Q1 skipped (paper type)' : 'Questions';
 
     state.currentQuestions.forEach((_, idx) => {
       const btn = document.createElement('button');
@@ -975,8 +996,12 @@
       if (lockBar) lockBar.classList.add('hidden');
     }
 
-    el.questionNumberBadge.textContent = originalPaperNumber(state.currentIndex) != null
-      ? `Question ${originalPaperNumber(state.currentIndex)} · ${state.currentIndex + 1} of ${state.currentQuestions.length} in test`
+    const printedNo = originalPaperNumber(state.currentIndex);
+    const isFullPaper = state.paperYear && state.paperLength === state.currentQuestions.length;
+    el.questionNumberBadge.textContent = printedNo != null
+      ? (isFullPaper
+        ? `Question ${printedNo} of ${state.paperLength + state.paperStart - 1}`
+        : `Question ${printedNo} · ${state.currentIndex + 1}/${state.currentQuestions.length} selected`)
       : `Question ${state.currentIndex + 1} of ${state.currentQuestions.length}`;
     // In lesson practice, use the app's established repeat index, which
     // checks the complete loaded subject bank and handles reordered options.
