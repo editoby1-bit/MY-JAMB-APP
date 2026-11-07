@@ -886,7 +886,11 @@
   // ─── PILLS ────────────────────────────────────────
   // Paper labels are presentation-only; array indices and answer scoring stay unchanged.
   // Register a year only when its source explicitly confirms a non-CBT question 1 was omitted.
-  const PAPER_FIRST_QUESTION = { economics: { 2012: 2, 2014: 2 } };
+  const PAPER_FIRST_QUESTION = Object.fromEntries(
+    Object.keys(QUESTION_BANK).map(subject => [subject, Object.fromEntries(
+      Array.from({ length: 14 }, (_, i) => [2001 + i, 2])
+    )])
+  );
   function originalPaperNumber(idx) {
     const yearSelection = el.yearSelect?.value;
     if (!/^\d{4}$/.test(yearSelection || '') || state.sessionType === 'combo') return null;
