@@ -423,32 +423,34 @@
 
   // ─────────────────────────────────────────────────
   function init() {
-    populateSubjects();
+    // Bind essential controls first: a failure in optional home widgets must
+    // never prevent student login or starting a practice session.
     bindEvents();
-    renderCurrentUser();
-    renderStats();
-    renderHistory();
-    syncSessionTypeUi();
-    syncStartButton();
-    showScreen('home');
-    restoreActivePaper();
-    initPaywall();
-    initAIExplain();
-    initCommunityQuiz();
-    checkForSharedSession();
-    refreshChallengeBtn();
-    initUpgradeBar();
-    checkForStartedJambChallenges();
-    checkScheduledChallengeReminders();
-
-    // Without this, a student who creates or joins a scheduled/ready
-    // challenge and then just sits on some other screen would never
-    // find out it started until they happened to reopen the modal or
-    // log in again. This catches that regardless of which screen they're on.
+    const steps = [
+      ['subjects', populateSubjects],
+      ['student', renderCurrentUser],
+      ['stats', renderStats],
+      ['history', renderHistory],
+      ['session UI', syncSessionTypeUi],
+      ['start button', syncStartButton],
+      ['home', () => showScreen('home')],
+      ['saved paper', restoreActivePaper],
+      ['paywall', initPaywall],
+      ['AI', initAIExplain],
+      ['community', initCommunityQuiz],
+      ['shared session', checkForSharedSession],
+      ['challenge button', refreshChallengeBtn],
+      ['upgrade bar', initUpgradeBar],
+      ['started challenges', checkForStartedJambChallenges],
+      ['challenge reminders', checkScheduledChallengeReminders]
+    ];
+    for (const [name, fn] of steps) {
+      try { fn(); } catch (err) { console.error('My JAMB optional startup step failed:', name, err); }
+    }
     setInterval(() => {
       if (!state.currentUser) return;
-      checkForStartedJambChallenges();
-      checkScheduledChallengeReminders();
+      try { checkForStartedJambChallenges(); } catch (err) { console.warn(err); }
+      try { checkScheduledChallengeReminders(); } catch (err) { console.warn(err); }
     }, 45000);
   }
 
