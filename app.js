@@ -884,6 +884,21 @@
   }
 
   // ─── PILLS ────────────────────────────────────────
+  // Paper labels are presentation-only; array indices and answer scoring stay unchanged.
+  // Register a year only when its source explicitly confirms a non-CBT question 1 was omitted.
+  const PAPER_FIRST_QUESTION = { economics: { 2012: 2, 2014: 2 } };
+  function originalPaperNumber(idx) {
+    const yearSelection = el.yearSelect?.value;
+    if (!/^\\d{4}$/.test(yearSelection || '') || state.sessionType === 'combo') return null;
+    const subject = state.subject;
+    const start = PAPER_FIRST_QUESTION[subject]?.[Number(yearSelection)];
+    if (!start) return null;
+    const q = state.currentQuestions[idx];
+    const bank = QUESTION_BANK[subject]?.filter(item => item.year === Number(yearSelection)) || [];
+    const position = bank.findIndex(item => item === q || (item.question === q?.question && item.year === q?.year));
+    return position < 0 ? null : start + position;
+  }
+
   function buildQuestionPills() {
     el.questionPills.innerHTML = '';
     // If combo, show label; else show "Questions"
@@ -892,8 +907,8 @@
     state.currentQuestions.forEach((_, idx) => {
       const btn = document.createElement('button');
       btn.className = 'pill';
-      btn.textContent = String(idx + 1);
-      btn.title = `Question ${idx + 1}${state.currentQuestions[idx].sourceSubject ? ' — ' + fmt(state.currentQuestions[idx].sourceSubject) : ''}`;
+      btn.textContent = String(originalPaperNumber(idx) ?? (idx + 1));
+      btn.title = `Question ${originalPaperNumber(idx) ?? (idx + 1)}${state.currentQuestions[idx].sourceSubject ? ' — ' + fmt(state.currentQuestions[idx].sourceSubject) : ''}`;
       btn.addEventListener('click', () => {
         state.currentIndex = idx;
         renderQuestion();
@@ -950,7 +965,9 @@
       if (lockBar) lockBar.classList.add('hidden');
     }
 
-    el.questionNumberBadge.textContent = `Question ${state.currentIndex + 1} of ${state.currentQuestions.length}`;
+    el.questionNumberBadge.textContent = originalPaperNumber(state.currentIndex) != null
+      ? `Question ${originalPaperNumber(state.currentIndex)} · ${state.currentIndex + 1} of ${state.currentQuestions.length} in test`
+      : `Question ${state.currentIndex + 1} of ${state.currentQuestions.length}`;
     // In lesson practice, use the app's established repeat index, which
     // checks the complete loaded subject bank and handles reordered options.
     let yearsLabel = q.year ? String(q.year) : '';
