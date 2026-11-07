@@ -524,7 +524,15 @@
     if (!el.yearSelect) return;
     const pool = QUESTION_BANK[el.subjectSelect.value] || [];
     const counts = JambContent.isLoaded(el.subjectSelect.value) ? {} : { ...(JambContent.manifest?.subjects?.[el.subjectSelect.value]?.years || {}) };
-    if (JambContent.isLoaded(el.subjectSelect.value)) pool.filter(q => !q.administrative).forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
+    if (JambContent.isLoaded(el.subjectSelect.value)) {
+      pool.filter(q => !q.administrative).forEach(q => { if (q.year) counts[q.year] = (counts[q.year] || 0) + 1; });
+    } else if (el.subjectSelect.value === 'commerce') {
+      // The cached manifest includes one booklet-type item in each source
+      // paper 2010–2017. These are never answerable in CBT practice.
+      for (let y = 2010; y <= 2017; y++) {
+        if (counts[y]) counts[y] = Math.max(0, counts[y] - 1);
+      }
+    }
     const years = Object.keys(counts).map(Number).sort((a, b) => b - a);
     const nRep = JambContent.isLoaded(el.subjectSelect.value) ? mostRepeatedPool(el.subjectSelect.value).length : (JambContent.manifest?.subjects?.[el.subjectSelect.value]?.repeats || 0);
     el.yearSelect.innerHTML = '<option value="all">All years (mixed)</option>' +
