@@ -57,6 +57,13 @@ self.addEventListener('fetch', event => {
     // network round trip. Online AI and payments are never intercepted.
     const saved = await content.match(req);
     if (saved && (url.searchParams.has('content') || url.pathname.includes('/past-questions/img/'))) return saved;
+    // Versioned app bundles are immutable: reuse the exact saved version on
+    // refresh instead of downloading the large app script every time.
+    // Each deployment changes ?v=, so newer code never reuses an older URL.
+    if (/\/app\.js$/.test(url.pathname) && url.searchParams.has('v')) {
+      const shellHit = await storage.match(req);
+      if (shellHit) return shellHit;
+    }
     try {
       const response = await network(req);
       if (!response.ok) throw new Error('File unavailable');
