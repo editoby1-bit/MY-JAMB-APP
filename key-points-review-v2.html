@@ -39,7 +39,7 @@ const accountingDiagrams={"control-accounts":"<div class=\"acct-diagram\"><h3>Sa
    const question=document.createElement('div');question.className='math-example-question';question.textContent=line;block.appendChild(question);
    let j=i+1;const solution=[];
    while(j<lines.length&&lines[j].trim()&&!/^Example \([ivxlcdm]+\):/i.test(lines[j])&&!/^\d+\. [A-Z]/.test(lines[j])&&!/^(COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK)$/.test(lines[j])){solution.push(lines[j]);j++;}
-   if(solution.length){const answer=document.createElement('div');answer.className='math-example-solution';const tag=document.createElement('strong');tag.textContent='SOLUTION — STEP BY STEP';answer.appendChild(tag);const steps=document.createElement('div');steps.textContent=solution.join('\n');answer.appendChild(steps);block.appendChild(answer);}
+   if(solution.length){const answer=document.createElement('div');answer.className='math-example-solution';const tag=document.createElement('strong');tag.textContent='Solution';answer.appendChild(tag);const steps=document.createElement('div');steps.textContent=solution.join('\n');answer.appendChild(steps);block.appendChild(answer);}
    else{question.classList.add('math-example-inline');}
    target.appendChild(block);i=j;continue;
   }
