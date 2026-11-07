@@ -230,3 +230,19 @@ All 20 Economics question-bank JavaScript files were read. Counts are distinct I
 2015 has four diagram fields but zero IMG filename references; inspect inline content. 2011, 2012, 2013, 2014 and 2020 have more fields than distinct image filenames; shared figures and inline content need checking. 2010 and 2018 have zero matches under this pattern, which does not prove those original papers lack visual questions. 2003 Q5 and Q6 refer to separate PNGs although both use a PPC context. The approved 2019 Q11–12 and Q14 diagrams must not be used to certify other years.
 
 **Outstanding:** An attempted image-path existence check exceeded the connector call limit; it is not recorded as passed. Original-paper image comparisons and deployed browser rendering QA remain incomplete. Extend inventory to the other seven subjects, then certify each figure individually. No answer keys or repeated-question mappings were changed by this documentation update.
+
+## 2026-11-07 — Workstream handoff: PAUSED for Key Points completion
+
+Per project owner instruction, pause the Economics/other-subject diagram source-matching work while completing the remaining Key Points/lesson updates. **Resume diagram verification immediately after Key Points is worked on.**
+
+### Source-supplied visual batches so far
+The user has provided original-paper screenshots and application screenshots covering Economics **2002, 2008, 2011, 2012, 2014, 2015, and 2019** (and prior examples across other years). These years are **source visually inspected in parts**, not blanket-certified across every figure in those years. Several source-guided diagram corrections have been committed. Retain the accepted 2015 Q4/Q38/Q44 and 2019 Q11–12/Q14 work.
+
+### Carry-forward verification requirements
+- Revisit **the diagrams still lacking exact source-to-render comparison**, including 2012 Q13–14/Q50 and 2014 Q7/Q11–12, where paper-vs-app source comparisons have been supplied but the final deployed rendering is not certified.
+- Continue the outstanding Economics 2001–2020 comparison and remaining subjects. Only mark individual figures verified after source-image and deployed mobile comparisons pass.
+- Preserve source examination numbers: for all subjects in 2001–2014, the intentionally omitted paper-type Question 1 remains omitted while visible original numbering begins at 2. Do not apply a numbering offset to CBT papers 2015 onward.
+- Preserve repeated questions, their linked years, and all existing answer keys unless separately audited.
+- When changing question-bank files, update `content-manifest.json` hashes; for changes in `app.js`, validate JavaScript syntax and refresh its versioned `index.html` URL.
+
+This handoff is a **pause marker, not an audit-completion certificate**.
