@@ -55,8 +55,22 @@
     });
     return node;
   }
+  function indicator() {
+    let node = document.getElementById('contentCornerStatus');
+    if (node) return node;
+    node = document.createElement('div');
+    node.id = 'contentCornerStatus';
+    node.setAttribute('role', 'status');
+    node.setAttribute('aria-live', 'polite');
+    node.style.cssText = 'position:fixed;right:12px;bottom:84px;z-index:1100;background:#102345;color:#fff;border-radius:20px;padding:8px 12px;font:500 12px system-ui,sans-serif;box-shadow:0 3px 12px #0002;pointer-events:none;max-width:65vw';
+    node.hidden = true;
+    document.body.append(node);
+    return node;
+  }
   function progress(done, total) {
     const node = dialog();
+    const corner = document.getElementById('contentCornerStatus');
+    if (corner && !corner.hidden) corner.textContent = total ? `Preparing ${done}/${total}…` : 'Checking resource…';
     node.querySelector('progress').max = Math.max(total, 1);
     node.querySelector('progress').value = done;
     node.querySelector('[role="status"]').textContent = total ? `${done} of ${total} files prepared` : 'Checking saved content…';
@@ -67,6 +81,7 @@
     const node = dialog();
     const previousFocus = document.activeElement;
     let timer;
+    const corner = indicator();
     const show = () => {
       node.hidden = false;
       node.querySelector('section').focus();
@@ -74,13 +89,14 @@
     node.querySelector('h2').textContent = label;
     node.querySelector('.content-loading-actions').hidden = true;
     progress(0, 0);
-    // Cached packages need no flashing overlay.
-    timer = setTimeout(show, 180);
+    // Non-blocking progress; the full dialog is reserved for recoverable errors.
+    timer = setTimeout(() => { corner.textContent = 'Preparing resource…'; corner.hidden = false; }, 650);
     try {
       while (true) {
         try { await task(); return true; }
         catch (err) {
           clearTimeout(timer);
+          corner.hidden = true;
           show();
           node.querySelector('[role="status"]').textContent = err.code === 'INTEGRITY'
             ? 'This content could not be verified. Reload the app to check for an updated version, or choose other saved content.'
@@ -111,6 +127,7 @@
     } finally {
       clearTimeout(timer);
       node.hidden = true;
+      corner.hidden = true;
       active = false;
       if (previousFocus?.isConnected) previousFocus.focus();
     }
@@ -141,17 +158,17 @@
   async function ready() {
     if (manifest) return manifest;
     const storage = await cache();
-    let response;
-    try { response = await request(urlFor('content-manifest.json')); }
-    catch (err) { response = await storage?.match(urlFor('content-manifest.json')); if (!response) throw err; }
+    // Startup uses the saved manifest immediately; only a selected resource
+    // triggers a fresh manifest check. Offline users retain their saved version.
+    let response = await storage?.match(urlFor('content-manifest.json'));
+    if (!response) response = await request(urlFor('content-manifest.json'));
     const data = await response.clone().json();
     if (data.schema !== 1 || !data.subjects || !data.files) throw new Error('Invalid content manifest');
-    // Restrict manifest entries to this app's own files.
     for (const [file, entry] of Object.entries(data.files)) {
-      if (!/^(past-questions|teach|booklet)\/[a-zA-Z0-9_./-]+$/.test(file)
+      if (!/^(past-questions|teach|booklet)\\/[a-zA-Z0-9_./-]+$/.test(file)
         || file.includes('..') || !/^[a-f0-9]{64}$/.test(entry.sha256)) throw new Error('Invalid content path');
     }
-    try { await storage?.put(urlFor('content-manifest.json'), response); } catch (_) { /* Online use still works. */ }
+    try { await storage?.put(urlFor('content-manifest.json'), response); } catch (_) {}
     manifest = data;
     await refreshSaved();
     return data;
@@ -177,7 +194,21 @@
     });
   }
   async function ensure(subjects) {
-    const data = await ready();
+    await ready();
+    // Check for new content only when a resource is selected, never on refresh.
+    // Keep the verified saved manifest when offline.
+    try {
+      const response = await request(urlFor('content-manifest.json'));
+      const fresh = await response.clone().json();
+      if (fresh.schema === 1 && fresh.subjects && fresh.files &&
+          Object.entries(fresh.files).every(([file, entry]) =>
+            /^(past-questions|teach|booklet)\\/[a-zA-Z0-9_./-]+$/.test(file) &&
+            !file.includes('..') && /^[a-f0-9]{64}$/.test(entry.sha256))) {
+        manifest = fresh;
+        try { await (await cache())?.put(urlFor('content-manifest.json'), response); } catch (_) {}
+      }
+    } catch (_) { /* Saved resources remain available offline. */ }
+    const data = manifest;
     const pending = [...new Set(subjects)].filter(s => !loaded.has(s));
     if (!pending.length) return;
     const files = [...new Set(pending.flatMap(subject => {
