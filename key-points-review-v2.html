@@ -67,7 +67,7 @@ if(currentSubject==='mathematics'){
   while((match=pattern.exec(content))!==null){
     appendMathFormatted(frag,content.slice(last,match.index));
     const diagram=diagramLibrary[match[1]||x.id];
-    if(diagram){const box=document.createElement('div');if(currentSubject==='mathematics'&&['integration-definite','integration-between','integration-motion'].includes(match[1])){const tag=document.createElement('div');tag.className='math-diagram-review-tag';tag.textContent='Updated · Ready for verification';box.appendChild(tag);}box.insertAdjacentHTML('beforeend',diagram);frag.appendChild(box);inserted++;}
+    if(diagram){const box=document.createElement('div');if(currentSubject==='mathematics'&&['data-histogram','data-ogive'].includes(match[1])){const tag=document.createElement('div');tag.className='math-diagram-review-tag';tag.textContent='Updated · Ready for verification';box.appendChild(tag);}box.insertAdjacentHTML('beforeend',diagram);frag.appendChild(box);inserted++;}
     last=pattern.lastIndex;
   }
   appendMathFormatted(frag,content.slice(last));
