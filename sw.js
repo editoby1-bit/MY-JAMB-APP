@@ -50,6 +50,27 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL('./', self.location).pathname)) return;
+  // The Key Points preview is a large standalone review page. Do not apply
+  // the app shell's 8-second body timeout or substitute index.html for it.
+  // A slow preview navigation must not silently open the main app instead.
+  if (/\/key-points-review-v2\.html$/.test(url.pathname)) {
+    event.respondWith((async () => {
+      const storage = await caches.open(CACHE);
+      try {
+        const response = await fetch(req);
+        if (!response.ok) throw new Error('Preview unavailable');
+        await storage.put(req, response.clone()).catch(() => {});
+        return response;
+      } catch (error) {
+        const cached = await storage.match(req);
+        if (cached) return cached;
+        return new Response('Key Points preview could not load. Check your connection and refresh.', {
+          status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
+      }
+    })());
+    return;
+  }
   event.respondWith((async () => {
     const storage = await caches.open(CACHE);
     const content = await caches.open(CONTENT_CACHE);
