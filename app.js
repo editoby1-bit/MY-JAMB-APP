@@ -1865,14 +1865,29 @@
     if(at<0)return fuText(body);
     return fuText(body.slice(0,at))+'<div class="kp-inline-diagram" style="overflow-x:auto;max-width:100%;margin:12px 0">'+figure+'</div>'+fuText(body.slice(at));
   }
+  let kpRenderGeneration = 0;
   async function renderKeyPoints() {
+    const generation = ++kpRenderGeneration;
     const subject = document.getElementById('kpSubjectSelect').value;
-    document.getElementById('jambKeyPointsBody').textContent = 'Choose a subject to prepare its saved study content.';
-    if (!subject || !await prepareContent([subject], `Preparing ${fmt(subject)}…`)) return;
-    if (document.getElementById('kpSubjectSelect').value !== subject) return renderKeyPoints();
+    const topicPicker = document.getElementById('kpTopicSelect');
+    // Immediately discard stale lesson options before any asynchronous loading.
+    if (topicPicker) {
+      topicPicker.disabled = true;
+      topicPicker.onchange = null;
+      topicPicker.innerHTML = '<option value="">Loading ' + escHtml(fmt(subject || 'subject')) + ' lessons…</option>';
+      topicPicker.setAttribute('aria-busy', 'true');
+    }
+    document.getElementById('jambKeyPointsBody').textContent = 'Preparing ' + fmt(subject || 'subject') + ' lessons…';
+    if (!subject) return;
+    const ready = await prepareContent([subject], `Preparing ${fmt(subject)}…`);
+    if (generation !== kpRenderGeneration || document.getElementById('kpSubjectSelect').value !== subject) return;
+    if (!ready) {
+      if (topicPicker) topicPicker.innerHTML = '<option value="">Lessons unavailable — choose a subject to retry</option>';
+      return;
+    }
     const t = window.TEACH_TOPICS?.[subject];
     const body = document.getElementById('jambKeyPointsBody');
-    if (!t) { body.innerHTML = '<p class="jqc-sub">No lessons for this subject yet.</p>'; return; }
+    if (!t) { body.innerHTML = '<p class="jqc-sub">No lessons for this subject yet.</p>'; if (topicPicker) topicPicker.innerHTML = '<option value="">No lessons available</option>'; return; }
     // Count only usable, loaded past questions, including new-year repeats.
     const counts = {};
     (QUESTION_BANK[subject] || []).forEach(q => {
@@ -1897,6 +1912,7 @@
     if (topicSelect) {
       topicSelect.innerHTML = '<option value="">Choose a lesson topic…</option>' + ids.map((id, i) => '<option value="' + i + '">' + (i + 1) + '. ' + escHtml(t.lessons[id].title) + (subject === 'mathematics' ? ' · ✓ Revised' : '') + (paid || i < KP_FREE_TOPICS ? '' : ' 🔒') + '</option>').join('');
       topicSelect.disabled = false;
+      topicSelect.removeAttribute('aria-busy');
       topicSelect.onchange = () => {
         const index = Number(topicSelect.value);
         if (topicSelect.value === '') return;
