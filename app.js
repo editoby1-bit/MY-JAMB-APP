@@ -1881,7 +1881,8 @@
       if (id && t.lessons[id]) counts[id] = (counts[id] || 0) + 1;
     });
     // Preserve the syllabus / author-defined teaching sequence.
-    const ids = Object.keys(t.lessons || {});
+    const mathPreviewOrder = ["number-bases","fractions-decimals","commercial","indices","logarithms","surds","sets","algebra","equations","quadratics","variation","inequalities","sequences","binary-operations","matrices","geometry","mensuration","loci","coordinate","trigonometry","differentiation","applications-differentiation","integration","representation-data","measures-location","measures-dispersion","statistics","permutations","probability"];
+    const ids = subject === 'mathematics' ? [...mathPreviewOrder.filter(id => t.lessons?.[id]), ...Object.keys(t.lessons || {}).filter(id => !mathPreviewOrder.includes(id))] : Object.keys(t.lessons || {});
     const paid = checkAccess();
     body.innerHTML = ids.map((id, i) => {
       const L = t.lessons[id];
@@ -1894,7 +1895,7 @@
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     const topicSelect = document.getElementById('kpTopicSelect');
     if (topicSelect) {
-      topicSelect.innerHTML = '<option value="">Choose a lesson topic…</option>' + ids.map((id, i) => '<option value="' + i + '">' + (i + 1) + '. ' + escHtml(t.lessons[id].title) + (paid || i < KP_FREE_TOPICS ? '' : ' 🔒') + '</option>').join('');
+      topicSelect.innerHTML = '<option value="">Choose a lesson topic…</option>' + ids.map((id, i) => '<option value="' + i + '">' + (i + 1) + '. ' + escHtml(t.lessons[id].title) + (subject === 'mathematics' ? ' · ✓ Revised' : '') + (paid || i < KP_FREE_TOPICS ? '' : ' 🔒') + '</option>').join('');
       topicSelect.disabled = false;
       topicSelect.onchange = () => {
         const index = Number(topicSelect.value);
