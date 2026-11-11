@@ -4336,6 +4336,10 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   function mathTopicHtml(body) {
     const diagrams = window.MATHEMATICS_LIVE_DIAGRAMS || {};
     const source = String(body || '');
+    // Match the preview's mixed-number typography (e.g. 2 1/3), while
+    // leaving the original lesson text and question mappings untouched.
+    const renderMathText = value => fuText(value).replace(/(^|[^\\d])([1-9]\\d*)\\s+([1-9]\\d*)\\/([1-9]\\d*)(?!\\d)/g,
+      (_, prefix, whole, numerator, denominator) => prefix + '<span class="math-mixed-number" aria-label="' + whole + ' and ' + numerator + ' over ' + denominator + '"><span>' + whole + '</span><span class="math-stacked-fraction"><span>' + numerator + '</span><span>' + denominator + '</span></span></span>');
     // Walkthroughs are lesson explanations, never part of a coloured example.
     const walkthroughSplit = /(?=^GUIDED WALKTHROUGH(?:\s|\s*—|:)|^Example \([ivxlcdm]+\):|^\d+\. [A-Z])/gim;
     const teachingBlocks = source.split(walkthroughSplit);
@@ -4343,7 +4347,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     const sections = source.split(/^(Example \([ivxlcdm]+\):[^\n]*)$/gim);
     const renderPlain = part => part.split(/(\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\])/g).map(fragment => {
       const match = fragment.match(/^\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\]$/);
-      if (!match) return fuText(fragment);
+      if (!match) return renderMathText(fragment);
       return diagrams[match[1]] || '<p class="kp-diagram-missing">Diagram unavailable for this section.</p>';
     }).join('');
     let output = renderPlain(sections[0] || '');
@@ -4360,7 +4364,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     }
     return output;
     };
-    return teachingBlocks.map(block => /^GUIDED WALKTHROUGH/i.test(block) ? '<section class="kp-guided-walkthrough">' + fuText(block) + '</section>' : formatExamples(block)).join('');
+    return teachingBlocks.map(block => /^GUIDED WALKTHROUGH/i.test(block) ? '<section class="kp-guided-walkthrough">' + renderMathText(block) + '</section>' : formatExamples(block)).join('');
   }
 
   function teachExtrasHtml(q, subject) {
