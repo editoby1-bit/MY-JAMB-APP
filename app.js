@@ -4329,9 +4329,9 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   function mathTopicHtml(body) {
     const diagrams = window.MATHEMATICS_LIVE_DIAGRAMS || {};
     const source = String(body || '');
-    const sections = source.split(/^(Example \\([ivxlcdm]+\\):[^\\n]*)$/gim);
-    const renderPlain = part => part.split(/(\\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\\])/g).map(fragment => {
-      const match = fragment.match(/^\\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\\]$/);
+    const sections = source.split(/^(Example \([ivxlcdm]+\):[^\n]*)$/gim);
+    const renderPlain = part => part.split(/(\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\])/g).map(fragment => {
+      const match = fragment.match(/^\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\]$/);
       if (!match) return fuText(fragment);
       return diagrams[match[1]] || '<p class="kp-diagram-missing">Diagram unavailable for this section.</p>';
     }).join('');
@@ -4339,10 +4339,10 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     for (let i = 1; i < sections.length; i += 2) {
       const question = sections[i];
       const rest = sections[i + 1] || '';
-      const match = rest.match(/^\\n\\s*Solution\\s*\\n/);
+      const match = rest.match(/^\n\s*Solution\s*\n/);
       if (!match) { output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div></div>' + renderPlain(rest); continue; }
       const after = rest.slice(match[0].length);
-      const boundary = after.search(/\\n(?=(?:\\d+\\. [A-Z]|COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK|QUICK UNDERSTANDING CHECK|PRACTICE QUESTIONS|JAMB TRAP|POLYNOMIAL REMAINDER AND FACTOR THEOREMS|THE EARTH AS A SPHERE))/);
+      const boundary = after.search(/\n(?=(?:\d+\. [A-Z]|COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK|QUICK UNDERSTANDING CHECK|PRACTICE QUESTIONS|JAMB TRAP|POLYNOMIAL REMAINDER AND FACTOR THEOREMS|THE EARTH AS A SPHERE))/);
       const solution = boundary < 0 ? after : after.slice(0, boundary);
       const trailing = boundary < 0 ? '' : after.slice(boundary);
       output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div><div class="math-example-solution"><strong>Solution</strong><div>' + renderPlain(solution.trim()) + '</div></div></div>' + renderPlain(trailing);
