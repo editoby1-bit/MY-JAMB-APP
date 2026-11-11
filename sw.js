@@ -1,6 +1,6 @@
 // Cache only the app shell at install. Subject packages are saved by
 // content-loader.js after integrity checks; keep them across shell updates.
-const CACHE = 'jamb-app-v4-math-examples';
+const CACHE = 'jamb-app-v5-preview-parity';
 const CONTENT_CACHE = 'jamb-content-v1';
 const FONT_CACHE = 'jamb-fonts-v1';
 
@@ -29,8 +29,10 @@ self.addEventListener('install', event => {
 });
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    // Keep legacy downloads: the loader migrates verified files on demand.
-    // Never clear other apps' caches on the shared GitHub Pages origin.
+    // Retain downloaded subjects, but discard obsolete shell bundles so an
+    // older offline index/app script cannot keep the previous topic order.
+    const names = await caches.keys();
+    await Promise.all(names.filter(name => name.startsWith('jamb-app-') && name !== CACHE).map(name => caches.delete(name)));
     await self.clients.claim();
   })());
 });
@@ -50,6 +52,24 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL('./', self.location).pathname)) return;
+  // The shell must be network-first. A cached index.html can otherwise
+  // continue referencing an old app.js even after a newer deployment.
+  if (req.mode === 'navigate' && (url.pathname.endsWith('/MY-JAMB-APP/') || /\/index\.html$/.test(url.pathname))) {
+    event.respondWith((async () => {
+      const storage = await caches.open(CACHE);
+      try {
+        const fresh = await fetch(new Request(req, { cache: 'no-cache' }));
+        if (!fresh.ok) throw new Error('Shell unavailable');
+        await storage.put('./index.html', fresh.clone()).catch(() => {});
+        await storage.put('./', fresh.clone()).catch(() => {});
+        return fresh;
+      } catch (_) {
+        return await storage.match('./index.html') || await storage.match('./') ||
+          new Response('Reconnect to load the latest app.', { status: 503 });
+      }
+    })());
+    return;
+  }
   // The Key Points preview is a large standalone review page. Do not apply
   // the app shell's 8-second body timeout or substitute index.html for it.
   // A slow preview navigation must not silently open the main app instead.
