@@ -1,6 +1,6 @@
 // Cache only the app shell at install. Subject packages are saved by
 // content-loader.js after integrity checks; keep them across shell updates.
-const CACHE = 'jamb-app-v5-preview-parity';
+const CACHE = 'jamb-app-v6-preview-recovery';
 const CONTENT_CACHE = 'jamb-content-v1';
 const FONT_CACHE = 'jamb-fonts-v1';
 
@@ -76,15 +76,28 @@ self.addEventListener('fetch', event => {
   if (/\/key-points-review-v2\.html$/.test(url.pathname)) {
     event.respondWith((async () => {
       const storage = await caches.open(CACHE);
+      // All subject/batch query strings point to the same preview document.
+      // Cache by pathname so a new batch link can use the last saved page
+      // even when the network briefly fails.
+      const canonical = new Request(new URL('./key-points-review-v2.html', self.location));
+      const cached = await storage.match(canonical) || await storage.match(req, { ignoreSearch: true });
       try {
-        const response = await fetch(req);
-        if (!response.ok) throw new Error('Preview unavailable');
-        await storage.put(req, response.clone()).catch(() => {});
-        return response;
+        const fresh = await fetch(new Request(req, { cache: 'no-cache' }));
+        if (!fresh.ok) throw new Error('Preview unavailable: ' + fresh.status);
+        await storage.put(canonical, fresh.clone()).catch(() => {});
+        return fresh;
       } catch (error) {
-        const cached = await storage.match(req);
         if (cached) return cached;
-        return new Response('Key Points preview could not load. Check your connection and refresh.', {
+        // Retry without the cache-busting query, which some mobile network
+        // intermediaries mishandle, before showing an offline message.
+        try {
+          const retry = await fetch(new Request(canonical, { cache: 'reload' }));
+          if (retry.ok) {
+            await storage.put(canonical, retry.clone()).catch(() => {});
+            return retry;
+          }
+        } catch (_) {}
+        return new Response('Key Points preview is temporarily unreachable. Check your connection and retry.', {
           status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' }
         });
       }
