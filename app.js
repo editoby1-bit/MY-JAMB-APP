@@ -1892,6 +1892,40 @@
       }
       return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
+    const topicSelect = document.getElementById('kpTopicSelect');
+    if (topicSelect) {
+      topicSelect.innerHTML = '<option value="">Choose a lesson topic…</option>' + ids.map((id, i) => '<option value="' + i + '">' + (i + 1) + '. ' + escHtml(t.lessons[id].title) + (paid || i < KP_FREE_TOPICS ? '' : ' 🔒') + '</option>').join('');
+      topicSelect.disabled = false;
+      topicSelect.onchange = () => {
+        const index = Number(topicSelect.value);
+        if (topicSelect.value === '') return;
+        if (!paid && index >= KP_FREE_TOPICS) { showPaywall('premium'); topicSelect.value = ''; return; }
+        const details = body.querySelectorAll('details.kp-topic')[index];
+        if (!details) return;
+        body.querySelectorAll('details.kp-topic').forEach(item => { if (item !== details) item.open = false; });
+        details.open = true;
+        details.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+    }
+    const openTopics = [...body.querySelectorAll('details.kp-topic')];
+    openTopics.forEach((details, i) => {
+      details.addEventListener('toggle', () => { if (details.open && topicSelect) topicSelect.value = String(i); });
+      const nav = document.createElement('div');
+      nav.className = 'kp-lesson-nav';
+      if (i > 0) {
+        const previous = document.createElement('button'); previous.type = 'button'; previous.textContent = '← Previous lesson';
+        previous.onclick = () => { const prev = openTopics[i - 1]; details.open = false; prev.open = true; if (topicSelect) topicSelect.value = String(i - 1); prev.scrollIntoView({behavior:'smooth',block:'start'}); };
+        nav.appendChild(previous);
+      }
+      if (i < openTopics.length - 1) {
+        const next = document.createElement('button'); next.type = 'button'; next.textContent = 'Next lesson →';
+        next.onclick = () => { const following = openTopics[i + 1]; details.open = false; following.open = true; if (topicSelect) topicSelect.value = String(i + 1); following.scrollIntoView({behavior:'smooth',block:'start'}); };
+        nav.appendChild(next);
+      } else if (!paid && ids.length > openTopics.length) {
+        const next = document.createElement('button'); next.type = 'button'; next.textContent = 'Unlock next lessons →'; next.onclick = () => showPaywall('premium'); nav.appendChild(next);
+      }
+      details.querySelector('.topic-body')?.appendChild(nav);
+    });
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
     if (subject === 'economics') {
@@ -4294,14 +4328,27 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   }
   function mathTopicHtml(body) {
     const diagrams = window.MATHEMATICS_LIVE_DIAGRAMS || {};
-    return String(body || '').split(/(\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\])/g).map(part => {
-      const match = part.match(/^\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\]$/);
-      if (!match) return fuText(part);
-      const figure = diagrams[match[1]];
-      return figure || '<p class="kp-diagram-missing">Diagram unavailable for this section.</p>';
+    const source = String(body || '');
+    const sections = source.split(/^(Example \\([ivxlcdm]+\\):[^\\n]*)$/gim);
+    const renderPlain = part => part.split(/(\\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\\])/g).map(fragment => {
+      const match = fragment.match(/^\\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\\]$/);
+      if (!match) return fuText(fragment);
+      return diagrams[match[1]] || '<p class="kp-diagram-missing">Diagram unavailable for this section.</p>';
     }).join('');
+    let output = renderPlain(sections[0] || '');
+    for (let i = 1; i < sections.length; i += 2) {
+      const question = sections[i];
+      const rest = sections[i + 1] || '';
+      const match = rest.match(/^\\n\\s*Solution\\s*\\n/);
+      if (!match) { output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div></div>' + renderPlain(rest); continue; }
+      const after = rest.slice(match[0].length);
+      const boundary = after.search(/\\n(?=(?:\\d+\\. [A-Z]|COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK|QUICK UNDERSTANDING CHECK|PRACTICE QUESTIONS|JAMB TRAP|POLYNOMIAL REMAINDER AND FACTOR THEOREMS|THE EARTH AS A SPHERE))/);
+      const solution = boundary < 0 ? after : after.slice(0, boundary);
+      const trailing = boundary < 0 ? '' : after.slice(boundary);
+      output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div><div class="math-example-solution"><strong>Solution</strong><div>' + renderPlain(solution.trim()) + '</div></div></div>' + renderPlain(trailing);
+    }
+    return output;
   }
-
 
   function teachExtrasHtml(q, subject) {
     const lesson = topicLessonFor(q, subject);
