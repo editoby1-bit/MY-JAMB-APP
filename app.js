@@ -1890,7 +1890,7 @@
       if (!paid && i >= KP_FREE_TOPICS) {
         return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
       }
-      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
@@ -4292,6 +4292,16 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   function fuText(text) {
     return mathHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
   }
+  function mathTopicHtml(body) {
+    const diagrams = window.MATHEMATICS_LIVE_DIAGRAMS || {};
+    return String(body || '').split(/(\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\])/g).map(part => {
+      const match = part.match(/^\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\]$/);
+      if (!match) return fuText(part);
+      const figure = diagrams[match[1]];
+      return figure || '<p class="kp-diagram-missing">Diagram unavailable for this section.</p>';
+    }).join('');
+  }
+
 
   function teachExtrasHtml(q, subject) {
     const lesson = topicLessonFor(q, subject);
@@ -4299,7 +4309,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     const left = followUpsLeft(key);
     const past = (fuHistory[key] || []).map(h =>
       `<div class="fu-q">${escHtml(h.q)}</div><div class="fu-a">${fuText(h.a)}</div>`).join('');
-    return `${lesson ? `<details class="topic-lesson"><summary>📘 Click here to learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${fuText(lesson.body)}</div></details>` : ''}
+    return `${lesson ? `<details class="topic-lesson"><summary>📘 Click here to learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${subject === "mathematics" ? mathTopicHtml(lesson.body) : fuText(lesson.body)}</div></details>` : ''}
       <div class="fu-box" data-key="${key}">
         <div class="fu-thread">${past}</div>
         <div class="fu-ask ${left > 0 ? '' : 'hidden'}">
