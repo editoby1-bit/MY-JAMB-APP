@@ -229,7 +229,7 @@
       },
       "count": 1005,
       "repeats": 50,
-      "lessons": 24,
+      "lessons": 29,
       "traps": true,
       "tricky": {
         "multi": 10,
@@ -901,8 +901,8 @@
       "bytes": 514851
     },
     "teach/mathematics-topics.js": {
-      "sha256": "44ea60f016a8dfdffeba3526ca3895e9b3adca10b58fab6ef38783886dda7763",
-      "bytes": 161004
+      "sha256": "4f2cd0ef1f30a87c427a19b915c352b490cd658a25fcb80231a18d8cb5bf5d52",
+      "bytes": 677389
     },
     "past-questions/img/maths-2001-q23.png": {
       "sha256": "256857b5bc129d9aaae78b0c286c7b1fd7dcafc61eca4fd15a379cffcd479696",
@@ -2113,5 +2113,5 @@
       "bytes": 45116
     }
   },
-  "version": "f8352459cb727bb9"
+  "version": "math-live-20261111-4f2cd0ef1f"
 }
