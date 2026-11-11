@@ -2031,3 +2031,7 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .kp-lesson-content .math-values-table th,.kp-lesson-content .math-values-table td,.topic-lesson .math-values-table th,.topic-lesson .math-values-table td{border:1px solid #b8cbdc;padding:8px;text-align:center}
 .kp-lesson-content .math-values-table th,.topic-lesson .math-values-table th{background:#e1edfb}
 .kp-lesson-content .math-values-table td:first-child,.topic-lesson .math-values-table td:first-child{font-weight:700;text-align:left;background:#f5f9fd}
+
+/* Preserve the preview's whitespace in ordinary Mathematics lesson text. */
+.kp-lesson-content:has(.math-worked-example),.topic-lesson .topic-body:has(.math-worked-example){white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75}
+.kp-lesson-content .math-worked-example,.topic-lesson .math-worked-example{white-space:normal}
