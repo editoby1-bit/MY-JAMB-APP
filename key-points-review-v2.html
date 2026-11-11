@@ -103,7 +103,7 @@ function appendMathFormatted(target,source){
    const block=document.createElement('div');block.className='math-worked-example';
    const question=document.createElement('div');question.className='math-example-question';appendMathText(question,line);block.appendChild(question);
    let j=i+1;const solution=[];if(lines[j]?.trim()==='Solution')j++;
-   while(j<lines.length&&lines[j].trim()&&!/^Example \([ivxlcdm]+\):/i.test(lines[j])&&!/^\d+\. [A-Z]/.test(lines[j])&&!/^(COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK)$/.test(lines[j])){solution.push(lines[j]);j++;}
+   while(j<lines.length&&!/^Example \([ivxlcdm]+\):/i.test(lines[j])&&!/^\d+\. [A-Z]/.test(lines[j])&&!/^(COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK)$/.test(lines[j].trim())){if(lines[j].trim()||solution.length)solution.push(lines[j]);j++;}
    if(solution.length){const answer=document.createElement('div');answer.className='math-example-solution';const tag=document.createElement('strong');tag.textContent='Solution';answer.appendChild(tag);const steps=document.createElement('div');appendMathText(steps,solution.join('\n'));answer.appendChild(steps);block.appendChild(answer);}
    else{question.classList.add('math-example-inline');}
    target.appendChild(block);i=j;continue;
