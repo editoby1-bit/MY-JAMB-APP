@@ -4353,7 +4353,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
       const match = rest.match(/^\n\s*Solution\s*\n/);
       if (!match) { output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div></div>' + renderPlain(rest); continue; }
       const after = rest.slice(match[0].length);
-      const boundary = after.search(/\n(?=(?:\d+\. [A-Z]|COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK|QUICK UNDERSTANDING CHECK|PRACTICE QUESTIONS|JAMB TRAP|POLYNOMIAL REMAINDER AND FACTOR THEOREMS|THE EARTH AS A SPHERE|GUIDED WALKTHROUGH|LEARNING TARGETS|KEY IDEAS|IMPORTANT NOTES|REMEMBER|SUMMARY|PRACTICE|CHECK YOUR UNDERSTANDING|EXAM TIPS))/);
+      const boundary = after.search(/\n(?=(?:\d+\. [A-Z]|COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK|QUICK UNDERSTANDING CHECK|PRACTICE QUESTIONS|JAMB TRAP|POLYNOMIAL REMAINDER AND FACTOR THEOREMS|THE EARTH AS A SPHERE|GUIDED WALKTHROUGH|LEARNING TARGETS|KEY IDEAS|IMPORTANT NOTES|REMEMBER|SUMMARY|PRACTICE|CHECK YOUR UNDERSTANDING|EXAM TIPS))/i);
       const solution = boundary < 0 ? after : after.slice(0, boundary);
       const trailing = boundary < 0 ? '' : after.slice(boundary);
       output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div><div class="math-example-solution"><strong>Solution</strong><div>' + renderPlain(solution.trim()) + '</div></div></div>' + renderPlain(trailing);
