@@ -2035,3 +2035,9 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 /* Preserve the preview's whitespace in ordinary Mathematics lesson text. */
 .kp-lesson-content:has(.math-worked-example),.topic-lesson .topic-body:has(.math-worked-example){white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75}
 .kp-lesson-content .math-worked-example,.topic-lesson .math-worked-example{white-space:normal}
+
+/* Five-question knowledge check beside the full lesson practice action. */
+#jambKeyPointsBody .kp-quick-check-btn{display:block;width:100%;margin:0 0 12px;padding:14px 16px;border:1px solid #7cb7ed;border-radius:12px;background:#eaf3ff;color:#17436a;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 0 0 0 rgba(58,143,220,.35);animation:kp-check-pulse 2.6s ease-in-out infinite}
+#jambKeyPointsBody .kp-quick-check-btn:focus-visible{outline:3px solid #2676bd;outline-offset:3px}
+@keyframes kp-check-pulse{0%,100%{box-shadow:0 0 0 0 rgba(58,143,220,.28)}55%{box-shadow:0 0 0 7px rgba(58,143,220,0)}}
+@media(prefers-reduced-motion:reduce){#jambKeyPointsBody .kp-quick-check-btn{animation:none}}
