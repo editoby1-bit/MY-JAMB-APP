@@ -4329,6 +4329,10 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   function mathTopicHtml(body) {
     const diagrams = window.MATHEMATICS_LIVE_DIAGRAMS || {};
     const source = String(body || '');
+    // Walkthroughs are lesson explanations, never part of a coloured example.
+    const walkthroughSplit = /(?=^GUIDED WALKTHROUGH(?:\s|\s*—|:))/gm;
+    const teachingBlocks = source.split(walkthroughSplit);
+    const formatExamples = source => {
     const sections = source.split(/^(Example \([ivxlcdm]+\):[^\n]*)$/gim);
     const renderPlain = part => part.split(/(\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\])/g).map(fragment => {
       const match = fragment.match(/^\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\]$/);
@@ -4348,6 +4352,8 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
       output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div><div class="math-example-solution"><strong>Solution</strong><div>' + renderPlain(solution.trim()) + '</div></div></div>' + renderPlain(trailing);
     }
     return output;
+    };
+    return teachingBlocks.map(block => /^GUIDED WALKTHROUGH/.test(block) ? '<section class="kp-guided-walkthrough">' + fuText(block) + '</section>' : formatExamples(block)).join('');
   }
 
   function teachExtrasHtml(q, subject) {
