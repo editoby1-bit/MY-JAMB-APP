@@ -2003,3 +2003,14 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .kp-lesson-nav button{border:1px solid #a9bfd7;border-radius:10px;background:#edf5ff;color:#173a60;font-weight:700;padding:11px 14px;cursor:pointer}
 .kp-lesson-nav button:last-child{margin-left:auto;background:#173a60;color:white}
 @media(max-width:600px){.kp-panel-header .kp-topic-select{flex-basis:100%;width:100%}.kp-lesson-nav button{flex:1 1 140px}}
+
+
+/* Guided walkthroughs are teaching notes, not coloured worked examples. */
+.kp-lesson-content .kp-guided-walkthrough,.topic-lesson .kp-guided-walkthrough{display:block;margin:18px 0;padding:14px 16px;border:1px solid #d9e0e8;border-left:3px solid #8b97a5;border-radius:10px;background:transparent;color:inherit;line-height:1.7}
+.kp-lesson-content .kp-guided-walkthrough .math-worked-example{display:none}
+.jamb-corner-loader{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:100000;display:flex;align-items:center;gap:9px;max-width:min(260px,calc(100vw - 28px));padding:10px 13px;border:1px solid #d6e1ec;border-radius:999px;background:rgba(255,255,255,.96);color:#263e58;box-shadow:0 3px 14px #152e461e;font-size:12px;font-weight:600;pointer-events:none;opacity:0;transform:translateY(8px);transition:opacity .18s ease,transform .18s ease}
+.jamb-corner-loader.is-visible{opacity:1;transform:translateY(0)}
+.jamb-corner-spinner{width:16px;height:16px;flex:none;border:2px solid #cad6e4;border-top-color:#2361a2;border-radius:50%;animation:jambCornerSpin .8s linear infinite}
+.jamb-corner-message{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes jambCornerSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.jamb-corner-spinner{animation:none;border-top-color:#2361a2}.jamb-corner-loader{transition:none}}
