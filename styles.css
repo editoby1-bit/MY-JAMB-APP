@@ -1987,3 +1987,19 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 #jambKeyPointsModal .kp-highlight-onboarding span{display:block;font-size:13px;line-height:1.55}
 #jambKeyPointsModal .kp-highlight-onboarding>button{position:absolute;right:10px;top:8px;border:0;background:transparent;color:#34445c;font-size:24px;cursor:pointer}
 @media(max-width:640px){#jambKeyPointsModal .kp-selection-dock{bottom:calc(96px + env(safe-area-inset-bottom,0px))}#jambKeyPointsModal .kp-highlight-onboarding{top:calc(106px + env(safe-area-inset-top,0px))}}
+
+
+/* Main Key Points: match the Mathematics preview's question/solution hierarchy. */
+.kp-panel-header .kp-topic-select{min-width:160px;max-width:100%;flex:1 1 200px}
+.kp-lesson-content .math-worked-example,.topic-lesson .math-worked-example{white-space:normal;margin:18px 0;border:1px solid #b7cce2;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 2px 8px #16324a0a}
+.kp-lesson-content .math-example-question,.topic-lesson .math-example-question{padding:12px 14px;font-weight:750;color:#173a60;background:#eaf3ff;line-height:1.65;white-space:pre-wrap}
+.kp-lesson-content .math-example-solution,.topic-lesson .math-example-solution{padding:12px 14px;background:#f2faf4;color:#183f2b;border-top:1px solid #c5e3cb;line-height:1.7}
+.kp-lesson-content .math-example-solution strong,.topic-lesson .math-example-solution strong{display:block;color:#17603a;font-size:.78rem;letter-spacing:.06em;margin-bottom:7px}
+.kp-lesson-content .math-example-solution div,.topic-lesson .math-example-solution div{white-space:pre-wrap}
+.kp-lesson-content .math-diagram,.topic-lesson .math-diagram{overflow-x:auto;max-width:100%;margin:14px 0;padding:12px;border:1px solid #c9d8e8;border-radius:12px;background:#f8fbff}
+.kp-lesson-content .math-diagram svg,.topic-lesson .math-diagram svg{display:block;max-width:100%;width:100%;height:auto}
+.kp-lesson-content .math-diagram h3,.topic-lesson .math-diagram h3{font-size:15px;margin:2px 0 10px;color:#1c3c5b}
+.kp-lesson-nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+.kp-lesson-nav button{border:1px solid #a9bfd7;border-radius:10px;background:#edf5ff;color:#173a60;font-weight:700;padding:11px 14px;cursor:pointer}
+.kp-lesson-nav button:last-child{margin-left:auto;background:#173a60;color:white}
+@media(max-width:600px){.kp-panel-header .kp-topic-select{flex-basis:100%;width:100%}.kp-lesson-nav button{flex:1 1 140px}}
