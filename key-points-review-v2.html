@@ -28,7 +28,7 @@
 .accounting-data-gap{height:8px}
 </style><style>.accounting-data-table{min-width:480px}.accounting-data-table th{padding:10px 12px;background:#eaf1fa;text-align:left;white-space:nowrap}.accounting-data-table th:not(:first-child){text-align:right}.accounting-data-table td:first-child{min-width:165px;white-space:normal}.accounting-data-table td{min-width:88px}</style><style>.math-mixed-number{display:inline-flex;align-items:center;gap:.16em;white-space:nowrap;vertical-align:middle}.math-stacked-fraction{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;vertical-align:middle;font-size:.92em;line-height:1.28;margin:.14em .2em;white-space:nowrap}.math-stacked-fraction>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .28em .14em}.math-stacked-fraction>span:last-child{padding:.14em .28em 0}.math-example-solution{line-height:1.95}.math-example-question{line-height:1.75} .math-example-visual{margin-top:16px;padding-top:14px;border-top:1px solid #c5e3cb}.math-example-visual svg{max-width:100%;height:auto}.math-example-visual h4{margin:0 0 10px;font-size:14px;color:#17436a}
  .math-example-diagram-caption{font-weight:800;font-size:13px;color:#17436a;background:#dcecff;padding:9px 12px;border-radius:8px;margin:0 0 10px}.math-example-visual .math-lesson-diagram{margin:0!important;border:0!important;padding:0!important}
-</style></head><body><header><a href="./index.html">← Back to My JAMB</a><h1>📘 Key Points · Lesson Review</h1><p class="intro">Compare original and redesigned lessons by subject, right here on the test site. The original Key Points feature remains unchanged.</p></header>
+ .math-values-table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}.math-values-table th,.math-values-table td{border:1px solid #b8cbdc;padding:8px;text-align:center}.math-values-table th{background:#e1edfb}.math-values-table td:first-child{font-weight:700;text-align:left;background:#f5f9fd}</style></head><body><header><a href="./index.html">← Back to My JAMB</a><h1>📘 Key Points · Lesson Review</h1><p class="intro">Compare original and redesigned lessons by subject, right here on the test site. The original Key Points feature remains unchanged.</p></header>
 <div id="mathDiagramRelease" style="background:#e9f5ff;color:#12466b;border:1px solid #8dc5ed;border-radius:10px;padding:10px 14px;margin:10px 0;font-weight:700">Mathematics · 24 completed lessons in curriculum order · Batch 8 covers lessons 22–24</div><div id="previewLoadError" hidden role="alert" style="margin:12px auto;max-width:1100px;padding:14px;border:2px solid #b42318;border-radius:10px;background:#fff3f0;color:#7a1c13;font-weight:700"></div><main class="wrap"><div id="mathBatch8Quick" style="display:none;background:#f0f8ff;border:1px solid #91bce0;border-radius:12px;padding:12px 14px;margin:0 0 14px"><strong>NEW · Mathematics Batch 8</strong><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:9px"><button type="button" data-math-id="applications-differentiation">22 · Applications of Differentiation</button><button type="button" data-math-id="integration">23 · Integration</button><button type="button" data-math-id="representation-data">24 · Representation of Data</button></div><small id="mathBatch8Status">Select a lesson above or use the lesson dropdown.</small></div><div class="controls"><label>Subject<select id="subjectSelect"><option value="mathematics" selected>Mathematics · 24 completed lessons (Batch 8 included)</option><option value="accounting">Accounting (24 redesigned lessons)</option><option value="commerce">Commerce (54 revised lessons)</option><option value="economics">Economics (20 lessons)</option><option value="government">Government (17 lessons)</option></select></label><label>Choose a lesson<select id="lessonSelect"></select></label><span id="accountingBatchNotice" style="display:none;font-size:13px;font-weight:700;color:#145b45">Syllabus audit: five lessons added or separated; four existing lessons strengthened.</span><span id="mathematicsBatchNotice" style="font-size:13px;font-weight:700;color:#145b45">Mathematics: 24 rewritten lessons available · newest batch linked above</span><div class="switch" aria-label="Reading mode"><button id="compare" aria-pressed="false">Compare both</button><button id="revised" aria-pressed="true">New only</button><button id="original" aria-pressed="false">Original only</button></div></div><div class="grid" id="grid"><article class="panel old hidden" id="oldPanel"><h2>Original lesson</h2><div class="lesson" id="oldText"></div></article><article class="panel new" id="newPanel"><h2>Redesigned lesson</h2><section id="commerce-visuals" class="commerce-visuals" aria-label="Commerce diagrams"></section><section id="accounting-visuals" aria-label="Accounting diagrams"></section><section id="economics-visuals" class="economics-visuals" aria-label="Economics diagrams"></section><div class="lesson" id="newText"></div><div id="lessonSpecificPractice" class="kp-practice-preview" style="display:none;margin-top:16px"></div><div class="kp-practice-preview"><p style="font-weight:700;margin:0 0 8px">Check Your Understanding</p><p class="note">Before moving on, try solving a few questions on your own. Apply what you've learned without checking the answers first, then review your mistakes to strengthen your understanding.</p><div class="kp-practice-actions"><button type="button" id="quickCheckBtn" class="attention-practice">✨ Quick Understanding Check · 5 Questions</button><button type="button" id="previewPracticeBtn" class="attention-practice attention-secondary">📝 Practice JAMB Past Questions →</button></div><p class="note" id="previewPracticeCount">Tap to load mapped historical questions for this lesson.</p></div></article></div><section id="practicePanel" class="practice-panel hidden" aria-live="polite"></section><p class="hint">Review preview · Mathematics: 29 rewritten teaching lessons in syllabus order, with worked methods, embedded diagrams and linked practice. Select any subject to compare old and revised notes. This preview does not change the live Key Points, exam answers or student progress.</p></main>
 <script>
 (function(){
@@ -157,6 +157,33 @@ if(currentSubject==='mathematics'){
     }
     if(cursor<original.length)holder.appendChild(document.createTextNode(original.slice(cursor)));
     node.replaceWith(holder);
+  }
+  // Keep the worked graphical example in teaching order, with a real table.
+  if(x.id==='equations'){
+    const blocks=Array.from(revisedText.querySelectorAll('.math-worked-example'));
+    const example=blocks.find(b=>b.querySelector('.math-example-question')?.textContent.includes('Example (x): Solve y=2x+1'));
+    const answer=example?.querySelector('.math-example-solution');
+    if(answer){
+      const graph=answer.querySelector('.math-example-visual');
+      const heading=answer.querySelector('strong');
+      answer.replaceChildren();
+      if(heading)answer.appendChild(heading);
+      const addStep=(value)=>{const p=document.createElement('p');p.textContent=value;p.style.margin='9px 0';answer.appendChild(p);};
+      addStep('Step 1 — Choose x = 0, 1 and 2. Substitute each value into both equations to construct the table.');
+      const table=document.createElement('table');table.className='math-values-table';
+      [['x','0','1','2'],['y = 2x + 1','1','3','5'],['y = −x + 4','4','3','2']].forEach((cells,i)=>{
+        const tr=document.createElement('tr');
+        cells.forEach(v=>{const c=document.createElement(i===0?'th':'td');c.textContent=v;tr.appendChild(c);});
+        table.appendChild(tr);
+      });
+      answer.appendChild(table);
+      addStep('For y = 2x + 1, the points are (0,1), (1,3) and (2,5). For y = −x + 4, the points are (0,4), (1,3) and (2,2).');
+      addStep('Step 2 — Plot each set of points and join them with a straight line, using the same scale on both axes.');
+      addStep('Step 3 — Read the point where the lines intersect.');
+      if(graph)answer.appendChild(graph);
+      addStep('The lines meet at (1,3), so x = 1 and y = 3.');
+      addStep('Check: 2(1) + 1 = 3 and −1 + 4 = 3. Both equations are satisfied.');
+    }
   }
   if(!inserted&&diagramLibrary[x.id]&&!content.includes('[LESSON_DIAGRAM')){const box=document.createElement('div');box.innerHTML=diagramLibrary[x.id];revisedText.appendChild(box);}
 }
