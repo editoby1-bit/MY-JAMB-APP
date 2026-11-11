@@ -123,13 +123,13 @@ if(currentSubject==='mathematics'){
     appendMathFormatted(frag,content.slice(last,match.index));
     const diagram=diagramLibrary[match[1]||x.id];
     if(diagram){const box=document.createElement('div');if(currentSubject==='mathematics'&&['stats-table','stats-hist','stats-ogive'].includes(match[1])){const tag=document.createElement('div');tag.className='math-diagram-review-tag';tag.textContent='● Pending verification';box.appendChild(tag);}box.insertAdjacentHTML('beforeend',diagram);
-    const linkedExample=x.id==='sets'?({'sets-operations':'ii','sets-two':'iv','sets-three':'vi'}[match[1]]):null;
+    const linkedExample=x.id==='sets'?({'sets-operations':'ii','sets-two':'iv','sets-three':'vi'}[match[1]]):(x.id==='equations'&&match[1]==='equations-lines'?'x':null);
     const matchingExample=linkedExample?Array.from(frag.querySelectorAll('.math-worked-example')).find(el=>el.querySelector('.math-example-question')?.textContent.startsWith('Example ('+linkedExample+'):')):null;
     const solution=matchingExample?.querySelector('.math-example-solution');
     if(solution){
       const caption=document.createElement('div');
       caption.className='math-example-diagram-caption';
-      caption.textContent='VENN DIAGRAM FOR EXAMPLE ('+linkedExample+') — Visual explanation of the solution above';
+      caption.textContent=x.id==='sets'?'VENN DIAGRAM FOR EXAMPLE ('+linkedExample+') — Visual explanation of the solution above':'GRAPH FOR EXAMPLE ('+linkedExample+') — The two lines meet at the solution (1, 3)';
       const visual=document.createElement('div');visual.className='math-example-visual';
       visual.append(caption,box);solution.appendChild(visual);
     }else{frag.appendChild(box);}
