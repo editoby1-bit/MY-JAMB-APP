@@ -65,6 +65,18 @@
     if (active) return false;
     active = true;
     const node = dialog();
+    const corner = document.getElementById('jambCornerLoader') || (() => {
+      const el = document.createElement('div');
+      el.id = 'jambCornerLoader';
+      el.className = 'jamb-corner-loader';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      el.innerHTML = '<span class="jamb-corner-spinner" aria-hidden="true"></span><span class="jamb-corner-message"></span>';
+      document.body.appendChild(el);
+      return el;
+    })();
+    corner.querySelector('.jamb-corner-message').textContent = label || 'Preparing subject…';
+    corner.classList.add('is-visible');
     const previousFocus = document.activeElement;
     let timer;
     const show = () => {
@@ -82,6 +94,7 @@
         try { await task(); return true; }
         catch (err) {
           clearTimeout(timer);
+          corner.classList.remove('is-visible');
           show();
           node.querySelector('[role="status"]').textContent = err.code === 'INTEGRITY'
             ? 'This content could not be verified. Reload the app to check for an updated version, or choose other saved content.'
@@ -105,12 +118,14 @@
           });
           retry.onclick = node.querySelector('[data-close]').onclick = null;
           if (!again) return false;
+          corner.classList.add('is-visible');
           node.querySelector('.content-loading-actions').hidden = true;
           progress(0, 0);
         }
       }
     } finally {
       clearTimeout(timer);
+      corner.classList.remove('is-visible');
       node.hidden = true;
       active = false;
       if (previousFocus?.isConnected) previousFocus.focus();
