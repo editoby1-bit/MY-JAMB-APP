@@ -1873,11 +1873,11 @@
     const t = window.TEACH_TOPICS?.[subject];
     const body = document.getElementById('jambKeyPointsBody');
     if (!t) { body.innerHTML = '<p class="jqc-sub">No lessons for this subject yet.</p>'; return; }
-    // Count only usable, loaded past questions; mapping keys alone can include unavailable items.
+    // Count only usable, loaded past questions, including new-year repeats.
     const counts = {};
     (QUESTION_BANK[subject] || []).forEach(q => {
       if (q.reviewPending || !Array.isArray(q.options) || q.options.length < 2) return;
-      const id = t.of?.[teachMeKey(q)];
+      const id = mappedKeyPointTopic(subject, q);
       if (id && t.lessons[id]) counts[id] = (counts[id] || 0) + 1;
     });
     // Preserve the syllabus / author-defined teaching sequence.
@@ -1891,7 +1891,7 @@
       if (!paid && i >= KP_FREE_TOPICS) {
         return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
       }
-      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body, id) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body, id) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-quick-check-btn" data-topic="${escHtml(id)}">✨ Test Your Knowledge · 5 Questions</button><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     const topicSelect = document.getElementById('kpTopicSelect');
     if (topicSelect) {
@@ -1929,6 +1929,7 @@
     });
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
+    body.querySelectorAll('.kp-quick-check-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic, 'quick')));
     if (subject === 'economics') {
       // Build diagrams only when a lesson is opened. Rendering every lesson at
       // once was unnecessarily expensive on low-memory mobile browsers.
@@ -2244,17 +2245,51 @@
   }
 
   // Reuse the existing practice session and its answer/explanation flow.
+  // New paper years are included automatically when they carry a verified
+  // lesson ID or repeat a previously mapped question. Unseen questions must
+  // be classified by the content importer; never silently guess their topic.
+  const kpTopicIndexCache = new Map();
+  function mappedKeyPointTopic(subject, q) {
+    const topicData = window.TEACH_TOPICS?.[subject];
+    if (!topicData || !q) return null;
+    const explicit = topicData.of?.[teachMeKey(q)] || q.lessonId || q.topicId;
+    if (explicit && topicData.lessons?.[explicit]) return explicit;
+    const bank = QUESTION_BANK[subject] || [];
+    const cache = kpTopicIndexCache.get(subject);
+    if (!cache || cache.bank !== bank || cache.size !== bank.length || cache.mapping !== topicData.of) {
+      const signatures = new Map();
+      const normalize = v => String(v || '').toLowerCase().replace(/<[^>]*>/g, '').replace(/[^a-z0-9]/g, '');
+      for (const item of bank) {
+        const id = topicData.of?.[teachMeKey(item)] || item.lessonId || item.topicId;
+        if (!id || !topicData.lessons?.[id] || !item.question || !Array.isArray(item.options)) continue;
+        const signature = normalize(item.question) + '|' + normalize(item.passage || '');
+        if (!signatures.has(signature)) signatures.set(signature, []);
+        signatures.get(signature).push({ id, choices: new Set(item.options.map(normalize)) });
+      }
+      kpTopicIndexCache.set(subject, { bank, size: bank.length, mapping: topicData.of, signatures });
+    }
+    const normalize = v => String(v || '').toLowerCase().replace(/<[^>]*>/g, '').replace(/[^a-z0-9]/g, '');
+    const signature = normalize(q.question) + '|' + normalize(q.passage || '');
+    const choices = new Set((q.options || []).map(normalize));
+    const matches = (kpTopicIndexCache.get(subject).signatures.get(signature) || []).filter(item => {
+      let common = 0;
+      choices.forEach(choice => { if (item.choices.has(choice)) common++; });
+      return common >= Math.min(3, choices.size);
+    });
+    const ids = [...new Set(matches.map(item => item.id))];
+    return ids.length === 1 ? ids[0] : null;
+  }
   function keyPointPool(subject, topic) {
-    const mapping = window.TEACH_TOPICS?.[subject]?.of || {};
-    return (QUESTION_BANK[subject] || []).filter(q => !q.administrative && !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && mapping[teachMeKey(q)] === topic);
+    return (QUESTION_BANK[subject] || []).filter(q => !q.administrative && !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && mappedKeyPointTopic(subject, q) === topic);
   }
   // Keep topic practice inside the lesson modal, like the approved review UI.
   let kpPractice = null;
-  function startKeyPointPractice(subject, topic) {
-    const questions = keyPointPool(subject, topic);
+  function startKeyPointPractice(subject, topic, mode = 'past') {
+    const allQuestions = keyPointPool(subject, topic);
+    const questions = mode === 'quick' ? allQuestions.slice(0, 5) : allQuestions;
     if (!questions.length) { showInfoToast('No mapped past questions are available for this lesson yet.'); return; }
-    const btn = [...document.querySelectorAll('#jambKeyPointsBody .kp-practice-btn')]
-      .find(node => node.dataset.topic === topic);
+    const btn = [...document.querySelectorAll('#jambKeyPointsBody .kp-practice-btn, #jambKeyPointsBody .kp-quick-check-btn')]
+      .find(node => node.dataset.topic === topic && node.classList.contains(mode === 'quick' ? 'kp-quick-check-btn' : 'kp-practice-btn'));
     if (!btn) return;
     const wrap = btn.closest('.kp-practice-wrap');
     if (!wrap) return;
@@ -2263,7 +2298,7 @@
     panel.className = 'kp-inline-practice';
     panel.setAttribute('aria-live', 'polite');
     wrap.insertAdjacentElement('afterend', panel);
-    kpPractice = { subject, topic, questions, index: 0, answers: {}, panel };
+    kpPractice = { subject, topic, mode, questions, index: 0, answers: {}, panel };
     renderKeyPointPractice();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -2461,7 +2496,7 @@ function accountingFinancialQuestionHtml(value) {
     const yearText = [...years].sort((a,b) => a-b).join(' · ');
     const title = window.TEACH_TOPICS?.[p.subject]?.lessons?.[p.topic]?.title || 'Topic';
     p.panel.innerHTML =
-      '<h3>📝 ' + escHtml(fmt(p.subject)) + ' · Topic Past Questions</h3>' +
+      '<h3>' + (p.mode === 'quick' ? '✨ Test Your Knowledge' : '📝 ' + escHtml(fmt(p.subject)) + ' · Topic Past Questions') + '</h3>' +
       '<p class="kp-inline-meta">' + escHtml(title) + ' · Question ' + (p.index + 1) + ' of ' +
       p.questions.length + ' · ' + Object.keys(p.answers).length + ' answered · ' + score + ' correct</p>' +
       (yearText ? '<span class="kp-inline-year">JAMB ' + escHtml(yearText) + '</span>' : '') +
