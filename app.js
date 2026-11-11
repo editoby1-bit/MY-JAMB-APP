@@ -5821,7 +5821,19 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   // Offline support (see sw.js). Only over http(s): service workers don't
   // run from file:// and need a secure origin, which GitHub Pages is.
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+        .then(registration => registration.update().catch(() => {}))
+        .catch(() => {});
+    });
+    // A newly activated shell worker means this tab may still be running
+    // an old script. Reload once to pick up the current lesson ordering.
+    let shellReloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (shellReloaded) return;
+      shellReloaded = true;
+      location.reload();
+    });
   }
 
 })();
