@@ -2142,3 +2142,12 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
    font-size:17px;line-height:1.42;
  }
 }
+
+/* Commerce figures are inserted at their teaching points, as in the review preview. */
+#jambKeyPointsBody .commerce-figure{white-space:normal;display:block;max-width:100%;margin:16px 0;padding:14px;border:1px solid #dce3ed;border-radius:12px;background:#f8fafc;overflow:hidden}
+#jambKeyPointsBody .commerce-figure figcaption{font-weight:750;margin-bottom:10px;color:#17324c}
+#jambKeyPointsBody .commerce-figure svg{display:block;width:100%;height:auto;max-width:100%}
+#jambKeyPointsBody .commerce-figure p{font-size:13px;color:#53627a;line-height:1.55}
+#jambKeyPointsBody .kp-economics-visuals .econ-inline-visual{margin:16px 0 20px}
+#jambKeyPointsBody .kp-economics-visuals .econ-inline-visual h4{font-size:15px;margin:8px 0}
+#kpTopicSelect:disabled{opacity:.6;cursor:wait}
