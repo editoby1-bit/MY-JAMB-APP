@@ -1891,7 +1891,7 @@
       if (!paid && i >= KP_FREE_TOPICS) {
         return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
       }
-      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body, id) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     const topicSelect = document.getElementById('kpTopicSelect');
     if (topicSelect) {
@@ -4333,38 +4333,13 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
   function fuText(text) {
     return mathHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
   }
-  function mathTopicHtml(body) {
-    const diagrams = window.MATHEMATICS_LIVE_DIAGRAMS || {};
-    const source = String(body || '');
-    // Match the preview's mixed-number typography (e.g. 2 1/3), while
-    // leaving the original lesson text and question mappings untouched.
-    const renderMathText = value => fuText(value).replace(/(^|[^\\d])([1-9]\\d*)\\s+([1-9]\\d*)\\/([1-9]\\d*)(?!\\d)/g,
-      (_, prefix, whole, numerator, denominator) => prefix + '<span class="math-mixed-number" aria-label="' + whole + ' and ' + numerator + ' over ' + denominator + '"><span>' + whole + '</span><span class="math-stacked-fraction"><span>' + numerator + '</span><span>' + denominator + '</span></span></span>');
-    // Walkthroughs are lesson explanations, never part of a coloured example.
-    const walkthroughSplit = /(?=^GUIDED WALKTHROUGH(?:\s|\s*—|:)|^Example \([ivxlcdm]+\):|^\d+\. [A-Z])/gim;
-    const teachingBlocks = source.split(walkthroughSplit);
-    const formatExamples = source => {
-    const sections = source.split(/^(Example \([ivxlcdm]+\):[^\n]*)$/gim);
-    const renderPlain = part => part.split(/(\[LESSON_DIAGRAM(?::[a-z0-9-]+)?\])/g).map(fragment => {
-      const match = fragment.match(/^\[LESSON_DIAGRAM(?::([a-z0-9-]+))?\]$/);
-      if (!match) return renderMathText(fragment);
-      return diagrams[match[1]] || '<p class="kp-diagram-missing">Diagram unavailable for this section.</p>';
-    }).join('');
-    let output = renderPlain(sections[0] || '');
-    for (let i = 1; i < sections.length; i += 2) {
-      const question = sections[i];
-      const rest = sections[i + 1] || '';
-      const match = rest.match(/^\n\s*Solution\s*\n/);
-      if (!match) { output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div></div>' + renderPlain(rest); continue; }
-      const after = rest.slice(match[0].length);
-      const boundary = after.search(/\n(?=(?:\d+\. [A-Z]|COMMON ERRORS|PRACTISE AND CHECK|ANSWERS WITH REASONS|FINAL UNDERSTANDING CHECK|ADDITIONAL FULLY WORKED JAMB EXAMPLES|WHAT YOU WILL LEARN|VISUAL CHECK|QUICK UNDERSTANDING CHECK|PRACTICE QUESTIONS|JAMB TRAP|POLYNOMIAL REMAINDER AND FACTOR THEOREMS|THE EARTH AS A SPHERE|GUIDED WALKTHROUGH|LEARNING TARGETS|KEY IDEAS|IMPORTANT NOTES|REMEMBER|SUMMARY|PRACTICE|CHECK YOUR UNDERSTANDING|EXAM TIPS))/i);
-      const solution = boundary < 0 ? after : after.slice(0, boundary);
-      const trailing = boundary < 0 ? '' : after.slice(boundary);
-      output += '<div class="math-worked-example"><div class="math-example-question">' + renderPlain(question) + '</div><div class="math-example-solution"><strong>Solution</strong><div>' + renderPlain(solution.trim()) + '</div></div></div>' + renderPlain(trailing);
+  function mathTopicHtml(body, lessonId) {
+    const target = document.createElement('div');
+    if (typeof window.renderSharedMathematicsLesson !== 'function') {
+      throw new Error('Shared Mathematics lesson renderer did not load');
     }
-    return output;
-    };
-    return teachingBlocks.map(block => /^GUIDED WALKTHROUGH/i.test(block) ? '<section class="kp-guided-walkthrough">' + renderMathText(block) + '</section>' : formatExamples(block)).join('');
+    window.renderSharedMathematicsLesson(target, String(body || ''), lessonId || '', window.MATHEMATICS_LIVE_DIAGRAMS || {});
+    return target.innerHTML;
   }
 
   function teachExtrasHtml(q, subject) {
@@ -4373,7 +4348,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     const left = followUpsLeft(key);
     const past = (fuHistory[key] || []).map(h =>
       `<div class="fu-q">${escHtml(h.q)}</div><div class="fu-a">${fuText(h.a)}</div>`).join('');
-    return `${lesson ? `<details class="topic-lesson"><summary>📘 Click here to learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${subject === "mathematics" ? mathTopicHtml(lesson.body) : fuText(lesson.body)}</div></details>` : ''}
+    return `${lesson ? `<details class="topic-lesson"><summary>📘 Click here to learn the topic: ${escHtml(lesson.title)}</summary><div class="topic-body">${subject === "mathematics" ? mathTopicHtml(lesson.body, lesson.id) : fuText(lesson.body)}</div></details>` : ''}
       <div class="fu-box" data-key="${key}">
         <div class="fu-thread">${past}</div>
         <div class="fu-ask ${left > 0 ? '' : 'hidden'}">
