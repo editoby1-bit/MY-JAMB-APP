@@ -123,8 +123,8 @@ const placements={
 'postal-delivery-services':['7. CERTIFICATE OF POSTING'],
 'communication-forms-media':['3. ELEMENTS OF THE PROCESS']
 };
-window.renderCommerceDiagrams=function(id){
-const host=document.getElementById('commerce-visuals'),lesson=document.getElementById('newText');
+window.renderCommerceDiagrams=function(id,options){
+const host=options?.host||document.getElementById('commerce-visuals'),lesson=options?.lesson||document.getElementById('newText');
 if(host)host.replaceChildren();
 if(!lesson||!id||!diagrams[id])return;
 const raw=lesson.textContent,lines=raw.split('\n'),items=diagrams[id],targets=placements[id]||[],inserts=new Map();
