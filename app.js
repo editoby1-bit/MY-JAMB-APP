@@ -3832,7 +3832,13 @@ function accountingFinancialQuestionHtml(value) {
   // Maths notation in question text: x^{2} → superscript, a_{n} → subscript.
   // Escapes first, so it is safe for any text.
   function mathHtml(s) {
-    return escHtml(s).replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>').replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>');
+    // The preview renders [[frac:numerator|denominator]] as a stacked fraction.
+    // Match that exact notation in the live app rather than showing raw tokens.
+    return escHtml(s)
+      .replace(/\[\[frac:([^|\]]+)\|([^\]]+)\]\]/g, (_, top, bottom) =>
+        '<span class="math-stacked-fraction" aria-label="' + top + ' divided by ' + bottom + '"><span>' + top + '</span><span>' + bottom + '</span></span>')
+      .replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+      .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>');
   }
   function escHtml(text) {
     return String(text)
