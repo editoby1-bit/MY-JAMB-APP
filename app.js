@@ -4330,7 +4330,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     const diagrams = window.MATHEMATICS_LIVE_DIAGRAMS || {};
     const source = String(body || '');
     // Walkthroughs are lesson explanations, never part of a coloured example.
-    const walkthroughSplit = /(?=^GUIDED WALKTHROUGH(?:\s|\s*—|:))/gm;
+    const walkthroughSplit = /(?=^GUIDED WALKTHROUGH(?:\s|\s*—|:)|^Example \([ivxlcdm]+\):|^\d+\. [A-Z])/gim;
     const teachingBlocks = source.split(walkthroughSplit);
     const formatExamples = source => {
     const sections = source.split(/^(Example \([ivxlcdm]+\):[^\n]*)$/gim);
