@@ -4360,7 +4360,7 @@ Use plain English. Be encouraging. Keep it brief — students are studying under
     }
     return output;
     };
-    return teachingBlocks.map(block => /^GUIDED WALKTHROUGH/.test(block) ? '<section class="kp-guided-walkthrough">' + fuText(block) + '</section>' : formatExamples(block)).join('');
+    return teachingBlocks.map(block => /^GUIDED WALKTHROUGH/i.test(block) ? '<section class="kp-guided-walkthrough">' + fuText(block) + '</section>' : formatExamples(block)).join('');
   }
 
   function teachExtrasHtml(q, subject) {
