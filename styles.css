@@ -2020,3 +2020,14 @@ input[type="datetime-local"].jqc-select::-webkit-calendar-picker-indicator:hover
 .math-stacked-fraction{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;vertical-align:middle;font-size:.92em;line-height:1.28;margin:.14em .2em;white-space:nowrap;font-weight:inherit}
 .math-stacked-fraction>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .28em .14em}
 .math-stacked-fraction>span:last-child{padding:.14em .28em 0}
+
+/* Shared Mathematics preview/live renderer: identical diagram, table and fraction presentation. */
+.kp-lesson-content .math-mixed-number,.topic-lesson .math-mixed-number{display:inline-flex;align-items:center;gap:.16em;white-space:nowrap;vertical-align:middle}
+.kp-lesson-content .math-example-visual,.topic-lesson .math-example-visual{margin-top:16px;padding-top:14px;border-top:1px solid #c5e3cb}
+.kp-lesson-content .math-example-visual svg,.topic-lesson .math-example-visual svg{max-width:100%;height:auto}
+.kp-lesson-content .math-example-diagram-caption,.topic-lesson .math-example-diagram-caption{font-weight:800;font-size:13px;color:#17436a;background:#dcecff;padding:9px 12px;border-radius:8px;margin:0 0 10px}
+.kp-lesson-content .math-example-visual .math-lesson-diagram,.topic-lesson .math-example-visual .math-lesson-diagram{margin:0!important;border:0!important;padding:0!important}
+.kp-lesson-content .math-values-table,.topic-lesson .math-values-table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+.kp-lesson-content .math-values-table th,.kp-lesson-content .math-values-table td,.topic-lesson .math-values-table th,.topic-lesson .math-values-table td{border:1px solid #b8cbdc;padding:8px;text-align:center}
+.kp-lesson-content .math-values-table th,.topic-lesson .math-values-table th{background:#e1edfb}
+.kp-lesson-content .math-values-table td:first-child,.topic-lesson .math-values-table td:first-child{font-weight:700;text-align:left;background:#f5f9fd}
