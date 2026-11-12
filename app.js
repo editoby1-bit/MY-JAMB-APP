@@ -2341,9 +2341,59 @@
   function keyPointPool(subject, topic) {
     return (QUESTION_BANK[subject] || []).filter(q => !q.administrative && !q.reviewPending && Array.isArray(q.options) && q.options.length >= 2 && mappedKeyPointTopic(subject, q) === topic);
   }
+  // Independent Scripture-grounded CRS checks: five per lesson, separate from past papers.
+  function startCrsUnderstandingCheck(topic) {
+    const items = window.CRS_UNDERSTANDING_QUIZZES?.[topic];
+    if (!Array.isArray(items) || items.length !== 5) {
+      showInfoToast('This lesson’s understanding check is unavailable. Please refresh the app.');
+      return;
+    }
+    const button = [...document.querySelectorAll('#jambKeyPointsBody .kp-quick-check-btn')].find(n => n.dataset.topic === topic);
+    const wrap = button?.closest('.kp-practice-wrap');
+    if (!wrap) return;
+    document.querySelectorAll('#jambKeyPointsBody .kp-inline-practice').forEach(n => n.remove());
+    const panel = document.createElement('section');
+    panel.className = 'kp-inline-practice';
+    panel.setAttribute('aria-live', 'polite');
+    wrap.insertAdjacentElement('afterend', panel);
+    const state = {index:0, answers:{}};
+    const render = () => {
+      if (!panel.isConnected) return;
+      const q = items[state.index], chosen = state.answers[state.index], answered = chosen !== undefined;
+      const mcq = Array.isArray(q.options);
+      const title = window.TEACH_TOPICS?.crs?.lessons?.[topic]?.title || 'CRS lesson';
+      panel.innerHTML = '<h3>✨ Quick Understanding Check · CRS</h3>' +
+        '<p class="kp-inline-meta">' + escHtml(title) + ' · Question ' + (state.index+1) + ' of 5</p>' +
+        '<div class="kp-inline-question">' + escHtml(q.question) + '</div>' +
+        (mcq ? q.options.map((option,i)=>'<button type="button" class="kp-inline-answer'+
+          (answered && i===q.correctIndex?' correct':answered && i===chosen?' wrong':'')+
+          '" data-crs-option="'+i+'"'+(answered?' disabled':'')+'>'+String.fromCharCode(65+i)+'. '+escHtml(option)+'</button>').join('') :
+          '<button type="button" data-crs-reveal>Reveal explanation after thinking</button>') +
+        (answered?'<div class="kp-inline-feedback"><strong>'+(mcq?(chosen===q.correctIndex?'✓ Correct':'Review the correct answer'):'Explanation')+
+          '</strong><p>'+escHtml(q.explanation)+'</p></div>':'') +
+        '<div class="kp-inline-nav"><button type="button" data-crs-back>'+(state.index?'← Previous':'← Close')+
+          '</button><button type="button" data-crs-next>'+(state.index===4?'Finish':'Next →')+'</button></div>';
+      panel.querySelectorAll('[data-crs-option]').forEach(b=>b.onclick=()=>{state.answers[state.index]=Number(b.dataset.crsOption);render()});
+      const reveal=panel.querySelector('[data-crs-reveal]');
+      if(reveal)reveal.onclick=()=>{state.answers[state.index]='reviewed';render()};
+      panel.querySelector('[data-crs-back]').onclick=()=>{if(state.index){state.index--;render()}else panel.remove()};
+      panel.querySelector('[data-crs-next]').onclick=()=>{
+        if(state.index<4){state.index++;render();return}
+        const mcqTotal=items.filter(x=>Array.isArray(x.options)).length;
+        const correct=items.filter((x,i)=>Array.isArray(x.options)&&state.answers[i]===x.correctIndex).length;
+        panel.innerHTML='<h3>Understanding check complete</h3><p>Reviewed '+Object.keys(state.answers).length+
+          ' of 5 questions. Multiple-choice score: '+correct+' of '+mcqTotal+
+          '. Compare your written answers with the explanations.</p><button type="button" data-crs-close>Return to lesson</button>';
+        panel.querySelector('[data-crs-close]').onclick=()=>panel.remove();
+      };
+    };
+    render();
+    panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
   // Keep topic practice inside the lesson modal, like the approved review UI.
   let kpPractice = null;
   function startKeyPointPractice(subject, topic, mode = 'past') {
+    if (subject === 'crs' && mode === 'quick') { startCrsUnderstandingCheck(topic); return; }
     const allQuestions = keyPointPool(subject, topic);
     const questions = mode === 'quick' ? allQuestions.slice(0, 5) : allQuestions;
     if (!questions.length) { showInfoToast('No mapped past questions are available for this lesson yet.'); return; }
