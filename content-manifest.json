@@ -1613,8 +1613,8 @@
       "bytes": 612761
     },
     "teach/crs-topics.js": {
-      "sha256": "b82ef0bf4b58cadcd32707454b93c751239414fd5d9ba1b91aafa94322d55b4f",
-      "bytes": 300072
+      "sha256": "2395d82f26f9983d52cd1708cc4e8c0b3b094dcba00b6e04fbaf3d8bda08e080",
+      "bytes": 667707
     },
     "past-questions/economics-2001.js": {
       "sha256": "83ab7b609bd6108a2556797f7b843f2ad571b970137780c7c228f12f7ca0dbf0",
@@ -2113,5 +2113,5 @@
       "bytes": 45116
     }
   },
-  "version": "math-live-20261111-4f2cd0ef1f"
+  "version": "crs-live-20261112-2395d82f"
 }
