@@ -237,7 +237,7 @@ function renderTopicPractice(){
  const credit=q.keyVerdict==='noanswer';
  const correct=credit||right.includes(selected);
  const scored=Object.entries(p.answers).filter(([i,a])=>{const x=p.questions[Number(i)];return x.keyVerdict==='noanswer'||x.answer===a||(x.alsoAccept||[]).includes(a)}).length;
- panel.innerHTML='<h2>📝 '+(currentSubject==='economics'?'Economics':currentSubject==='commerce'?'Commerce':currentSubject==='accounting'?'Accounting':currentSubject==='mathematics'?'Mathematics':'Government')+' · '+(p.mode==='quick'?'Quick Understanding Check':'Topic Past Questions')+'</h2><p class="small">'+escapePractice(lessons.find(x=>x.id===p.lesson)?.new.title)+' · Question '+(p.index+1)+' of '+p.questions.length+' · '+Object.keys(p.answers).length+' answered · '+scored+' correct</p>'+(verifiedQuestionYears(q,(window.QUESTION_BANK[currentSubject]||[])).length?'<span class="jamb-year">JAMB '+verifiedQuestionYears(q,(window.QUESTION_BANK[currentSubject]||[])).map(escapePractice).join(' · ')+'</span>':'')+(currentSubject==='accounting'?renderAccountingQuestion(q):'<p><strong>'+escapePractice(q.question)+'</strong></p>')+((cleanMusicHistoryVenn(q)||q.diagram)?'<div class="practice-diagram" style="margin:12px 0 18px;max-width:100%;overflow-x:auto">'+(cleanMusicHistoryVenn(q)||q.diagram)+'</div>':'')+
+ panel.innerHTML='<h2>📝 '+(currentSubject==='economics'?'Economics':currentSubject==='commerce'?'Commerce':currentSubject==='accounting'?'Accounting':currentSubject==='mathematics'?'Mathematics':currentSubject==='crs'?'CRS':'Government')+' · '+(p.mode==='quick'?'Quick Understanding Check':'Topic Past Questions')+'</h2><p class="small">'+escapePractice(lessons.find(x=>x.id===p.lesson)?.new.title)+' · Question '+(p.index+1)+' of '+p.questions.length+' · '+Object.keys(p.answers).length+' answered · '+scored+' correct</p>'+(verifiedQuestionYears(q,(window.QUESTION_BANK[currentSubject]||[])).length?'<span class="jamb-year">JAMB '+verifiedQuestionYears(q,(window.QUESTION_BANK[currentSubject]||[])).map(escapePractice).join(' · ')+'</span>':'')+(currentSubject==='accounting'?renderAccountingQuestion(q):'<p><strong>'+escapePractice(q.question)+'</strong></p>')+((cleanMusicHistoryVenn(q)||q.diagram)?'<div class="practice-diagram" style="margin:12px 0 18px;max-width:100%;overflow-x:auto">'+(cleanMusicHistoryVenn(q)||q.diagram)+'</div>':'')+
  q.options.map((o,i)=>'<button class="answer '+(done?(right.includes(i)?'correct':selected===i?'wrong':''):'')+'" data-answer="'+i+'" '+(done?'disabled':'')+'>'+String.fromCharCode(65+i)+'. '+escapePractice(o)+'</button>').join('')+
  (done?'<div class="feedback"><strong>'+(correct?'✓ Correct':'✗ Not correct')+'</strong><p>Answer: '+(credit?'Question reviewed: any attempted answer receives credit':right.map(i=>String.fromCharCode(65+i)).join(' or '))+'</p><p>'+escapePractice(q.explanation||q.answerNote||'Review the correct answer above.')+'</p></div>':'')+
  '<div class="nav"><button id="practiceBack">'+(p.index?'← Previous':'← Close practice')+'</button><button id="practiceNext">'+(p.index===p.questions.length-1?'Finish':'Next →')+'</button></div>';
@@ -245,4 +245,44 @@ function renderTopicPractice(){
  document.getElementById('practiceBack').onclick=()=>{if(p.index){p.index--;renderTopicPractice()}else{activePractice=null;panel.classList.add('hidden')}};
  document.getElementById('practiceNext').onclick=()=>{if(p.index<p.questions.length-1){p.index++;renderTopicPractice()}else{const total=Object.keys(p.answers).length;panel.innerHTML='<h2>Practice summary</h2><p>Answered '+total+' of '+p.questions.length+' questions. Correct: <strong>'+scored+'</strong>.</p><button id="restartPractice">Practise again</button><button id="closePractice">Return to lesson</button>';document.getElementById('restartPractice').onclick=()=>startTopicPractice(p.mode);document.getElementById('closePractice').onclick=()=>{activePractice=null;panel.classList.add('hidden')}}};
 }
+</script><script src="./crs-understanding-quizzes.js?v=crs-180-checks-20261112"></script>
+<script>
+/* CRS understanding checks are lesson-specific; past-question practice remains a separate button. */
+(function(){
+ const escapeText=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ let session=null;
+ function draw(){
+  const panel=document.getElementById('practicePanel');if(!panel||!session)return;
+  const q=session.items[session.index],n=session.index,chosen=session.answers[n],isMCQ=Array.isArray(q.options),revealed=chosen!==undefined;
+  panel.classList.remove('hidden');
+  panel.innerHTML='<h2>✨ CRS · Quick Understanding Check</h2><p class="small">'+escapeText(session.title)+' · Question '+(n+1)+' of 5</p>'+
+   '<p><strong>'+escapeText(q.question)+'</strong></p>'+
+   (isMCQ?'<div class="practice-options">'+q.options.map((option,i)=>'<button type="button" data-crs-answer="'+i+'" style="display:block;width:100%;margin:7px 0;padding:12px;text-align:left;border:1px solid #a9b9cb;border-radius:9px;background:'+(revealed?(i===q.correctIndex?'#dcfce7':i===chosen?'#fee2e2':'#fff'):'#fff')+';color:#17283c">'+escapeText('ABCD'[i]+'. '+option)+'</button>').join('')+'</div>':
+   '<p class="small">Think of your answer before revealing the explanation.</p><button type="button" id="crsRevealAnswer">Reveal explanation</button>')+
+   (revealed?'<div style="margin:12px 0;padding:14px;border-radius:10px;background:#eff6ff;color:#173a60"><strong>'+(isMCQ?(chosen===q.correctIndex?'Correct.':'Review the correct answer.'):'Explanation')+'</strong><p>'+escapeText(q.explanation)+'</p></div>':'')+
+   '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><button type="button" id="crsQuizBack">'+(n?'← Previous':'Close check')+'</button><button type="button" id="crsQuizNext">'+(n===4?'Finish':'Next →')+'</button></div>';
+  panel.querySelectorAll('[data-crs-answer]').forEach(btn=>btn.onclick=()=>{session.answers[n]=Number(btn.dataset.crsAnswer);draw()});
+  const reveal=panel.querySelector('#crsRevealAnswer');if(reveal)reveal.onclick=()=>{session.answers[n]='revealed';draw()};
+  panel.querySelector('#crsQuizBack').onclick=()=>{if(n){session.index--;draw()}else{session=null;panel.classList.add('hidden')}};
+  panel.querySelector('#crsQuizNext').onclick=()=>{if(n<4){session.index++;draw()}else{
+   const attempted=Object.keys(session.answers).length;
+   const mcqCorrect=session.items.filter((item,i)=>Array.isArray(item.options)&&session.answers[i]===item.correctIndex).length;
+   const mcqCount=session.items.filter(item=>Array.isArray(item.options)).length;
+   panel.innerHTML='<h2>Understanding check complete</h2><p>Reviewed '+attempted+' of 5 questions. Multiple-choice correct: '+mcqCorrect+' of '+mcqCount+'. Written-response questions are for self-assessment against the explanations.</p><button type="button" id="crsQuizAgain">Try again</button> <button type="button" id="crsQuizClose">Return to lesson</button>';
+   panel.querySelector('#crsQuizAgain').onclick=()=>{session.answers={};session.index=0;draw()};
+   panel.querySelector('#crsQuizClose').onclick=()=>{session=null;panel.classList.add('hidden')};
+  }};
+ }
+ document.addEventListener('click',function(event){
+  const button=event.target.closest&&event.target.closest('#quickCheckBtn');
+  if(!button||document.getElementById('subjectSelect').value!=='crs')return;
+  event.preventDefault();event.stopImmediatePropagation();
+  const index=Number(document.getElementById('lessonSelect').value)||0;
+  const lesson=(window.CRS_REVIEW_LESSONS||[])[index];
+  const items=lesson&&(window.CRS_UNDERSTANDING_QUIZZES||{})[lesson.id];
+  const panel=document.getElementById('practicePanel');
+  if(!items||items.length!==5){panel.classList.remove('hidden');panel.textContent='This lesson’s five-question check is temporarily unavailable.';return}
+  session={items,title:lesson.new.title,index:0,answers:{}};draw();panel.scrollIntoView({behavior:'smooth',block:'start'});
+ },true);
+})();
 </script></body></html>
