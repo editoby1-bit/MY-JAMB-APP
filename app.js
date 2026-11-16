@@ -1882,6 +1882,42 @@
     if(at<0)return fuText(body);
     return fuText(body.slice(0,at))+'<div class="kp-inline-diagram" style="overflow-x:auto;max-width:100%;margin:12px 0">'+figure+'</div>'+fuText(body.slice(at));
   }
+  // English preview-equivalent worked-example cards, without changing the question bank.
+  function englishLessonHtml(body) {
+    const text=String(body||'');
+    const pattern=/(?:^|\n)(Example\s*\([ivxlcdm]+\)[^\n]*\n)([\s\S]*?)(?=\nExample\s*\([ivxlcdm]+\)|\n\s*\n|$)/gi;
+    let output='',last=0,match;
+    while((match=pattern.exec(text))){
+      const start=match.index+(text[match.index]==='\n'?1:0);
+      const block=match[2],answer=/(?:^|\n)(?:Answer|Solution)\s*:\s*/i.exec(block);
+      if(!answer)continue;
+      const split=answer.index,answerStart=split+answer[0].length;
+      output+=fuText(text.slice(last,start));
+      output+='<section class="kp-english-example"><div class="kp-english-question"><strong>'+escHtml(match[1].trim())+'</strong>'+fuText(block.slice(0,split).trim())+'</div><div class="kp-english-answer"><strong>Answer</strong>'+fuText(block.slice(answerStart).trim())+'</div></section>';
+      last=pattern.lastIndex;
+    }
+    return output+fuText(text.slice(last));
+  }
+  function startEnglishUnderstandingCheck(topic) {
+    const items=window.TEACH_TOPICS?.english?.understandingChecks?.[topic];
+    if(!Array.isArray(items)||items.length!==5){showInfoToast('This understanding check is unavailable. Please refresh.');return;}
+    const button=[...document.querySelectorAll('#jambKeyPointsBody .kp-quick-check-btn')].find(b=>b.dataset.topic===topic);
+    const wrap=button?.closest('.kp-practice-wrap');if(!wrap)return;
+    document.querySelectorAll('#jambKeyPointsBody .kp-inline-practice').forEach(n=>n.remove());
+    const panel=document.createElement('section');panel.className='kp-inline-practice';panel.setAttribute('aria-live','polite');
+    wrap.insertAdjacentElement('afterend',panel);
+    let index=0,revealed=false;
+    function draw(){
+      const pair=items[index];
+      panel.innerHTML='<h3>✨ Quick Understanding Check · English</h3><p>Question '+(index+1)+' of 5</p><p class="kp-english-quiz-question">'+escHtml(pair[0])+'</p>'+
+        (revealed?'<p class="kp-english-quiz-answer"><strong>Answer:</strong> '+escHtml(pair[1])+'</p>':'')+
+        '<div class="kp-english-quiz-controls"><button type="button" data-english-reveal '+(revealed?'hidden':'')+'>Reveal answer</button><button type="button" data-english-next>'+(index===4?'Start again':'Next question')+'</button><button type="button" data-english-close>Close</button></div>';
+      panel.querySelector('[data-english-reveal]').onclick=()=>{revealed=true;draw()};
+      panel.querySelector('[data-english-next]').onclick=()=>{index=(index+1)%5;revealed=false;draw()};
+      panel.querySelector('[data-english-close]').onclick=()=>panel.remove();
+    }
+    draw();panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
   let kpRenderGeneration = 0;
   async function renderKeyPoints() {
     const generation = ++kpRenderGeneration;
@@ -1923,7 +1959,7 @@
       if (!paid && i >= KP_FREE_TOPICS) {
         return `<div class="kp-topic kp-locked" data-locked="1"><span>🔒 ${escHtml(L.title)}</span>${meta}</div>`;
       }
-      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body, id) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-quick-check-btn" data-topic="${escHtml(id)}">✨ Test Your Knowledge · 5 Questions</button><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
+      return `<details class="kp-topic"><summary>${escHtml(L.title)} ${meta}</summary><div class="topic-body"><div class="kp-lesson-content" data-lesson="${escHtml(id)}">${subject === "accounting" ? accountingLessonHtml(id, L.body) : subject === "mathematics" ? mathTopicHtml(L.body, id) : subject === "english" ? englishLessonHtml(L.body) : fuText(L.body)}</div><div class="kp-practice-wrap"><button type="button" class="kp-quick-check-btn" data-topic="${escHtml(id)}">✨ Test Your Knowledge · 5 Questions</button><button type="button" class="kp-practice-btn" data-topic="${escHtml(id)}">📝 Practice JAMB Past Questions on This Topic →</button>${n ? `<p class="kp-practice-note">${n} mapped past question${n === 1 ? "" : "s"} available</p>` : `<p class="kp-practice-note">Tap to check available questions for this lesson</p>`}</div></div></details>`;
     }).join('') + (paid ? '' : `<p class="kp-unlock">Unlock all ${ids.length} topics with Full Access. <button type="button" class="kp-unlock-btn">Upgrade →</button></p>`);
     const topicSelect = document.getElementById('kpTopicSelect');
     if (topicSelect) {
@@ -1962,7 +1998,7 @@
     });
     body.querySelectorAll('[data-locked], .kp-unlock-btn').forEach(n => n.addEventListener('click', () => { closeKeyPoints(); showPaywall('premium'); }));
     body.querySelectorAll('.kp-practice-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic)));
-    body.querySelectorAll('.kp-quick-check-btn').forEach(btn => btn.addEventListener('click', () => startKeyPointPractice(subject, btn.dataset.topic, 'quick')));
+    body.querySelectorAll('.kp-quick-check-btn').forEach(btn => btn.addEventListener('click', () => subject === 'english' ? startEnglishUnderstandingCheck(btn.dataset.topic) : startKeyPointPractice(subject, btn.dataset.topic, 'quick')));
     if (subject === 'economics') {
       // Build diagrams only when a lesson is opened. Rendering every lesson at
       // once was unnecessarily expensive on low-memory mobile browsers.
