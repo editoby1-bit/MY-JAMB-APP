@@ -1906,18 +1906,20 @@
     document.querySelectorAll('#jambKeyPointsBody .kp-inline-practice').forEach(n=>n.remove());
     const panel=document.createElement('section');panel.className='kp-inline-practice';panel.setAttribute('aria-live','polite');
     wrap.insertAdjacentElement('afterend',panel);
-    let index=0,revealed=false;
+    let index=0;const answers={};
     function draw(){
-      const pair=items[index];
-      panel.innerHTML='<h3>✨ Quick Understanding Check · English</h3><p>Question '+(index+1)+' of 5</p><p class="kp-english-quiz-question">'+escHtml(pair[0])+'</p>'+
-        (revealed?'<p class="kp-english-quiz-answer"><strong>Answer:</strong> '+escHtml(pair[1])+'</p>':'')+
-        '<div class="kp-english-quiz-controls"><button type="button" data-english-reveal '+(revealed?'hidden':'')+'>Reveal answer</button><button type="button" data-english-next>'+(index===4?'Start again':'Next question')+'</button><button type="button" data-english-close>Close</button></div>';
-      panel.querySelector('[data-english-reveal]').onclick=()=>{revealed=true;draw()};
-      panel.querySelector('[data-english-next]').onclick=()=>{index=(index+1)%5;revealed=false;draw()};
+      const item=items[index],chosen=answers[index],answered=chosen!==undefined;
+      const options=item.options.map((option,i)=>'<button type="button" class="kp-english-choice" data-english-choice="'+i+'" '+(answered?'disabled':'')+' aria-pressed="'+(chosen===i)+'">'+String.fromCharCode(65+i)+'. '+escHtml(option)+(answered&&i===item.answerIndex?' ✓':'')+'</button>').join('');
+      panel.innerHTML='<h3>✨ Quick Understanding Check · English</h3><p>Question '+(index+1)+' of 5</p><p class="kp-english-quiz-question">'+escHtml(item.question)+'</p><div class="kp-english-choices">'+options+'</div>'+
+        (answered?'<p class="kp-english-quiz-answer"><strong>'+(chosen===item.answerIndex?'Correct!':'Correct answer: '+String.fromCharCode(65+item.answerIndex))+ '</strong> '+escHtml(item.explanation)+'</p>':'')+
+        '<div class="kp-english-quiz-controls"><button type="button" data-english-next '+(!answered?'disabled':'')+'>'+(index===4?'Start again':'Next question')+'</button><button type="button" data-english-close>Close</button></div>';
+      panel.querySelectorAll('[data-english-choice]').forEach(btn=>btn.onclick=()=>{answers[index]=Number(btn.dataset.englishChoice);draw()});
+      panel.querySelector('[data-english-next]').onclick=()=>{if(index===4){index=0;Object.keys(answers).forEach(k=>delete answers[k])}else index++;draw()};
       panel.querySelector('[data-english-close]').onclick=()=>panel.remove();
     }
     draw();panel.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
+
   let kpRenderGeneration = 0;
   async function renderKeyPoints() {
     const generation = ++kpRenderGeneration;
