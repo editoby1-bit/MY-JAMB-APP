@@ -809,8 +809,8 @@
       "bytes": 881411
     },
     "teach/english-topics.js": {
-      "sha256": "b6184a1af578f349dc1d7662d30f3abd08f1d6f2ac3eb5fe952242e3505fcd5b",
-      "bytes": 628206
+      "sha256": "4fc129da33ddb56fd474df3a914c399f7aab0552660e359b4fa8f110a0399e8d",
+      "bytes": 642517
     },
     "booklet/errors.js": {
       "sha256": "d51d01e14b2ca4b2605361193a055fbd564e74c80e3aaf1faff74a1d5a8af64b",
@@ -2113,5 +2113,5 @@
       "bytes": 45116
     }
   },
-  "version": "english-live-20261117"
+  "version": "english-mcq-20261117"
 }
