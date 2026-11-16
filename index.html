@@ -20,6 +20,10 @@
 .kp-english-quiz-answer{padding:12px;background:#f0faf4;border-radius:8px;line-height:1.7}
 .kp-english-quiz-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .kp-english-quiz-controls button{padding:9px 13px;border:1px solid #b9cde2;border-radius:9px;cursor:pointer}
+ .kp-english-choices{display:grid;gap:9px;margin:12px 0}
+.kp-english-choice{width:100%;text-align:left;padding:12px;border:1px solid #c7d5e6;border-radius:10px;background:#f7faff;color:#183653;font:inherit;cursor:pointer}
+.kp-english-choice[aria-pressed="true"]{border-color:#21754d;background:#e8f7ed;font-weight:700}
+.kp-english-choice:disabled{cursor:default;opacity:1}
 </style>
 </head>
 <body>
@@ -835,7 +839,7 @@
   <script src="key-points-economics-graphs.js?v=inline-v6"></script>
   <script src="math-shared-renderer.js?v=math-unified-e963ed6"></script>
   <script src="crs-understanding-quizzes.js?v=crs-live-180-20261112"></script>
-  <script src="app.js?v=english-live-20261117"></script>
+  <script src="app.js?v=english-mcq-20261117"></script>
   <script>
     // A broken or stale main script must not silently leave all controls dead.
     window.addEventListener('load', () => {
