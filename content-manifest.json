@@ -339,6 +339,8 @@
         "past-questions/literature-2020.js",
         "teach/literature.js",
         "teach/literature-topics.js",
+        "key-points-review-literature.js",
+        "teach/literature-revised-bridge.js",
         "booklet/errors.js"
       ],
       "images": [],
