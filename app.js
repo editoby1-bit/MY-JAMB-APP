@@ -2457,7 +2457,7 @@
       const item=items[index];
       panel.innerHTML='<h3>✨ Literature · Quick Understanding Check</h3><p class="kp-inline-meta">'+escHtml(lesson.title)+' · Question '+(index+1)+' of '+items.length+'</p>'+
         '<div class="kp-inline-question">'+escHtml(item.question)+'</div>'+
-        (revealed.has(index)?'<div class="kp-inline-feedback"><strong>Answer</strong><p>'+escHtml(item.answer)+'</p></div>':'<button type="button" data-lit-reveal>Reveal answer after thinking</button>')+
+        (revealed.has(index)?'<div class="kp-inline-feedback"><strong>Answer</strong><p>'+escHtml(item.answer)+'</p></div>':'<button type="button" class="kp-literature-reveal" data-lit-reveal><span aria-hidden="true">✨</span> Reveal Answer <span class="kp-literature-reveal-hint">after thinking</span></button>')+
         '<div class="kp-inline-nav"><button type="button" data-lit-back>'+(index?'← Previous':'← Close')+'</button><button type="button" data-lit-next>'+(index===items.length-1?'Finish':'Next →')+'</button></div>';
       const reveal=panel.querySelector('[data-lit-reveal]');
       if(reveal)reveal.onclick=()=>{revealed.add(index);render()};
