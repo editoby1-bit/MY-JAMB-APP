@@ -164,7 +164,7 @@
     if (data.schema !== 1 || !data.subjects || !data.files) throw new Error('Invalid content manifest');
     // Restrict manifest entries to this app's own files.
     for (const [file, entry] of Object.entries(data.files)) {
-      if (!/^(past-questions|teach|booklet)\/[a-zA-Z0-9_./-]+$/.test(file)
+      if (!(/^(past-questions|teach|booklet)\/[a-zA-Z0-9_./-]+$/.test(file) || file === 'key-points-review-literature.js')
         || file.includes('..') || !/^[a-f0-9]{64}$/.test(entry.sha256)) throw new Error('Invalid content path');
     }
     try { await storage?.put(urlFor('content-manifest.json'), response); } catch (_) { /* Online use still works. */ }
