@@ -2428,10 +2428,50 @@
     render();
     panel.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
+  // Literature checks come from each approved lesson, not unrelated past papers.
+  function startLiteratureUnderstandingCheck(topic) {
+    const lesson = window.TEACH_TOPICS?.literature?.lessons?.[topic];
+    const body = lesson?.body || '';
+    const at = body.lastIndexOf('QUICK UNDERSTANDING CHECK');
+    const lines = at < 0 ? [] : body.slice(at).split('\n').slice(1);
+    const items = [];
+    for (const raw of lines) {
+      const line = raw.trim();
+      const match = line.match(/^\d+\.\s+(.+?)\s+Answer:\s+(.+)$/);
+      if (match) items.push({question:match[1],answer:match[2]});
+      else if (items.length && (/^[A-Z][A-Z ]{5,}$/.test(line) || line.startsWith('PRACTICE CONNECTION') || line.startsWith('EXAM CONNECTION'))) break;
+      if (items.length === 5) break;
+    }
+    if (!items.length) { showInfoToast('This lesson’s understanding check is unavailable.'); return; }
+    const btn = [...document.querySelectorAll('#jambKeyPointsBody .kp-quick-check-btn')].find(n => n.dataset.topic === topic);
+    const wrap = btn?.closest('.kp-practice-wrap');
+    if (!wrap) return;
+    document.querySelectorAll('#jambKeyPointsBody .kp-inline-practice').forEach(n => n.remove());
+    const panel = document.createElement('section');
+    panel.className = 'kp-inline-practice';
+    panel.setAttribute('aria-live','polite');
+    wrap.insertAdjacentElement('afterend',panel);
+    let index = 0;
+    const revealed = new Set();
+    function render() {
+      const item=items[index];
+      panel.innerHTML='<h3>✨ Literature · Quick Understanding Check</h3><p class="kp-inline-meta">'+escHtml(lesson.title)+' · Question '+(index+1)+' of '+items.length+'</p>'+
+        '<div class="kp-inline-question">'+escHtml(item.question)+'</div>'+
+        (revealed.has(index)?'<div class="kp-inline-feedback"><strong>Answer</strong><p>'+escHtml(item.answer)+'</p></div>':'<button type="button" data-lit-reveal>Reveal answer after thinking</button>')+
+        '<div class="kp-inline-nav"><button type="button" data-lit-back>'+(index?'← Previous':'← Close')+'</button><button type="button" data-lit-next>'+(index===items.length-1?'Finish':'Next →')+'</button></div>';
+      const reveal=panel.querySelector('[data-lit-reveal]');
+      if(reveal)reveal.onclick=()=>{revealed.add(index);render()};
+      panel.querySelector('[data-lit-back]').onclick=()=>{if(index){index--;render()}else panel.remove()};
+      panel.querySelector('[data-lit-next]').onclick=()=>{if(index<items.length-1){index++;render()}else{panel.innerHTML='<h3>Understanding check complete</h3><p>Reviewed '+revealed.size+' of '+items.length+' answers. Return to the lesson to revisit any difficult concepts.</p><button type="button" data-lit-close>Return to lesson</button>';panel.querySelector('[data-lit-close]').onclick=()=>panel.remove()}};
+    }
+    render();
+    panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
   // Keep topic practice inside the lesson modal, like the approved review UI.
   let kpPractice = null;
   function startKeyPointPractice(subject, topic, mode = 'past') {
     if (subject === 'crs' && mode === 'quick') { startCrsUnderstandingCheck(topic); return; }
+    if (subject === 'literature' && mode === 'quick') { startLiteratureUnderstandingCheck(topic); return; }
     const allQuestions = keyPointPool(subject, topic);
     const questions = mode === 'quick' ? allQuestions.slice(0, 5) : allQuestions;
     if (!questions.length) { showInfoToast('No mapped past questions are available for this lesson yet.'); return; }
