@@ -290,9 +290,18 @@ function loadGovernmentQuestions(){
 }
 function practiceKey(q){return q.teachKey||((q.passageId||'')+'|'+q.question+'|'+q.options.join('|'))}
 function escapePractice(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function physicsPreviewUnderstandingCheck(lesson){
+ const panel=document.getElementById('practicePanel');
+ const text=lesson.new.body.split('QUICK UNDERSTANDING CHECK')[1]||'';
+ const items=[...text.matchAll(/^\d+\.\s+(.+?)\s+Answer:\s+(.+)$/gm)].slice(0,5).map(m=>({question:m[1],answer:m[2]}));
+ if(!items.length){panel.innerHTML='<p>Understanding checks are being prepared.</p>';return}
+ let index=0;const seen=new Set();
+ function show(){const item=items[index];panel.innerHTML='<h2>✨ Physics · Quick Understanding Check</h2><p>Question '+(index+1)+' of '+items.length+'</p><p><strong>'+escapePractice(item.question)+'</strong></p>'+(seen.has(index)?'<div class="kp-inline-feedback"><strong>Answer</strong><p>'+escapePractice(item.answer)+'</p></div>':'<button type="button" class="attention-practice" id="physicsReveal">✨ Reveal Answer</button>')+'<div class="kp-inline-nav"><button type="button" id="physicsBack">'+(index?'← Previous':'Close')+'</button><button type="button" id="physicsNext">'+(index===items.length-1?'Finish':'Next →')+'</button></div>';const reveal=document.getElementById('physicsReveal');if(reveal)reveal.onclick=()=>{seen.add(index);show()};document.getElementById('physicsBack').onclick=()=>{if(index){index--;show()}else panel.classList.add('hidden')};document.getElementById('physicsNext').onclick=()=>{if(index<items.length-1){index++;show()}else{panel.innerHTML='<h2>Check complete</h2><p>Reviewed '+seen.size+' of '+items.length+' answers. Return to the lesson to revise any difficult ideas.</p>'}}}
+ show();
+}
 async function startTopicPractice(mode='past'){
  const panel=document.getElementById('practicePanel'),lesson=lessons[Number(sel.value)||0];
- panel.classList.remove('hidden');panel.innerHTML='<p>Loading '+currentSubject+' past questions for this topic…</p>';panel.scrollIntoView({behavior:'smooth',block:'start'});
+ panel.classList.remove('hidden');panel.innerHTML='<p>Loading '+currentSubject+' past questions for this topic…</p>';panel.scrollIntoView({behavior:'smooth',block:'start'});if(currentSubject==='physics'){if(mode==='quick')physicsPreviewUnderstandingCheck(lesson);else panel.innerHTML='<h2>Past questions pending mapping</h2><p>Physics lessons are syllabus-first. Historical year uploads and verified topic tags will be connected as they are added. No unrelated questions will be shown.</p>';return;}
  try{
   await (currentSubject==='english'?loadEnglishQuestions():currentSubject==='crs'?loadCrsQuestions():currentSubject==='government'?loadGovernmentQuestions():currentSubject==='commerce'?loadCommerceQuestions():currentSubject==='accounting'?loadAccountingQuestions():currentSubject==='mathematics'?loadMathematicsQuestions():currentSubject==='literature'?loadLiteratureQuestions():loadEconomicsQuestions());
   const of=currentSubject==='literature'?literaturePreviewMap():currentSubject==='mathematics'?mathPreviewMap():currentSubject==='accounting'?{...(window.TEACH_TOPICS.accounting.of||{}),...accountingPreviewQuestionOverrides}:(window.TEACH_TOPICS[currentSubject].of||{});
